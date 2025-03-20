@@ -1,1 +1,45 @@
+@import '../node_modules/primeicons/primeicons.css';
+
 /* You can add global styles to this file, and also import other style files */
+html, body {
+    margin: 0;
+    padding: 0;
+  }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+.d-flex{
+    display: flex;
+}
+
+.d-block{
+    display: block;
+}
+
+.hover {
+    cursor: pointer;
+}
+
+.text-align-center {
+    text-align: center;
+}
+
+.delete-button{
+    background-color: red !important;
+}
+
+table > thead {
+    background-color: #63C4DA !important;
+    opacity: 0.8;
+  }
+.mat-mdc-row:nth-child(odd) {
+    background-color: white
+  }
+  
+  .mat-mdc-row:nth-child(even) {
+    background-color: white
+  }
+
+  .float-right{
+    float:right;
+}

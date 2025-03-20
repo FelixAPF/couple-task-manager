@@ -10,7 +10,7 @@ import java.util.List;
 @RestController
 public abstract class GenericController<T, S extends IGenericService<T>> {
     @Autowired
-    private S service;
+    protected S service;
 
     @GetMapping("/{id}")
     T retrieve(@PathVariable("id") Long id){

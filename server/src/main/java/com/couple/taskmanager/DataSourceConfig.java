@@ -12,7 +12,7 @@ public class DataSourceConfig {
     public DataSource dataSource() {
         return DataSourceBuilder.create()
                 .driverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver")
-                .url("jdbc:sqlserver://couple-task-manager-active.database.windows.net:1433;database=couple-task-manager-active;user=;password={};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;")
+                .url("jdbc:sqlserver://couple-task-manager-active.database.windows.net:1433;database=couple-task-manager-active;user=CloudSA4f7cabff@couple-task-manager-active;password={Halowars123!};encrypt=true;trustServerCertificate=false;hostNameInCertificate=*.database.windows.net;loginTimeout=30;")
                 .build();
     }
 }

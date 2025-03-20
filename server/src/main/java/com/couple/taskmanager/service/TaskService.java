@@ -1,20 +1,26 @@
 package com.couple.taskmanager.service;
 
+import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.model.Task;
+import com.couple.taskmanager.model.TaskAssignment;
+import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.repository.ITaskPeriodRepository;
+import com.couple.taskmanager.repository.TaskAssignmentRepository;
 import com.couple.taskmanager.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 @Service
 public class TaskService implements IGenericService<Task> {
     @Autowired
     TaskRepository taskRepository;
+    @Autowired
+    ITaskPeriodRepository ITaskPeriodRepository;
+    @Autowired
+    TaskAssignmentRepository taskAssignmentRepository;
 
     @Override
     public Task get(Long id) {
@@ -33,12 +39,30 @@ public class TaskService implements IGenericService<Task> {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
+        List<TaskAssignment> allByTaskId = this.taskAssignmentRepository.findAllByTaskId(id);
+        for (TaskAssignment taskAssignment : allByTaskId) {
+            taskAssignmentRepository.delete(taskAssignment);
+        }
+
         taskRepository.deleteById(id);
     }
 
     @Override
     public void create(Task task) {
         taskRepository.save(task);
+    }
+
+    public List<TaskPeriod> retrieveTasksByDate(Date date){
+        return ITaskPeriodRepository.retrieveTasksInPeriod(date);
+    }
+
+    public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee){
+        return taskAssignmentRepository.findAllByCompletedFalseAndAssignee(assignee);
+    }
+
+    public void completeTask(Long assignmentId) {
+        taskAssignmentRepository.setAssignmentCompleted(assignmentId, true);
     }
 }

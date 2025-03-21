@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">couple-task-manager</string>
+    <string name="title_activity_main">couple-task-manager</string>
+    <string name="package_name">com.couple.taskmanager</string>
+    <string name="custom_url_scheme">com.couple.taskmanager</string>
+</resources>

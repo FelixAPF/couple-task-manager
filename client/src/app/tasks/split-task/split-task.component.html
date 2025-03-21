@@ -1,0 +1,30 @@
+<div>
+    <p-button class="submit-button float-right d-block" mat-flat-button (click)="create()">Créer</p-button>
+    <div style="display: block;">
+        <p-accordion   *ngFor="let taskPeriod of taskPeriods; index" class=" d-block" value="index++">
+            <p-accordion-panel value="index">
+                <p-accordion-header>Période du {{taskPeriod.startDate | date: 'longDate'}} au {{taskPeriod.endDate | date: 'longDate'}}</p-accordion-header>
+                <p-accordion-content>
+                    <button mat-button (click)="deletePeriod(taskPeriod.id)">Delete</button>
+            
+                    <div>
+                        <h5>Tâches Copain</h5>
+                        <p *ngFor="let taskAssignment of copainTasks(taskPeriod.id)">
+                            {{taskAssignment.task.title}} - {{taskAssignment.dueDate | date}}
+                        </p>
+                    </div>
+                
+                
+                
+                    <div>
+                        <h5>Tâches Copine</h5>
+                        <p *ngFor="let taskAssignment of copineTasks(taskPeriod.id)">
+                            {{taskAssignment.task.title}} - {{taskAssignment.dueDate | date}}
+                        </p>
+                    </div>
+                </p-accordion-content>
+            </p-accordion-panel>
+        </p-accordion>
+
+    </div>
+</div>

@@ -1,0 +1,140 @@
+
+
+<div class="d-block">
+    <h4 class="text-align-center">Assigner des tâches</h4>
+
+</div>
+
+<!-- 
+<mat-stepper [linear]="false" #stepper>
+    <mat-step [stepControl]="firstFormGroup" label="Choisir la période">
+      <form [formGroup]="firstFormGroup">
+
+        <p-fluid class="card flex flex-wrap gap-4">
+          <div class="flex-auto">
+              <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
+              <p-datepicker formControlName="startDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
+          </div>
+          <div class="flex-auto">
+              <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
+              <p-datepicker formControlName="endDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
+          </div>
+      </p-fluid>
+        <div>
+          <button mat-button matStepperNext>Next</button>
+        </div>
+      </form>
+    </mat-step>
+
+
+
+    <mat-step [stepControl]="secondFormGroup" label="Assigner les tâches">
+      <form [formGroup]="secondFormGroup">
+        <div formArrayName="taskAssignments">
+          <div *ngFor="let task of taskAssignments?.controls; index as i" class="task" [formGroupName]="i">
+              <p>{{ task.get(AssignmentRow.TASK_TITLE.toString())?.value }}</p>
+              <mat-radio-group [formControlName]="AssignmentRow.ASSIGNEE.toString()" aria-label="Personne assignée" class="d-block">
+                  Personne assignée:
+                  <mat-radio-button value="0">Felix</mat-radio-button>
+                  <mat-radio-button value="1">Camille</mat-radio-button>
+              </mat-radio-group>
+          </div>
+      </div>
+          <div>
+              <button mat-button matStepperPrevious>Back</button>
+              <button mat-button matStepperNext>Next</button>
+          </div>
+      </form>
+  </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>Terminé</ng-template>
+      <p>You are now done.</p>
+      <div>
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button (click)="save()">Sauvegarder</button>
+      </div>
+    </mat-step>
+  </mat-stepper> -->
+
+
+
+
+  <div class="card flex justify-center">
+    <p-stepper [(value)]="activeStep" class="basis-[40rem]">
+        <p-step-list>
+            <p-step [value]="1" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                    <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
+                        <span
+                            class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
+                            [ngClass]="{
+                                'bg-primary text-primary-contrast border-primary': value <= activeStep,
+                                'border-surface': value > activeStep
+                            }"
+                        >
+                            <i class="pi pi-user"></i>
+                        </span>
+                    </button>
+                </ng-template>
+            </p-step>
+
+            <p-step [value]="2" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                    <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
+                        <span
+                            class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
+                            [ngClass]="{
+                                'bg-primary text-primary-contrast border-primary': value <= activeStep,
+                                'border-surface': value > activeStep
+                            }"
+                        >
+                            <i class="pi pi-star"></i>
+                        </span>
+                    </button>
+                </ng-template>
+            </p-step>
+
+            <p-step [value]="3" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                    <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
+                        <span
+                            class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
+                            [ngClass]="{
+                                'bg-primary text-primary-contrast border-primary': value <= activeStep,
+                                'border-surface': value > activeStep
+                            }"
+                        >
+                            <i class="pi pi-id-card"></i>
+                        </span>
+                    </button>
+                </ng-template>
+            </p-step>
+        </p-step-list>
+
+        <p-step-panels>
+            <p-step-panel [value]="1" [formGroup]="firstFormGroup">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <p-fluid class="card flex flex-wrap gap-4">
+                      <div class="flex-auto">
+                          <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
+                          <p-datepicker formControlName="startDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
+                      </div>
+                      <div class="flex-auto">
+                          <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
+                          <p-datepicker formControlName="endDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
+                      </div>
+                  </p-fluid>
+                    <div class="flex pt-6 justify-end">
+                        <p-button (onClick)="activateCallback(2)" label="Next" icon="pi pi-arrow-right" iconPos="right" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="2">
+            </p-step-panel>
+
+            <p-step-panel [value]="3">
+            </p-step-panel>
+        </p-step-panels>
+    </p-stepper>
+</div>

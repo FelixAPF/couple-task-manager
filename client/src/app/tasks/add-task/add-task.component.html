@@ -1,0 +1,29 @@
+
+
+<div class="flex justify-center items-center">
+
+    <p-card>
+        <div>
+            <H3>{{idFormControl?.value === null ? 'Ajouter' : 'Modifier'}} une tâche</H3>
+        </div>
+        <div>
+            <form [formGroup]="formGroup" (submit)="save()">
+                <div class="d-block">
+                <mat-form-field class="example-full-width">
+                    <mat-label>Title</mat-label>
+                    <input matInput formControlName="title">
+                </mat-form-field>
+                
+                <mat-form-field class="example-full-width">
+                    <mat-label>Descrption</mat-label>
+                    <input matInput formControlName="description">
+                </mat-form-field>
+                </div>
+            
+                <p-button type="submit" class="submit-button">Sauvegarder</p-button>
+                <p-button routerLink=".." class="submit-button" severity="warn">Annuler</p-button>
+            
+            </form>
+        </div>
+    </p-card>
+</div>

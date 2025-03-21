@@ -3,12 +3,13 @@ import { Observable } from 'rxjs';
 import { Task } from '../model/task';
 import { HttpClient } from '@angular/common/http';
 import { Assignee, TaskAssignment, TaskPeriod } from '../model/task-period';
+import { environment } from '../environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
-  readonly baseUrl: string = "http://localhost:8080/tasks";
+  readonly baseUrl: string = `${environment.apiUrl}/tasks`;
   constructor(private http: HttpClient) { }
 
 

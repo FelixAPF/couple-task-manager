@@ -2,12 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { TaskPeriod } from '../model/task-period';
 import { Observable } from 'rxjs';
+import { environment } from '../environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskPeriodService {
-  readonly baseUrl: string = "http://localhost:8080/task-periods";
+  readonly baseUrl = `${environment.apiUrl}/task-periods`;
+
   constructor(private http: HttpClient) { }
 
   createTaskPeriod(taskPeriod: TaskPeriod): Observable<void>{

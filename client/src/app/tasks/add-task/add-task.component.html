@@ -19,9 +19,40 @@
                     <input matInput formControlName="description">
                 </mat-form-field>
                 </div>
+
+                <div class="flex flex-wrap gap-4">
+                    <div class="flex items-center">
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.DAILY" formControlName="frequency" inputId="daily" />
+                        <label for="daily" class="ml-2">{{FREQUENCY.DAILY | frequencyPipe }}</label>
+                    </div>
+                
+                    <div class="flex items-center">
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.WEEKLY" formControlName="frequency" inputId="weekly" />
+                        <label for="weekly" class="ml-2">{{FREQUENCY.WEEKLY | frequencyPipe }}</label>
+                    </div>                    
+
+                    <div class="flex items-center">
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIWEEKLY" formControlName="frequency" inputId="biweekly" />
+                        <label for="biweekly" class="ml-2">{{FREQUENCY.BIWEEKLY | frequencyPipe }}</label>
+                    </div>
+                
+                    <div class="flex items-center">
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.MONTHLY" formControlName="frequency" inputId="monthly" />
+                        <label for="monthly" class="ml-2">{{FREQUENCY.MONTHLY | frequencyPipe }}</label>
+                    </div>
+                    <div class="flex items-center">
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIYEARLY" formControlName="frequency" inputId="biyearly" />
+                        <label for="monthly" class="ml-2">{{FREQUENCY.BIYEARLY | frequencyPipe }}</label>
+                    </div>
+                
+                    <div class="flex items-center">
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.YEARLY" formControlName="frequency" inputId="yearly" />
+                        <label for="yearly" class="ml-2">{{FREQUENCY.YEARLY | frequencyPipe }}</label>
+                    </div>
+                </div>
             
                 <p-button type="submit" class="submit-button">Sauvegarder</p-button>
-                <p-button routerLink=".." class="submit-button" severity="warn">Annuler</p-button>
+                <p-button routerLink=".." class="submit-button" severity="secondary">Annuler</p-button>
             
             </form>
         </div>

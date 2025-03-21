@@ -5,10 +5,11 @@ import { Subscription } from 'rxjs';
 import { SharedModule } from '../shared.module';
 import { MatTableDataSource } from '@angular/material/table';
 import { MenuItem, MessageService } from 'primeng/api';
+import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
 
 @Component({
   selector: 'app-tasks',
-  imports: [SharedModule],
+  imports: [SharedModule, FrequencyPipe],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
   providers: [MessageService]

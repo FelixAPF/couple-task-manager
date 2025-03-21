@@ -10,7 +10,6 @@
     [paginator]="true"
     [rows]="10"
     [showCurrentPageReport]="true"
-    [tableStyle]="{ 'min-width': '50rem' }"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
     [rowsPerPageOptions]="[10, 25, 100]"
   >
@@ -18,6 +17,7 @@
         <tr>
             <th style="width:30%">Titre</th>
             <th style="width:40%">Description</th>
+            <th style="width:20%">Fréquence</th>
             <th style="width:15%">Delete</th>
         </tr>
     </ng-template>
@@ -25,6 +25,7 @@
         <tr>
             <td>{{ element.title }}</td>
             <td>{{ element.description }}</td>
+            <td>{{ element.frequency | frequencyPipe }}</td>
             <td>
               <div class="card flex justify-center flex-wrap gap-4">
                 <p-toast></p-toast>

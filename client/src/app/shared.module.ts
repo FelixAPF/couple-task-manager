@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DashboardComponent } from './app/pages/dashboard/dashboard.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
@@ -20,6 +20,8 @@ import { FluidModule } from 'primeng/fluid';
 import { DynamicDialogModule } from 'primeng/dynamicdialog';
 import { StepperModule } from 'primeng/stepper';
 import { AccordionModule } from 'primeng/accordion';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { CheckboxModule } from 'primeng/checkbox';
 
 
 
@@ -32,8 +34,8 @@ import { MyTasksComponent } from './tasks/my-tasks/my-tasks.component';
 @NgModule({
   declarations: [],
   imports: [
-    CommonModule, AccordionModule, StepperModule, DynamicDialogModule, FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule, MatRadioModule,MatFormFieldModule, MatDatepickerModule,MatStepperModule
+    CommonModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule,  MatRadioModule,MatFormFieldModule, MatDatepickerModule,MatStepperModule
   ],
-  exports: [CommonModule, AccordionModule, StepperModule, DynamicDialogModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule, MatRadioModule,MatFormFieldModule, MatDatepickerModule, MatStepperModule]
+  exports: [CommonModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule, MatRadioModule,MatFormFieldModule, MatDatepickerModule, MatStepperModule]
 })
 export class SharedModule { }

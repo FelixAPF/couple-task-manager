@@ -5,60 +5,6 @@
 
 </div>
 
-<!-- 
-<mat-stepper [linear]="false" #stepper>
-    <mat-step [stepControl]="firstFormGroup" label="Choisir la période">
-      <form [formGroup]="firstFormGroup">
-
-        <p-fluid class="card flex flex-wrap gap-4">
-          <div class="flex-auto">
-              <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
-              <p-datepicker formControlName="startDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
-          </div>
-          <div class="flex-auto">
-              <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
-              <p-datepicker formControlName="endDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
-          </div>
-      </p-fluid>
-        <div>
-          <button mat-button matStepperNext>Next</button>
-        </div>
-      </form>
-    </mat-step>
-
-
-
-    <mat-step [stepControl]="secondFormGroup" label="Assigner les tâches">
-      <form [formGroup]="secondFormGroup">
-        <div formArrayName="taskAssignments">
-          <div *ngFor="let task of taskAssignments?.controls; index as i" class="task" [formGroupName]="i">
-              <p>{{ task.get(AssignmentRow.TASK_TITLE.toString())?.value }}</p>
-              <mat-radio-group [formControlName]="AssignmentRow.ASSIGNEE.toString()" aria-label="Personne assignée" class="d-block">
-                  Personne assignée:
-                  <mat-radio-button value="0">Felix</mat-radio-button>
-                  <mat-radio-button value="1">Camille</mat-radio-button>
-              </mat-radio-group>
-          </div>
-      </div>
-          <div>
-              <button mat-button matStepperPrevious>Back</button>
-              <button mat-button matStepperNext>Next</button>
-          </div>
-      </form>
-  </mat-step>
-    <mat-step>
-      <ng-template matStepLabel>Terminé</ng-template>
-      <p>You are now done.</p>
-      <div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button (click)="save()">Sauvegarder</button>
-      </div>
-    </mat-step>
-  </mat-stepper> -->
-
-
-
-
   <div class="card flex justify-center">
     <p-stepper [(value)]="activeStep" class="basis-[40rem]">
         <p-step-list>
@@ -114,27 +60,84 @@
         <p-step-panels>
             <p-step-panel [value]="1" [formGroup]="firstFormGroup">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <p-fluid class="card flex flex-wrap gap-4">
-                      <div class="flex-auto">
-                          <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
-                          <p-datepicker formControlName="startDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
-                      </div>
-                      <div class="flex-auto">
-                          <label for="icondisplay" class="font-bold block mb-2"> Default Icon </label>
-                          <p-datepicker formControlName="endDate" [iconDisplay]="'input'" [showIcon]="true" inputId="icondisplay" />
-                      </div>
-                  </p-fluid>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex items-center">
+                            <p-radiobutton name="assignee" [value]="ASSIGNEE.Camille" formControlName="assignee" inputId="camille" />
+                            <label for="assignee" class="ml-2">{{ASSIGNEE.Camille }}</label>
+                        </div>                    
+    
+                        <div class="flex items-center">
+                            <p-radiobutton name="assignee" [value]="ASSIGNEE.Felix" formControlName="assignee" inputId="felix" />
+                            <label for="assignee" class="ml-2">{{ASSIGNEE.Felix }}</label>
+                        </div>
+                    </div>
                     <div class="flex pt-6 justify-end">
-                        <p-button (onClick)="activateCallback(2)" label="Next" icon="pi pi-arrow-right" iconPos="right" />
+                        <p-button (onClick)="createTaskList(activateCallback)" label="Next" icon="pi pi-arrow-right" iconPos="right" />
+                        <p-button (onClick)="cancel()" severity="secondary" label="Cancel"  icon="pi pi-times" iconPos="right" />
                     </div>
                 </ng-template>
             </p-step-panel>
 
-            <p-step-panel [value]="2">
+
+            <p-step-panel [value]="2">      
+                <ng-template #content let-activateCallback="activateCallback">
+
+                <div #tableContainer>
+                    <p-table
+                    class="table-resize"
+                    [formGroup]="secondFormGroup"
+                    [value]="tableData"
+                    [paginator]="true"
+                    [rows]="10"
+                    [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [rowsPerPageOptions]="[10, 25, 100]"
+                    >
+                    <ng-template #header>
+                        <tr>
+                        <th style="width:30%">Titre</th>
+                        <th style="width:40%">Description</th>
+                        <th style="width:20%">Assigner</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template #body let-element let-rowIndex="rowIndex">
+                        <tr>
+                        <td>{{ element.title }}</td>
+                        <td>{{ element.description }}</td>
+                        <td>
+                            <div class="card flex justify-center flex-wrap gap-4">
+                            <div class="flex flex-wrap gap-4">
+                                <div class="flex items-center">
+                                    <p-checkbox
+                                    name="selected-{{rowIndex}}"
+                                    value="true"
+                                    [binary]="true"
+                                    [formControl]="getFormControl(rowIndex, 'selected')"
+                                    inputId="selected-{{rowIndex}}"
+                                  />
+                                </div>
+                            </div>
+                            </div>
+                        </td>
+                        </tr>
+                    </ng-template>
+                    </p-table>
+                </div>
+                <div class="flex pt-6 justify-end">
+                    <p-button (onClick)="next()" label="Next" icon="pi pi-arrow-right" iconPos="right" />
+                    <p-button (onClick)="cancel()" severity="secondary" label="Cancel"  icon="pi pi-times" iconPos="right" />
+                </div>
+                </ng-template>
+                
             </p-step-panel>
 
             <p-step-panel [value]="3">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <p-button (onClick)="submit()" label="Soumettre"></p-button>
+                    <p-button (onClick)="cancel()" severity="secondary" label="Cancel"  icon="pi pi-times" iconPos="right" />
+                </ng-template>
             </p-step-panel>
         </p-step-panels>
     </p-stepper>
+    
 </div>

@@ -9,7 +9,7 @@ import { environment } from '../environment';
   providedIn: 'root'
 })
 export class TaskService {
-  readonly baseUrl: string = `${environment.apiUrl}/tasks`;
+  readonly baseUrl: string = `${environment.apiUrl}tasks`;
   constructor(private http: HttpClient) { }
 
 

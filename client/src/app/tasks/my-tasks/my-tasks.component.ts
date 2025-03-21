@@ -5,12 +5,17 @@ import { TaskService } from '../../service/task-service.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Task } from '../../model/task';
 import { Subscription } from 'rxjs';
+import { DialogService } from 'primeng/dynamicdialog';
+import { TaskPeriodService } from '../../service/task-period.service';
+import { TaskListService } from '../../service/task-list.service';
+import { CreatePeriodDialogComponent } from '../../create-period-dialog/create-period-dialog.component';
 
 @Component({
   selector: 'app-my-tasks',
   imports: [SharedModule],
   templateUrl: './my-tasks.component.html',
-  styleUrl: './my-tasks.component.scss'
+  styleUrl: './my-tasks.component.scss',
+  providers: [DialogService]
 })
 export class MyTasksComponent implements OnInit {
   tasks: Task[] = [];
@@ -20,7 +25,8 @@ export class MyTasksComponent implements OnInit {
   
   selectedAssignee: Assignee = Assignee.Camille;
   taskAssignments: TaskAssignment[] = [];
-  constructor(private taskService: TaskService){}
+  constructor(private taskService: TaskService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
+
 
   ngOnInit(): void {
     this.retrieveTaskByAssignee();
@@ -45,4 +51,15 @@ export class MyTasksComponent implements OnInit {
       this.retrieveTaskByAssignee();
     }));
   }
+
+  startNewPeriod(){
+    const dialogRef = this.dialog.open(CreatePeriodDialogComponent, {
+      width: '50vw',
+      dismissableMask: true,
+      modal:true,
+      breakpoints: {
+          '960px': '75vw',
+          '640px': '90vw'
+      },
+    });  }
 }

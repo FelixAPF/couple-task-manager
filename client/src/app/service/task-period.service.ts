@@ -8,7 +8,7 @@ import { environment } from '../environment';
   providedIn: 'root'
 })
 export class TaskPeriodService {
-  readonly baseUrl = `${environment.apiUrl}/task-periods`;
+  readonly baseUrl = `${environment.apiUrl}task-periods`;
 
   constructor(private http: HttpClient) { }
 

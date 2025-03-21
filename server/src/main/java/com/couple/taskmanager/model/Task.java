@@ -1,5 +1,6 @@
 package com.couple.taskmanager.model;
 
+import com.couple.taskmanager.enums.Frequency;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,5 +21,8 @@ public class Task {
 
     @NonNull
     private String description;
+
+    @NonNull
+    private Frequency frequency;
 
 }

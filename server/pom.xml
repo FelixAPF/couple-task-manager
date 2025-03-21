@@ -7,17 +7,20 @@
 		<relativePath/>
 		<!--  lookup parent from repository  -->
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>demo</artifactId>
+	<groupId>com.couple.taskmanager</groupId>
+	<artifactId>server</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
-	<description>Demo project for Spring Boot</description>
+	<name>couple-task-manager</name>
+	<description>Couple Task Manager</description>
 	<url/>
 	<licenses>
 		<license/>
 	</licenses>
 	<developers>
-		<developer/>
+		<developer>
+			<name>Felix P</name>
+			<email>felix.pelletierf@hotmail.com</email>
+		</developer>
 	</developers>
 	<scm>
 		<connection/>

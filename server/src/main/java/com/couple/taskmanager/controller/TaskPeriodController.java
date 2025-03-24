@@ -19,4 +19,9 @@ public class TaskPeriodController extends GenericController<TaskPeriod, TaskPeri
     public void startPeriodCreation(@RequestBody PeriodCreationRqstV1 request){
         service.createPeriodAutomatically(request);
     }
+
+    @GetMapping("/incomplete")
+    public List<TaskPeriod> findALlIncompletePeriod(){
+        return service.listIncomplete();
+    }
 }

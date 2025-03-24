@@ -1,6 +1,7 @@
 package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.enums.Assignee;
+import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.dto.TaskListRequestV1;
 import com.couple.taskmanager.service.TaskListService;

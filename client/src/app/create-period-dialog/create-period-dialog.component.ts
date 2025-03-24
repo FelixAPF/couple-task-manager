@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { SharedModule } from '../shared.module';
-import { FrequencyPipe } from "../shared/pipes/frequency-pipe";
 import { CreationMethod, Frequency } from '../model/task';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskPeriodService } from '../service/task-period.service';
@@ -18,7 +17,7 @@ enum FormControlName {
 
 @Component({
   selector: 'app-create-period-dialog',
-  imports: [SharedModule, ReactiveFormsModule, FrequencyPipe],
+  imports: [SharedModule, ReactiveFormsModule],
   templateUrl: './create-period-dialog.component.html',
   styleUrl: './create-period-dialog.component.scss',
   providers: [DatePipe]
@@ -57,7 +56,7 @@ export class CreatePeriodDialogComponent implements OnInit {
   constructor(private taskPeriodService: TaskPeriodService, private ref: DynamicDialogRef, private datePipe: DatePipe ){}
 
   ngOnInit(): void {
-    this.taskPeriodService.retrieveTaskPeriods().subscribe(periods => {
+    this.taskPeriodService.retrieveTaskPeriodsIncomplete().subscribe(periods => {
       this.existingTaskPeriods = periods;
     });
   }
@@ -72,7 +71,7 @@ export class CreatePeriodDialogComponent implements OnInit {
       taskIds: this.taskIds?.value || []
     }
     this.taskPeriodService.initiateCreatePeriod(result).subscribe(() => {
-      this.ref.close();
+      this.close();
     });
   }
 
@@ -85,5 +84,9 @@ export class CreatePeriodDialogComponent implements OnInit {
       this.formGroup.get(FormControlName.DURATION)?.enable();
       this.formGroup.get(FormControlName.START_DATE)?.enable();
     }
+  }
+
+  close(){
+    this.ref.close();
   }
 }

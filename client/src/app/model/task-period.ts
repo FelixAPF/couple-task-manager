@@ -5,6 +5,7 @@ export interface TaskPeriod {
     startDate?: Date;
     endDate?: Date;
     taskAssignments: TaskAssignment[];
+    completed: boolean;
 }
 
 export interface TaskAssignment {

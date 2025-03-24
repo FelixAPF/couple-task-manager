@@ -1,23 +1,31 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Assignee, TaskAssignment } from '../../model/task-period';
 import { SharedModule } from '../../shared.module';
 import { TaskService } from '../../service/task-service.service';
 import { MatTableDataSource } from '@angular/material/table';
-import { Task } from '../../model/task';
+import { Frequency, Task } from '../../model/task';
 import { Subscription } from 'rxjs';
 import { DialogService } from 'primeng/dynamicdialog';
 import { TaskPeriodService } from '../../service/task-period.service';
 import { TaskListService } from '../../service/task-list.service';
 import { CreatePeriodDialogComponent } from '../../create-period-dialog/create-period-dialog.component';
+import { SelectChangeEvent } from 'primeng/select';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
+enum FormControlName {
+  DISPLAY_DURATION = 'displayDuration'
+}
 @Component({
   selector: 'app-my-tasks',
-  imports: [SharedModule],
+  imports: [SharedModule, ReactiveFormsModule],
   templateUrl: './my-tasks.component.html',
   styleUrl: './my-tasks.component.scss',
   providers: [DialogService]
 })
 export class MyTasksComponent implements OnInit {
+  DISPLAY_DURATION = FormControlName;
+  fb:FormBuilder = inject(FormBuilder);
+  formGroup: FormGroup = this.fb.group({ [FormControlName.DISPLAY_DURATION]: [Frequency.MONTHLY] });
   tasks: Task[] = [];
   subscription: Subscription = new Subscription();
   displayedColumns = [ "title", "description", "dueDate", "complete"]
@@ -38,7 +46,8 @@ export class MyTasksComponent implements OnInit {
   }
 
   retrieveTaskByAssignee(){
-    this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssignee).subscribe(taskAssignments => {
+    const frequency = this.formGroup.get(FormControlName.DISPLAY_DURATION)?.value || Frequency.MONTHLY;
+    this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssignee, frequency).subscribe(taskAssignments => {
       this.tasks = taskAssignments.map(({ assignee, creationDate, dueDate, task, id, period }) => ({
         assignee, creationDate, dueDate, task, id, period
       }));
@@ -55,8 +64,8 @@ export class MyTasksComponent implements OnInit {
   startNewPeriod(){
     const dialogRef = this.dialog.open(CreatePeriodDialogComponent, {
       header: 'Créer une période de tâches',
-      width: '50vw',
-      height: '500px',
+      width: '30vw',
+      height: '700px',
       dismissableMask: true,
       modal:true,
       breakpoints: {
@@ -67,6 +76,24 @@ export class MyTasksComponent implements OnInit {
     dialogRef.onClose.subscribe(() => {
       this.retrieveTaskByAssignee();
     })
+  }
+
+  get options(){
+    return [
+      { label: 'Semaine', value: Frequency.WEEKLY},
+      { label: 'Deux semaines', value: Frequency.BIWEEKLY},
+      { label: 'Mois', value: Frequency.MONTHLY},
+      { label: 'Année', value: Frequency.YEARLY}
+    ]
+  }
+
+  
+  get displayDuration(){
+    return this.formGroup.get(FormControlName.DISPLAY_DURATION);
+  }
+
+  onChange($event: SelectChangeEvent) {
+    this.retrieveTaskByAssignee();
   }
     
 }

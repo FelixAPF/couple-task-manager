@@ -9,10 +9,11 @@ import { TaskListService } from '../../service/task-list.service';
 import { TaskList } from '../../model/task-list';
 import { DialogRef } from '@angular/cdk/dialog';
 import { Task } from '../../model/task';
+import { AssigneeTaskListComponent } from "./assignee-task-list/assignee-task-list.component";
 
 @Component({
   selector: 'app-split-task',
-  imports: [SharedModule],
+  imports: [SharedModule, AssigneeTaskListComponent],
   templateUrl: './split-task.component.html',
   styleUrl: './split-task.component.scss',
   providers:[DialogService]
@@ -40,7 +41,8 @@ export class SplitTaskComponent implements OnInit {
     }))
   }
 
-  unassign(element: any, taskList?: TaskList){
+  unassign(value: any){
+    const { element, taskList } = value;
     this.taskListService.deleteTaskList({ taskListId: taskList?.id, assignee: taskList?.assignee, taskId: element.id }).subscribe(resp => {
       switch(taskList?.assignee){
         case Assignee.Felix: 

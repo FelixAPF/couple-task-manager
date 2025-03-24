@@ -17,50 +17,49 @@
                         
                             <h5>Durée de la période:</h5>
                             <div class="flex items-center">
-                                <p-radiobutton name="duration" [value]="FREQUENCY.DAILY" formControlName="duration" inputId="daily" />
-                                <label for="daily" class="ml-2">{{FREQUENCY.DAILY | frequencyPipe }}</label>
-                            </div>
-                            <div class="flex items-center">
-                                <p-radiobutton name="duration" [value]="FREQUENCY.WEEKLY" formControlName="duration" inputId="weekly" />
-                                <label for="weekly" class="ml-2">{{FREQUENCY.WEEKLY | frequencyPipe }}</label>
+                                <p-radiobutton name="duration" size="large" [value]="FREQUENCY.WEEKLY" formControlName="duration" inputId="weekly" />
+                                <label for="weekly" class="ml-2">1 semaine</label>
                             </div>                    
                 
                             <div class="flex items-center">
-                                <p-radiobutton name="duration" [value]="FREQUENCY.BIWEEKLY" formControlName="duration" inputId="biweekly" />
-                                <label for="biweekly" class="ml-2">{{FREQUENCY.BIWEEKLY | frequencyPipe }}</label>
+                                <p-radiobutton name="duration" size="large" [value]="FREQUENCY.BIWEEKLY" formControlName="duration" inputId="biweekly" />
+                                <label for="biweekly" class="ml-2">2 semaines</label>
                             </div>
                         
                             <div class="flex items-center">
-                                <p-radiobutton name="duration" [value]="FREQUENCY.MONTHLY" formControlName="duration" inputId="monthly" />
-                                <label for="monthly" class="ml-2">{{FREQUENCY.MONTHLY | frequencyPipe }}</label>
+                                <p-radiobutton name="duration" size="large" [value]="FREQUENCY.MONTHLY" formControlName="duration" inputId="monthly" />
+                                <label for="monthly" class="ml-2">1 mois</label>
                             </div>
                             <div class="flex items-center">
-                                <p-radiobutton name="duration" [value]="FREQUENCY.BIYEARLY" formControlName="duration" inputId="biyearly" />
-                                <label for="monthly" class="ml-2">{{FREQUENCY.BIYEARLY | frequencyPipe }}</label>
+                                <p-radiobutton name="duration" size="large" [value]="FREQUENCY.BIYEARLY" formControlName="duration" inputId="biyearly" />
+                                <label for="monthly" class="ml-2">6 mois</label>
                             </div>
                         
                             <div class="flex items-center">
-                                <p-radiobutton name="duration" [value]="FREQUENCY.YEARLY" formControlName="duration" inputId="yearly" />
-                                <label for="yearly" class="ml-2">{{FREQUENCY.YEARLY | frequencyPipe }}</label>
+                                <p-radiobutton name="duration" size="large" [value]="FREQUENCY.YEARLY" formControlName="duration" inputId="yearly" />
+                                <label for="yearly" class="ml-2">1 an</label>
                             </div>
                         </div>
                 
                         <div>
                             <h5>Méthode d'assignation des tâches</h5>
                             <div class="flex items-center">
-                                <p-radiobutton name="creationMethod" [value]="CREATION_METHOD.AUTOMATIC" formControlName="creationMethod" inputId="automatic" />
+                                <p-radiobutton name="creationMethod" size="large" [value]="CREATION_METHOD.AUTOMATIC" formControlName="creationMethod" inputId="automatic" />
                                 <label for="automatic" class="ml-2">Automatiquement créer les tâches attitrées</label>
                             </div>
                         
                             <div class="flex items-center">
-                                <p-radiobutton name="creationMethod" [value]="CREATION_METHOD.MANUAL" formControlName="creationMethod" inputId="manual" />
+                                <p-radiobutton name="creationMethod" size="large" [value]="CREATION_METHOD.MANUAL" formControlName="creationMethod" inputId="manual" />
                                 <label for="manual" class="ml-2">Manuellement sélectionner les tâches à créer</label>
                             </div>
                         </div>
-                        <p-button  *ngIf="isAutomaticCreation else nextButton" (onClick)="submit()" label="Submit"></p-button>
-                        <ng-template #nextButton>
-                            <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="activateCallback(2)" />
-                        </ng-template>  
+                        <div class="button-space">
+                            <p-button  *ngIf="isAutomaticCreation else nextButton" size="large" (onClick)="submit()" label="Soumettre"></p-button>
+                            <ng-template #nextButton>
+                                <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" size="large" (onClick)="activateCallback(2)" />
+                            </ng-template>  
+                            <p-button severity="secondary" size="large" (onClick)="close()" label="Annuler"></p-button>
+                        </div>
                     </form>
                 </ng-template>
             </p-step-panel>

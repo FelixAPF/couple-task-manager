@@ -8,13 +8,13 @@
         </div>
         <div>
             <form [formGroup]="formGroup" (submit)="save()">
-                <div class="d-block">
-                <mat-form-field class="example-full-width">
-                    <mat-label>Title</mat-label>
+                <div>
+                <mat-form-field class="d-block input-width">
+                    <mat-label>Tâche</mat-label>
                     <input matInput formControlName="title">
                 </mat-form-field>
                 
-                <mat-form-field class="example-full-width">
+                <mat-form-field class="d-block input-width">
                     <mat-label>Descrption</mat-label>
                     <input matInput formControlName="description">
                 </mat-form-field>
@@ -22,38 +22,39 @@
 
                 <div class="flex flex-wrap gap-4">
                     <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.DAILY" formControlName="frequency" inputId="daily" />
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.DAILY" size="large" formControlName="frequency" inputId="daily" />
                         <label for="daily" class="ml-2">{{FREQUENCY.DAILY | frequencyPipe }}</label>
                     </div>
                 
                     <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.WEEKLY" formControlName="frequency" inputId="weekly" />
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.WEEKLY" size="large" formControlName="frequency" inputId="weekly" />
                         <label for="weekly" class="ml-2">{{FREQUENCY.WEEKLY | frequencyPipe }}</label>
                     </div>                    
 
                     <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIWEEKLY" formControlName="frequency" inputId="biweekly" />
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIWEEKLY" size="large" formControlName="frequency" inputId="biweekly" />
                         <label for="biweekly" class="ml-2">{{FREQUENCY.BIWEEKLY | frequencyPipe }}</label>
                     </div>
                 
                     <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.MONTHLY" formControlName="frequency" inputId="monthly" />
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.MONTHLY" size="large" formControlName="frequency" inputId="monthly" />
                         <label for="monthly" class="ml-2">{{FREQUENCY.MONTHLY | frequencyPipe }}</label>
                     </div>
                     <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIYEARLY" formControlName="frequency" inputId="biyearly" />
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIYEARLY" size="large" formControlName="frequency" inputId="biyearly" />
                         <label for="monthly" class="ml-2">{{FREQUENCY.BIYEARLY | frequencyPipe }}</label>
                     </div>
                 
                     <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.YEARLY" formControlName="frequency" inputId="yearly" />
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.YEARLY" size="large" formControlName="frequency" inputId="yearly" />
                         <label for="yearly" class="ml-2">{{FREQUENCY.YEARLY | frequencyPipe }}</label>
                     </div>
                 </div>
             
-                <p-button type="submit" class="submit-button">Sauvegarder</p-button>
-                <p-button routerLink=".." class="submit-button" severity="secondary">Annuler</p-button>
-            
+                <div class="button-space">
+                    <p-button type="submit" class="submit-button">Sauvegarder</p-button>
+                    <p-button routerLink=".." class="submit-button" severity="secondary">Annuler</p-button>
+                </div>
             </form>
         </div>
     </p-card>

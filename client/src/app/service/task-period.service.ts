@@ -24,6 +24,10 @@ export class TaskPeriodService {
     return this.http.get<TaskPeriod[]>(this.baseUrl);
   }
 
+  retrieveTaskPeriodsIncomplete(){
+    return this.http.get<TaskPeriod[]>(`${this.baseUrl}/incomplete`);
+  }
+
   deleteTaskPeriod(id?: number){
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }

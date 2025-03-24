@@ -1,18 +1,17 @@
 package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.enums.Assignee;
+import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.repository.ITaskPeriodRepository;
 import com.couple.taskmanager.repository.TaskAssignmentRepository;
 import com.couple.taskmanager.repository.TaskRepository;
-import com.couple.taskmanager.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -20,7 +19,7 @@ public class TaskService implements IGenericService<Task> {
     @Autowired
     TaskRepository taskRepository;
     @Autowired
-    ITaskPeriodRepository ITaskPeriodRepository;
+    ITaskPeriodRepository taskPeriodRepository;
     @Autowired
     TaskAssignmentRepository taskAssignmentRepository;
 
@@ -57,15 +56,21 @@ public class TaskService implements IGenericService<Task> {
     }
 
     public List<TaskPeriod> retrieveTasksByDate(Date date){
-        return ITaskPeriodRepository.retrieveTasksInPeriod(date);
+        return taskPeriodRepository.retrieveTasksInPeriod(date);
     }
 
-    public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee, Date date){
-        date.setTime(date.getTime() + (long) 30 * 24 * 60 * 60 * 1000);
+    public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee, Date date, Frequency frequency){
+        date.setTime(date.getTime() + (long) frequency.getDaysAmount() * 24 * 60 * 60 * 1000);
         return taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(assignee, date);
     }
 
     public void completeTask(Long assignmentId) {
         taskAssignmentRepository.setAssignmentCompleted(assignmentId, true);
+
+        TaskPeriod taskPeriod = taskPeriodRepository.findByTaskAssignmentId(assignmentId);
+        boolean isTaskPeriodCompleted = taskPeriod.getTaskAssignments().stream().allMatch(TaskAssignment::getCompleted);
+        if(isTaskPeriodCompleted){
+            taskPeriodRepository.markAsCompleted(taskPeriod.getId());
+        }
     }
 }

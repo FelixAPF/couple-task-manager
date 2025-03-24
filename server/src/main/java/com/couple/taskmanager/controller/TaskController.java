@@ -1,6 +1,7 @@
 package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.enums.Assignee;
+import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.TaskPeriod;
@@ -23,8 +24,8 @@ public class TaskController extends GenericController<Task, TaskService> {
     }
 
     @GetMapping("by-assignee/{assignee}/{date}")
-    public List<TaskAssignment> retrieveTasksByDate(@PathVariable Assignee assignee, @PathVariable Date date){
-        return service.retrieveIncompleteTasksByAssignee(assignee, date);
+    public List<TaskAssignment> retrieveTasksByDate(@PathVariable Assignee assignee, @PathVariable Date date, @RequestParam("frequency") Frequency frequency){
+        return service.retrieveIncompleteTasksByAssignee(assignee, date, frequency);
     }
 
     @PostMapping("complete-assignment")

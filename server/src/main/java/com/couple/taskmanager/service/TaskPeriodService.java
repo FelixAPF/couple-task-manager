@@ -41,6 +41,10 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         return taskPeriodRepository.findAll();
     }
 
+    public List<TaskPeriod> listIncomplete() {
+        return taskPeriodRepository.findByCompletedFalse();
+    }
+
     @Override
     public TaskPeriod update(Long id, TaskPeriod taskPeriod) {
         throw new IllegalArgumentException();
@@ -101,6 +105,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
     private List<TaskAssignment> generateTaskAssignments(Assignee assignee, PeriodCreationRqstV1 rqst){
         TaskList taskList = taskListRepository.findByAssignee(assignee);
+        if(taskList == null) return new ArrayList<>();
         Date startDate = rqst.getStartDate();
         Date periodEndDate = DateUtils.calculateDueDate(startDate, rqst.getDuration());
 
@@ -124,6 +129,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         taskPeriod.setTaskAssignments(taskAssignments);
         taskPeriod.setStartDate(rqst.getStartDate());
         taskPeriod.setEndDate(dueDate);
+        taskPeriod.setCompleted(false);
         return taskPeriod;
     }
 
@@ -132,6 +138,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         Date currentDate = startDate;
         while (currentDate.before(periodEndDate)) {
             currentDate = DateUtils.calculateDueDate(currentDate, frequency);
+            if(currentDate.after(periodEndDate)) break;
             dates.add(currentDate);
         }
         return dates;

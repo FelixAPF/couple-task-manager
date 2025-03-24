@@ -13,6 +13,7 @@
             <tr>
                 <th style="width:30%">Titre</th>
                 <th style="width:40%">Description</th>
+                <th style="width:10%">Pièce</th>
                 <th style="width:10%">Désassigner</th>
             </tr>
         </ng-template>
@@ -20,6 +21,7 @@
             <tr>
                 <td>{{ element.title }}</td>
                 <td>{{ element.description }}</td>
+                <td>{{ element.room | roomPipe }}</td>
                 <td><p-button (onClick)="unassign(element)" severity="warn" label="Désassigner"></p-button></td>
             </tr>
         </ng-template>

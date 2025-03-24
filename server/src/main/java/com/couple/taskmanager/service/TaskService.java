@@ -4,9 +4,11 @@ import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
+import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.repository.ITaskPeriodRepository;
 import com.couple.taskmanager.repository.TaskAssignmentRepository;
+import com.couple.taskmanager.repository.TaskListRepository;
 import com.couple.taskmanager.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ public class TaskService implements IGenericService<Task> {
     ITaskPeriodRepository taskPeriodRepository;
     @Autowired
     TaskAssignmentRepository taskAssignmentRepository;
+    @Autowired
+    TaskListRepository taskListRepository;
+
 
     @Override
     public Task get(Long id) {
@@ -42,11 +47,6 @@ public class TaskService implements IGenericService<Task> {
     @Override
     @Transactional
     public void delete(Long id) {
-        List<TaskAssignment> allByTaskId = this.taskAssignmentRepository.findAllByTaskId(id);
-        for (TaskAssignment taskAssignment : allByTaskId) {
-            taskAssignmentRepository.delete(taskAssignment);
-        }
-
         taskRepository.deleteById(id);
     }
 
@@ -59,6 +59,7 @@ public class TaskService implements IGenericService<Task> {
         return taskPeriodRepository.retrieveTasksInPeriod(date);
     }
 
+    @Transactional
     public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee, Date date, Frequency frequency){
         date.setTime(date.getTime() + (long) frequency.getDaysAmount() * 24 * 60 * 60 * 1000);
         return taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(assignee, date);

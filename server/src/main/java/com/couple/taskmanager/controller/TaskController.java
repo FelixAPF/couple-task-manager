@@ -4,14 +4,14 @@ import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
+import com.couple.taskmanager.model.dto.TaskAssignmentDto;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.service.TaskService;
-import com.couple.taskmanager.utils.DateUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tasks")
@@ -24,12 +24,13 @@ public class TaskController extends GenericController<Task, TaskService> {
     }
 
     @GetMapping("by-assignee/{assignee}/{date}")
-    public List<TaskAssignment> retrieveTasksByDate(@PathVariable Assignee assignee, @PathVariable Date date, @RequestParam("frequency") Frequency frequency){
-        return service.retrieveIncompleteTasksByAssignee(assignee, date, frequency);
+    public List<TaskAssignmentDto> retrieveTasksByDate(@PathVariable Assignee assignee, @PathVariable Date date, @RequestParam("frequency") Frequency frequency){
+        List<TaskAssignment> taskAssignments = service.retrieveIncompleteTasksByAssignee(assignee, date, frequency);
+        return taskAssignments.stream().map(TaskAssignmentDto::new).collect(Collectors.toList());
     }
 
-    @PostMapping("complete-assignment")
-    public void completeTask(@RequestBody Long assignmentId){
+    @PostMapping("complete-assignment/{assignmentId}")
+    public void completeTask(@PathVariable("assignmentId") Long assignmentId){
         service.completeTask(assignmentId);
     }
 }

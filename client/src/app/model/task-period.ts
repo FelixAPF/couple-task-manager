@@ -1,4 +1,4 @@
-import { CreationMethod, Frequency, Task } from "./task";
+import { CreationMethod, Frequency, Room, Task } from "./task";
 
 export interface TaskPeriod {
     id?: number;
@@ -15,6 +15,18 @@ export interface TaskAssignment {
     period?: number;
     creationDate: Date;
     dueDate: Date | null;
+}
+
+export interface TaskAssignmentDto {
+    id: number;
+    taskTitle: string;
+    taskDescription: string;
+    assignee: Assignee;
+    creationDate: Date;
+    dueDate: Date;
+    room: Room;
+    completed: boolean;
+    taskPeriodId: number;
 }
 
 export enum Assignee {

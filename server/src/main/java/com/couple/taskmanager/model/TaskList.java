@@ -4,6 +4,7 @@ import com.couple.taskmanager.enums.Assignee;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -15,9 +16,9 @@ public class TaskList {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @NonNull
-    private List<Task> tasks;
+    private List<Task> tasks = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @NonNull

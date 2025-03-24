@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Assignee, TaskAssignment } from '../../model/task-period';
+import { Assignee, TaskAssignment, TaskAssignmentDto } from '../../model/task-period';
 import { SharedModule } from '../../shared.module';
 import { TaskService } from '../../service/task-service.service';
 import { MatTableDataSource } from '@angular/material/table';
@@ -11,13 +11,15 @@ import { TaskListService } from '../../service/task-list.service';
 import { CreatePeriodDialogComponent } from '../../create-period-dialog/create-period-dialog.component';
 import { SelectChangeEvent } from 'primeng/select';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RoomPipe } from '../../shared/pipes/room-pipe';
+import { InputTextModule } from 'primeng/inputtext';
 
 enum FormControlName {
   DISPLAY_DURATION = 'displayDuration'
 }
 @Component({
   selector: 'app-my-tasks',
-  imports: [SharedModule, ReactiveFormsModule],
+  imports: [SharedModule, ReactiveFormsModule, RoomPipe, InputTextModule],
   templateUrl: './my-tasks.component.html',
   styleUrl: './my-tasks.component.scss',
   providers: [DialogService]
@@ -26,9 +28,8 @@ export class MyTasksComponent implements OnInit {
   DISPLAY_DURATION = FormControlName;
   fb:FormBuilder = inject(FormBuilder);
   formGroup: FormGroup = this.fb.group({ [FormControlName.DISPLAY_DURATION]: [Frequency.MONTHLY] });
-  tasks: Task[] = [];
+  tasks: TaskAssignmentDto[] = [];
   subscription: Subscription = new Subscription();
-  displayedColumns = [ "title", "description", "dueDate", "complete"]
   dataSource = new MatTableDataSource<TaskAssignment>();
   
   selectedAssignee: Assignee = Assignee.Camille;
@@ -48,15 +49,14 @@ export class MyTasksComponent implements OnInit {
   retrieveTaskByAssignee(){
     const frequency = this.formGroup.get(FormControlName.DISPLAY_DURATION)?.value || Frequency.MONTHLY;
     this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssignee, frequency).subscribe(taskAssignments => {
-      this.tasks = taskAssignments.map(({ assignee, creationDate, dueDate, task, id, period }) => ({
-        assignee, creationDate, dueDate, task, id, period
+      this.tasks = taskAssignments.map(({ assignee, creationDate, dueDate, taskTitle, taskDescription, id, taskPeriodId, completed, room }) => ({
+        assignee, creationDate, dueDate, taskTitle, taskDescription, id, completed, taskPeriodId, room: room
       }));
-      this.taskAssignments = taskAssignments;
     }))
   }
 
-  completeTask(elementId: number){
-    this.subscription.add(this.taskService.completeTask(elementId).subscribe(() => {
+  completeTask(element: any){
+    this.subscription.add(this.taskService.completeTask(element.id).subscribe(() => {
       this.retrieveTaskByAssignee();
     }));
   }

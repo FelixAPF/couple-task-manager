@@ -17,6 +17,10 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
 
     List<TaskAssignment> findAllByTaskId(Long taskId);
 
+    @Transactional
+    void deleteAllByTaskId(Long taskId);
+
+    @Query("SELECT ta FROM TaskAssignment ta JOIN FETCH ta.taskPeriod WHERE ta.completed = false AND ta.assignee = :assignee AND ta.dueDate <= :dueDateInMonth")
     List<TaskAssignment> findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee assignee, Date dueDateInMonth);
 
     @Modifying

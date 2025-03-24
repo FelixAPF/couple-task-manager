@@ -9,6 +9,7 @@
     
     <div class="mt-4">
         <p-table
+        stripedRows="true"
         [value]="tasks"
         [paginator]="true"
         [rows]="10"
@@ -20,17 +21,19 @@
         <ng-template #header>
             <tr>
                 <th style="width:30%">Titre</th>
-                <th style="width:40%">Description</th>
+                <th style="width:30%">Description</th>
+                <th style="width:10%">Pièce</th>
                 <th style="width:15%">Deadline</th>
                 <th style="width:15%">Compléter</th>
             </tr>
         </ng-template>
         <ng-template #body let-element>
             <tr>
-                <td>{{ element.task.title }}</td>
-                <td>{{ element.task.description }}</td>
+                <td>{{ element.taskTitle }}</td>
+                <td>{{ element.taskDescription }}</td>
+                <td>{{ element?.room | roomPipe }}</td>
                 <td>{{ element.dueDate | date: 'longDate' }}</td>
-                <td (click)="completeTask(element.id)"><i class="pi pi-check hover" style="font-size: 1.5rem"></i></td>
+                <td (click)="completeTask(element)"><i class="pi pi-check hover" style="font-size: 1.5rem"></i></td>
             </tr>
         </ng-template>
     </p-table>

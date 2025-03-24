@@ -1,6 +1,8 @@
 package com.couple.taskmanager.model;
 
 import com.couple.taskmanager.enums.Frequency;
+import com.couple.taskmanager.enums.Room;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,5 +26,8 @@ public class Task {
 
     @NonNull
     private Frequency frequency;
+
+    @NonNull
+    private Room room;
 
 }

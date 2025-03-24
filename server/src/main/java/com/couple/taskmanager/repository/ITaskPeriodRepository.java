@@ -17,7 +17,7 @@ public interface ITaskPeriodRepository extends JpaRepository<TaskPeriod, Long> {
     @Query("SELECT tp FROM TaskPeriod tp WHERE :date BETWEEN tp.startDate AND tp.endDate")
     List<TaskPeriod> retrieveTasksInPeriod(Date date);
 
-    @Query("SELECT tp FROM TaskPeriod tp JOIN tp.taskAssignments ta WHERE ta.id = :assignmentId")
+    @Query("SELECT ta.taskPeriod FROM TaskAssignment ta WHERE ta.id = :assignmentId")
     TaskPeriod findByTaskAssignmentId(Long assignmentId);
 
     @Modifying

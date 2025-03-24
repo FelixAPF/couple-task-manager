@@ -32,12 +32,10 @@ export class SplitTaskComponent implements OnInit {
   retrieveTasks(){
     this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Felix).subscribe((taskList) => {
       this.tasksCopain = taskList;
-      console.log(taskList);
     }))
 
     this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Camille).subscribe((taskList) => {
       this.tasksCopine = taskList;
-      console.log(taskList);
     }))
   }
 

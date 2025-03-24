@@ -2,6 +2,7 @@ package com.couple.taskmanager.model;
 
 import com.couple.taskmanager.config.AssigneeDeserializer;
 import com.couple.taskmanager.enums.Assignee;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,13 +17,14 @@ public class TaskAssignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne()
     @NonNull
     private Task task;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @NonNull
-    private TaskPeriod taskPeriod;
+    @JsonBackReference
+    private TaskPeriod taskPeriod;;
 
     @NonNull
     private Assignee assignee;

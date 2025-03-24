@@ -7,10 +7,11 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MenuItem, MenuItemCommandEvent, MessageService } from 'primeng/api';
 import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
 import { Router } from '@angular/router';
+import { RoomPipe } from '../shared/pipes/room-pipe';
 
 @Component({
   selector: 'app-tasks',
-  imports: [SharedModule, FrequencyPipe],
+  imports: [SharedModule, FrequencyPipe, RoomPipe],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
   providers: [MessageService]
@@ -23,7 +24,6 @@ export class TasksComponent {
   dataSource = new MatTableDataSource<Task>();
   
     constructor(private taskService: TaskService, private messageService: MessageService, private router: Router){
-
     };
 
     items(row: any) {

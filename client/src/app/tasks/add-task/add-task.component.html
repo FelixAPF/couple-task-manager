@@ -21,34 +21,14 @@
                 </div>
 
                 <div class="flex flex-wrap gap-4">
-                    <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.DAILY" size="large" formControlName="frequency" inputId="daily" />
-                        <label for="daily" class="ml-2">{{FREQUENCY.DAILY | frequencyPipe }}</label>
+                    <div class="flex items-center" *ngFor="let frequence of frequencies">
+                        <p-radiobutton name="frequency" [value]="frequence.value" size="large" formControlName="frequency" [inputId]="frequence.value" />
+                        <label [for]="frequence.value" class="ml-2">{{ frequence.label }}</label>
                     </div>
+                </div>                
                 
-                    <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.WEEKLY" size="large" formControlName="frequency" inputId="weekly" />
-                        <label for="weekly" class="ml-2">{{FREQUENCY.WEEKLY | frequencyPipe }}</label>
-                    </div>                    
-
-                    <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIWEEKLY" size="large" formControlName="frequency" inputId="biweekly" />
-                        <label for="biweekly" class="ml-2">{{FREQUENCY.BIWEEKLY | frequencyPipe }}</label>
-                    </div>
-                
-                    <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.MONTHLY" size="large" formControlName="frequency" inputId="monthly" />
-                        <label for="monthly" class="ml-2">{{FREQUENCY.MONTHLY | frequencyPipe }}</label>
-                    </div>
-                    <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIYEARLY" size="large" formControlName="frequency" inputId="biyearly" />
-                        <label for="monthly" class="ml-2">{{FREQUENCY.BIYEARLY | frequencyPipe }}</label>
-                    </div>
-                
-                    <div class="flex items-center">
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.YEARLY" size="large" formControlName="frequency" inputId="yearly" />
-                        <label for="yearly" class="ml-2">{{FREQUENCY.YEARLY | frequencyPipe }}</label>
-                    </div>
+                <div class="flex flex-wrap gap-4">
+                    <p-select [options]="rooms" class="input-width" optionValue="value" optionLabel="label" formControlName="room"></p-select>
                 </div>
             
                 <div class="button-space">

@@ -11,10 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.couple.taskmanager.utils.StreamUtils.ofNullable;
@@ -50,22 +47,12 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         throw new IllegalArgumentException();
     }
 
-
+    @Transactional
     public TaskPeriod update(TaskPeriod taskPeriod, List<TaskAssignment> taskAssignments) {
-        // Load the existing TaskPeriod
-        TaskPeriod existingPeriod = get(taskPeriod.getId());
-        //delete the old task assignments
-        List<TaskAssignment> oldAssignments = taskAssignmentRepository.findAllByTaskPeriodId(taskPeriod.getId());
-        oldAssignments.forEach(ta -> taskAssignmentRepository.delete(ta));
-        // Set the new values
-        existingPeriod.setStartDate(taskPeriod.getStartDate());
-        // Save all new taskAssignments
-        taskAssignments.forEach(ta -> {
-            ta.setTaskPeriod(existingPeriod);
-            taskAssignmentRepository.save(ta);
-        });
-        existingPeriod.getTaskAssignments().addAll(taskAssignments);
-        return taskPeriodRepository.save(existingPeriod);
+        List<TaskAssignment> list = taskAssignments.stream()
+                .peek(taskAssignment -> taskAssignment.setTaskPeriod(taskPeriod)).toList();
+        taskAssignmentRepository.saveAll(list);
+        return taskPeriodRepository.save(taskPeriod);
     }
 
     @Override
@@ -76,14 +63,6 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     @Override
     @Transactional
     public void create(TaskPeriod taskPeriod) {
-        ofNullable(taskPeriod.getTaskAssignments())
-                .filter(taskAssignment -> taskAssignment.getId() == null)
-                .forEach(taskAssignment -> {
-                    if(taskAssignment.getTask().getId() == null){
-                        taskRepository.save(taskAssignment.getTask());
-                    }
-                    taskAssignmentRepository.save(taskAssignment);
-                });
         taskPeriodRepository.save(taskPeriod);
     }
 
@@ -92,20 +71,21 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
         List<TaskAssignment> taskAssignments = new ArrayList<>();
 
-        taskAssignments.addAll(generateTaskAssignments(Assignee.Felix,rqst));
-        taskAssignments.addAll(generateTaskAssignments(Assignee.Camille, rqst));
-        TaskPeriod taskPeriod = generatePeriod(rqst, taskAssignments, dueDate);
+        TaskPeriod taskPeriod = generatePeriod(rqst, dueDate);
+        taskAssignments.addAll(generateTaskAssignments(Assignee.Felix,rqst, taskPeriod));
+        taskAssignments.addAll(generateTaskAssignments(Assignee.Camille, rqst, taskPeriod));
 
-        if(rqst.getPeriodId() != null){
-            update(taskPeriod, taskAssignments);
-        } else {
+        if(taskPeriod.getId() == null){
+            taskPeriod.setTaskAssignments(taskAssignments);
             create(taskPeriod);
+        } else {
+            update(taskPeriod, taskAssignments);
         }
     }
 
-    private List<TaskAssignment> generateTaskAssignments(Assignee assignee, PeriodCreationRqstV1 rqst){
+    private List<TaskAssignment> generateTaskAssignments(Assignee assignee, PeriodCreationRqstV1 rqst, TaskPeriod taskPeriod) {
         TaskList taskList = taskListRepository.findByAssignee(assignee);
-        if(taskList == null) return new ArrayList<>();
+        if (taskList == null) return new ArrayList<>();
         Date startDate = rqst.getStartDate();
         Date periodEndDate = DateUtils.calculateDueDate(startDate, rqst.getDuration());
 
@@ -118,15 +98,15 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
                             taskAssignment.setCompleted(false);
                             taskAssignment.setCreationDate(startDate);
                             taskAssignment.setDueDate(dueDate);
+                            taskAssignment.setTaskPeriod(taskPeriod);
                             return taskAssignment;
                         }))
                 .toList();
     }
 
-    private TaskPeriod generatePeriod(PeriodCreationRqstV1 rqst, List<TaskAssignment> taskAssignments, Date dueDate){
+    private TaskPeriod generatePeriod(PeriodCreationRqstV1 rqst, Date dueDate){
         TaskPeriod taskPeriod = new TaskPeriod();
         taskPeriod.setId(rqst.getPeriodId());
-        taskPeriod.setTaskAssignments(taskAssignments);
         taskPeriod.setStartDate(rqst.getStartDate());
         taskPeriod.setEndDate(dueDate);
         taskPeriod.setCompleted(false);

@@ -4,7 +4,7 @@
         <h2>Tâches Copain</h2>
 
         <p-table
-        [value]="tasksCopain"
+        [value]="tasksCopain?.tasks ||[]"
         [paginator]="true"
         [rows]="10"
         [showCurrentPageReport]="true"
@@ -15,12 +15,14 @@
                 <tr>
                     <th style="width:30%">Titre</th>
                     <th style="width:40%">Description</th>
+                    <th style="width:10%">Désassigner</th>
                 </tr>
             </ng-template>
             <ng-template #body let-element>
                 <tr>
                     <td>{{ element.title }}</td>
                     <td>{{ element.description }}</td>
+                    <td><p-button (onClick)="unassign(element, tasksCopain)" label="Désassigner"></p-button></td>
                 </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">
@@ -35,7 +37,7 @@
         <h2>Tâches Copine</h2>
 
         <p-table
-        [value]="tasksCopine"
+        [value]="tasksCopine?.tasks|| []"
         [paginator]="true"
         [rows]="10"
         [showCurrentPageReport]="true"
@@ -46,12 +48,14 @@
                 <tr>
                     <th style="width:30%">Titre</th>
                     <th style="width:40%">Description</th>
+                    <th style="width:10%">Désassigner</th>
                 </tr>
             </ng-template>
             <ng-template #body let-element>
                 <tr>
                     <td>{{ element.title }}</td>
                     <td>{{ element.description }}</td>
+                    <td><p-button (onClick)="unassign(element, tasksCopine)" label="Désassigner"></p-button></td>
                 </tr>
             </ng-template>
             

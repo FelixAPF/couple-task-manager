@@ -10,7 +10,7 @@
     [paginator]="true"
     [rows]="10"
     [showCurrentPageReport]="true"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    currentPageReportTemplate="Affichage des éléments {first} à {last} de {totalRecords}"
     [rowsPerPageOptions]="[10, 25, 100]"
   >
     <ng-template #header>
@@ -29,7 +29,7 @@
             <td>
               <div class="card flex justify-center flex-wrap gap-4">
                 <p-toast></p-toast>
-                <p-splitbutton label="Supprimer" (onClick)="delete(element.id)" [model]="items" severity="danger" />
+                <p-splitbutton label="Supprimer" (onClick)="delete(element.id)" [model]="items(element)" severity="danger" />
               </div>
            </td>
         </tr>

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { TaskPeriod } from '../model/task-period';
+import { PeriodCreationRequest, TaskPeriod } from '../model/task-period';
 import { Observable } from 'rxjs';
 import { environment } from '../environment';
 
@@ -14,6 +14,10 @@ export class TaskPeriodService {
 
   createTaskPeriod(taskPeriod: TaskPeriod): Observable<void>{
     return this.http.post<void>(this.baseUrl, taskPeriod);
+  }
+
+  initiateCreatePeriod(creationRqst: PeriodCreationRequest): Observable<void>{
+    return this.http.post<void>(`${this.baseUrl}/creation`, creationRqst);
   }
 
   retrieveTaskPeriods(){

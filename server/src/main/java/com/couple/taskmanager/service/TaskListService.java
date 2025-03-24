@@ -2,24 +2,19 @@ package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.model.Task;
-import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.TaskList;
-import com.couple.taskmanager.model.TaskPeriod;
-import com.couple.taskmanager.repository.ITaskPeriodRepository;
-import com.couple.taskmanager.repository.TaskAssignmentRepository;
+import com.couple.taskmanager.model.dto.TaskListRequestV1;
 import com.couple.taskmanager.repository.TaskListRepository;
 import com.couple.taskmanager.repository.TaskRepository;
 import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.MethodNotAllowedException;
 
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class TaskListService implements IGenericService<TaskList> {
@@ -52,6 +47,18 @@ public class TaskListService implements IGenericService<TaskList> {
     @Transactional
     public void delete(Long id) {
         taskListRepository.deleteById(id);
+    }
+
+    @Transactional
+    public TaskList unassign(TaskListRequestV1 rqst) {
+        TaskList taskList = taskListRepository.findById(rqst.getTaskListId()).orElseThrow(() -> new NoSuchElementException("Task List does not exist " + rqst.getTaskListId()));
+
+        List<Task> tasks = StreamUtils.ofNullable(taskList.getTasks())
+                .filter(task -> !task.getId().equals(rqst.getTaskId()))
+                .toList();
+
+        taskList.setTasks(new ArrayList<>(tasks));
+        return taskListRepository.save(taskList);
     }
 
     @Override

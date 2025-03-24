@@ -54,12 +54,19 @@ export class MyTasksComponent implements OnInit {
 
   startNewPeriod(){
     const dialogRef = this.dialog.open(CreatePeriodDialogComponent, {
+      header: 'Créer une période de tâches',
       width: '50vw',
+      height: '500px',
       dismissableMask: true,
       modal:true,
       breakpoints: {
           '960px': '75vw',
           '640px': '90vw'
       },
-    });  }
+    });  
+    dialogRef.onClose.subscribe(() => {
+      this.retrieveTaskByAssignee();
+    })
+  }
+    
 }

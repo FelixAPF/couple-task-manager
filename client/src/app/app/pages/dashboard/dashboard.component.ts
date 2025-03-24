@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { TaskService } from '../service/task-service.service';
-import { SharedModule } from '../shared.module';
-import { MyTasksComponent } from '../tasks/my-tasks/my-tasks.component';
+import { TaskService } from '../../../service/task-service.service';
+import { SharedModule } from '../../../shared.module';
+import { MyTasksComponent } from '../../../tasks/my-tasks/my-tasks.component';
 
 @Component({
   selector: 'app-dashboard',

@@ -18,12 +18,10 @@ import { Task } from '../../model/task';
   providers:[DialogService]
 })
 export class SplitTaskComponent implements OnInit {
-  taskPeriods: TaskPeriod[] = [];
-
   subscription: Subscription = new Subscription();
   taskLists: TaskList[] = [];
-  tasksCopine: Task[] = [];
-  tasksCopain: Task[] = [];
+  tasksCopine?: TaskList;
+  tasksCopain?: TaskList;
   constructor(public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
 
   ngOnInit(): void {
@@ -32,12 +30,27 @@ export class SplitTaskComponent implements OnInit {
 
   retrieveTasks(){
     this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Felix).subscribe((taskList) => {
-      this.tasksCopain = taskList?.tasks;
+      this.tasksCopain = taskList;
+      console.log(taskList);
     }))
 
     this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Camille).subscribe((taskList) => {
-      this.tasksCopine = taskList?.tasks;
+      this.tasksCopine = taskList;
+      console.log(taskList);
     }))
+  }
+
+  unassign(element: any, taskList?: TaskList){
+    this.taskListService.deleteTaskList({ taskListId: taskList?.id, assignee: taskList?.assignee, taskId: element.id }).subscribe(resp => {
+      switch(taskList?.assignee){
+        case Assignee.Felix: 
+          this.tasksCopain = resp;
+          break;
+        case Assignee.Camille:
+          this.tasksCopine = resp;
+          break;
+      }
+    });
   }
 
   create(){
@@ -49,6 +62,10 @@ export class SplitTaskComponent implements OnInit {
           '960px': '75vw',
           '640px': '90vw'
       },
+    });
+
+    dialogRef.onClose.subscribe((taskPeriod: TaskPeriod) => {
+      this.retrieveTasks();
     });
   }
 }

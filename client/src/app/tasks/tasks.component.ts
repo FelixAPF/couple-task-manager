@@ -4,8 +4,9 @@ import { Task } from '../model/task';
 import { Subscription } from 'rxjs';
 import { SharedModule } from '../shared.module';
 import { MatTableDataSource } from '@angular/material/table';
-import { MenuItem, MessageService } from 'primeng/api';
+import { MenuItem, MenuItemCommandEvent, MessageService } from 'primeng/api';
 import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tasks',
@@ -16,23 +17,29 @@ import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
 })
 export class TasksComponent {
   tasks: Task[] = [];
-  items: MenuItem[];
+  
   subscription: Subscription = new Subscription();
   displayedColumns = [ "title", "description", "delete"]
   dataSource = new MatTableDataSource<Task>();
   
-    constructor(private taskService: TaskService, private messageService: MessageService){
-      this.items = [
+    constructor(private taskService: TaskService, private messageService: MessageService, private router: Router){
+
+    };
+
+    items(row: any) {
+      return [
         {
-            label: 'Update',  routerLink: ['/add-task'], queryParams: {}
-        },
-        { separator: true },
-        { label: 'Upload',  }
-    ];
+          label: 'Update', 
+          icon: 'pi pi-clone', 
+          command: () => {
+            this.onModify(row);
+          }
+        }
+      ];
     }
 
-    update(){
-
+    onModify(item: any): void {
+      this.router.navigate(['tasks/add-task'], { queryParams: { id: item.id, title: item.title, description: item.description, frequency: item.frequency } });
     }
 
   

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Task } from '../model/task';
 import { HttpClient } from '@angular/common/http';
 import { Assignee, TaskAssignment, TaskPeriod } from '../model/task-period';
 import { environment } from '../environment';
+import { addTimeToCurrentDate } from '../utils/DateUtils';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +43,8 @@ export class TaskService {
   }
 
   retrieveTaskByAssignee(assignee: Assignee): Observable<TaskAssignment[]> {
-    return this.http.get<TaskAssignment[]>(`${this.baseUrl}/by-assignee/${assignee}`);
+    const dueDate = addTimeToCurrentDate(new Date(), 0, 0, 1);
+    return this.http.get<TaskAssignment[]>(`${this.baseUrl}/by-assignee/${assignee}/${dueDate}`);
   }
   
 }

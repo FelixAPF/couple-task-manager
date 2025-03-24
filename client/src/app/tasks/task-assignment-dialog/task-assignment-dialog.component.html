@@ -39,22 +39,6 @@
                     </button>
                 </ng-template>
             </p-step>
-
-            <p-step [value]="3" class="flex flex-row flex-auto gap-2">
-                <ng-template #content let-activateCallback="activateCallback" let-value="value">
-                    <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
-                        <span
-                            class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
-                            [ngClass]="{
-                                'bg-primary text-primary-contrast border-primary': value <= activeStep,
-                                'border-surface': value > activeStep
-                            }"
-                        >
-                            <i class="pi pi-id-card"></i>
-                        </span>
-                    </button>
-                </ng-template>
-            </p-step>
         </p-step-list>
 
         <p-step-panels>
@@ -124,18 +108,11 @@
                     </p-table>
                 </div>
                 <div class="flex pt-6 justify-end">
-                    <p-button (onClick)="next()" label="Next" icon="pi pi-arrow-right" iconPos="right" />
+                    <p-button (onClick)="submit()" label="Soumettre"></p-button>
                     <p-button (onClick)="cancel()" severity="secondary" label="Cancel"  icon="pi pi-times" iconPos="right" />
                 </div>
                 </ng-template>
                 
-            </p-step-panel>
-
-            <p-step-panel [value]="3">
-                <ng-template #content let-activateCallback="activateCallback">
-                    <p-button (onClick)="submit()" label="Soumettre"></p-button>
-                    <p-button (onClick)="cancel()" severity="secondary" label="Cancel"  icon="pi pi-times" iconPos="right" />
-                </ng-template>
             </p-step-panel>
         </p-step-panels>
     </p-stepper>

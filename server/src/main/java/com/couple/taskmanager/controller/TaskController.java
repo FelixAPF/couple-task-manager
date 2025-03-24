@@ -22,9 +22,9 @@ public class TaskController extends GenericController<Task, TaskService> {
         return service.retrieveTasksByDate(date);
     }
 
-    @GetMapping("by-assignee/{assignee}")
-    public List<TaskAssignment> retrieveTasksByDate(@PathVariable Assignee assignee){
-        return service.retrieveIncompleteTasksByAssignee(assignee);
+    @GetMapping("by-assignee/{assignee}/{date}")
+    public List<TaskAssignment> retrieveTasksByDate(@PathVariable Assignee assignee, @PathVariable Date date){
+        return service.retrieveIncompleteTasksByAssignee(assignee, date);
     }
 
     @PostMapping("complete-assignment")

@@ -4,5 +4,11 @@ import { Assignee } from "./task-period";
 export interface TaskList {
     id?: number | null;
     assignee: Assignee;
-    tasks: Task[];
+    tasks?: Task[];
+}
+
+export interface TaskListRequest {
+    taskListId?: number | null;
+    assignee?: Assignee;
+    taskId?: number;
 }

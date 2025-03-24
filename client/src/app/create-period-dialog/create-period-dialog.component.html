@@ -1,1 +1,87 @@
-<p>create-period-dialog works!</p>
+<div>
+
+    <p-stepper [value]="1" class="basis-[50rem]">
+        <p-step-list>
+            <p-step [value]="1">Sélection de la période</p-step>
+            <p-step [value]="2">Assignation des tâches</p-step>
+        </p-step-list>
+        <p-step-panels>
+            <p-step-panel [value]="1">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <form [formGroup]="formGroup">
+                        <div class="d-block">
+                            <p-select [options]="taskPeriods" class="input-width" optionValue="value" optionLabel="label" (onChange)="disableOtherFields($event)" placeholder="Choisir une période existante" formControlName="taskPeriod"></p-select>
+                        </div>
+                        <p-datepicker size="large" class="dp-margin" placeholder="Date de début"formControlName="startDate" showIcon iconDisplay="input" />
+                        <div class="flex flex-wrap gap-4 d-block">
+                        
+                            <h5>Durée de la période:</h5>
+                            <div class="flex items-center">
+                                <p-radiobutton name="duration" [value]="FREQUENCY.DAILY" formControlName="duration" inputId="daily" />
+                                <label for="daily" class="ml-2">{{FREQUENCY.DAILY | frequencyPipe }}</label>
+                            </div>
+                            <div class="flex items-center">
+                                <p-radiobutton name="duration" [value]="FREQUENCY.WEEKLY" formControlName="duration" inputId="weekly" />
+                                <label for="weekly" class="ml-2">{{FREQUENCY.WEEKLY | frequencyPipe }}</label>
+                            </div>                    
+                
+                            <div class="flex items-center">
+                                <p-radiobutton name="duration" [value]="FREQUENCY.BIWEEKLY" formControlName="duration" inputId="biweekly" />
+                                <label for="biweekly" class="ml-2">{{FREQUENCY.BIWEEKLY | frequencyPipe }}</label>
+                            </div>
+                        
+                            <div class="flex items-center">
+                                <p-radiobutton name="duration" [value]="FREQUENCY.MONTHLY" formControlName="duration" inputId="monthly" />
+                                <label for="monthly" class="ml-2">{{FREQUENCY.MONTHLY | frequencyPipe }}</label>
+                            </div>
+                            <div class="flex items-center">
+                                <p-radiobutton name="duration" [value]="FREQUENCY.BIYEARLY" formControlName="duration" inputId="biyearly" />
+                                <label for="monthly" class="ml-2">{{FREQUENCY.BIYEARLY | frequencyPipe }}</label>
+                            </div>
+                        
+                            <div class="flex items-center">
+                                <p-radiobutton name="duration" [value]="FREQUENCY.YEARLY" formControlName="duration" inputId="yearly" />
+                                <label for="yearly" class="ml-2">{{FREQUENCY.YEARLY | frequencyPipe }}</label>
+                            </div>
+                        </div>
+                
+                        <div>
+                            <h5>Méthode d'assignation des tâches</h5>
+                            <div class="flex items-center">
+                                <p-radiobutton name="creationMethod" [value]="CREATION_METHOD.AUTOMATIC" formControlName="creationMethod" inputId="automatic" />
+                                <label for="automatic" class="ml-2">Automatiquement créer les tâches attitrées</label>
+                            </div>
+                        
+                            <div class="flex items-center">
+                                <p-radiobutton name="creationMethod" [value]="CREATION_METHOD.MANUAL" formControlName="creationMethod" inputId="manual" />
+                                <label for="manual" class="ml-2">Manuellement sélectionner les tâches à créer</label>
+                            </div>
+                        </div>
+                        <p-button  *ngIf="isAutomaticCreation else nextButton" (onClick)="submit()" label="Submit"></p-button>
+                        <ng-template #nextButton>
+                            <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="activateCallback(2)" />
+                        </ng-template>  
+                    </form>
+                </ng-template>
+            </p-step-panel>
+    
+            <p-step-panel [value]="2">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col h-48">
+                        <div
+                            class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 flex-auto flex justify-center items-center font-medium"
+                        >
+                            Content II
+                        </div>
+                    </div>
+                    <div class="flex pt-6 justify-between">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="activateCallback(1)" />
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="activateCallback(3)" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+        </p-step-panels>
+    </p-stepper>
+    
+    
+</div>

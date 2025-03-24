@@ -1,11 +1,9 @@
 package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.enums.Assignee;
-import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskList;
-import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.model.dto.TaskListRequestV1;
 import com.couple.taskmanager.service.TaskListService;
-import com.couple.taskmanager.service.TaskPeriodService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +21,11 @@ public class TaskListController extends GenericController<TaskList, TaskListServ
     @PostMapping("/{assignee}")
     public void addTasksToExistingList(@PathVariable("assignee") Assignee assignee, @RequestBody List<Long> taskIds){
         service.addTasksToExistingList(assignee, taskIds);
+    }
+
+    @PostMapping("/unassign")
+    public TaskList unassign(@RequestBody TaskListRequestV1 rqst){
+        return service.unassign(rqst);
     }
 
 }

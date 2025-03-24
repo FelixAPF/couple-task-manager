@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../environment';
 import { HttpClient } from '@angular/common/http';
-import { TaskList } from '../model/task-list';
+import { TaskList, TaskListRequest } from '../model/task-list';
 import { Assignee } from '../model/task-period';
 import { Observable } from 'rxjs';
 import { Task } from '../model/task';
@@ -30,8 +30,8 @@ export class TaskListService {
     return this.http.post<void>(`${this.baseUrl}/${assignee}`, tasks);
   }
 
-  deleteTaskList(id: number): Observable<void>{
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+  deleteTaskList(taskList: TaskListRequest): Observable<TaskList>{
+    return this.http.post<TaskList>(`${this.baseUrl}/unassign`, taskList);
   }
 
 }

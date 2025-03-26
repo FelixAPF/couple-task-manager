@@ -6,6 +6,11 @@ export interface Task {
     room: Room;
 }
 
+export interface TaskWithCompletedDate {
+    task: Task;
+    completedDate: Date;
+}
+
 export enum Frequency {
     DAILY = "DAILY", BIWEEKLY = "BIWEEKLY", WEEKLY = "WEEKLY", MONTHLY = "MONTHLY", BIYEARLY = "BIYEARLY", YEARLY = "YEARLY"
 }

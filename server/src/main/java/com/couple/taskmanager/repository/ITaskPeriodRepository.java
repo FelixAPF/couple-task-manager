@@ -4,6 +4,7 @@ import com.couple.taskmanager.model.TaskPeriod;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,6 @@ public interface ITaskPeriodRepository extends JpaRepository<TaskPeriod, Long> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE TaskPeriod tp SET tp.completed = true WHERE tp.id = :periodId")
-    void markAsCompleted(Long periodId);
+    @Query("UPDATE TaskPeriod tp SET tp.completed = true, tp.completedDate = :date WHERE tp.id = :periodId")
+    void markAsCompleted(Long periodId, @Param("date") Date date);
 }

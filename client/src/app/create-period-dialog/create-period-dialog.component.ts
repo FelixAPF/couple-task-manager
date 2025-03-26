@@ -118,15 +118,10 @@ export class CreatePeriodDialogComponent implements OnInit {
       explicitDueDate: this.durationType?.value ? this.explicitDueDate?.value : null,
       createEachTaskOnce: this.createEachTaskOnce?.value || false
     }
-    console.log(result);
     
     this.taskPeriodService.initiateCreatePeriod(result).subscribe(() => {
       this.close();
     });
-  }
-
-  log(){
-    console.log(this.secondFormGroup.value);
   }
 
   disableOtherFields(event: any) {

@@ -5,6 +5,7 @@ import lombok.experimental.UtilityClass;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,12 @@ public class DateUtils {
         long time = (long) daysAmount * 24 * 60 * 60 * 1000;
         date.setTime(date.getTime() + time);
         return date;
+    }
+
+    public static Date addMonthsToDate(Date date, int numberOfMonths) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MONTH, numberOfMonths);
+        return calendar.getTime();
     }
 
 

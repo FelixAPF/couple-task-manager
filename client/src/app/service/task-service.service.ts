@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, of, Subscription } from 'rxjs';
-import { Frequency, Task } from '../model/task';
+import { Frequency, Task, TaskWithCompletedDate } from '../model/task';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Assignee, TaskAssignment, TaskAssignmentDto, TaskPeriod } from '../model/task-period';
 import { environment } from '../environment';
@@ -30,6 +30,10 @@ export class TaskService implements OnDestroy {
 
   retrieveTasksByDate(date: Date): Observable<Task[]> {
     return this.http.post<Task[]>(`${this.baseUrl}/by-date`, date);
+  }
+
+  retrieveTasksNotDoneInLongTime(): Observable<TaskWithCompletedDate[]> {
+    return this.http.get<TaskWithCompletedDate[]>(`${this.baseUrl}/not-completed-in-long-time`);
   }
 
   retrieveCurrentPeriodDate(){

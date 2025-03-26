@@ -28,4 +28,5 @@ public class TaskPeriod {
     private Date startDate;
     private Date endDate;
     private Boolean completed;
+    private Date completedDate;
 }

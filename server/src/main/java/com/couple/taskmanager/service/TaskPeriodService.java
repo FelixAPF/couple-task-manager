@@ -98,9 +98,12 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
                     .toList());
         }
 
-        taskPeriod.setTaskAssignments(taskAssignments);
-
-        return create(taskPeriod);
+        if(taskPeriod.getId() == null){
+            taskPeriod.setTaskAssignments(taskAssignments);
+            return create(taskPeriod);
+        } else {
+            return update(taskPeriod, taskAssignments);
+        }
     }
 
     private TaskAssignment map(Task task, TaskPeriod taskPeriod, Assignee assignee, Date dueDate, Date startDate, Date explicitDueDate){

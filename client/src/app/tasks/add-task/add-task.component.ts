@@ -25,9 +25,6 @@ enum FormControlName {
   styleUrl: './add-task.component.scss'
 })
 export class AddTaskComponent implements OnInit {
-log(value: { label: string; value: Frequency; }) {
-console.log(value);
-}
   ROOM = Room;
   FREQUENCY = Frequency;
   fb = inject(FormBuilder);

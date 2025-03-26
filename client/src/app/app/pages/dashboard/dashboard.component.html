@@ -1,3 +1,8 @@
 <div>
-    <app-my-tasks></app-my-tasks>
+    <p-card class="container d-block text-center" *ngIf="expiredTasks?.length">
+        <app-warning-tasks-due [expiredTasks]="expiredTasks"></app-warning-tasks-due>
+    </p-card>
+    <p-card class="container d-block text-center">
+        <app-my-tasks (taskCompleteEmitter)="refreshExpiredTasks($event)"></app-my-tasks>
+    </p-card>
 </div>

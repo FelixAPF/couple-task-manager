@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
 import { Assignee, TaskAssignment, TaskAssignmentDto } from '../../model/task-period';
 import { SharedModule } from '../../shared.module';
 import { TaskService } from '../../service/task-service.service';
@@ -32,6 +32,7 @@ export class MyTasksComponent implements OnInit {
   tasks: TaskAssignmentDto[] = [];
   subscription: Subscription = new Subscription();
   dataSource = new MatTableDataSource<TaskAssignment>();
+  @Output() taskCompleteEmitter: EventEmitter<number> = new EventEmitter();
   
   selectedAssignee: Assignee = Assignee.Camille;
   taskAssignments: TaskAssignment[] = [];
@@ -51,8 +52,8 @@ export class MyTasksComponent implements OnInit {
   retrieveTaskByAssignee(){
     const frequency = this.formGroup.get(FormControlName.DISPLAY_DURATION)?.value || Frequency.MONTHLY;
     this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssignee, frequency).subscribe(taskAssignments => {
-      this.tasks = taskAssignments.map(({ assignee, creationDate, dueDate, taskTitle, taskDescription, id, taskPeriodId, completed, room }) => ({
-        assignee, creationDate, dueDate, taskTitle, taskDescription, id, completed, taskPeriodId, room: room
+      this.tasks = taskAssignments.map(({ assignee, creationDate, dueDate, taskTitle, taskDescription, id, taskPeriodId, completed, room, taskId }) => ({
+        assignee, creationDate, dueDate, taskTitle, taskDescription, id, completed, taskPeriodId, room: room, taskId
       }));
     }))
   }
@@ -60,7 +61,9 @@ export class MyTasksComponent implements OnInit {
   completeTask(element: any){
     this.subscription.add(this.taskService.completeTask(element.id).subscribe(() => {
       this.retrieveTaskByAssignee();
+      this.taskCompleteEmitter.emit(element.taskId);
     }));
+
   }
 
   startNewPeriod(){

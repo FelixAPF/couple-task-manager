@@ -21,6 +21,7 @@ public class TaskAssignmentDto {
     private Room room;
     private Boolean completed;
     private Long taskPeriodId;
+    private Long taskId;
 
     public TaskAssignmentDto(TaskAssignment taskAssignment) {
         this.id = taskAssignment.getId();
@@ -32,5 +33,6 @@ public class TaskAssignmentDto {
         this.completed = taskAssignment.getCompleted();
         this.room = taskAssignment.getTask().getRoom();
         this.taskPeriodId = taskAssignment.getTaskPeriod().getId();
+        this.taskId = taskAssignment.getTask().getId();
     }
 }

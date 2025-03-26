@@ -1,6 +1,5 @@
 
-
-<p-card class="container d-block text-center">
+<div>
         <div class="float-right d-block" [formGroup]="formGroup">
             <p-select class="input-width" [formControlName]="DISPLAY_DURATION.DISPLAY_DURATION" (onChange)="onChange($event)" label="Affichage du" [options]="options" optionValue="value" optionLabel="label"></p-select>
         </div>
@@ -48,4 +47,4 @@
     <div class="d-flex float-right">
         <p-button (click)="startNewPeriod()" class="create-button float-right">Débuter une période de tâches</p-button>
     </div>
-</p-card>
+</div>

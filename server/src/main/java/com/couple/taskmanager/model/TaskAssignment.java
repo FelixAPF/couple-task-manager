@@ -38,6 +38,8 @@ public class TaskAssignment {
     @NonNull
     private Boolean completed = false;
 
+    private Date completedDate;
+
     public TaskAssignment(@NonNull Task task, @NonNull TaskPeriod taskPeriod, @NonNull Assignee assignee, @NonNull Date creationDate, @NonNull Date dueDate) {
         this.task = task;
         this.taskPeriod = taskPeriod;

@@ -27,6 +27,7 @@ export interface TaskAssignmentDto {
     room: Room;
     completed: boolean;
     taskPeriodId: number;
+    taskId: number;
 }
 
 export enum Assignee {

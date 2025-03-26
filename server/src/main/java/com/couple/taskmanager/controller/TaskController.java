@@ -6,9 +6,11 @@ import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.dto.TaskAssignmentDto;
 import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.service.TaskService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,5 +34,11 @@ public class TaskController extends GenericController<Task, TaskService> {
     @PostMapping("complete-assignment/{assignmentId}")
     public void completeTask(@PathVariable("assignmentId") Long assignmentId){
         service.completeTask(assignmentId);
+    }
+
+
+    @GetMapping("not-completed-in-long-time")
+    public List<TaskWithCompletedDateV1> retrieveTasksNotCompletedInLongTime(){
+        return service.retrieveTasksNotCompletedInLongTime();
     }
 }

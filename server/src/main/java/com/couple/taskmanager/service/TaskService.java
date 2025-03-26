@@ -5,10 +5,14 @@ import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.repository.ITaskPeriodRepository;
 import com.couple.taskmanager.repository.TaskAssignmentRepository;
 import com.couple.taskmanager.repository.TaskListRepository;
 import com.couple.taskmanager.repository.TaskRepository;
+import com.couple.taskmanager.utils.DateUtils;
+import com.couple.taskmanager.utils.StreamUtils;
+import jakarta.persistence.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,12 +69,22 @@ public class TaskService implements IGenericService<Task> {
     }
 
     public void completeTask(Long assignmentId) {
-        taskAssignmentRepository.setAssignmentCompleted(assignmentId, true);
+        Date completionDate = new Date();
+        taskAssignmentRepository.setAssignmentCompleted(assignmentId, true, completionDate);
 
         TaskPeriod taskPeriod = taskPeriodRepository.findByTaskAssignmentId(assignmentId);
         boolean isTaskPeriodCompleted = taskPeriod.getTaskAssignments().stream().allMatch(TaskAssignment::getCompleted);
         if(isTaskPeriodCompleted){
-            taskPeriodRepository.markAsCompleted(taskPeriod.getId());
+            taskPeriodRepository.markAsCompleted(taskPeriod.getId(), completionDate);
         }
+    }
+
+    public List<TaskWithCompletedDateV1> retrieveTasksNotCompletedInLongTime() {
+        int numberOfMonths = -3;
+        Date date = DateUtils.addMonthsToDate(new Date(), numberOfMonths);
+        return StreamUtils.ofNullable(taskRepository.retrieveTasksNotCompletedInLongTime(date))
+                .map(tuple -> new TaskWithCompletedDateV1(tuple.get(0, Task.class), tuple.get(1, Date.class)))
+                .toList();
+
     }
 }

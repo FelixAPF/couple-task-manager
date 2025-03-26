@@ -99,10 +99,7 @@ AssignmentRow = AssignmentRow;
       this.tasks = tasks;
     });
   }
-
-  log(element: any){
-    console.log(element);
-  }
+  
   createTaskList(callback: any) {
     const assignee = this.assignee?.value;
     if (!assignee) return;

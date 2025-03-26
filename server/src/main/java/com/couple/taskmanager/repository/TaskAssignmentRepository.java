@@ -25,8 +25,8 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
 
     @Modifying
     @Transactional
-    @Query("UPDATE TaskAssignment ta SET ta.completed = :completed WHERE ta.id = :assignmentId")
-    void setAssignmentCompleted(@Param("assignmentId") Long assignmentId, @Param("completed") boolean completed);
+    @Query("UPDATE TaskAssignment ta SET ta.completed = :completed, ta.completedDate = :date WHERE ta.id = :assignmentId")
+    void setAssignmentCompleted(@Param("assignmentId") Long assignmentId, @Param("completed") boolean completed, @Param("date") Date date);
 
     List<TaskAssignment> findAllByTaskPeriodId(Long periodId);
 }

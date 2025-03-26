@@ -23,6 +23,9 @@ export class TaskPeriodService {
   retrieveTaskPeriods(){
     return this.http.get<TaskPeriod[]>(this.baseUrl);
   }
+  retrieveTaskPeriod(periodId: number){
+    return this.http.get<TaskPeriod>(`${this.baseUrl}/${periodId}`);
+  }
 
   retrieveTaskPeriodsIncomplete(){
     return this.http.get<TaskPeriod[]>(`${this.baseUrl}/incomplete`);

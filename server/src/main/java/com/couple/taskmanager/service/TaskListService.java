@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class TaskListService implements IGenericService<TaskList> {
@@ -62,8 +61,8 @@ public class TaskListService implements IGenericService<TaskList> {
     }
 
     @Override
-    public void create(TaskList taskList) {
-        taskListRepository.save(taskList);
+    public TaskList create(TaskList taskList) {
+        return taskListRepository.save(taskList);
     }
 
     public void addTasksToExistingList(Assignee assignee, List<Long> taskIds){

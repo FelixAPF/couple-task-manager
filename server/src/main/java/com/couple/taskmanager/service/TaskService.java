@@ -4,7 +4,6 @@ import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
-import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.repository.ITaskPeriodRepository;
 import com.couple.taskmanager.repository.TaskAssignmentRepository;
@@ -51,8 +50,8 @@ public class TaskService implements IGenericService<Task> {
     }
 
     @Override
-    public void create(Task task) {
-        taskRepository.save(task);
+    public Task create(Task task) {
+        return taskRepository.save(task);
     }
 
     public List<TaskPeriod> retrieveTasksByDate(Date date){

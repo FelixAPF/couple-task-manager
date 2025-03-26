@@ -23,8 +23,8 @@ public abstract class GenericController<T, S extends IGenericService<T>> {
     }
 
     @PostMapping
-    void create(@RequestBody T t){
-        service.create(t);
+    T create(@RequestBody T t){
+        return service.create(t);
     }
 
     @PutMapping("/{id}")

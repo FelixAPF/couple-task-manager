@@ -12,8 +12,8 @@ import java.util.List;
 @CrossOrigin("*")
 public class TaskPeriodController extends GenericController<TaskPeriod, TaskPeriodService> {
     @PostMapping("/creation")
-    public void startPeriodCreation(@RequestBody PeriodCreationRqstV1 request){
-        service.createPeriodAutomatically(request);
+    public TaskPeriod startPeriodCreation(@RequestBody PeriodCreationRqstV1 request){
+        return service.createPeriod(request);
     }
 
     @GetMapping("/incomplete")

@@ -4,8 +4,12 @@
     bottom: 1rem;
 }
 
-.container {
-    margin:2%;
-    background-color:white;
-    text-align: center;
+
+
+@media all and (min-width:0px) and (max-width: 1024px) {
+    .create-button {
+        position: absolute;
+        right: 1rem;
+        bottom: 1rem;
+    }
 }

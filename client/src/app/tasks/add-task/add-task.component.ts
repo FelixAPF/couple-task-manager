@@ -20,11 +20,14 @@ enum FormControlName {
 @Component({
   selector: 'app-add-task',
   standalone: true,
-  imports: [SharedModule, ReactiveFormsModule, FrequencyPipe, RoomPipe],
+  imports: [SharedModule, ReactiveFormsModule ],
   templateUrl: './add-task.component.html',
   styleUrl: './add-task.component.scss'
 })
 export class AddTaskComponent implements OnInit {
+log(value: { label: string; value: Frequency; }) {
+console.log(value);
+}
   ROOM = Room;
   FREQUENCY = Frequency;
   fb = inject(FormBuilder);
@@ -95,6 +98,7 @@ export class AddTaskComponent implements OnInit {
   }
 
   save(){
+    if(this.formGroup.invalid) return;
     const task: Task = {
       title: this.titleFormControl?.value,
       description: this.descriptionFormControl?.value,

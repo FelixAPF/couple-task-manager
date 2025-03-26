@@ -1,40 +1,44 @@
 
 <div class="container">
-  <p-button routerLink="add-task" class="float-right">Ajouter</p-button>
 
-  <h2>Gérer les tâches</h2>
-  
-  <div>
-    <p-table
-    [value]="tasks"
-    [paginator]="true"
-    [rows]="10"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Affichage des éléments {first} à {last} de {totalRecords}"
-    [rowsPerPageOptions]="[10, 25, 100]"
-  >
-    <ng-template #header>
-        <tr>
-            <th style="width:30%">Titre</th>
-            <th style="width:40%">Description</th>
-            <th style="width:20%">Fréquence</th>
-            <th style="width:20%">Pièce</th>
-            <th style="width:15%">Delete</th>
-        </tr>
-    </ng-template>
-    <ng-template #body let-element>
-        <tr>
-            <td>{{ element.title }}</td>
-            <td>{{ element.description }}</td>
-            <td>{{ element.frequency | frequencyPipe }}</td>
-            <td>{{ element.room | roomPipe }}</td>
-            <td>
-              <div class="card flex justify-center flex-wrap gap-4">
-                <p-toast></p-toast>
-                <p-splitbutton label="Supprimer" (onClick)="delete(element.id)" [model]="items(element)" severity="danger" />
-              </div>
-           </td>
-        </tr>
-    </ng-template>
-  </p-table>
+  <p-card>
+
+    <p-button routerLink="add-task" class="float-right create-button">Ajouter</p-button>
+    <h2>Gérer les tâches</h2>
+    
+    <div>
+      <p-table
+      [value]="tasks"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Affichage des éléments {first} à {last} de {totalRecords}"
+      [rowsPerPageOptions]="[10, 25, 100]"
+    >
+      <ng-template #header>
+          <tr>
+              <th style="width:30%">Titre</th>
+              <th style="width:40%">Description</th>
+              <th style="width:20%">Fréquence</th>
+              <th style="width:20%">Pièce</th>
+              <th style="width:15%">Delete</th>
+          </tr>
+      </ng-template>
+      <ng-template #body let-element>
+          <tr>
+              <td>{{ element.title }}</td>
+              <td>{{ element.description }}</td>
+              <td>{{ element.frequency | frequencyPipe }}</td>
+              <td>{{ element.room | roomPipe }}</td>
+              <td>
+                <div class="card flex justify-center flex-wrap gap-4">
+                  <p-toast></p-toast>
+                  <p-splitbutton appendTo="body" label="Supprimer" (onClick)="delete(element.id)" [model]="items(element)" severity="danger" />
+                </div>
+             </td>
+          </tr>
+      </ng-template>
+    </p-table>
+    </div>
+  </p-card>
 </div>

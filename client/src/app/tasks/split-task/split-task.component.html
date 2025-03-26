@@ -1,6 +1,9 @@
-<div>
-    <p-button class="submit-button float-right d-block create-button" size="large" mat-flat-button (click)="create()">Créer</p-button>
+<div class="container">
+    <p-card>
+        <p-button class="submit-button float-right d-block create-button" size="large" mat-flat-button (click)="create()">Créer</p-button>
 
-    <app-assignee-task-list (unassignEmitter)="unassign($event)" [taskList]="tasksCopain" title="Tâches Copain"></app-assignee-task-list>
-    <app-assignee-task-list (unassignEmitter)="unassign($event)" [taskList]="tasksCopine" title="Tâches Copine"></app-assignee-task-list>
+        <app-assignee-task-list (unassignEmitter)="unassign($event)" [taskList]="tasksCopain" title="Tâches Copain"></app-assignee-task-list>
+        <app-assignee-task-list (unassignEmitter)="unassign($event)" [taskList]="tasksCopine" title="Tâches Copine"></app-assignee-task-list>
+    </p-card>
+    
 </div>

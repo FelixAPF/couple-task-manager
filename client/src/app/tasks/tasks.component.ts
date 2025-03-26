@@ -39,7 +39,7 @@ export class TasksComponent {
     }
 
     onModify(item: any): void {
-      this.router.navigate(['tasks/add-task'], { queryParams: { id: item.id, title: item.title, description: item.description, frequency: item.frequency } });
+      this.router.navigate(['tasks/add-task'], { queryParams: { id: item.id, title: item.title, description: item.description, frequency: item.frequency, room: item.room } });
     }
 
   

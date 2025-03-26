@@ -13,6 +13,7 @@ import { SelectChangeEvent } from 'primeng/select';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RoomPipe } from '../../shared/pipes/room-pipe';
 import { InputTextModule } from 'primeng/inputtext';
+import { DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
 
 enum FormControlName {
   DISPLAY_DURATION = 'displayDuration'
@@ -22,7 +23,7 @@ enum FormControlName {
   imports: [SharedModule, ReactiveFormsModule, RoomPipe, InputTextModule],
   templateUrl: './my-tasks.component.html',
   styleUrl: './my-tasks.component.scss',
-  providers: [DialogService]
+  providers: [DialogService,   {provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {dateFormat: 'longDate', locale: 'fr'}}]
 })
 export class MyTasksComponent implements OnInit {
   DISPLAY_DURATION = FormControlName;
@@ -34,6 +35,7 @@ export class MyTasksComponent implements OnInit {
   
   selectedAssignee: Assignee = Assignee.Camille;
   taskAssignments: TaskAssignment[] = [];
+  today: any = new Date();
   constructor(private taskService: TaskService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
 
 
@@ -65,12 +67,11 @@ export class MyTasksComponent implements OnInit {
     const dialogRef = this.dialog.open(CreatePeriodDialogComponent, {
       header: 'Créer une période de tâches',
       width: '30vw',
-      height: '700px',
+      height: '720px',
       dismissableMask: true,
       modal:true,
       breakpoints: {
-          '960px': '75vw',
-          '640px': '90vw'
+ '1199px': '75vw', '575px': '90vw'
       },
     });  
     dialogRef.onClose.subscribe(() => {
@@ -94,6 +95,11 @@ export class MyTasksComponent implements OnInit {
 
   onChange($event: SelectChangeEvent) {
     this.retrieveTaskByAssignee();
+  }
+
+  
+  datePastDeadline(dueDate: any): boolean {
+    return new Date(dueDate) < this.today;
   }
     
 }

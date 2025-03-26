@@ -1,0 +1,2 @@
+$ScriptLocation = "C:\Users\Felix\Documents\Projects\couple-task-manager\server\local_package_app.ps1"
+Start-Process -FilePath "powershell.exe" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File $ScriptLocation" -verb runas

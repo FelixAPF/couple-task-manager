@@ -25,20 +25,20 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { SelectModule } from 'primeng/select';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
+import {TranslateModule} from "@ngx-translate/core";
 
 
 
 
 import { RouterModule } from '@angular/router';
-import { MyTasksComponent } from './tasks/my-tasks/my-tasks.component';
 
 
 
 @NgModule({
   declarations: [],
   imports: [
-    CommonModule, IconField,InputIcon, SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule,  MatRadioModule,MatFormFieldModule, MatDatepickerModule,MatStepperModule
+    CommonModule, TranslateModule,IconField,InputIcon, SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule,  MatRadioModule,MatFormFieldModule, MatDatepickerModule,MatStepperModule
   ],
-  exports: [CommonModule, IconField, InputIcon,SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule, MatRadioModule,MatFormFieldModule, MatDatepickerModule, MatStepperModule]
+  exports: [CommonModule, TranslateModule, IconField, InputIcon,SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule, MatRadioModule,MatFormFieldModule, MatDatepickerModule, MatStepperModule]
 })
 export class SharedModule { }

@@ -60,7 +60,7 @@ AssignmentRow = AssignmentRow;
     return this.firstFormGroup.get(FormControlName.ASSIGNEE);
   }
   getFormControl(index: number, controlName: string): FormControl {
-    const control = this.taskLinks.at(index).get(controlName);
+    const control = this.taskLinks.at(index)?.get(controlName);
     return control as FormControl;
   }
 
@@ -109,7 +109,6 @@ AssignmentRow = AssignmentRow;
   
     this.taskListService.retrieveTaskList(assignee).subscribe((taskList) => {
       this.taskList = taskList;
-      console.log("TASK LIST RETRIEVED",this.taskList);
       const loadTasksAndCallback = () => {
         this.loadTasks().add(() => { // Wait for loadTasks() to complete
           callback(2);

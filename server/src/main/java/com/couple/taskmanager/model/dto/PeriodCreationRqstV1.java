@@ -12,6 +12,8 @@ public class PeriodCreationRqstV1 {
     private Long periodId;
     private Frequency duration;
     private Date startDate;
+    private Date explicitDueDate;
     private CreationMethod creationMethod;
-    private List<Long> taskIds;
+    private List<BasicTaskAssignmentRqstV1> taskAssignmentRqst;
+    private Boolean createEachTaskOnce = false;
 }

@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { TaskService } from './service/task-service.service';
 import { SharedModule } from "../app/shared.module"
 import { NavbarComponent } from './header/navbar/navbar.component';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-root',
@@ -13,7 +14,11 @@ import { NavbarComponent } from './header/navbar/navbar.component';
 export class AppComponent implements OnInit {
   title = 'client';
 
-  constructor(){}
+  constructor(private translate: TranslateService){
+    translate.setDefaultLang('fr');
+    translate.addLangs(['fr', 'en']);
+    translate.use('fr');
+  }
 
   ngOnInit(): void {
   }

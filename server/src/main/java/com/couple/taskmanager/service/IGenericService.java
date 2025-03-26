@@ -8,5 +8,5 @@ public interface IGenericService<T> {
     List<T> list();
     T update(Long id, T t);
     void delete(Long id);
-    void create(T t);
+    T create(T t);
 }

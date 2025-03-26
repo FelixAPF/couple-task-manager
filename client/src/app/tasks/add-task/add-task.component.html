@@ -1,13 +1,13 @@
 
 
-<div class="flex justify-center items-center">
+<div class="container">
 
     <p-card>
         <div>
             <H3>{{idFormControl?.value === null ? 'Ajouter' : 'Modifier'}} une tâche</H3>
         </div>
         <div>
-            <form [formGroup]="formGroup" (submit)="save()">
+            <form [formGroup]="formGroup" class="form-container" (submit)="save()">
                 <div>
                 <mat-form-field class="d-block input-width">
                     <mat-label>Tâche</mat-label>
@@ -20,8 +20,8 @@
                 </mat-form-field>
                 </div>
 
-                <div class="flex flex-wrap gap-4">
-                    <div class="flex items-center" *ngFor="let frequence of frequencies">
+                <div>
+                    <div *ngFor="let frequence of frequencies">
                         <p-radiobutton name="frequency" [value]="frequence.value" size="large" formControlName="frequency" [inputId]="frequence.value" />
                         <label [for]="frequence.value" class="ml-2">{{ frequence.label }}</label>
                     </div>

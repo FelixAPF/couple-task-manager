@@ -33,10 +33,21 @@ export enum Assignee {
     Felix = "Felix", Camille = "Camille"
 }
 
+export interface BasicTaskAssignmentRqst {
+    taskId: number;
+    assignee: Assignee;
+}
+
 export interface PeriodCreationRequest {
     periodId?: number | null;
     duration: Frequency;
     startDate: Date;
+    explicitDueDate?: Date | null;
     creationMethod: CreationMethod;
-    taskIds: number[];
+    taskAssignmentRqst: BasicTaskAssignmentRqst[];
+    createEachTaskOnce?: boolean;
+}
+
+export enum DurationType {
+    PERIOD, EXPLICIT
 }

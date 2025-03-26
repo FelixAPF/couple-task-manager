@@ -1,6 +1,10 @@
 <div class="flex flex-col min-h-screen">
   <app-navbar></app-navbar>
-  <div class="flex-grow">
+  <div
+    class="flex-grow transition-transform duration-300 ease-in-out"
+    [style.transform]="swipeTransform"
+    (swipe)="swipeNavigation($event)"
+  >
     <router-outlet></router-outlet>
   </div>
   <app-footer-navbar></app-footer-navbar>

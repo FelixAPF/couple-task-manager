@@ -4,6 +4,7 @@ import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
+import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.repository.ITaskPeriodRepository;
@@ -50,6 +51,24 @@ public class TaskService implements IGenericService<Task> {
     @Override
     @Transactional
     public void delete(Long id) {
+        Optional<Task> taskOptional = taskRepository.findById(id);
+        if (taskOptional.isEmpty()) return;
+        Task taskToDelete = taskOptional.get();
+
+        // Delete TaskAssignments associated with the Task
+        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByTaskId(id);
+        taskAssignmentRepository.deleteAll(taskAssignments);
+
+        // Remove the Task from TaskLists
+        List<TaskList> taskLists = taskListRepository.findAll();
+        for (TaskList taskList : taskLists) {
+            if (taskList.getTasks().contains(taskToDelete)) {
+                taskList.getTasks().remove(taskToDelete);
+                taskListRepository.save(taskList);
+            }
+        }
+
+        // Finally, delete the Task
         taskRepository.deleteById(id);
     }
 

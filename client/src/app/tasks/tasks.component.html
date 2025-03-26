@@ -3,7 +3,7 @@
 
   <p-card>
 
-    <p-button routerLink="add-task" class="float-right create-button">Ajouter</p-button>
+    <p-button (onClick)="openNewTaskDialog()" class="float-right create-button">Ajouter</p-button>
     <h2>Gérer les tâches</h2>
     
     <div>
@@ -33,12 +33,14 @@
               <td>
                 <div class="card flex justify-center flex-wrap gap-4">
                   <p-toast></p-toast>
-                  <p-splitbutton appendTo="body" label="Supprimer" (onClick)="delete(element.id)" [model]="items(element)" severity="danger" />
+                  <p-splitbutton appendTo="body" label="Supprimer" (onClick)="delete($event, element.id)" [model]="items(element)" severity="danger" />
                 </div>
              </td>
           </tr>
       </ng-template>
     </p-table>
     </div>
+    <p-toast />
+    <p-confirmdialog />
   </p-card>
 </div>

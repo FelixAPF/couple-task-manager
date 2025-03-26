@@ -4,6 +4,7 @@ import { TaskService } from './service/task-service.service';
 import { SharedModule } from "../app/shared.module"
 import { NavbarComponent } from './header/navbar/navbar.component';
 import { TranslateService } from '@ngx-translate/core';
+import { PrimeNG } from 'primeng/config';
 
 @Component({
   selector: 'app-root',
@@ -14,10 +15,11 @@ import { TranslateService } from '@ngx-translate/core';
 export class AppComponent implements OnInit {
   title = 'client';
 
-  constructor(private translate: TranslateService){
+  constructor(private translate: TranslateService, private primeng: PrimeNG){
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');
+    this.primeng.ripple.set(true);
   }
 
   ngOnInit(): void {

@@ -1,41 +1,63 @@
 
 
 <div class="container">
-
-    <p-card>
-        <div>
-            <H3>{{idFormControl?.value === null ? 'Ajouter' : 'Modifier'}} une tâche</H3>
-        </div>
-        <div>
-            <form [formGroup]="formGroup" class="form-container" (submit)="save()">
-                <div>
-                <mat-form-field class="d-block input-width">
-                    <mat-label>Tâche</mat-label>
-                    <input matInput formControlName="title">
-                </mat-form-field>
-                
-                <mat-form-field class="d-block input-width">
-                    <mat-label>Descrption</mat-label>
-                    <input matInput formControlName="description">
-                </mat-form-field>
-                </div>
-
-                <div>
-                    <div *ngFor="let frequence of frequencies">
-                        <p-radiobutton name="frequency" [value]="frequence.value" size="large" formControlName="frequency" [inputId]="frequence.value" />
-                        <label [for]="frequence.value" class="ml-2">{{ frequence.label }}</label>
-                    </div>
-                </div>                
-                
-                <div class="flex flex-wrap gap-4">
-                    <p-select [options]="rooms" class="input-width" optionValue="value" optionLabel="label" formControlName="room"></p-select>
-                </div>
+    <div>
+        <form [formGroup]="formGroup" class="form-container" (submit)="save()">
+            <div>
+            <mat-form-field class="d-block input-width">
+                <mat-label>Tâche</mat-label>
+                <input matInput formControlName="title">
+            </mat-form-field>
             
-                <div class="button-space">
-                    <p-button type="submit" class="submit-button">Sauvegarder</p-button>
-                    <p-button routerLink=".." class="submit-button" severity="secondary">Annuler</p-button>
-                </div>
-            </form>
-        </div>
-    </p-card>
+            <mat-form-field class="d-block input-width">
+                <mat-label>Descrption</mat-label>
+                <input matInput formControlName="description">
+            </mat-form-field>
+            </div>
+
+            <div>
+                <!-- <div>
+                    <div *ngFor="let frequence of frequencies; let i = index">
+                        <p-radiobutton name="frequency" [value]="frequence.value" formControlName="frequency" [inputId]="'frequence-' + i" />
+                        <label [for]="'frequence-' + i">{{ frequence.label }}</label>
+                    </div>
+                </div>      -->
+                <div>
+                    <div>
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.DAILY" formControlName="frequency" [inputId]="FREQUENCY.DAILY" />
+                        <label [for]="FREQUENCY.DAILY">Quotidien</label>
+                    </div>
+                    <div>
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.WEEKLY" formControlName="frequency" [inputId]="FREQUENCY.WEEKLY" />
+                        <label [for]="FREQUENCY.WEEKLY">Hebdomadaire</label>
+                    </div>
+                    <div>
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIWEEKLY" formControlName="frequency" [inputId]="FREQUENCY.BIWEEKLY" />
+                        <label [for]="FREQUENCY.BIWEEKLY">Bi-mensuel</label>
+                    </div>
+                    <div>
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.MONTHLY" formControlName="frequency" [inputId]="FREQUENCY.MONTHLY" />
+                        <label [for]="FREQUENCY.MONTHLY">Mensuel</label>
+                    </div>
+                    <div>
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIYEARLY" formControlName="frequency" [inputId]="FREQUENCY.BIYEARLY" />
+                        <label [for]="FREQUENCY.BIYEARLY">Bi-annuel</label>
+                    </div>
+                    <div>
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.YEARLY" formControlName="frequency" [inputId]="FREQUENCY.YEARLY" />
+                        <label [for]="FREQUENCY.YEARLY">Annuel</label>
+                    </div>
+                </div>    
+            </div>                
+            
+            <div class="flex flex-wrap gap-4">
+                <p-select [options]="rooms" appendTo="body" class="input-width" optionValue="value" optionLabel="label" formControlName="room"></p-select>
+            </div>
+        
+            <div class="button-space">
+                <p-button type="submit" class="submit-button">Sauvegarder</p-button>
+                <p-button (onClick)="close()" class="submit-button" severity="secondary">Annuler</p-button>
+            </div>
+        </form>
+    </div>
 </div>

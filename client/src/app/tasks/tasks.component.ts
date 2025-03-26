@@ -4,17 +4,19 @@ import { Task } from '../model/task';
 import { Subscription } from 'rxjs';
 import { SharedModule } from '../shared.module';
 import { MatTableDataSource } from '@angular/material/table';
-import { MenuItem, MenuItemCommandEvent, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem, MenuItemCommandEvent, MessageService } from 'primeng/api';
 import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
 import { Router } from '@angular/router';
 import { RoomPipe } from '../shared/pipes/room-pipe';
+import { AddTaskComponent } from './add-task/add-task.component';
+import { DialogService } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-tasks',
   imports: [SharedModule, FrequencyPipe, RoomPipe],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
-  providers: [MessageService]
+  providers: [ConfirmationService, MessageService, DialogService]
 })
 export class TasksComponent {
   tasks: Task[] = [];
@@ -23,7 +25,7 @@ export class TasksComponent {
   displayedColumns = [ "title", "description", "delete"]
   dataSource = new MatTableDataSource<Task>();
   
-    constructor(private taskService: TaskService, private messageService: MessageService, private router: Router){
+    constructor(private taskService: TaskService, private messageService: MessageService, private router: Router, private confirmationService: ConfirmationService, private dialogService: DialogService) {
     };
 
     items(row: any) {
@@ -39,7 +41,8 @@ export class TasksComponent {
     }
 
     onModify(item: any): void {
-      this.router.navigate(['tasks/add-task'], { queryParams: { id: item.id, title: item.title, description: item.description, frequency: item.frequency, room: item.room } });
+      this.openNewTaskDialog(item);
+      //this.router.navigate(['tasks/add-task'], { queryParams: { id: item.id, title: item.title, description: item.description, frequency: item.frequency, room: item.room } });
     }
 
   
@@ -53,8 +56,52 @@ export class TasksComponent {
           this.tasks = tasks;
       }));
     }
+
+      openNewTaskDialog(task: Task | null = null){
+        console.log(task?.id);
+        const dialogRef = this.dialogService.open(AddTaskComponent, {
+          header: (task?.id === undefined ? 'Ajouter' : 'Modifier') + ' une tâche',
+          width: '40vw',
+          height: '560px',
+          dismissableMask: true,
+          modal:true,
+          breakpoints: {
+     '1199px': '75vw', '575px': '90vw'
+          },
+          data: {
+            task: task
+          }
+        });  
+        dialogRef.onClose.subscribe(() => {
+          this.retrieveTasks();
+        })
+      }
   
-    delete(id: number){
-      this.subscription.add(this.taskService.deleteTask(id).subscribe(() => this.retrieveTasks()));
+    delete(event: any, id: number){
+      this.confirmationService.confirm({
+        target: event.target as EventTarget,
+        message: 'Voulez-vous réellement supprimer la tâche? \n Cela supprimera toute assignation reliée à celle-ci.',
+        header: 'Supprimer une tâche',
+        closable: true,
+        closeOnEscape: true,
+        icon: 'pi pi-exclamation-triangle',
+        rejectButtonProps: {
+            label: 'Annuler',
+            severity: 'secondary',
+            outlined: true,
+        },
+        acceptButtonProps: {
+            label: 'Supprimer',
+            severity: 'danger',
+        },
+        accept: () => {
+          this.subscription.add(this.taskService.deleteTask(id).subscribe(() => { 
+            this.retrieveTasks() 
+            this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'La tâche a bien été supprimée' });
+          }));
+        },
+        reject: () => {
+        },
+    });
     }
 }

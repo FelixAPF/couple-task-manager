@@ -27,6 +27,7 @@ import { MessageModule } from 'primeng/message';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import {TranslateModule} from "@ngx-translate/core";
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 
 
@@ -38,8 +39,8 @@ import { RouterModule } from '@angular/router';
 @NgModule({
   declarations: [],
   imports: [
-    CommonModule, MessageModule, TranslateModule,IconField,InputIcon, SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule,  MatRadioModule,MatFormFieldModule, MatDatepickerModule,MatStepperModule
+    CommonModule, MessageModule, ConfirmDialogModule, TranslateModule,IconField,InputIcon, SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule,  MatRadioModule,MatFormFieldModule, MatDatepickerModule,MatStepperModule
   ],
-  exports: [CommonModule, MessageModule,TranslateModule, IconField, InputIcon,SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule, MatRadioModule,MatFormFieldModule, MatDatepickerModule, MatStepperModule]
+  exports: [CommonModule, MessageModule,TranslateModule, ConfirmDialogModule, IconField, InputIcon,SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, DynamicDialogModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, MatButtonModule, RouterModule, MatInputModule, ButtonModule, MatTableModule, MatDialogModule, MatRadioModule,MatFormFieldModule, MatDatepickerModule, MatStepperModule]
 })
 export class SharedModule { }

@@ -19,6 +19,16 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimations(),
+    providePrimeNG({
+      theme: {
+          preset: Aura,
+          options: {
+              prefix: 'p',
+              darkModeSelector: 'system',
+              cssLayer: false
+          }
+      }
+  }),
     importProvidersFrom([TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -26,10 +36,5 @@ export const appConfig: ApplicationConfig = {
         deps: [HttpClient],
       },
     })]),
-    providePrimeNG({
-      theme: {
-          preset: Aura
-      }
-  })
   ]
 };

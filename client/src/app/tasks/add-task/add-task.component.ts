@@ -8,6 +8,7 @@ import { Location } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { FrequencyPipe } from '../../shared/pipes/frequency-pipe';
 import { RoomPipe } from '../../shared/pipes/room-pipe';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 
 enum FormControlName {
   ID = 'id',
@@ -25,6 +26,10 @@ enum FormControlName {
   styleUrl: './add-task.component.scss'
 })
 export class AddTaskComponent implements OnInit {
+  display:boolean = false;
+log() {
+  this.display=true;
+}
   ROOM = Room;
   FREQUENCY = Frequency;
   fb = inject(FormBuilder);
@@ -64,34 +69,22 @@ export class AddTaskComponent implements OnInit {
   }
 
 
-  constructor(private taskService: TaskService, private router: Router, private _location: Location, private route: ActivatedRoute){
+  constructor(private taskService: TaskService, private ref: DynamicDialogRef, private config: DynamicDialogConfig, private router: Router, private _location: Location, private route: ActivatedRoute){
     this.buildFormGroup();
   }
 
   buildFormGroup(task: Task | null = null){
     this.formGroup = this.fb.group({
-      [FormControlName.ID]: [this.loadedTask?.id || null],
-      [FormControlName.TITLE]: [this.loadedTask?.title || "", [Validators.required]],
-      [FormControlName.DESCRIPTION]: [this.loadedTask?.description || "", [Validators.required]],
-      [FormControlName.FREQUENCY]: [this.loadedTask?.frequency || "", [Validators.required]],
-      [FormControlName.ROOM]: [this.loadedTask?.room || "", [Validators.required]],
+      [FormControlName.ID]: [task?.id || null],
+      [FormControlName.TITLE]: [task?.title || "", [Validators.required]],
+      [FormControlName.DESCRIPTION]: [task?.description || "", [Validators.required]],
+      [FormControlName.FREQUENCY]: [task?.frequency || "", [Validators.required]],
+      [FormControlName.ROOM]: [task?.room || "", [Validators.required]],
     })
   }
 
   ngOnInit(): void {
-    this.subscription.add(
-      this.route.queryParams.subscribe(params => {
-        this.loadedTask = {
-          title: params['title'],
-          description: params['description'],
-          id: params['id'],
-          frequency: params['frequency'],
-          room: params['room']
-        }
-
-        this.buildFormGroup(this.loadedTask);
-      })
-    )
+    this.buildFormGroup(this.config.data.task);
   }
 
   save(){
@@ -104,8 +97,11 @@ export class AddTaskComponent implements OnInit {
       room: this.roomFormControl?.value
     }
     
-    this.taskService.saveTask(task).subscribe();
-    this._location.back();
+    this.taskService.saveTask(task).subscribe(() => this.close());
+  }
+
+  close(){
+    this.ref.close();
   }
 
 }

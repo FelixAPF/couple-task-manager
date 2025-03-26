@@ -23,7 +23,7 @@ enum FormControlName {
   standalone: true,
   imports: [SharedModule, ReactiveFormsModule ],
   templateUrl: './add-task.component.html',
-  styleUrl: './add-task.component.scss'
+  styleUrl: './add-task.component.css'
 })
 export class AddTaskComponent implements OnInit {
   display:boolean = false;

@@ -15,7 +15,7 @@ import { DialogService } from 'primeng/dynamicdialog';
   selector: 'app-tasks',
   imports: [SharedModule, FrequencyPipe, RoomPipe],
   templateUrl: './tasks.component.html',
-  styleUrl: './tasks.component.scss',
+  styleUrl: './tasks.component.css',
   providers: [ConfirmationService, MessageService, DialogService]
 })
 export class TasksComponent {
@@ -62,7 +62,6 @@ export class TasksComponent {
         const dialogRef = this.dialogService.open(AddTaskComponent, {
           header: (task?.id === undefined ? 'Ajouter' : 'Modifier') + ' une tâche',
           width: '40vw',
-          height: '560px',
           dismissableMask: true,
           modal:true,
           breakpoints: {

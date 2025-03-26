@@ -1,74 +1,68 @@
-
-
-<div class="d-block">
-    <h4 class="text-center">Assigner des tâches</h4>
-
-</div>
-
-  <div class="card flex justify-center">
-    <p-stepper [(value)]="activeStep" class="basis-[40rem]">
-        <p-step-list>
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-[60rem]">
+      <h4 class="text-2xl font-semibold mb-6 text-center text-gray-800">Assigner des tâches</h4>
+  
+      <div class="card flex justify-center text-center items-center">
+        <p-stepper [(value)]="activeStep" class="w-full">
+          <p-step-list class="flex justify-around">
             <p-step [value]="1" class="flex flex-row flex-auto gap-2">
-                <ng-template #content let-activateCallback="activateCallback" let-value="value">
-                    <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
-                        <span
-                            class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
-                            [ngClass]="{
-                                'bg-primary text-primary-contrast border-primary': value <= activeStep,
-                                'border-surface': value > activeStep
-                            }"
-                        >
-                            <i class="pi pi-user"></i>
-                        </span>
-                    </button>
-                </ng-template>
+              <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
+                  <span
+                    class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
+                    [ngClass]="{
+                      'bg-blue-500 text-white border-blue-500': value <= activeStep,
+                      'border-gray-300 text-gray-600': value > activeStep
+                    }"
+                  >
+                    <i class="pi pi-user"></i>
+                  </span>
+                </button>
+              </ng-template>
             </p-step>
-
+  
             <p-step [value]="2" class="flex flex-row flex-auto gap-2">
-                <ng-template #content let-activateCallback="activateCallback" let-value="value">
-                    <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
-                        <span
-                            class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
-                            [ngClass]="{
-                                'bg-primary text-primary-contrast border-primary': value <= activeStep,
-                                'border-surface': value > activeStep
-                            }"
-                        >
-                            <i class="pi pi-star"></i>
-                        </span>
-                    </button>
-                </ng-template>
+              <ng-template #content let-activateCallback="activateCallback" let-value="value">
+                <button class="bg-transparent border-0 inline-flex flex-col gap-2" (click)="activateCallback()">
+                  <span
+                    class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
+                    [ngClass]="{
+                      'bg-blue-500 text-white border-blue-500': value <= activeStep,
+                      'border-gray-300 text-gray-600': value > activeStep
+                    }"
+                  >
+                    <i class="pi pi-star"></i>
+                  </span>
+                </button>
+              </ng-template>
             </p-step>
-        </p-step-list>
-
-        <p-step-panels>
+          </p-step-list>
+  
+          <p-step-panels>
             <p-step-panel [value]="1" [formGroup]="firstFormGroup">
-                <ng-template #content let-activateCallback="activateCallback">
-                    <div class="flex flex-wrap gap-4">
-                        <div class="flex items-center">
-                            <p-radiobutton name="assignee" [value]="ASSIGNEE.Camille" formControlName="assignee" inputId="camille" />
-                            <label for="assignee" class="ml-2">{{ASSIGNEE.Camille }}</label>
-                        </div>                    
-    
-                        <div class="flex items-center">
-                            <p-radiobutton name="assignee" [value]="ASSIGNEE.Felix" formControlName="assignee" inputId="felix" />
-                            <label for="assignee" class="ml-2">{{ASSIGNEE.Felix }}</label>
-                        </div>
-                    </div>
-                    <div class="flex pt-6 justify-end">
-                        <p-button (onClick)="createTaskList(activateCallback)" label="Next" icon="pi pi-arrow-right" iconPos="right" />
-                        <p-button (onClick)="cancel()" severity="secondary" label="Cancel"  icon="pi pi-times" iconPos="right" />
-                    </div>
-                </ng-template>
+              <ng-template #content let-activateCallback="activateCallback">
+                <div class="flex gap-4 justify-center mb-6">
+                  <div>
+                    <p-radiobutton name="assignee" [value]="ASSIGNEE.Camille" formControlName="assignee" inputId="camille" />
+                    <label for="camille" class="ml-2 text-gray-700">{{ASSIGNEE.Camille }}</label>
+                  </div>
+                  <div>
+                    <p-radiobutton name="assignee" [value]="ASSIGNEE.Felix" formControlName="assignee" inputId="felix" />
+                    <label for="felix" class="ml-2 text-gray-700">{{ASSIGNEE.Felix }}</label>
+                  </div>
+                </div>
+                <div class="flex pt-6 justify-end gap-4">
+                  <p-button (onClick)="createTaskList(activateCallback)" label="Next" icon="pi pi-arrow-right" iconPos="right" />
+                  <p-button (onClick)="cancel()" severity="secondary" label="Cancel" icon="pi pi-times" iconPos="right" />
+                </div>
+              </ng-template>
             </p-step-panel>
-
-
-            <p-step-panel [value]="2">      
-                <ng-template #content let-activateCallback="activateCallback">
-
+  
+            <p-step-panel [value]="2">
+              <ng-template #content let-activateCallback="activateCallback">
                 <div #tableContainer>
-                    <p-table
-                    class="table-resize"
+                  <p-table
+                    class="w-full"
                     [formGroup]="secondFormGroup"
                     [value]="tableData"
                     [paginator]="true"
@@ -76,45 +70,43 @@
                     [showCurrentPageReport]="true"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
                     [rowsPerPageOptions]="[10, 25, 100]"
-                    >
+                  >
                     <ng-template #header>
-                        <tr>
-                        <th style="width:30%">Titre</th>
-                        <th style="width:40%">Description</th>
-                        <th style="width:20%">Assigner</th>
-                        </tr>
+                      <tr>
+                        <th class="text-left">Titre</th>
+                        <th class="text-left">Description</th>
+                        <th class="text-center">Assigner</th>
+                      </tr>
                     </ng-template>
                     <ng-template #body let-element let-rowIndex="rowIndex">
-                        <tr>
+                      <tr>
                         <td>{{ element.title }}</td>
                         <td>{{ element.description }}</td>
-                        <td>
-                            <div class="card flex justify-center flex-wrap gap-4">
-                            <div class="flex flex-wrap gap-4">
-                                <div class="flex items-center">
-                                    <p-checkbox
-                                    name="selected-{{rowIndex}}"
-                                    value="true"
-                                    [binary]="true"
-                                    [formControl]="getFormControl(rowIndex, 'selected')"
-                                    inputId="selected-{{rowIndex}}"
-                                  />
-                                </div>
+                        <td class="text-center">
+                          <div class="flex justify-center">
+                            <div class="flex items-center">
+                              <p-checkbox
+                                name="selected-{{rowIndex}}"
+                                value="true"
+                                [binary]="true"
+                                [formControl]="getFormControl(rowIndex, 'selected')"
+                                inputId="selected-{{rowIndex}}"
+                              />
                             </div>
-                            </div>
+                          </div>
                         </td>
-                        </tr>
+                      </tr>
                     </ng-template>
-                    </p-table>
+                  </p-table>
                 </div>
-                <div class="flex pt-6 justify-end">
-                    <p-button (onClick)="submit()" label="Soumettre"></p-button>
-                    <p-button (onClick)="cancel()" severity="secondary" label="Cancel"  icon="pi pi-times" iconPos="right" />
+                <div class="flex pt-6 justify-end gap-4">
+                  <p-button (onClick)="submit()" label="Soumettre" />
+                  <p-button (onClick)="cancel()" severity="secondary" label="Cancel" icon="pi pi-times" iconPos="right" />
                 </div>
-                </ng-template>
-                
+              </ng-template>
             </p-step-panel>
-        </p-step-panels>
-    </p-stepper>
-    
-</div>
+          </p-step-panels>
+        </p-stepper>
+      </div>
+    </div>
+  </div>

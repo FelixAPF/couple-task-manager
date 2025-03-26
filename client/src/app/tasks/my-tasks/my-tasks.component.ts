@@ -22,7 +22,7 @@ enum FormControlName {
   selector: 'app-my-tasks',
   imports: [SharedModule, ReactiveFormsModule, RoomPipe, InputTextModule],
   templateUrl: './my-tasks.component.html',
-  styleUrl: './my-tasks.component.scss',
+  styleUrl: './my-tasks.component.css',
   providers: [DialogService,   {provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {dateFormat: 'longDate', locale: 'fr'}}]
 })
 export class MyTasksComponent implements OnInit {
@@ -70,7 +70,6 @@ export class MyTasksComponent implements OnInit {
     const dialogRef = this.dialog.open(CreatePeriodDialogComponent, {
       header: 'Créer une période de tâches',
       width: '30vw',
-      height: '720px',
       dismissableMask: true,
       modal:true,
       breakpoints: {

@@ -1,6 +1,6 @@
 
 
-<div class="container">
+<div class="container flex flex-col gap-6 w-full sm:w-auto">
     <div>
         <form [formGroup]="formGroup" class="form-container" (submit)="save()">
             <div>
@@ -13,16 +13,22 @@
                 <mat-label>Descrption</mat-label>
                 <input matInput formControlName="description">
             </mat-form-field>
+            </div>     
+            
+            <label for="room" class="block font-semibold mb-2">Pièce</label>
+            <div class="flex flex-wrap gap-4">
+                <p-select [options]="rooms" id="room" appendTo="body" class="input-width block" optionValue="value" optionLabel="label" formControlName="room"></p-select>
             </div>
 
             <div>
-                <!-- <div>
-                    <div *ngFor="let frequence of frequencies; let i = index">
+                <!-- <div *ngFor="let frequence of frequencies; let i = index">
+                    <div>
                         <p-radiobutton name="frequency" [value]="frequence.value" formControlName="frequency" [inputId]="'frequence-' + i" />
                         <label [for]="'frequence-' + i">{{ frequence.label }}</label>
                     </div>
                 </div>      -->
-                <div>
+                <label for="frequency" class="block font-semibold mb-2">Fréquence</label>
+                <div id="frequency">
                     <div>
                         <p-radiobutton name="frequency" [value]="FREQUENCY.DAILY" formControlName="frequency" [inputId]="FREQUENCY.DAILY" />
                         <label [for]="FREQUENCY.DAILY">Quotidien</label>
@@ -48,11 +54,7 @@
                         <label [for]="FREQUENCY.YEARLY">Annuel</label>
                     </div>
                 </div>    
-            </div>                
-            
-            <div class="flex flex-wrap gap-4">
-                <p-select [options]="rooms" appendTo="body" class="input-width" optionValue="value" optionLabel="label" formControlName="room"></p-select>
-            </div>
+            </div>           
         
             <div class="button-space">
                 <p-button type="submit" class="submit-button">Sauvegarder</p-button>

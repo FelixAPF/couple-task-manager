@@ -15,7 +15,7 @@ import { AssigneeTaskListComponent } from "./assignee-task-list/assignee-task-li
   selector: 'app-split-task',
   imports: [SharedModule, AssigneeTaskListComponent],
   templateUrl: './split-task.component.html',
-  styleUrl: './split-task.component.scss',
+  styleUrl: './split-task.component.css',
   providers:[DialogService]
 })
 export class SplitTaskComponent implements OnInit {
@@ -55,7 +55,7 @@ export class SplitTaskComponent implements OnInit {
 
   create(){
     const dialogRef = this.dialog.open(TaskAssignmentDialogComponent, {
-      width: '50vw',
+      width: '20vw',
       dismissableMask: true,
       modal:true,
       breakpoints: {

@@ -7,7 +7,7 @@ import { SharedModule } from '../shared.module';
   selector: 'app-warning-tasks-due',
   imports: [SharedModule],
   templateUrl: './warning-tasks-due.component.html',
-  styleUrl: './warning-tasks-due.component.scss'
+  styleUrl: './warning-tasks-due.component.css'
 })
 export class WarningTasksDueComponent implements OnInit {
   @Input() expiredTasks: TaskWithCompletedDate[] = [];

@@ -8,7 +8,7 @@ import { RoomPipe } from '../../../shared/pipes/room-pipe';
   selector: 'app-assignee-task-list',
   imports: [SharedModule, RoomPipe],
   templateUrl: './assignee-task-list.component.html',
-  styleUrl: './assignee-task-list.component.scss'
+  styleUrl: './assignee-task-list.component.css'
 })
 export class AssigneeTaskListComponent {
   @Input() taskList: TaskList | undefined;

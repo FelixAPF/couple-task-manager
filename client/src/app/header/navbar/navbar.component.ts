@@ -7,14 +7,19 @@ import { TranslateService } from '@ngx-translate/core';
   selector: 'app-navbar',
   imports: [SharedModule],
   templateUrl: './navbar.component.html',
-  styleUrl: './navbar.component.scss'
+  styleUrl: './navbar.component.css'
 })
 export class NavbarComponent {
+  isMenuOpen = false;
 
   constructor(private router: Router, private translate: TranslateService){}
 
   useLanguage(language: string): void {
     this.translate.use(language);
+  }
+
+toggleMenu(): void {
+  this.isMenuOpen = !this.isMenuOpen;
 }
 
 }

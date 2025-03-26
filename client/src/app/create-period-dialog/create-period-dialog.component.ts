@@ -39,7 +39,7 @@ interface TaskWithAssignee {
   selector: 'app-create-period-dialog',
   imports: [SharedModule, ReactiveFormsModule],
   templateUrl: './create-period-dialog.component.html',
-  styleUrl: './create-period-dialog.component.scss',
+  styleUrl: './create-period-dialog.component.css',
   providers: [DatePipe]
 })
 export class CreatePeriodDialogComponent implements OnInit {

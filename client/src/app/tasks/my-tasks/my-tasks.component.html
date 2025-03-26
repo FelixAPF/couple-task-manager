@@ -1,15 +1,28 @@
-
-<div>
-        <div class="float-right d-block" [formGroup]="formGroup">
-            <p-select class="input-width" [formControlName]="DISPLAY_DURATION.DISPLAY_DURATION" (onChange)="onChange($event)" label="Affichage du" [options]="options" optionValue="value" optionLabel="label"></p-select>
-        </div>
-    <div class="d-flex text-center full-width item-center">
-        <h2 class="full-width">Mes tâches - {{selectedAssignee}} <i class="pi pi-users hover ml-8px" (click)="changeUser()"  style="font-size: 2rem"></i>
-        </h2>
+<div class="flex flex-col flex-grow">
+    <div class="flex justify-end gap-2" [formGroup]="formGroup">
+      <p-button (click)="startNewPeriod()" class="create-button">Débuter une période de tâches</p-button>
+      <p-select
+        class="input-width"
+        [formControlName]="DISPLAY_DURATION.DISPLAY_DURATION"
+        (onChange)="onChange($event)"
+        label="Affichage du"
+        [options]="options"
+        optionValue="value"
+        optionLabel="label"
+      ></p-select>
     </div>
-    
-    <div class="mt-4">
-        <p-table
+    <div class="flex justify-center items-center">
+      <label for="icon" class="font-semibold text-2xl mb-2">Mes tâches - {{ selectedAssignee }}</label>
+      <i
+        id="icon"
+        class="pi pi-users hover ml-8px"
+        (click)="changeUser()"
+        style="font-size: 2rem"
+      ></i>
+    </div>
+  
+    <div class="mt-4 flex flex-col flex-grow">
+      <p-table
         [value]="tasks"
         [paginator]="true"
         [rows]="10"
@@ -18,33 +31,35 @@
         responsiveLayout="scroll"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         [rowsPerPageOptions]="[10, 25, 50]"
-    >
+        class="flex-grow"
+      >
         <ng-template #header>
-            <tr>
-                <th style="width:5%">Alerte</th>
-                <th style="width:15%">Deadline</th>
-                <th style="width:10%">Pièce</th>
-                <th style="width:30%">Titre</th>
-                <th style="width:25%">Description</th>
-                <th style="width:15%">Compléter</th>
-            </tr>
+          <tr>
+            <th style="width: 5%">Alerte</th>
+            <th style="width: 15%">Deadline</th>
+            <th style="width: 10%">Pièce</th>
+            <th style="width: 30%">Titre</th>
+            <th style="width: 25%">Description</th>
+            <th style="width: 15%">Compléter</th>
+          </tr>
         </ng-template>
         <ng-template #body let-element>
-            <tr [ngClass]="{'highlight-due': datePastDeadline(element.dueDate) }">
-                <td *ngIf="datePastDeadline(element.dueDate) else alert"><i class="pi pi-exclamation-triangle" style="font-size: 1.5rem; color: darkred;"> </i></td>
-                <ng-template #alert>
-                    <td></td>
-                </ng-template>  
-                <td>{{ element.dueDate | date }}</td>
-                <td>{{ element?.room | roomPipe }}</td>
-                <td>{{ element.taskTitle }} </td>
-                <td>{{ element.taskDescription }}</td>
-                <td class="text-center" (click)="completeTask(element)"><i class="pi pi-check-circle hover" style="font-size: 1.5rem"></i></td>
-            </tr>
+          <tr [ngClass]="{ 'highlight-due': datePastDeadline(element.dueDate) }">
+            <td *ngIf="datePastDeadline(element.dueDate) else alert">
+              <i class="pi pi-exclamation-triangle" style="font-size: 1.5rem; color: darkred;"> </i>
+            </td>
+            <ng-template #alert>
+              <td></td>
+            </ng-template>
+            <td>{{ element.dueDate | date }}</td>
+            <td>{{ element?.room | roomPipe }}</td>
+            <td>{{ element.taskTitle }}</td>
+            <td>{{ element.taskDescription }}</td>
+            <td class="text-center" (click)="completeTask(element)">
+              <i class="pi pi-check-circle hover" style="font-size: 1.5rem"></i>
+            </td>
+          </tr>
         </ng-template>
-    </p-table>
+      </p-table>
     </div>
-    <div class="d-flex float-right">
-        <p-button (click)="startNewPeriod()" class="create-button float-right">Débuter une période de tâches</p-button>
-    </div>
-</div>
+  </div>

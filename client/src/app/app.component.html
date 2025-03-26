@@ -1,4 +1,7 @@
-<div>
+<div class="flex flex-col min-h-screen">
   <app-navbar></app-navbar>
-  <router-outlet></router-outlet>
+  <div class="flex-grow">
+    <router-outlet></router-outlet>
+  </div>
+  <app-footer-navbar></app-footer-navbar>
 </div>

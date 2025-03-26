@@ -1,36 +1,38 @@
-<div>
-    <h2>{{title}}</h2>
-
+<div class="flex flex-col flex-grow">
+    <h2>{{ title }}</h2>
+  
     <p-table
-    [value]="taskList?.tasks|| []"
-    [paginator]="true"
-    [rows]="10"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-    [rowsPerPageOptions]="[10, 25, 50]"
+      [value]="taskList?.tasks || []"
+      [paginator]="true"
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      class="flex-grow"
     >
-        <ng-template #header>
-            <tr>
-                <th style="width:30%">Titre</th>
-                <th style="width:40%">Description</th>
-                <th style="width:10%">Pièce</th>
-                <th style="width:10%">Désassigner</th>
-            </tr>
-        </ng-template>
-        <ng-template #body let-element>
-            <tr>
-                <td>{{ element.title }}</td>
-                <td>{{ element.description }}</td>
-                <td>{{ element.room | roomPipe }}</td>
-                <td><p-button (onClick)="unassign(element)" severity="warn" label="Désassigner"></p-button></td>
-            </tr>
-        </ng-template>
-        
-        <ng-template pTemplate="emptymessage">
-            <tr>
-                <td></td>
-                <td>Aucune tâche</td>
-            </tr>
-        </ng-template>
+      <ng-template #header>
+        <tr>
+          <th style="width: 30%">Titre</th>
+          <th style="width: 40%">Description</th>
+          <th style="width: 10%">Pièce</th>
+          <th style="width: 10%">Désassigner</th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-element>
+        <tr>
+          <td>{{ element.title }}</td>
+          <td>{{ element.description }}</td>
+          <td>{{ element.room | roomPipe }}</td>
+          <td><p-button (onClick)="unassign(element)" severity="warn" label="Désassigner"></p-button></td>
+        </tr>
+      </ng-template>
+  
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td></td>
+          <td>Aucune tâche</td>
+        </tr>
+      </ng-template>
     </p-table>
-</div>
+    <div class="pb-12"></div>
+  </div>

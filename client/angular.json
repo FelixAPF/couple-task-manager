@@ -7,7 +7,7 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss",
+          "style": "css",
           "module": "src/app/shared/shared.module.ts"
         }
       },
@@ -26,7 +26,7 @@
               "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
-            "inlineStyleLanguage": "scss",
+            "inlineStyleLanguage": "css",
             "assets": [
               {
                 "glob": "**/*",
@@ -35,7 +35,7 @@
             ],
             "styles": [
               "@angular/material/prebuilt-themes/azure-blue.css",
-              "src/styles.scss"
+              "src/styles.css"
             ],
             "scripts": []
           },
@@ -99,7 +99,7 @@
               "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.spec.json",
-            "inlineStyleLanguage": "scss",
+            "inlineStyleLanguage": "css",
             "assets": [
               {
                 "glob": "**/*",
@@ -108,7 +108,7 @@
             ],
             "styles": [
               "@angular/material/prebuilt-themes/azure-blue.css",
-              "src/styles.scss"
+              "src/styles.css"
             ],
             "scripts": []
           }

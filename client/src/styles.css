@@ -1,5 +1,7 @@
 @import '../node_modules/primeicons/primeicons.css';
-
+@import "tailwindcss";
+@import "tailwindcss";
+@import "tailwindcss-primeui";
 /* You can add global styles to this file, and also import other style files */
 html, body {
     margin: 0;
@@ -7,10 +9,6 @@ html, body {
   }
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
-
-.d-flex{
-    display: flex;
-}
 
 .d-block{
     display: block;

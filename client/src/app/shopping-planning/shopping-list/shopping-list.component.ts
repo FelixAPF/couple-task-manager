@@ -5,7 +5,7 @@ import { SharedModule } from '../../shared.module';
   selector: 'app-shopping-list',
   imports: [SharedModule],
   templateUrl: './shopping-list.component.html',
-  styleUrl: './shopping-list.component.scss'
+  styleUrl: './shopping-list.component.css'
 })
 export class ShoppingListComponent {
 

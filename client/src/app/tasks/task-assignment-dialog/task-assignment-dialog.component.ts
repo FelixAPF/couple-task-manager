@@ -29,7 +29,7 @@ enum AssignmentRow {
   selector: 'app-task-assignment-dialog',
   imports: [SharedModule, ReactiveFormsModule],
   templateUrl: './task-assignment-dialog.component.html',
-  styleUrl: './task-assignment-dialog.component.scss',
+  styleUrl: './task-assignment-dialog.component.css',
   providers: [ provideNativeDateAdapter() ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -1,8 +1,9 @@
-<div class="nav-container">
-    <a mat-button [routerLink]="'dashboard'">Dashboard</a>    
-    <a mat-button [routerLink]="'tasks'">Tâches</a>
-    <a mat-button [routerLink]="'split'">Répartition</a>
-    <a mat-button [routerLink]="'shopping-list'" *ngIf="false">À acheter</a>
-</div>
-
-<div class="spacer"></div>
+<nav class="bg-white shadow-md h-16 flex items-center px-6 lg:px-20 sm:flex hidden">
+    <div class="flex items-center space-x-4">
+      <a mat-button [routerLink]="'dashboard'" class="text-gray-700 hover:text-blue-500 font-medium">Dashboard</a>
+      <a mat-button [routerLink]="'tasks'" class="text-gray-700 hover:text-blue-500 font-medium">Tâches</a>
+      <a mat-button [routerLink]="'split'" class="text-gray-700 hover:text-blue-500 font-medium">Répartition</a>
+    </div>
+  </nav>
+  
+  <div class="border-b border-gray-200"></div>

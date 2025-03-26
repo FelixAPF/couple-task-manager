@@ -1,0 +1,19 @@
+.task{
+    background-color: aquamarine;
+}
+
+/* Example CSS for your dialog */
+.p-dialog-content {
+    width: 100%; /* Make dialog content fill dialog */
+    height: 100%; /* Make dialog content fill dialog */
+  }
+  
+  .p-dialog-content .p-table {
+    width: 100%; /* Make table fill its container */
+  }
+  
+  /* Optional: If you need to adjust column widths */
+  .p-table th,
+  .p-table td {
+    box-sizing: border-box; /* Include padding and border in width calculations */
+  }

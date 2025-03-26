@@ -93,7 +93,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
                     .toList());
         } else {
             taskAssignments.addAll(StreamUtils.ofNullable(rqst.getTaskAssignmentRqst())
-                    .flatMap(task -> occurenceInPeriod(startDate, periodEndDate, taskMap.get(task.getTaskId()).getFrequency()).stream()
+                    .flatMap(task -> occurenceButAtLeastOne(startDate, periodEndDate, taskMap.get(task.getTaskId()).getFrequency()).stream()
                             .map(dueDate -> map(taskMap.get(task.getTaskId()), taskPeriod,  task.getAssignee(), dueDate, startDate, rqst.getExplicitDueDate())))
                     .toList());
         }
@@ -162,6 +162,15 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
             if(currentDate.after(periodEndDate)) break;
             dates.add(currentDate);
         }
+        return dates;
+    }
+
+    private List<Date> occurenceButAtLeastOne(Date startDate, Date periodEndDate, Frequency frequency){
+        List<Date> dates = occurenceInPeriod(startDate, periodEndDate, frequency);
+        if(!dates.isEmpty()) return dates;
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, frequency.getDaysAmount());
+        dates.add(calendar.getTime());
         return dates;
     }
 

@@ -96,7 +96,7 @@ log() {
       frequency: this.frequencyFormControl?.value,
       room: this.roomFormControl?.value
     }
-    
+
     this.taskService.saveTask(task).subscribe(() => this.close());
   }
 

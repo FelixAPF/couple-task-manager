@@ -93,7 +93,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
                     .toList());
         } else {
             taskAssignments.addAll(StreamUtils.ofNullable(rqst.getTaskAssignmentRqst())
-                    .flatMap(task -> occurenceButAtLeastOne(startDate, periodEndDate, taskMap.get(task.getTaskId()).getFrequency()).stream()
+                    .flatMap(task -> occurenceButAtLeastOne(startDate, periodEndDate, rqst.getExplicitDueDate(), taskMap.get(task.getTaskId()).getFrequency()).stream()
                             .map(dueDate -> map(taskMap.get(task.getTaskId()), taskPeriod,  task.getAssignee(), dueDate, startDate, rqst.getExplicitDueDate())))
                     .toList());
         }
@@ -140,7 +140,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         Date startDate = rqst.getStartDate();
 
         return taskList.getTasks().stream()
-                .flatMap(task -> occurenceInPeriod(startDate, periodEndDate, task.getFrequency()).stream()
+                .flatMap(task -> occurenceInPeriod(startDate, periodEndDate, rqst.getExplicitDueDate(), task.getFrequency()).stream()
                         .map(dueDate -> map(task, taskPeriod, assignee, dueDate, startDate, rqst.getExplicitDueDate())))
                 .toList();
     }
@@ -154,10 +154,11 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         return taskPeriod;
     }
 
-    private List<Date> occurenceInPeriod(Date startDate, Date periodEndDate, Frequency frequency){
+    private List<Date> occurenceInPeriod(Date startDate, Date periodEndDate, Date explicitDate, Frequency frequency){
         List<Date> dates = new ArrayList<>();
+        Date endDate = explicitDate == null ? periodEndDate : explicitDate;
         Date currentDate = startDate;
-        while (currentDate.before(periodEndDate)) {
+        while (currentDate.before(endDate)) {
             currentDate = DateUtils.calculateDueDate(currentDate, frequency);
             if(currentDate.after(periodEndDate)) break;
             dates.add(currentDate);
@@ -165,8 +166,8 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         return dates;
     }
 
-    private List<Date> occurenceButAtLeastOne(Date startDate, Date periodEndDate, Frequency frequency){
-        List<Date> dates = occurenceInPeriod(startDate, periodEndDate, frequency);
+    private List<Date> occurenceButAtLeastOne(Date startDate, Date periodEndDate, Date explicitEndDate, Frequency frequency){
+        List<Date> dates = occurenceInPeriod(startDate, periodEndDate, explicitEndDate, frequency);
         if(!dates.isEmpty()) return dates;
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, frequency.getDaysAmount());

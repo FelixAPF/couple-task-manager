@@ -9,16 +9,16 @@
             <p-step-panel [value]="1">
                 <ng-template #content let-activateCallback="activateCallback">
                     <form [formGroup]="formGroup">
-                        <div class="d-block">
+                        <div class="d-block gap-4">
                             <p-select [options]="taskPeriods"  class="input-width" optionValue="value" optionLabel="label" (onChange)="disableOtherFields($event)" placeholder="Choisir une période existante" formControlName="taskPeriod"></p-select>
                         </div>
                         <div>
-                            <h5>Date début de période:</h5>
+                            <p class="font-semibold">Date début de période:</p>
                             <p-datepicker appendTo="body" size="large" class="dp-margin" placeholder="Date de début"formControlName="startDate" showIcon iconDisplay="input" />
                         </div>
-                        <div class="flex flex-wrap gap-4 d-block">
+                        <div class="flex flex-wrap gap-8 d-block">
                         
-                            <h5>Durée de la période:</h5>
+                            <p class="font-semibold">Durée de la période:</p>
                             <div class="mb-8">
                                 <p-checkbox formControlName="durationType" [binary]="true" inputId="periodType" /> 
                                 <label for="weekly" class="ml-2">Choisir un deadline fixe</label>
@@ -53,8 +53,8 @@
                             </ng-template>
                         </div>
                 
-                        <div class="mb-8">
-                            <h5>Méthode d'assignation des tâches</h5>
+                        <div class="mb-8 gap-8">
+                            <p class="font-semibold">Méthode d'assignation des tâches</p>
                             <div class="flex items-center">
                                 <p-radiobutton name="creationMethod" size="large" [value]="CREATION_METHOD.AUTOMATIC" formControlName="creationMethod" inputId="automatic" />
                                 <label for="automatic" class="ml-2">Automatiquement créer les tâches attitrées</label>

@@ -1,4 +1,21 @@
 
 {
-    
+    "SHOPPING_ITEM_TYPE": {
+        "COSTCO": "Costco",
+        "SUPER_C": "Super C",
+        "MAXI": "Maxi",
+        "IGA": "IGA",
+        "METRO": "Metro",
+        "SAQ": "SAQ",
+        "CINQ_SAVEUR": "5 saveurs",
+        "TERRE_ET_OCEAN": "Terre et ocean",
+        "PROVIGO": "Provigo",
+        "MAYRAND": "Mayrand",
+        "RESTAURANT": "Restaurant",
+        "WALMART": "Walmart",
+        "DOLLARAMA": "Dollarama",
+        "AMAZON": "Amazon",
+        "MUNCHIZ": "Munchiz",
+        "AUTRE": "Autre"
+    }    
 }

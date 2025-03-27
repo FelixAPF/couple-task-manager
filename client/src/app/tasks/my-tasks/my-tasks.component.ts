@@ -14,6 +14,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { RoomPipe } from '../../shared/pipes/room-pipe';
 import { InputTextModule } from 'primeng/inputtext';
 import { DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
+import { QuickCompleteTaskComponent } from '../quick-complete-task/quick-complete-task.component';
 
 enum FormControlName {
   DISPLAY_DURATION = 'displayDuration'
@@ -59,11 +60,27 @@ export class MyTasksComponent implements OnInit {
   }
 
   completeTask(element: any){
+    this.taskService.quickComplete(13, Assignee.Camille).subscribe();
     this.subscription.add(this.taskService.completeTask(element.id).subscribe(() => {
       this.retrieveTaskByAssignee();
       this.taskCompleteEmitter.emit(element.taskId);
     }));
 
+  }
+
+  quickComplete(){
+    const dialogRef = this.dialog.open(QuickCompleteTaskComponent, {
+      header: 'Ajouter une tâche complétée',
+      width: '30vw',
+      dismissableMask: true,
+      modal:true,
+      breakpoints: {
+ '1199px': '75vw', '575px': '90vw'
+      },
+    });  
+    dialogRef.onClose.subscribe(() => {
+      this.retrieveTaskByAssignee();
+    })
   }
 
   startNewPeriod(){

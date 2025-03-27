@@ -1,0 +1,43 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { environment } from '../environment';
+import { TaskList, TaskListRequest } from '../model/task-list';
+import { Assignee } from '../model/task-period';
+import { ShoppingItem } from '../model/shopping-item';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ShoppingService {
+  readonly baseUrl: string = `${environment.apiUrl}shopping-list`;
+  constructor(private http: HttpClient) { }
+
+
+  retrieveShoppingItem(id: number): Observable<ShoppingItem> {
+    return this.http.get<ShoppingItem>(`${this.baseUrl}/${id}`);
+  }
+
+  retrieveShoppingList(): Observable<ShoppingItem[]> {
+    return this.http.get<ShoppingItem[]>(this.baseUrl);
+  }
+  retrieveShoppingListNotBought(): Observable<ShoppingItem[]> {
+    return this.http.get<ShoppingItem[]>(`${this.baseUrl}/not-bought`);
+  }
+
+  addShoppingItem(taskList: ShoppingItem): Observable<void>{
+    return this.http.post<void>(this.baseUrl, taskList);
+  }
+
+  deleteTaskList(shoppingItemId: number): Observable<ShoppingItem>{
+    return this.http.delete<ShoppingItem>(`${this.baseUrl}/${shoppingItemId}`);
+  }
+
+  updateShoppingList(shoppingItem: ShoppingItem): Observable<ShoppingItem>{
+    return this.http.put<ShoppingItem>(`${this.baseUrl}/${shoppingItem.id}`, shoppingItem);
+  }
+
+  listNameSuggestions(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.baseUrl}/name/suggestions`)
+  }
+}

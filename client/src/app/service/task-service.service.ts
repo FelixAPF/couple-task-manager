@@ -16,6 +16,10 @@ export class TaskService implements OnDestroy {
   tasks: Observable<Task[]> = of([]);
 
   
+  getTaskAssignmentsByDate(completedDate: Date) {
+    return this.http.get<TaskAssignment[]>(`${this.baseUrl}/by-date/${completedDate}`);
+  }
+  
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
@@ -56,6 +60,10 @@ export class TaskService implements OnDestroy {
     const options = { params: new HttpParams().set('frequency', frequency) };
     const dueDate = addTimeToCurrentDate(new Date(), 0, 0, 1);
     return this.http.get<TaskAssignmentDto[]>(`${this.baseUrl}/by-assignee/${assignee}/${dueDate}`, options);
+  }
+
+  quickComplete(taskId: number, assignee: Assignee): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assignee }));
   }
   
 }

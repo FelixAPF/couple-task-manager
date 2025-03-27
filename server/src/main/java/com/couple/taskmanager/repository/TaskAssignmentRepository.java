@@ -23,6 +23,9 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     @Query("SELECT ta FROM TaskAssignment ta JOIN FETCH ta.taskPeriod WHERE ta.completed = false AND ta.assignee = :assignee AND ta.dueDate <= :dueDateInMonth")
     List<TaskAssignment> findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee assignee, Date dueDateInMonth);
 
+    @Query("SELECT ta FROM TaskAssignment ta WHERE ta.completed = true AND DATE(ta.completedDate) = DATE(:completedDate)")
+    List<TaskAssignment> findAllByCompletedTrueAndCompletedDateSameDay(Date completedDate);
+
     @Modifying
     @Transactional
     @Query("UPDATE TaskAssignment ta SET ta.completed = :completed, ta.completedDate = :date WHERE ta.id = :assignmentId")

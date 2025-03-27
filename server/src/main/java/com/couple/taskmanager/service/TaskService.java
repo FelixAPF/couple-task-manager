@@ -6,6 +6,7 @@ import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.model.dto.TaskAssignmentDto;
 import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.repository.ITaskPeriodRepository;
 import com.couple.taskmanager.repository.TaskAssignmentRepository;
@@ -81,6 +82,10 @@ public class TaskService implements IGenericService<Task> {
         return taskPeriodRepository.retrieveTasksInPeriod(date);
     }
 
+    public List<TaskAssignment> retrieveTaskAssignmentsByDate(Date date){
+        return taskAssignmentRepository.findAllByCompletedTrueAndCompletedDateSameDay(date);
+    }
+
     @Transactional
     public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee, Date date, Frequency frequency){
         date.setTime(date.getTime() + (long) frequency.getDaysAmount() * 24 * 60 * 60 * 1000);
@@ -96,6 +101,21 @@ public class TaskService implements IGenericService<Task> {
         if(isTaskPeriodCompleted){
             taskPeriodRepository.markAsCompleted(taskPeriod.getId(), completionDate);
         }
+    }
+
+    public Long quickCompleteTask(Long taskId, Assignee assignee) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(IllegalArgumentException::new);
+
+        Date todayDate = new Date();
+        TaskAssignment assignment = new TaskAssignment();
+        assignment.setTask(task);
+        assignment.setAssignee(assignee);
+        assignment.setCreationDate(todayDate);
+        assignment.setCompletedDate(todayDate);
+        assignment.setCompleted(true);
+        assignment.setTaskPeriod(null);
+        return taskAssignmentRepository.save(assignment).getId();
     }
 
     public List<TaskWithCompletedDateV1> retrieveTasksNotCompletedInLongTime() {

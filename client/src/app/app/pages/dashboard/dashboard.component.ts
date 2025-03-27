@@ -4,10 +4,12 @@ import { SharedModule } from '../../../shared.module';
 import { MyTasksComponent } from '../../../tasks/my-tasks/my-tasks.component';
 import { WarningTasksDueComponent } from "../../../warning-tasks-due/warning-tasks-due.component";
 import { Task, TaskWithCompletedDate } from '../../../model/task';
+import { CompletedTasksComponent } from "../../../tasks/completed-tasks/completed-tasks.component";
+import { TaskAssignment } from '../../../model/task-period';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [SharedModule, MyTasksComponent, WarningTasksDueComponent],
+  imports: [SharedModule, MyTasksComponent, WarningTasksDueComponent, CompletedTasksComponent],
   standalone: true,
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
@@ -15,11 +17,15 @@ import { Task, TaskWithCompletedDate } from '../../../model/task';
 export class DashboardComponent {
   expiredTasks: TaskWithCompletedDate[] = [];
   tasks: Task[] = [];
+  completedTasks: TaskAssignment[] = [];
+  taskAssignments: TaskAssignment[] = [];
+  todayDate: Date = new Date();
 
   constructor(private taskService: TaskService){}
 
   ngOnInit(): void {
     this.retrieveExpiredTasks();
+    this.retrieveTaskAssignmentsByDate();
   }
 
   refreshExpiredTasks(taskId: number){ 
@@ -50,5 +56,15 @@ export class DashboardComponent {
       });
     });
   }
+
+  
+  retrieveTaskAssignmentsByDate(){
+    this.taskService.getTaskAssignmentsByDate(this.todayDate).subscribe((taskAssignments) => {
+      this.taskAssignments = taskAssignments;
+    });
+  }
+
+
+    
 
 }

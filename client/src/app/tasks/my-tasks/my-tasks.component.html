@@ -1,6 +1,7 @@
 <div class="flex flex-col flex-grow">
     <div class="flex justify-end gap-2" [formGroup]="formGroup">
       <p-button (click)="startNewPeriod()" class="create-button">Débuter une période de tâches</p-button>
+      <p-button (click)="quickComplete()" class="create-button">Quick complete</p-button>
       <p-select
         class="input-width"
         [formControlName]="DISPLAY_DURATION.DISPLAY_DURATION"

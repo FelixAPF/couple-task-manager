@@ -1,0 +1,10 @@
+<div [formGroup]="formGroup">
+    <label for="taskId">Tâche</label>
+    <div>
+        <p-select class="min-w-3xs" [options]="tasks" class="min-w-3xs" itemid="taskId" appendTo="body" formControlName="taskId" optionValue="id" optionLabel="title"></p-select>
+    </div>
+    <div>
+        <p-select class="min-w-3xs" [options]="assignees" class="min-w-3xs" itemid="taskId" appendTo="body" formControlName="assignee"></p-select>
+    </div>
+    <p-button (onClick)="quickComplete()" label="Compléter"></p-button>
+</div>

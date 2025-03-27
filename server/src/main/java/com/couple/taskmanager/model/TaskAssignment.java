@@ -25,7 +25,6 @@ public class TaskAssignment {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NonNull
     @JsonBackReference
     private TaskPeriod taskPeriod;;
 

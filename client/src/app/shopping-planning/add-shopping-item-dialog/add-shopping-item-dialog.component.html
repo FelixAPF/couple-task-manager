@@ -1,0 +1,37 @@
+
+
+<div class="container flex flex-col gap-6 w-full sm:w-auto">
+    <div>
+        <form [formGroup]="formGroup" class="form-container" (submit)="save()">
+            
+          <div class="card grid gap-4">
+            <div>
+                <label for="room" class="block font-semibold mb-2">Type d'article</label>
+                <div class="flex flex-wrap gap-4">
+                    <p-autocomplete formControlName="name" [suggestions]="filteredSuggestions" (completeMethod)="search($event)" />
+                </div>
+            </div>
+            <div>
+                <label for="room" class="block font-semibold mb-2">Type d'article</label>
+                <div class="flex flex-wrap gap-4">
+                    <p-select [options]="shoppingTypes" id="shoppingType" appendTo="body" class="input-width block min-w-3xs" optionValue="value" optionLabel="label" formControlName="type"></p-select>
+                </div>
+            </div>
+            <div>
+                <label for="room" class="block font-semibold mb-2">Magasin</label>
+                <div class="flex flex-wrap gap-4">
+                    <p-select [options]="stores" id="store" appendTo="body" class="input-width block min-w-3xs" optionValue="value" optionLabel="label" formControlName="store"></p-select>
+                </div>
+            </div>
+            
+            <div class="button-space">
+                <p-button type="submit" class="submit-button">Sauvegarder</p-button>
+                <p-button (onClick)="close()" class="submit-button" severity="secondary">Annuler</p-button>
+            </div>
+
+          </div>
+
+
+        </form>
+    </div>
+</div>

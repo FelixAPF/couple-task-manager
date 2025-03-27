@@ -48,6 +48,8 @@ export class AppComponent implements OnInit {
             this.router.navigate(['/tasks']);
           } else if (currentRoute === '/tasks') {
             this.router.navigate(['/split']);
+          } else if(currentRoute === '/split'){
+            this.router.navigate(['/shopping-list']);
           }
           this.swipeTransform = 'translateX(0)';
         }, 200); // Reduced delay
@@ -58,6 +60,8 @@ export class AppComponent implements OnInit {
             this.router.navigate(['/dashboard']);
           } else if (currentRoute === '/split') {
             this.router.navigate(['/tasks']);
+          }  else if(currentRoute === '/shopping-list'){
+            this.router.navigate(['/split']);
           }
           this.swipeTransform = 'translateX(0)';
         }, 200); // Reduced delay

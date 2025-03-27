@@ -58,7 +58,6 @@ export class TasksComponent {
     }
 
       openNewTaskDialog(task: Task | null = null){
-        console.log(task?.id);
         const dialogRef = this.dialogService.open(AddTaskComponent, {
           header: (task?.id === undefined ? 'Ajouter' : 'Modifier') + ' une tâche',
           width: '40vw',

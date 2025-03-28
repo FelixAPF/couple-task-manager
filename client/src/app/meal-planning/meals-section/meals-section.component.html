@@ -1,0 +1,4 @@
+<p>meals-section works!</p>
+<p-button [routerLink]="[{ outlets: { meals: ['meals-list'] } }]" label="Meals"></p-button>
+<p-button [routerLink]="[{ outlets: { meals: ['recipes'] } }]" label="Recipes"></p-button>
+<router-outlet name="meals"></router-outlet>

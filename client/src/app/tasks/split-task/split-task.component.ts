@@ -40,6 +40,7 @@ export class SplitTaskComponent implements OnInit {
   }
 
   unassign(value: any){
+    console.log("JUST EMITTED")
     const { element, taskList } = value;
     this.taskListService.deleteTaskList({ taskListId: taskList?.id, assignee: taskList?.assignee, taskId: element.id }).subscribe(resp => {
       switch(taskList?.assignee){

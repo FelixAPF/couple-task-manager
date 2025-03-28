@@ -38,16 +38,24 @@ export class MyTasksComponent implements OnInit {
   selectedAssignee: Assignee = Assignee.Camille;
   taskAssignments: TaskAssignment[] = [];
   today: any = new Date();
+  hideCompletedTasks: boolean = false;
+
   constructor(private taskService: TaskService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
 
 
   ngOnInit(): void {
+    this.selectedAssignee = localStorage.getItem("assignee") as Assignee;
+    if(this.selectedAssignee == null){
+      this.selectedAssignee = Assignee.Camille;
+      localStorage.setItem("assignee", this.selectedAssignee);
+    }
     this.retrieveTaskByAssignee();
   }
 
   changeUser(){
     this.selectedAssignee = this.selectedAssignee === Assignee.Camille ? Assignee.Felix : Assignee.Camille;
     this.retrieveTaskByAssignee();
+    localStorage.setItem("assignee", this.selectedAssignee);
   }
 
   retrieveTaskByAssignee(){
@@ -69,8 +77,12 @@ export class MyTasksComponent implements OnInit {
   }
 
   quickComplete(){
-    const dialogRef = this.dialog.open(QuickCompleteTaskComponent, {
-      header: 'Ajouter une tâche complétée',
+    this.openDialog('Ajouter une tâche complétée', QuickCompleteTaskComponent);
+  }
+
+  openDialog(title: string, component: any){
+    const dialogRef = this.dialog.open(component, {
+      header: title,
       width: '30vw',
       dismissableMask: true,
       modal:true,
@@ -84,18 +96,8 @@ export class MyTasksComponent implements OnInit {
   }
 
   startNewPeriod(){
-    const dialogRef = this.dialog.open(CreatePeriodDialogComponent, {
-      header: 'Créer une période de tâches',
-      width: '30vw',
-      dismissableMask: true,
-      modal:true,
-      breakpoints: {
- '1199px': '75vw', '575px': '90vw'
-      },
-    });  
-    dialogRef.onClose.subscribe(() => {
-      this.retrieveTaskByAssignee();
-    })
+    this.openDialog('Créer une nouvelle période', CreatePeriodDialogComponent);
+    
   }
 
   get options(){

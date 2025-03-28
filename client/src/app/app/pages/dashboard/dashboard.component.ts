@@ -6,26 +6,53 @@ import { WarningTasksDueComponent } from "../../../warning-tasks-due/warning-tas
 import { Task, TaskWithCompletedDate } from '../../../model/task';
 import { CompletedTasksComponent } from "../../../tasks/completed-tasks/completed-tasks.component";
 import { TaskAssignment } from '../../../model/task-period';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [SharedModule, MyTasksComponent, WarningTasksDueComponent, CompletedTasksComponent],
+  imports: [SharedModule, MyTasksComponent, WarningTasksDueComponent, CompletedTasksComponent, FormsModule],
   standalone: true,
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
+
   expiredTasks: TaskWithCompletedDate[] = [];
   tasks: Task[] = [];
   completedTasks: TaskAssignment[] = [];
   taskAssignments: TaskAssignment[] = [];
   todayDate: Date = new Date();
 
+  hideCompletedTasks: boolean = false;
+
   constructor(private taskService: TaskService){}
 
   ngOnInit(): void {
+    const storedHideCompletedTasks = localStorage.getItem("hideCompletedTasks");
+    console.log(storedHideCompletedTasks);
+    console.log(localStorage);
+    if (storedHideCompletedTasks !== null) {
+      this.hideCompletedTasks = JSON.parse(storedHideCompletedTasks);
+    }
+
+    if(!this.hideCompletedTasks) {
+      this.retrieveTaskAssignmentsByDate();
+    }
+
     this.retrieveExpiredTasks();
-    this.retrieveTaskAssignmentsByDate();
+  }
+
+  
+  
+  onHideCompletedTasks(value: any){
+    this.hideCompletedTasks = value.checked;
+    localStorage.setItem("hideCompletedTasks", this.hideCompletedTasks.toString());
+
+    if(!this.hideCompletedTasks){
+      this.retrieveTaskAssignmentsByDate();
+    } else {
+      this.taskAssignments = [];
+    }
   }
 
   refreshExpiredTasks(taskId: number){ 

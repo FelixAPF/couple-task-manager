@@ -59,4 +59,8 @@ export class QuickCompleteTaskComponent implements OnInit {
       this.ref.close(true);
     }))
   }
+
+  onCancel(){
+    this.ref.close(false);
+  }
 }

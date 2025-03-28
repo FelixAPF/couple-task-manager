@@ -1,11 +1,37 @@
-<div>
-    <p-card class="container d-block text-center" *ngIf="expiredTasks?.length">
+<div class="p-4 bg-white rounded-md shadow-md">
+    <div class="flex items-center mb-4">
+      <label for="hideCompletedTasksCB" class="mr-4 text-sm font-medium text-gray-700">
+        Cacher les tâches complétées aujourd'hui
+      </label>
+      <p-checkbox
+        inputId="hideCompletedTasksCB"
+        [(ngModel)]="hideCompletedTasks"
+        (onChange)="onHideCompletedTasks($event)"
+        [binary]="true"
+      ></p-checkbox>
+    </div>
+  
+    <p-card
+      class="mb-4"
+      *ngIf="expiredTasks?.length"
+    >
+      <div class="text-center">
         <app-warning-tasks-due [expiredTasks]="expiredTasks"></app-warning-tasks-due>
+      </div>
     </p-card>
-    <p-card class="container d-block text-center" *ngIf="taskAssignments?.length">
+  
+    <p-card
+      class="mb-4"
+      *ngIf="taskAssignments?.length"
+    >
+      <div class="text-center">
         <app-completed-tasks [taskAssignments]="taskAssignments"></app-completed-tasks>
+      </div>
     </p-card>
-    <p-card class="container d-block text-center">
+  
+    <p-card>
+      <div class="text-center">
         <app-my-tasks (taskCompleteEmitter)="refreshExpiredTasks($event)"></app-my-tasks>
+      </div>
     </p-card>
-</div>
+  </div>

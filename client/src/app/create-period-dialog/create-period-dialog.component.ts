@@ -3,11 +3,12 @@ import { SharedModule } from '../shared.module';
 import { CreationMethod, Frequency, Task } from '../model/task';
 import { FormArray, FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskPeriodService } from '../service/task-period.service';
-import { Assignee, BasicTaskAssignmentRqst, DurationType, PeriodCreationRequest, TaskPeriod } from '../model/task-period';
+import { Assignee, BasicTaskAssignmentRqst, DurationType, PeriodCreationRequest, TaskAssignment, TaskPeriod } from '../model/task-period';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DatePipe, DatePipeConfig } from '@angular/common';
 import { TaskLink } from '../model/local-model';
 import { TaskService } from '../service/task-service.service';
+import { TaskAssignmentComponent } from "../tasks/task-assignment/task-assignment.component";
 
 enum FormControlName {
   DURATION = "duration",
@@ -18,26 +19,17 @@ enum FormControlName {
   DURATION_TYPE = "durationType",
   EXPLICIT_DUE_DATE = "explicitDueDate",
   ASSIGNEE = "assignee",
-  TASK_ASSIGNMENTS = "taskAssignments",
-  CREATE_EACH_TASK_ONCE = "createEachTaskOnce"
 }
 
-enum AssignmentRow {
-  TASK_ID = "taskId",
-  TASK_TITLE = "title",
-  TASK_DESCRIPTION = "description",
-  ASSIGNEE = "assignee",
-  SELECTED = "selected",
-}
 
-interface TaskWithAssignee {
+export interface TaskWithAssignee {
   task: Task;
   assignee: Assignee | null;
 }
 
 @Component({
   selector: 'app-create-period-dialog',
-  imports: [SharedModule, ReactiveFormsModule],
+  imports: [SharedModule, ReactiveFormsModule, TaskAssignmentComponent],
   templateUrl: './create-period-dialog.component.html',
   styleUrl: './create-period-dialog.component.css',
   providers: [DatePipe]
@@ -54,10 +46,6 @@ export class CreatePeriodDialogComponent implements OnInit {
     [FormControlName.DURATION_TYPE]: [DurationType.PERIOD, Validators.required],
     [FormControlName.EXPLICIT_DUE_DATE]: [new Date(), []]
   })
-  secondFormGroup = this.fb.group({
-    [FormControlName.TASK_ASSIGNMENTS]: this.fb.array([]),
-    [FormControlName.CREATE_EACH_TASK_ONCE]: [false, []]
-  });
   ASSIGNEE = Assignee;
   FREQUENCY = Frequency;
   CREATION_METHOD = CreationMethod;
@@ -65,17 +53,16 @@ export class CreatePeriodDialogComponent implements OnInit {
   date: DatePipe
   existingPeriodSelected: boolean = false;
   tasks: Task[] = [];
+  taskAssignments: TaskWithAssignee[] = [];
 
   get duration(){ return this.formGroup.get(FormControlName.DURATION) }
   get startDate(){ return this.formGroup.get(FormControlName.START_DATE) }
   get creationMethod(){ return this.formGroup.get(FormControlName.CREATION_METHOD) }
   get durationType(){ return this.formGroup.get(FormControlName.DURATION_TYPE) }
-  get createEachTaskOnce(){ return this.secondFormGroup.get(FormControlName.CREATE_EACH_TASK_ONCE) }
   get explicitDueDate(){ return this.formGroup.get(FormControlName.EXPLICIT_DUE_DATE) }
   get taskPeriod(){ return this.formGroup.get(FormControlName.TASK_PERIOD) }
   get taskIds(){ return this.formGroup.get(FormControlName.TASK_IDS) }
   get isAutomaticCreation() { return this.creationMethod?.value === CreationMethod.AUTOMATIC };
-  get taskAssignments() { return this.secondFormGroup.get(FormControlName.TASK_ASSIGNMENTS) as FormArray };
 
   get taskPeriods(){
     return this.existingTaskPeriods.map(({ id, startDate, endDate }) => {
@@ -93,30 +80,15 @@ export class CreatePeriodDialogComponent implements OnInit {
       this.existingTaskPeriods = periods;
     });
   }
-
-    patchValues(taskLink: TaskWithAssignee) {
-      return this.fb.group({
-        [AssignmentRow.TASK_TITLE]: [taskLink?.task.title || ""],
-        [AssignmentRow.TASK_DESCRIPTION]: [taskLink?.task.description || ""],
-        [AssignmentRow.TASK_ID]: [taskLink?.task.id],
-        [AssignmentRow.ASSIGNEE]: [taskLink?.assignee || null]
-      })    
-    }
-
-    getFormControl(index: number, controlName: string): FormControl {
-      const control = this.taskAssignments.at(index).get(controlName);
-      return control as FormControl;
-    }
-  submit(){
+  submit(rqst: any = null){
     const result:PeriodCreationRequest = {
       periodId: this.taskPeriod?.value || null,
       duration: this.duration?.value || Frequency.MONTHLY,
       startDate: this.startDate?.value || new Date(),
       creationMethod: this.creationMethod?.value || CreationMethod.AUTOMATIC,
-      taskAssignmentRqst: this.taskAssignments?.value.filter((taskAssignment: { task: Task, assignee: Assignee}) => taskAssignment?.assignee !== null)
-              .map((taskAssignment: { task: Task, assignee: Assignee}) => ({taskId: taskAssignment.task.id, assignee: taskAssignment.assignee })) || [],
+      taskAssignmentRqst: rqst?.taskWithAssignees?.map((taskWithAssignee: TaskWithAssignee) => ({ taskId: taskWithAssignee.task.id, assignee: taskWithAssignee.assignee })) || [],
       explicitDueDate: this.durationType?.value ? this.explicitDueDate?.value : null,
-      createEachTaskOnce: this.createEachTaskOnce?.value || false
+      createEachTaskOnce: rqst?.createEachOnce || false
     }
     
     this.taskPeriodService.initiateCreatePeriod(result).subscribe(() => {
@@ -139,18 +111,6 @@ export class CreatePeriodDialogComponent implements OnInit {
     this.ref.close();
   }
 
-  retrieveTaskPeriod() {
-    this.taskService.retrieveTasks().subscribe(tasks => {
-      this.tasks = tasks;
-      this.tasks.forEach(task => {
-        this.taskAssignments.push(this.fb.group({
-          task,
-          assignee: null
-        }))
-      });
-    });
-    
-  }
 
   onDurationTypeChange(){
     if(this.durationType?.value === DurationType.EXPLICIT){
@@ -160,6 +120,19 @@ export class CreatePeriodDialogComponent implements OnInit {
       this.formGroup.get(FormControlName.EXPLICIT_DUE_DATE)?.clearValidators();
       this.formGroup.get(FormControlName.DURATION)?.setValidators([Validators.required]);
     }
+  }
+  
+  
+  retrieveTaskPeriod() {
+    this.taskService.retrieveTasks().subscribe(tasks => {
+      this.tasks = tasks;
+      console.log("TASKS RETRIEVED", tasks);
+      this.taskAssignments = this.tasks.map(task => ({
+        assignee: null,
+        task
+      }));
+    });
+    
   }
 
   activateSecondFormGroup(activateCallback: any, ){

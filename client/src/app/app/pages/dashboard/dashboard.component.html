@@ -12,7 +12,7 @@
     </div>
   
     <div class="text-center">
-        <p-accordion value="0"
+        <p-accordion value="0" 
         class="mb-4"
         *ngIf="expiredTasks?.length">
             <p-accordion-panel value="0">  
@@ -26,9 +26,9 @@
 
   
     <div class="text-center">
-    <p-accordion value="0" *ngIf="taskAssignments?.length">
+    <p-accordion [value]="collapseCompletedTasks"  (onClose)="saveHideStorage('collapseCompletedTasks',false)" (onOpen)="saveHideStorage('collapseCompletedTasks',true)"  *ngIf="taskAssignments?.length">
         <p-accordion-panel value="0">
-            <p-accordion-header class="text-2xl font-semibold">Tâches complétées</p-accordion-header>
+            <p-accordion-header class="text-2xl font-semibold">Tâches complétées <p-badge [value]="taskAssignments.length" severity="success" /></p-accordion-header>
             <p-accordion-content>
                 <app-completed-tasks [taskAssignments]="taskAssignments"></app-completed-tasks>
             </p-accordion-content>

@@ -50,6 +50,10 @@
                         <label [for]="FREQUENCY.MONTHLY">Mensuel</label>
                     </div>
                     <div>
+                        <p-radiobutton name="frequency" [value]="FREQUENCY.QUARTERLY" formControlName="frequency" [inputId]="FREQUENCY.QUARTERLY" />
+                        <label [for]="FREQUENCY.QUARTERLY">Trimestriel</label>
+                    </div>
+                    <div>
                         <p-radiobutton name="frequency" [value]="FREQUENCY.BIYEARLY" formControlName="frequency" [inputId]="FREQUENCY.BIYEARLY" />
                         <label [for]="FREQUENCY.BIYEARLY">Bi-annuel</label>
                     </div>

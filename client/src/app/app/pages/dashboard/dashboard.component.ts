@@ -24,15 +24,21 @@ export class DashboardComponent {
   todayDate: Date = new Date();
 
   hideCompletedTasks: boolean = false;
+  collapseCompletedTasks: string = '0';
+  
 
   constructor(private taskService: TaskService){}
 
   ngOnInit(): void {
     const storedHideCompletedTasks = localStorage.getItem("hideCompletedTasks");
-    console.log(storedHideCompletedTasks);
-    console.log(localStorage);
     if (storedHideCompletedTasks !== null) {
       this.hideCompletedTasks = JSON.parse(storedHideCompletedTasks);
+    }
+
+    
+    const storedCollapseCompletedTasks = localStorage.getItem("collapseCompletedTasks");
+    if (storedCollapseCompletedTasks !== null) {
+      this.collapseCompletedTasks = JSON.parse(storedCollapseCompletedTasks) ? '0' : '1';
     }
 
     if(!this.hideCompletedTasks) {
@@ -42,6 +48,11 @@ export class DashboardComponent {
     this.retrieveExpiredTasks();
   }
 
+
+  
+  saveHideStorage(arg0: string,arg1: boolean) {
+    localStorage.setItem(arg0, arg1.toString());
+  }
   
   
   onHideCompletedTasks(value: any){

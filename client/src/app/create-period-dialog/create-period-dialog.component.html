@@ -66,7 +66,7 @@
                             </div>
                         </div>
                         <div class="button-space">
-                            <p-button  *ngIf="isAutomaticCreation else nextButton" size="large" (onClick)="submit()" label="Soumettre"></p-button>
+                            <p-button *ngIf="isAutomaticCreation else nextButton" size="large" (onClick)="submit()" label="Soumettre"></p-button>
                             <ng-template #nextButton>
                                 <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" size="large" (onClick)="activateSecondFormGroup(activateCallback)" />
                             </ng-template>  
@@ -78,54 +78,7 @@
     
             <p-step-panel [value]="2">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <div #tableContainer [formGroup]="secondFormGroup">
-                        <div class="mb-8">
-                            <p-checkbox formControlName="createEachTaskOnce" [binary]="true" inputId="createEachTaskOnce" /> 
-                            <label for="createEachTaskOnce" class="ml-2">Créer les tâches seulement une fois</label>
-                        </div>
-                        <p-table
-                        class="table-resize"
-                        [value]="tasks"
-                        [paginator]="true"
-                        [rows]="10"
-                        [showCurrentPageReport]="true"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                        [rowsPerPageOptions]="[10, 25, 100]"
-                        >
-                        <ng-template #header>
-                            <tr>
-                            <th style="width:30%">Titre</th>
-                            <th style="width:40%">Description</th>
-                            <th style="width:20%">Assigner</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template #body let-element let-rowIndex="rowIndex">
-                            <tr>
-                            <td>{{ element.title }}</td>
-                            <td>{{ element.description }}</td>
-                            <td>
-                                <div class="card flex justify-center flex-wrap gap-4">
-                                    <div class="flex flex-wrap gap-4">
-                                        <div class="flex items-center">           
-                                            <p-radiobutton name="selected-{{rowIndex}}" [value]="ASSIGNEE.Camille" [formControl]="getFormControl(rowIndex, 'assignee')" inputId="selected1-{{rowIndex}}" />
-                                            <label for="selected1-{{rowIndex}}" class="ml-2">{{ASSIGNEE.Camille }}</label>
-                                        </div>                    
-                    
-                                        <div class="flex items-center">
-                                            <p-radiobutton name="selected-{{rowIndex}}" [value]="ASSIGNEE.Felix"  [formControl]="getFormControl(rowIndex, 'assignee')" inputId="selected2-{{rowIndex}}" />
-                                            <label for="selected2-{{rowIndex}}" class="ml-2">{{ASSIGNEE.Felix }}</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            </tr>
-                        </ng-template>
-                        </p-table>
-                    </div>
-                    <div class="flex pt-6 justify-between">
-                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="activateCallback(1)" />
-                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="submit()" />
-                    </div>
+                    <app-task-assignment [showCreateEachTaskOnce]="true" (submit)="submit($event)" (cancel)="close()" [tasks]="taskAssignments"></app-task-assignment>
                 </ng-template>
             </p-step-panel>
         </p-step-panels>

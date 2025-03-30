@@ -56,14 +56,14 @@ export class SplitTaskComponent implements OnInit {
 
   create(){
     const dialogRef = this.dialog.open(TaskAssignmentDialogComponent, {
-      width: '20vw',
+      header: 'Assigner des tâches',
+      width: '30vw',
       dismissableMask: true,
       modal:true,
       breakpoints: {
-          '960px': '75vw',
-          '640px': '90vw'
+ '1199px': '75vw', '575px': '90vw'
       },
-    });
+    });  
 
     dialogRef.onClose.subscribe((taskPeriod: TaskPeriod) => {
       this.retrieveTasks();

@@ -3,7 +3,7 @@ export interface Task {
     title?: string;
     description?: string;
     frequency?: Frequency;
-    room: Room;
+    room?: Room;
 }
 
 export interface TaskWithCompletedDate {
@@ -12,7 +12,7 @@ export interface TaskWithCompletedDate {
 }
 
 export enum Frequency {
-    DAILY = "DAILY", BIWEEKLY = "BIWEEKLY", WEEKLY = "WEEKLY", MONTHLY = "MONTHLY", BIYEARLY = "BIYEARLY", YEARLY = "YEARLY"
+    DAILY = "DAILY", BIWEEKLY = "BIWEEKLY", WEEKLY = "WEEKLY", MONTHLY = "MONTHLY", QUARTERLY = "QUARTERLY", BIYEARLY = "BIYEARLY", YEARLY = "YEARLY"
 }
 
 export enum CreationMethod {

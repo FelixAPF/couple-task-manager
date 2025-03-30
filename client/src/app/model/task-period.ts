@@ -31,12 +31,12 @@ export interface TaskAssignmentDto {
 }
 
 export enum Assignee {
-    Felix = "Felix", Camille = "Camille"
+    Felix = "Felix", Camille = "Camille", Deux = "Deux"
 }
 
 export interface BasicTaskAssignmentRqst {
-    taskId: number;
-    assignee: Assignee;
+    taskId?: number;
+    assignee?: Assignee;
 }
 
 export interface PeriodCreationRequest {

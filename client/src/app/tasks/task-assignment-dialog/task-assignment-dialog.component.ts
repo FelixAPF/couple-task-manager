@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, Renderer2, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { SharedModule } from '../../shared.module';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -6,11 +6,13 @@ import { Subscription, take } from 'rxjs';
 import { Frequency, Task } from '../../model/task';
 import { TaskService } from '../../service/task-service.service';
 import { TaskPeriodService } from '../../service/task-period.service';
-import { Assignee, TaskAssignment, TaskPeriod } from '../../model/task-period';
+import { Assignee, BasicTaskAssignmentRqst, TaskAssignment, TaskPeriod } from '../../model/task-period';
 import { TaskListService } from '../../service/task-list.service';
 import { TaskLink } from '../../model/local-model';
 import { TaskList } from '../../model/task-list';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { TaskAssignmentComponent } from '../task-assignment/task-assignment.component';
+import { TaskWithAssignee } from '../../create-period-dialog/create-period-dialog.component';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -27,18 +29,17 @@ enum AssignmentRow {
 
 @Component({
   selector: 'app-task-assignment-dialog',
-  imports: [SharedModule, ReactiveFormsModule],
+  imports: [SharedModule, ReactiveFormsModule, TaskAssignmentComponent],
   templateUrl: './task-assignment-dialog.component.html',
   styleUrl: './task-assignment-dialog.component.css',
   providers: [ provideNativeDateAdapter() ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TaskAssignmentDialogComponent {
+export class TaskAssignmentDialogComponent implements OnInit {
   ASSIGNEE = Assignee;
   fb = inject(FormBuilder);
   subscription: Subscription = new Subscription();
   taskList: any | null = null;
-  activeStep: number = 1;
   tasks: Task[] = [];
   displayedColumns = ["title", "assignment"]
   @ViewChild('tableContainer') tableContainer!: ElementRef;
@@ -69,35 +70,32 @@ AssignmentRow = AssignmentRow;
     public ref: DynamicDialogRef) {    
   }
 
-  next(){
-    this.activeStep++;
+  ngOnInit(){
+    this.loadTaskAssignments();
   }
 
-  submit(){
-    this.taskListService.saveTasksToExistingTaskList(this.assignee?.value, this.generateTaskList()).subscribe(() => {
+  submit(tasksWithAssignment: { taskWithAssignees: TaskWithAssignee[], createEachOnce: boolean }){
+    const basicTaskAssignmentRqsts: any[] = tasksWithAssignment.taskWithAssignees.map(taskWithAssignee => ({ assignee: taskWithAssignee.assignee, taskId: taskWithAssignee.task.id }));
+
+        
+    this.taskListService.saveTasksToExistingTaskList(basicTaskAssignmentRqsts).subscribe(() => {
       this.ref.close();
     })
   }
-  loadTasks() {
-    return this.taskService.retrieveTasks().pipe(take(1)).subscribe(tasks => { // Return the subscription and add take(1)
-      const taskLink: TaskLink[] = tasks.map((task) => ({
-        selected: this.taskList?.tasks.find((t: Task) => task.id === t?.id) !== undefined,
-        task
-      }));
 
-      const formArray = this.secondFormGroup.get(FormControlName.TASK_LINKS) as FormArray;
-      formArray.clear();
-      taskLink.forEach(t => formArray.push(this.patchValues(t)));
-
-      this.tableData = taskLink.map(link => ({
-        title: link.task.title,
-        description: link.task.description,
-        taskId: link.task.id,
-        selected: link.selected
-      }));
-
-      this.tasks = tasks;
+  taskAssignments: TaskWithAssignee[] = [];
+  loadTaskAssignments(){
+    return this.taskListService.retrieveWithUnassigned().subscribe(taskLists => {
+      const newDataList = [];
+      for(let list of taskLists){
+        if(list.tasks == undefined) continue;
+        for(let task of list.tasks){
+          newDataList.push({task: task, assignee: list.assignee});
+        }
+      }
+      this.taskAssignments = [...newDataList];
     });
+
   }
   
   createTaskList(callback: any) {
@@ -107,9 +105,10 @@ AssignmentRow = AssignmentRow;
     this.taskListService.retrieveTaskList(assignee).subscribe((taskList) => {
       this.taskList = taskList;
       const loadTasksAndCallback = () => {
-        this.loadTasks().add(() => { // Wait for loadTasks() to complete
+        this.loadTaskAssignments().add(() => {
           callback(2);
-        });
+
+        })
       };
   
       if (!taskList) {
@@ -127,23 +126,5 @@ AssignmentRow = AssignmentRow;
   }
   
 
-  patchValues(taskLink: TaskLink) {
-    return this.fb.group({
-      [AssignmentRow.TASK_TITLE]: [taskLink?.task.title || ""],
-      [AssignmentRow.TASK_DESCRIPTION]: [taskLink?.task.description || ""],
-      [AssignmentRow.TASK_ID]: [taskLink?.task.id],
-      [AssignmentRow.SELECTED]: [taskLink?.selected || false]
-    })    
-  }
-
-  generateTaskList(): number[] {
-    const taskLinksFormValue = this.taskLinks?.value as any[];
-    return taskLinksFormValue.filter((taskLink) => taskLink.selected).map((taskLink) => taskLink.taskId);
-  }
-
-  // save(){
-  //   const taskPeriod = this.generateTaskPeriodFromForm();
-  //   this.taskPeriodService.createTaskPeriod(taskPeriod).subscribe(() => {});
-  // }
 }
 

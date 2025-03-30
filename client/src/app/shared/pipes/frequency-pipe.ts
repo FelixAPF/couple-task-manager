@@ -11,6 +11,7 @@ export class FrequencyPipe implements PipeTransform {
         case Frequency.WEEKLY: return 'Hebdomadaire';
         case Frequency.BIWEEKLY: return 'Bi-mensuel';
         case Frequency.MONTHLY: return 'Mensuel';
+        case Frequency.QUARTERLY: return 'Trimestriel';
         case Frequency.BIYEARLY: return 'Bi-annuel';
         case Frequency.YEARLY: return 'Annuel';
         default: return "N/A"

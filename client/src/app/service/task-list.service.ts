@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { environment } from '../environment';
 import { HttpClient } from '@angular/common/http';
 import { TaskList, TaskListRequest } from '../model/task-list';
-import { Assignee } from '../model/task-period';
+import { Assignee, BasicTaskAssignmentRqst } from '../model/task-period';
 import { Observable } from 'rxjs';
 import { Task } from '../model/task';
+import { TaskWithAssignee } from '../create-period-dialog/create-period-dialog.component';
 
 @Injectable({
   providedIn: 'root'
@@ -26,12 +27,16 @@ export class TaskListService {
     return this.http.post<void>(this.baseUrl, taskList);
   }
 
-  saveTasksToExistingTaskList(assignee: Assignee, tasks: number[]): Observable<void>{
-    return this.http.post<void>(`${this.baseUrl}/${assignee}`, tasks);
+  saveTasksToExistingTaskList(basicTaskAssignmentRqst: BasicTaskAssignmentRqst[]): Observable<void>{
+    return this.http.post<void>(`${this.baseUrl}/assign`, basicTaskAssignmentRqst);
   }
 
   deleteTaskList(taskList: TaskListRequest): Observable<TaskList>{
     return this.http.post<TaskList>(`${this.baseUrl}/unassign`, taskList);
+  }
+
+  retrieveWithUnassigned(): Observable<TaskList[]> {
+    return this.http.get<TaskList[]>(`${this.baseUrl}/with-unassigned`);
   }
 
 }

@@ -5,6 +5,7 @@ public enum Frequency {
     BIWEEKLY("BIWEEKLY"),
     WEEKLY("WEEKLY"),
     MONTHLY("MONTHLY"),
+    QUARTERLY("QUARTERLY"),
     BIYEARLY("BIYEARLY"),
     YEARLY("YEARLY");
 
@@ -22,6 +23,9 @@ public enum Frequency {
                 break;
             case "MONTHLY":
                 daysAmount = 30;
+                break;
+            case "QUARTERLY":
+                daysAmount = 90;
                 break;
             case "BIYEARLY":
                 daysAmount = 182;

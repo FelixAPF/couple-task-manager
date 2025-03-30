@@ -1,5 +1,4 @@
 <div>
-    <p class="text-2xl font-semibold">Tâches expirées</p>
     <div class="d-block text-center">
         <p-message severity="warn" class="text-center mt-8" *ngFor="let task of expiredTasks">{{task.task.title}}, 
             <span *ngIf="task.completedDate else neverCompleted"> Complété pour la dernière fois le {{task.completedDate | date: 'longDate'}}</span> 

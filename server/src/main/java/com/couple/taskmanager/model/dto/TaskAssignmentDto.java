@@ -20,6 +20,7 @@ public class TaskAssignmentDto {
     private Date dueDate;
     private Room room;
     private Boolean completed;
+    private Date completedDate;
     private Long taskPeriodId;
     private Long taskId;
 
@@ -31,8 +32,11 @@ public class TaskAssignmentDto {
         this.creationDate = taskAssignment.getCreationDate();
         this.dueDate = taskAssignment.getDueDate();
         this.completed = taskAssignment.getCompleted();
+        this.completedDate = taskAssignment.getCompletedDate();
         this.room = taskAssignment.getTask().getRoom();
-        this.taskPeriodId = taskAssignment.getTaskPeriod().getId();
+        if(taskAssignment.getTaskPeriod() != null){
+            this.taskPeriodId = taskAssignment.getTaskPeriod().getId();
+        }
         this.taskId = taskAssignment.getTask().getId();
     }
 }

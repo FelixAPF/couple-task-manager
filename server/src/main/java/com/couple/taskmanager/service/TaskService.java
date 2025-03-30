@@ -14,7 +14,6 @@ import com.couple.taskmanager.repository.TaskListRepository;
 import com.couple.taskmanager.repository.TaskRepository;
 import com.couple.taskmanager.utils.DateUtils;
 import com.couple.taskmanager.utils.StreamUtils;
-import jakarta.persistence.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +43,18 @@ public class TaskService implements IGenericService<Task> {
         return taskRepository.findAll();
     }
 
+    public List<TaskAssignmentDto> list(Long taskId){
+        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(taskId))
+                .map(TaskAssignmentDto::new)
+                .toList();
+    }
+
+    public List<TaskAssignmentDto> list(Boolean completed){
+        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByCompletedEquals(completed))
+                .map(TaskAssignmentDto::new)
+                .toList();
+    }
+
     @Override
     public Task update(Long id, Task task) {
         return taskRepository.save(task);
@@ -57,7 +68,7 @@ public class TaskService implements IGenericService<Task> {
         Task taskToDelete = taskOptional.get();
 
         // Delete TaskAssignments associated with the Task
-        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByTaskId(id);
+        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(id);
         taskAssignmentRepository.deleteAll(taskAssignments);
 
         // Remove the Task from TaskLists

@@ -21,6 +21,11 @@ import java.util.stream.Collectors;
 @CrossOrigin("*")
 public class TaskController extends GenericController<Task, TaskService> {
 
+    @GetMapping("/keep-alive")
+    public String keepAlive(){
+        return "alive";
+    }
+
     @PostMapping("by-date")
     public List<TaskPeriod> retrieveTasksByDate(@RequestBody Date date){
         return service.retrieveTasksByDate(date);
@@ -51,4 +56,15 @@ public class TaskController extends GenericController<Task, TaskService> {
     public List<TaskWithCompletedDateV1> retrieveTasksNotCompletedInLongTime(){
         return service.retrieveTasksNotCompletedInLongTime();
     }
+
+    @GetMapping("{taskId}/assignments-by-id")
+    public List<TaskAssignmentDto> retrieveTaskAssignmentsFromTaskId(@PathVariable("taskId") Long taskId){
+        return service.list(taskId);
+    }
+
+    @GetMapping("completed/{completed}")
+    public List<TaskAssignmentDto> retrieveTaskAssignmentsFromCompleted(@PathVariable("completed") Boolean completed){
+        return service.list(completed);
+    }
+
 }

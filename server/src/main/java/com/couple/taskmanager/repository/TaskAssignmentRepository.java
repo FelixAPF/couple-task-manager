@@ -15,7 +15,9 @@ import java.util.List;
 @Repository
 public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
 
-    List<TaskAssignment> findAllByTaskId(Long taskId);
+    List<TaskAssignment> findAllByTaskIdAndCompletedTrue(Long taskId);
+
+    List<TaskAssignment> findAllByCompletedEquals(Boolean completed);
 
     @Transactional
     void deleteAllByTaskId(Long taskId);
@@ -32,4 +34,5 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     void setAssignmentCompleted(@Param("assignmentId") Long assignmentId, @Param("completed") boolean completed, @Param("date") Date date);
 
     List<TaskAssignment> findAllByTaskPeriodId(Long periodId);
+
 }

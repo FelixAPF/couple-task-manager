@@ -32,6 +32,10 @@ export class TaskService implements OnDestroy {
     return this.http.get<Task[]>(this.baseUrl);
   }
 
+  retrieveTaskAssignmentsByTaskId(taskId: number): Observable<TaskAssignment[]> {
+    return this.http.get<TaskAssignment[]>(`${this.baseUrl}/${taskId}/assignments-by-id`);
+  }
+
   retrieveTasksByDate(date: Date): Observable<Task[]> {
     return this.http.post<Task[]>(`${this.baseUrl}/by-date`, date);
   }

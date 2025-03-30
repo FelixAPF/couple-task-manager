@@ -11,23 +11,30 @@
       ></p-checkbox>
     </div>
   
-    <p-card
-      class="mb-4"
-      *ngIf="expiredTasks?.length"
-    >
-      <div class="text-center">
-        <app-warning-tasks-due [expiredTasks]="expiredTasks"></app-warning-tasks-due>
-      </div>
-    </p-card>
+    <div class="text-center">
+        <p-accordion value="0"
+        class="mb-4"
+        *ngIf="expiredTasks?.length">
+            <p-accordion-panel value="0">  
+                <p-accordion-header class="text-2xl font-semibold">Tâches expirées</p-accordion-header>
+                <p-accordion-content>
+                    <app-warning-tasks-due [expiredTasks]="expiredTasks"></app-warning-tasks-due>
+                </p-accordion-content>
+            </p-accordion-panel>
+        </p-accordion>
+    </div>
+
   
-    <p-card
-      class="mb-4"
-      *ngIf="taskAssignments?.length"
-    >
-      <div class="text-center">
-        <app-completed-tasks [taskAssignments]="taskAssignments"></app-completed-tasks>
-      </div>
-    </p-card>
+    <div class="text-center">
+    <p-accordion value="0" *ngIf="taskAssignments?.length">
+        <p-accordion-panel value="0">
+            <p-accordion-header class="text-2xl font-semibold">Tâches complétées</p-accordion-header>
+            <p-accordion-content>
+                <app-completed-tasks [taskAssignments]="taskAssignments"></app-completed-tasks>
+            </p-accordion-content>
+        </p-accordion-panel>
+    </p-accordion>
+    </div>
   
     <p-card>
       <div class="text-center">

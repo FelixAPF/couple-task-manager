@@ -78,7 +78,7 @@
     
             <p-step-panel [value]="2">
                 <ng-template #content let-activateCallback="activateCallback">
-                    <app-task-assignment [showCreateEachTaskOnce]="true" (submit)="submit($event)" (cancel)="close()" [tasks]="taskAssignments"></app-task-assignment>
+                    <app-task-assignment [showCreateEachTaskOnce]="true" (submit)="submit($event)" (cancel)="close()"></app-task-assignment>
                 </ng-template>
             </p-step-panel>
         </p-step-panels>

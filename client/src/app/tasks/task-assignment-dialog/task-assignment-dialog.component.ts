@@ -11,8 +11,9 @@ import { TaskListService } from '../../service/task-list.service';
 import { TaskLink } from '../../model/local-model';
 import { TaskList } from '../../model/task-list';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { TaskAssignmentComponent } from '../task-assignment/task-assignment.component';
+import { TaskAssignmentComponent, TasksInputParameter } from '../task-assignment/task-assignment.component';
 import { TaskWithAssignee } from '../../create-period-dialog/create-period-dialog.component';
+import { TaskAssignmentService } from '../../service/task-assignment.service';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -60,13 +61,14 @@ AssignmentRow = AssignmentRow;
   get assignee(): AbstractControl | null {
     return this.firstFormGroup.get(FormControlName.ASSIGNEE);
   }
+
   getFormControl(index: number, controlName: string): FormControl {
     const control = this.taskLinks.at(index)?.get(controlName);
     return control as FormControl;
   }
 
   constructor(public dialogService: DialogService,private taskService: TaskService, private taskListService: TaskListService,
-    private renderer: Renderer2,
+    private renderer: Renderer2, public taskAssignmentService: TaskAssignmentService,
     public ref: DynamicDialogRef) {    
   }
 
@@ -83,19 +85,17 @@ AssignmentRow = AssignmentRow;
     })
   }
 
-  taskAssignments: TaskWithAssignee[] = [];
-  loadTaskAssignments(){
-    return this.taskListService.retrieveWithUnassigned().subscribe(taskLists => {
+  loadTaskAssignments() {
+    return this.taskListService.retrieveWithUnassigned().subscribe((taskLists) => {
       const newDataList = [];
-      for(let list of taskLists){
-        if(list.tasks == undefined) continue;
-        for(let task of list.tasks){
-          newDataList.push({task: task, assignee: list.assignee});
+      for (let list of taskLists) {
+        if (list.tasks == undefined) continue;
+        for (let task of list.tasks) {
+          newDataList.push({ task: task, assignee: list.assignee });
         }
       }
-      this.taskAssignments = [...newDataList];
+      this.taskAssignmentService.setTaskAssignments(newDataList);
     });
-
   }
   
   createTaskList(callback: any) {
@@ -107,7 +107,6 @@ AssignmentRow = AssignmentRow;
       const loadTasksAndCallback = () => {
         this.loadTaskAssignments().add(() => {
           callback(2);
-
         })
       };
   

@@ -8,7 +8,8 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
 import { DatePipe, DatePipeConfig } from '@angular/common';
 import { TaskLink } from '../model/local-model';
 import { TaskService } from '../service/task-service.service';
-import { TaskAssignmentComponent } from "../tasks/task-assignment/task-assignment.component";
+import { TaskAssignmentComponent, TasksInputParameter } from "../tasks/task-assignment/task-assignment.component";
+import { TaskAssignmentService } from '../service/task-assignment.service';
 
 enum FormControlName {
   DURATION = "duration",
@@ -73,7 +74,7 @@ export class CreatePeriodDialogComponent implements OnInit {
     });
   }
 
-  constructor(private taskPeriodService: TaskPeriodService, private ref: DynamicDialogRef, private datePipe: DatePipe, private taskService: TaskService ){}
+  constructor(private taskPeriodService: TaskPeriodService, private ref: DynamicDialogRef, private datePipe: DatePipe, private taskService: TaskService, public taskAssignmentService: TaskAssignmentService ){}
 
   ngOnInit(): void {
     this.taskPeriodService.retrieveTaskPeriodsIncomplete().subscribe(periods => {
@@ -126,11 +127,11 @@ export class CreatePeriodDialogComponent implements OnInit {
   retrieveTaskPeriod() {
     this.taskService.retrieveTasks().subscribe(tasks => {
       this.tasks = tasks;
-      console.log("TASKS RETRIEVED", tasks);
       this.taskAssignments = this.tasks.map(task => ({
         assignee: null,
         task
       }));
+      this.taskAssignmentService.setTaskAssignments(this.taskAssignments);
     });
     
   }

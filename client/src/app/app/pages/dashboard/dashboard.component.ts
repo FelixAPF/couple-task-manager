@@ -24,10 +24,19 @@ export class DashboardComponent {
   todayDate: Date = new Date();
 
   hideCompletedTasks: boolean = false;
+  hideDescription: boolean = false;
   collapseCompletedTasks: string = '0';
   
 
   constructor(private taskService: TaskService){}
+
+  initializeStoredDescription(property: any, propertyName: string){
+    const storedValue = localStorage.getItem(propertyName);
+    if (storedValue !== null) {
+      property = JSON.parse(storedValue);
+    }
+    console.log(storedValue, property, propertyName, this.hideDescription);
+  }
 
   ngOnInit(): void {
     const storedHideCompletedTasks = localStorage.getItem("hideCompletedTasks");
@@ -39,7 +48,9 @@ export class DashboardComponent {
     const storedCollapseCompletedTasks = localStorage.getItem("collapseCompletedTasks");
     if (storedCollapseCompletedTasks !== null) {
       this.collapseCompletedTasks = JSON.parse(storedCollapseCompletedTasks) ? '0' : '1';
-    }
+    }    
+    
+    this.initializeStoredDescription(this.hideDescription, "hideDescription");
 
     if(!this.hideCompletedTasks) {
       this.retrieveTaskAssignmentsByDate();

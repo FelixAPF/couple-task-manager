@@ -39,6 +39,7 @@ export class MyTasksComponent implements OnInit {
   taskAssignments: TaskAssignment[] = [];
   today: any = new Date();
   hideCompletedTasks: boolean = false;
+  @Input() hideDescription: boolean = false;
 
   constructor(private taskService: TaskService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
 

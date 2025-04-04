@@ -3,10 +3,11 @@ import { SharedModule } from '../../../shared.module';
 import { TaskList } from '../../../model/task-list';
 import { Task } from '../../../model/task';
 import { RoomPipe } from '../../../shared/pipes/room-pipe';
+import { FrequencyPipe } from '../../../shared/pipes/frequency-pipe';
 
 @Component({
   selector: 'app-assignee-task-list',
-  imports: [SharedModule, RoomPipe],
+  imports: [SharedModule, RoomPipe, FrequencyPipe],
   templateUrl: './assignee-task-list.component.html',
   styleUrl: './assignee-task-list.component.css'
 })

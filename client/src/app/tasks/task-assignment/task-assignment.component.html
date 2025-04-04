@@ -5,6 +5,10 @@
             <p-checkbox formControlName="createEachTaskOnce" [binary]="true" inputId="createEachTaskOnce" /> 
             <label for="createEachTaskOnce" class="ml-2">Créer les tâches seulement une fois</label>
         </div>
+        <div class="mb-8">
+            <p-checkbox [binary]="true"  (onChange)="onChange($event)" inputId="showDescription" /> 
+            <label for="showDescription" class="ml-2">Afficher la description</label>
+        </div>
         <p-table
         class="table-resize"
         [value]="taskAssignments.value"
@@ -16,15 +20,19 @@
         >
         <ng-template #header>
             <tr>
-            <th style="width:30%">Titre</th>
-            <th style="width:40%">Description</th>
+            <th style="width:25%">Titre</th>
+            <th *ngIf="showDescription" style="width:30%">Description</th>
+            <th pSortableColumn="room" style="width:15%">Pièce</th>
+            <th pSortableColumn="frequency" style="width:10%">Fréquence</th>
             <th style="width:20%">Assigner</th>
             </tr>
         </ng-template>
         <ng-template #body let-element let-rowIndex="rowIndex">
             <tr>
             <td>{{ element.title }}</td>
-            <td>{{ element.description }}</td>
+            <td *ngIf="showDescription">{{ element.description }}</td>
+            <td>{{ `ROOM.${element.room}` | translate }}</td>
+            <td>{{ `FREQUENCY.${element.frequency}` | translate }}</td>
             <td>
                 <div class="card flex justify-center flex-wrap gap-4">
                     <div class="flex flex-wrap gap-4">

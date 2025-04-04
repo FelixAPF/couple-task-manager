@@ -1,6 +1,6 @@
 
 {
-    "SHOPPING_ITEM_TYPE": {
+    "STORE": {
         "COSTCO": "Costco",
         "SUPER_C": "Super C",
         "MAXI": "Maxi",
@@ -17,5 +17,32 @@
         "AMAZON": "Amazon",
         "MUNCHIZ": "Munchiz",
         "AUTRE": "Autre"
-    }    
+    },
+    "SHOPPING_ITEM_TYPE": {
+        "GROCERY": "Épicerie",
+        "HOME": "Article ménager",
+        "OTHER": "Autre"
+    },
+    "ROOM": {
+        "": "Pièce",
+        "BATHROOM": "Salle de bain",
+        "BEDROOM": "Chambre",
+        "EVERYWHERE": "Partout",
+        "HALLWAY": "Couloir",
+        "KITCHEN": "Cuisine",
+        "LIVING_ROOM": "Salon",
+        "OFFICE": "Bureau",
+        "OUTSIDE": "Dehors",
+        "OTHER": "Autre"
+    },
+    "FREQUENCY": {
+        "": "Fréquence",
+        "DAILY": "Quotidien",
+        "WEEKLY": "Hebdomadaire",
+        "BIWEEKLY": "Bi-mensuel",
+        "MONTHLY": "Mensuel",
+        "QUARTERLY": "Trimestrel",
+        "YEARLY": "Annuel"
+    }
+
 }

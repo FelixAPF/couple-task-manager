@@ -10,6 +10,17 @@
         [binary]="true"
       ></p-checkbox>
     </div>
+    <div class="flex items-center mb-4">
+      <label for="hideCompletedTasksCB" class="mr-4 text-sm font-medium text-gray-700">
+        Cacher la description
+      </label>
+      <p-checkbox
+        inputId="hideDescriptionCB"
+        [(ngModel)]="hideDescription"
+        (onChange)="onHideCompletedTasks($event)"
+        [binary]="true"
+      ></p-checkbox>
+    </div>
   
     <div class="text-center">
         <p-accordion value="0" 
@@ -38,7 +49,7 @@
   
     <p-card>
       <div class="text-center">
-        <app-my-tasks (taskCompleteEmitter)="refreshExpiredTasks($event)"></app-my-tasks>
+        <app-my-tasks [hideDescription]="hideDescription" (taskCompleteEmitter)="refreshExpiredTasks($event)"></app-my-tasks>
       </div>
     </p-card>
   </div>

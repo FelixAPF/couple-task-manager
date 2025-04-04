@@ -6,11 +6,14 @@ import { TaskWithAssignee } from '../../create-period-dialog/create-period-dialo
 import { Assignee } from '../../model/task-period';
 import { Observable, Subscription, timer } from 'rxjs';
 import { TaskAssignmentService } from '../../service/task-assignment.service';
+import { CheckboxChangeEvent } from 'primeng/checkbox';
 
 enum FormControlName {
   TASK_ID = "taskId",
   TASK_TITLE = "title",
   TASK_DESCRIPTION = "description",
+  FREQUENCY = "frequency",
+  ROOM = "room",
   ASSIGNEE = "assignee",
   SELECTED = "selected",
   TASK_ASSIGNMENTS = "taskAssignments",
@@ -30,6 +33,7 @@ export interface TasksInputParameter {
 export class TaskAssignmentComponent implements OnInit, OnDestroy {
   ASSIGNEE = Assignee;
   subscription: Subscription = new Subscription();
+  showDescription = false;
   get createEachTaskOnce(){ return this.secondFormGroup.get(FormControlName.CREATE_EACH_TASK_ONCE) }
   get taskAssignments() { return this.secondFormGroup.get(FormControlName.TASK_ASSIGNMENTS) as FormArray };
   fb: FormBuilder = inject(FormBuilder);
@@ -44,6 +48,9 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadData();
   }
+  onChange($event: CheckboxChangeEvent) {
+    this.showDescription = !this.showDescription;
+  }
   ngOnDestroy(){
     this.subscription.unsubscribe();
   }
@@ -52,7 +59,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.taskAssignmentService.getTaskAssignments().subscribe((data) => {
         this.taskAssignments.clear();
-        if (data && data.length > 0) {
+        if (data && data.length) {
           data.forEach((t) => {
             this.taskAssignments.push(this.patchValues(t));
           });
@@ -71,6 +78,8 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
     return this.fb.group({
       [FormControlName.TASK_TITLE]: [taskLink?.task.title || ""],
       [FormControlName.TASK_DESCRIPTION]: [taskLink?.task.description || ""],
+      [FormControlName.ROOM]: [taskLink?.task.room || ""],
+      [FormControlName.FREQUENCY]: [taskLink?.task.frequency || ""],
       [FormControlName.TASK_ID]: [taskLink?.task.id],
       [FormControlName.ASSIGNEE]: [taskLink?.assignee || null]
     })    

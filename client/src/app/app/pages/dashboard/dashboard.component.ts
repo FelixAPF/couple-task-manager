@@ -76,6 +76,11 @@ export class DashboardComponent {
       this.taskAssignments = [];
     }
   }
+  
+  onHideDescription(value: any){
+    this.hideDescription = value.checked;
+    this.saveHideStorage("hideDescription", value.checked);
+  }
 
   refreshExpiredTasks(taskId: number){ 
     const isTaskExpired = this.tasks.find(t => t.id === taskId) !== undefined; 

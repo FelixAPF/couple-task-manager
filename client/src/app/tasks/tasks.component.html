@@ -31,10 +31,10 @@
               <td>{{ element.frequency | frequencyPipe }}</td>
               <td>{{ element.room | roomPipe }}</td>
               <td>
-                <div class="flex justify-center flex-wrap gap-4">
+                <div class="flex justify-center flex-wrap gap-4" id="element.id">
                   <p-toast></p-toast>
                   <p-splitbutton
-                    appendTo="body"
+                    [appendTo]="element.id"
                     label="Supprimer"
                     (onClick)="delete($event, element.id)"
                     [model]="items(element)"

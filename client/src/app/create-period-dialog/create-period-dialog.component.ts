@@ -82,6 +82,7 @@ export class CreatePeriodDialogComponent implements OnInit {
     });
   }
   submit(rqst: any = null){
+    if(!this.formGroup.valid) return;
     const result:PeriodCreationRequest = {
       periodId: this.taskPeriod?.value || null,
       duration: this.duration?.value || Frequency.MONTHLY,
@@ -137,6 +138,7 @@ export class CreatePeriodDialogComponent implements OnInit {
   }
 
   activateSecondFormGroup(activateCallback: any, ){
+    if(!this.formGroup.valid) return;
     this.retrieveTaskPeriod();
     activateCallback(2);
   }

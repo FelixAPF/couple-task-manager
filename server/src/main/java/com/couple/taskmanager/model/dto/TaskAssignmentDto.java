@@ -1,6 +1,7 @@
 package com.couple.taskmanager.model.dto;
 
 import com.couple.taskmanager.enums.Assignee;
+import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.enums.Room;
 import com.couple.taskmanager.model.TaskAssignment;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ public class TaskAssignmentDto {
     private String taskTitle;
     private String taskDescription;
     private Assignee assignee;
+    private Frequency frequency;
     private Date creationDate;
     private Date dueDate;
     private Room room;
@@ -29,6 +31,7 @@ public class TaskAssignmentDto {
         this.taskTitle = taskAssignment.getTask().getTitle();
         this.taskDescription = taskAssignment.getTask().getDescription();
         this.assignee = taskAssignment.getAssignee();
+        this.frequency = taskAssignment.getTask().getFrequency();
         this.creationDate = taskAssignment.getCreationDate();
         this.dueDate = taskAssignment.getDueDate();
         this.completed = taskAssignment.getCompleted();

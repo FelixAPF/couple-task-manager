@@ -62,9 +62,7 @@ export class MyTasksComponent implements OnInit {
   retrieveTaskByAssignee(){
     const frequency = this.formGroup.get(FormControlName.DISPLAY_DURATION)?.value || Frequency.MONTHLY;
     this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssignee, frequency).subscribe(taskAssignments => {
-      this.tasks = taskAssignments.map(({ assignee, creationDate, dueDate, taskTitle, taskDescription, id, taskPeriodId, completed, room, taskId }) => ({
-        assignee, creationDate, dueDate, taskTitle, taskDescription, id, completed, taskPeriodId, room: room, taskId
-      }));
+      this.tasks = taskAssignments;
     }))
   }
 

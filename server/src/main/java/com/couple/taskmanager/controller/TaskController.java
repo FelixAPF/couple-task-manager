@@ -9,6 +9,7 @@ import com.couple.taskmanager.model.dto.TaskAssignmentDto;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.service.TaskService;
+import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -38,8 +39,7 @@ public class TaskController extends GenericController<Task, TaskService> {
 
     @GetMapping("by-assignee/{assignee}/{date}")
     public List<TaskAssignmentDto> retrieveTasksByDate(@PathVariable Assignee assignee, @PathVariable Date date, @RequestParam("frequency") Frequency frequency){
-        List<TaskAssignment> taskAssignments = service.retrieveIncompleteTasksByAssignee(assignee, date, frequency);
-        return taskAssignments.stream().map(TaskAssignmentDto::new).collect(Collectors.toList());
+        return StreamUtils.mapToList(service.retrieveIncompleteTasksByAssignee(assignee, date, frequency), TaskAssignmentDto::new);
     }
 
     @PostMapping("complete-assignment/{assignmentId}")

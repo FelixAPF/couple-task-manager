@@ -8,7 +8,7 @@ android {
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
     versionCode 1
-    versionName "1.3"
+    versionName "1.6"
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')
     setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate)

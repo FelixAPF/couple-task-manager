@@ -35,12 +35,13 @@
         "OTHER": "Autre"
     },
     "FREQUENCY": {
-        "": "Fréquence",
+        "LABEL": "Fréquence",
         "DAILY": "Quotidien",
         "WEEKLY": "Hebdomadaire",
         "BIWEEKLY": "Bi-mensuel",
         "MONTHLY": "Mensuel",
         "QUARTERLY": "Trimestrel",
+        "BIANNUALY": "Bi-annuel",
         "YEARLY": "Annuel"
     }
 }

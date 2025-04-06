@@ -67,7 +67,6 @@ export class MyTasksComponent implements OnInit {
   }
 
   completeTask(element: any){
-    this.taskService.quickComplete(13, Assignee.Camille).subscribe();
     this.subscription.add(this.taskService.completeTask(element.id).subscribe(() => {
       this.retrieveTaskByAssignee();
       this.taskCompleteEmitter.emit(element.taskId);

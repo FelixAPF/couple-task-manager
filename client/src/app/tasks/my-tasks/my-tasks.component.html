@@ -5,7 +5,7 @@
       <p-select
         class="input-width"
         [formControlName]="DISPLAY_DURATION.DISPLAY_DURATION"
-        (onChange)="onChange($event)"
+        (onChange)="onFrequencySelectChange($event)"
         label="Affichage du"
         [options]="options"
         optionValue="value"
@@ -27,12 +27,12 @@
       <p-table
         [value]="tasks"
         [paginator]="true"
-        [rows]="10"
+        [rows]="25"
         sortField="dueDate"
         [showCurrentPageReport]="true"
         responsiveLayout="scroll"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        [rowsPerPageOptions]="[10, 25, 50]"
+        [rowsPerPageOptions]="[10, 25, 50, 100]"
         class="flex-grow"
       >
         <ng-template #header>

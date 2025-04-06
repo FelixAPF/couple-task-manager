@@ -10,10 +10,10 @@
         <p-table
           [value]="tasks"
           [paginator]="true"
-          [rows]="10"
+          [rows]="25"
           [showCurrentPageReport]="true"
           currentPageReportTemplate="Affichage des éléments {first} à {last} de {totalRecords}"
-          [rowsPerPageOptions]="[10, 25, 100]"
+          [rowsPerPageOptions]="[10, 25, 50, 100]"
         >
           <ng-template #header>
             <tr>

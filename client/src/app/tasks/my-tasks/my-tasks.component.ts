@@ -40,6 +40,10 @@ export class MyTasksComponent implements OnInit {
   today: any = new Date();
   hideCompletedTasks: boolean = false;
   @Input() hideDescription: boolean = false;
+  
+  get displayDuration(){
+    return this.formGroup.get(FormControlName.DISPLAY_DURATION);
+  }
 
   constructor(private taskService: TaskService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
 
@@ -50,7 +54,20 @@ export class MyTasksComponent implements OnInit {
       this.selectedAssignee = Assignee.Camille;
       localStorage.setItem("assignee", this.selectedAssignee);
     }
+
+    const selectedFrequency = localStorage.getItem("myTasksFrequency") as Frequency;
+    if(selectedFrequency != null){
+      this.displayDuration?.setValue(selectedFrequency);
+    } else {
+      this.displayDuration?.setValue(Frequency.MONTHLY);
+      this.setMyTaskFrequencyStorage(Frequency.MONTHLY);
+    }
+
     this.retrieveTaskByAssignee();
+  }
+
+  setMyTaskFrequencyStorage(frequency: Frequency){
+    localStorage.setItem("myTasksFrequency", frequency);
   }
 
   changeUser(){
@@ -95,7 +112,6 @@ export class MyTasksComponent implements OnInit {
 
   startNewPeriod(){
     this.openDialog('Créer une nouvelle période', CreatePeriodDialogComponent);
-    
   }
 
   get options(){
@@ -107,12 +123,8 @@ export class MyTasksComponent implements OnInit {
     ]
   }
 
-  
-  get displayDuration(){
-    return this.formGroup.get(FormControlName.DISPLAY_DURATION);
-  }
-
-  onChange($event: SelectChangeEvent) {
+  onFrequencySelectChange({value}: SelectChangeEvent) {
+    this.setMyTaskFrequencyStorage(value);
     this.retrieveTaskByAssignee();
   }
 

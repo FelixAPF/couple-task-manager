@@ -52,7 +52,6 @@ export class QuickCompleteTaskComponent implements OnInit {
   }
 
   quickComplete(){
-    console.log(this.formGroup)
     if(this.formGroup.invalid) return;
     
     this.subscription.add(this.taskService.quickComplete(this.taskId?.value, this.assignee?.value).subscribe(() => {

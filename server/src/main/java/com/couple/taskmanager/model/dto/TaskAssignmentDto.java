@@ -19,6 +19,7 @@ public class TaskAssignmentDto {
     private Assignee assignee;
     private Frequency frequency;
     private Date creationDate;
+    private Date startDate;
     private Date dueDate;
     private Room room;
     private Boolean completed;
@@ -32,6 +33,7 @@ public class TaskAssignmentDto {
         this.taskDescription = taskAssignment.getTask().getDescription();
         this.assignee = taskAssignment.getAssignee();
         this.frequency = taskAssignment.getTask().getFrequency();
+        this.startDate = taskAssignment.getStartDate();
         this.creationDate = taskAssignment.getCreationDate();
         this.dueDate = taskAssignment.getDueDate();
         this.completed = taskAssignment.getCompleted();

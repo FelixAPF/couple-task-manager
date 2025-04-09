@@ -41,7 +41,7 @@
         "BIWEEKLY": "Bi-mensuel",
         "MONTHLY": "Mensuel",
         "QUARTERLY": "Trimestrel",
-        "BIANNUALY": "Bi-annuel",
+        "BIYEARLY": "Bi-annuel",
         "YEARLY": "Annuel"
     }
 }

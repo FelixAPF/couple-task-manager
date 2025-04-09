@@ -1,3 +1,4 @@
+
 param(
     [Parameter(Mandatory=$true)]
     [string]$FilePath
@@ -10,46 +11,35 @@ if (-not (Test-Path $FilePath)) {
     Write-Error "File not found: '$FilePath'"
     exit 1
 }
-
 # Read the content of the file
 $content = Get-Content $FilePath
 Write-Host "Successfully read the content of '$FilePath'"
 
-# Regular expression to find the versionName line
-$regex = '^\s*versionName\s+"([^"]+)"'
+# Regular expression to find the versionCode line
+$regex = '^\s*versionCode\s+"([^"]+)"'
 
 # Find the line matching the pattern
-$versionNameLine = $content | Where-Object { $_ -match $regex }
+$versionCodeLine = $content | Where-Object { $_ -match $regex }
 
-if ($versionNameLine) {
-    Write-Host "Found the versionName line: '$versionNameLine'"
+if ($versionCodeLine) {
+    Write-Host "Found the versionCodeLine line: '$versionCodeLine'"
 
     # Extract the current version name
-    $currentVersion = $Matches[1]
-    Write-Host "Current versionName: '$currentVersion'"
+    $versionCode = $Matches[1]
+    Write-Host "Current versionCode: '$versionCode'"
 
     # Try to increment the version name
-    if ($currentVersion -match '^(\d+)\.(\d+)$') {
-        $major = [int]$Matches[1]
-        $minor = [int]$Matches[2]
-        $newMinor = $minor + 1
-        $newVersion = "$major.$newMinor"
+    if ($currentVersion -match '^(\d+)\') {
+        $newVersion = $currentVersion + 1
         Write-Host "Incremented minor version to: '$newVersion'"
-    } elseif ($currentVersion -match '^(\d+)$') {
-        $major = [int]$Matches[1]
-        $newVersion = "$($major + 1).0"
-        Write-Host "Incremented major version to: '$newVersion'"
-    } else {
-        Write-Warning "Could not automatically increment versionName '$currentVersion'. Please update it manually."
-        exit 0
     }
 
     # Create the new versionName line
-    $newVersionNameLine = '    versionName "' + $newVersion + '"'
+    $newVersionCodeLine = '    versionCode "' + $versionCodeLine + '"'
     Write-Host "New versionName line will be: '$newVersionNameLine'"
 
     # Replace the old line with the new line
-    $newContent = $content -replace $versionNameLine, $newVersionNameLine
+    $newContent = $content -replace $versionCodeLine, $newVersionCodeLine
 
     # Write the updated content back to the file
     $newContent | Set-Content $FilePath

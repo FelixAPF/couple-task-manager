@@ -39,7 +39,6 @@ export class MyTasksComponent implements OnInit {
   taskAssignments: TaskAssignment[] = [];
   today: any = new Date();
   hideCompletedTasks: boolean = false;
-  @Input() hideDescription: boolean = false;
   
   get displayDuration(){
     return this.formGroup.get(FormControlName.DISPLAY_DURATION);

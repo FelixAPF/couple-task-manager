@@ -28,7 +28,7 @@
             <tr>
               <td>{{ element.title }}</td>
               <td>{{ element.description }}</td>
-              <td>{{ element.frequency | frequencyPipe }}</td>
+              <td>{{ `FREQUENCY.${element.frequency}` | translate }}</td>
               <td>{{ element.room | roomPipe }}</td>
               <td>
                 <div class="flex justify-center flex-wrap gap-4" id="element.id">

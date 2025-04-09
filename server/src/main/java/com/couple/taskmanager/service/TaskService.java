@@ -135,6 +135,6 @@ public class TaskService implements IGenericService<Task> {
         return StreamUtils.ofNullable(taskRepository.retrieveTasksNotCompletedInLongTime(date))
                 .map(tuple -> new TaskWithCompletedDateV1(tuple.get(0, Task.class), tuple.get(1, Date.class)))
                 .toList();
-
     }
+
 }

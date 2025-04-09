@@ -24,7 +24,6 @@ export class DashboardComponent {
   todayDate: Date = new Date();
 
   hideCompletedTasks: boolean = false;
-  hideDescription: boolean = false;
   collapseCompletedTasks: string = '0';
   
 
@@ -35,7 +34,6 @@ export class DashboardComponent {
     if (storedValue !== null) {
       property = JSON.parse(storedValue);
     }
-    console.log(storedValue, property, propertyName, this.hideDescription);
   }
 
   ngOnInit(): void {
@@ -49,8 +47,6 @@ export class DashboardComponent {
     if (storedCollapseCompletedTasks !== null) {
       this.collapseCompletedTasks = JSON.parse(storedCollapseCompletedTasks) ? '0' : '1';
     }    
-    
-    this.initializeStoredDescription(this.hideDescription, "hideDescription");
 
     if(!this.hideCompletedTasks) {
       this.retrieveTaskAssignmentsByDate();
@@ -75,11 +71,6 @@ export class DashboardComponent {
     } else {
       this.taskAssignments = [];
     }
-  }
-  
-  onHideDescription(value: any){
-    this.hideDescription = value.checked;
-    this.saveHideStorage("hideDescription", value.checked);
   }
 
   refreshExpiredTasks(taskId: number){ 

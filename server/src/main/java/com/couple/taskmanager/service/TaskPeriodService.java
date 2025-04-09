@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class TaskPeriodService implements IGenericService<TaskPeriod> {
@@ -74,10 +75,9 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
     public TaskPeriod createPeriodManually(PeriodCreationRqstV1 rqst){
         Date periodEndDate = DateUtils.calculateDueDate(rqst.getStartDate(), rqst.getDuration());
-        Date startDate = rqst.getStartDate();
         List<Task> tasks = taskRepository.findAll();
 
-        TaskPeriod taskPeriod = generatePeriod(rqst, periodEndDate);
+        TaskPeriod taskPeriod = rqst.getPeriodId() == null ? generatePeriod(rqst, periodEndDate) : taskPeriodRepository.findById(rqst.getPeriodId()).orElseThrow(NoSuchElementException::new);
 
         Map<Long, Task> taskMap = StreamUtils.ofNullable(tasks).filter(t -> StreamUtils.ofNullable(rqst.getTaskAssignmentRqst())
                         .map(BasicTaskAssignmentRqstV1::getTaskId)
@@ -89,12 +89,12 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
         if(rqst.getCreateEachTaskOnce()){
             taskAssignments.addAll(StreamUtils.ofNullable(rqst.getTaskAssignmentRqst()).map((r) ->
-                    map(taskMap.get(r.getTaskId()), taskPeriod, r.getAssignee(), periodEndDate, startDate, rqst.getExplicitDueDate()))
+                    map(taskMap.get(r.getTaskId()), taskPeriod, r.getAssignee(), periodEndDate, taskPeriod.getStartDate(), rqst.getExplicitDueDate(), new Date()))
                     .toList());
         } else {
             taskAssignments.addAll(StreamUtils.ofNullable(rqst.getTaskAssignmentRqst())
-                    .flatMap(task -> occurenceButAtLeastOne(startDate, periodEndDate, rqst.getExplicitDueDate(), taskMap.get(task.getTaskId()).getFrequency()).stream()
-                            .map(dueDate -> map(taskMap.get(task.getTaskId()), taskPeriod,  task.getAssignee(), dueDate, startDate, rqst.getExplicitDueDate())))
+                    .flatMap(task -> occurenceButAtLeastOne(rqst.getStartDate(), periodEndDate, rqst.getExplicitDueDate(), taskMap.get(task.getTaskId()).getFrequency()).stream()
+                            .map(dueDate -> map(taskMap.get(task.getTaskId()), taskPeriod,  task.getAssignee(), dueDate, taskPeriod.getStartDate(), rqst.getExplicitDueDate(), new Date())))
                     .toList());
         }
 
@@ -106,12 +106,13 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         }
     }
 
-    private TaskAssignment map(Task task, TaskPeriod taskPeriod, Assignee assignee, Date dueDate, Date startDate, Date explicitDueDate){
+    private TaskAssignment map(Task task, TaskPeriod taskPeriod, Assignee assignee, Date dueDate, Date startDate, Date explicitDueDate, Date creationDate){
         TaskAssignment taskAssignment = new TaskAssignment();
         taskAssignment.setTask(task);
         taskAssignment.setAssignee(assignee);
         taskAssignment.setCompleted(false);
-        taskAssignment.setCreationDate(startDate);
+        taskAssignment.setStartDate(startDate);
+        taskAssignment.setCreationDate(creationDate == null ? new Date() : creationDate);
         taskAssignment.setDueDate(explicitDueDate == null ? dueDate : explicitDueDate);
         taskAssignment.setTaskPeriod(taskPeriod);
         return taskAssignment;
@@ -120,11 +121,10 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     public TaskPeriod createPeriodAutomatically(PeriodCreationRqstV1 rqst){
         Date periodEndDate = DateUtils.calculateDueDate(rqst.getStartDate(), rqst.getDuration());
 
-        List<TaskAssignment> taskAssignments = new ArrayList<>();
-
         TaskPeriod taskPeriod = generatePeriod(rqst, periodEndDate);
-        taskAssignments.addAll(generateTaskAssignments(Assignee.Felix,rqst, taskPeriod, periodEndDate));
-        taskAssignments.addAll(generateTaskAssignments(Assignee.Camille, rqst, taskPeriod, periodEndDate));
+        List<TaskAssignment> taskAssignments = Stream.of(Assignee.Felix, Assignee.Camille)
+                .flatMap(assignee -> generateTaskAssignments(assignee, rqst, taskPeriod, periodEndDate).stream())
+                .toList();
 
         if(taskPeriod.getId() == null){
             taskPeriod.setTaskAssignments(taskAssignments);
@@ -141,7 +141,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
         return taskList.getTasks().stream()
                 .flatMap(task -> occurenceInPeriod(startDate, periodEndDate, rqst.getExplicitDueDate(), task.getFrequency()).stream()
-                        .map(dueDate -> map(task, taskPeriod, assignee, dueDate, startDate, rqst.getExplicitDueDate())))
+                        .map(dueDate -> map(task, taskPeriod, assignee, dueDate, startDate, rqst.getExplicitDueDate(), new Date())))
                 .toList();
     }
 

@@ -23,7 +23,7 @@
         <tr>
           <td>{{ element.title }}</td>
           <td>{{ element.description }}</td>
-          <td>{{ element.frequency | frequencyPipe }}</td>
+          <td>{{ `FREQUENCY.${element.frequency}` | translate }}</td>
           <td>{{ element.room | roomPipe }}</td>
           <td><p-button (onClick)="unassign(element)" severity="warn" label="Désassigner"></p-button></td>
         </tr>

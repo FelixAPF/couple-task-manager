@@ -5,7 +5,6 @@ import { Subscription } from 'rxjs';
 import { SharedModule } from '../shared.module';
 import { MatTableDataSource } from '@angular/material/table';
 import { ConfirmationService, MenuItem, MenuItemCommandEvent, MessageService } from 'primeng/api';
-import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
 import { Router } from '@angular/router';
 import { RoomPipe } from '../shared/pipes/room-pipe';
 import { AddTaskComponent } from './add-task/add-task.component';
@@ -13,7 +12,7 @@ import { DialogService } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-tasks',
-  imports: [SharedModule, FrequencyPipe, RoomPipe],
+  imports: [SharedModule, RoomPipe],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.css',
   providers: [ConfirmationService, MessageService, DialogService]

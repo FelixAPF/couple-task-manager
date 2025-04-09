@@ -1,5 +1,24 @@
 apply plugin: 'com.android.application'
 
+def incrementVersionCode = {
+  def buildGradle = file('build.gradle')
+  def content = buildGradle.getText()
+  def versionCodeRegex = "(versionCode\\s+)(\\d+)"
+  def matcher = content =~ versionCodeRegex
+  if (matcher.find()) {
+    def oldVersionCode = matcher[0][2].toInteger()
+    def newVersionCode = oldVersionCode + 1
+    content = content.replaceFirst(versionCodeRegex, "\$1${newVersionCode}")
+    buildGradle.write(content)
+    println "Incremented versionCode to: $newVersionCode"
+  } else {
+    println "Warning: versionCode not found in build.gradle"
+  }
+}
+
+// Call the incrementVersionCode function during the configuration phase
+incrementVersionCode()
+
 android {
   namespace "com.couple.taskmanager"
   compileSdk rootProject.ext.compileSdkVersion
@@ -7,15 +26,14 @@ android {
     applicationId "com.couple.taskmanager"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode 1
-    versionName "1.8"
+    // versionCode will be read from the modified file
+    versionCode 3
+    versionName "1.11"
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')
     setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate)
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     aaptOptions {
-      // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
-      // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
       ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
   }
@@ -56,7 +74,6 @@ try {
   logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
 
-// Task to increment the versionName using the PowerShell script
 tasks.register('incrementVersionName') {
   doLast {
     def powershellPath = 'powershell'
@@ -79,6 +96,4 @@ tasks.register('incrementVersionName') {
     }
   }
 }
-
-// Run the incrementVersionName task before every build
 preBuild.dependsOn incrementVersionName

@@ -35,6 +35,9 @@ public class TaskAssignment {
     private Date creationDate;
 
     @NonNull
+    private Date startDate;
+
+    @NonNull
     private Date dueDate;
 
     @NonNull
@@ -42,11 +45,12 @@ public class TaskAssignment {
 
     private Date completedDate;
 
-    public TaskAssignment(@NonNull Task task, @NonNull TaskPeriod taskPeriod, @NonNull Assignee assignee, @NonNull Date creationDate, @NonNull Date dueDate) {
+    public TaskAssignment(@NonNull Task task, @NonNull TaskPeriod taskPeriod, @NonNull Assignee assignee, @NonNull Date creationDate, @NonNull Date startDate, @NonNull Date dueDate) {
         this.task = task;
         this.taskPeriod = taskPeriod;
         this.assignee = assignee;
         this.creationDate = creationDate;
+        this.startDate = startDate;
         this.dueDate = dueDate;
     }
 }

@@ -6,6 +6,11 @@ import { NavbarComponent } from './header/navbar/navbar.component';
 import { TranslateService } from '@ngx-translate/core';
 import { PrimeNG } from 'primeng/config';
 import { FooterNavbarComponent } from './footer-navbar/footer-navbar.component';
+import { StatusBar, StatusBarStyle, Style } from '@capacitor/status-bar';
+import { AppUpdate, AppUpdateInfo } from '@capawesome/capacitor-app-update';
+import { Platform } from '@angular/cdk/platform';
+import { App } from '@capacitor/app';
+
 
 @Component({
   selector: 'app-root',
@@ -14,17 +19,29 @@ import { FooterNavbarComponent } from './footer-navbar/footer-navbar.component';
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
+  public appUpdateInfo: AppUpdateInfo | undefined;
+
   title = 'client';
   swipeTransform = 'translateX(0)';
 
   isMobile = false;
 
-  constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router){
+  constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router, private platform: Platform){
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');
     this.primeng.ripple.set(true);
   }
+
+  get platformName(){
+    return this.platform;
+  }
+
+  version: string = '-';
+  versionName: string = '-';
+  versionBuild: string = '-';
+  versionId: string = '-';
+
 
   ngOnInit(): void {
     this.checkScreenWidth();
@@ -33,6 +50,9 @@ export class AppComponent implements OnInit {
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     this.checkScreenWidth();
+  }
+
+  ionViewWillEnter() {
   }
 
   checkScreenWidth() {

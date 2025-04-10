@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { SharedModule } from '../../shared.module';
 import { Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 @Component({
   selector: 'app-navbar',
@@ -11,6 +12,7 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class NavbarComponent {
   isMenuOpen = false;
+  nextBackgroundTheme = Style.Dark;
 
   constructor(private router: Router, private translate: TranslateService){}
 
@@ -21,5 +23,10 @@ export class NavbarComponent {
 toggleMenu(): void {
   this.isMenuOpen = !this.isMenuOpen;
 }
+
+  switchStyle(){
+    StatusBar.setStyle({ style: this.nextBackgroundTheme });
+    this.nextBackgroundTheme = this.nextBackgroundTheme === Style.Dark ? Style.Light : Style.Dark;
+  }
 
 }

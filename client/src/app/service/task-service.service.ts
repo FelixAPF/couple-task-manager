@@ -69,5 +69,9 @@ export class TaskService implements OnDestroy {
   quickComplete(taskId: number, assignee: Assignee): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assignee }));
   }
+
+  retrieveTaskHistory(taskId: number): Observable<TaskAssignmentDto[]> {
+    return this.http.get<TaskAssignmentDto[]>(`${this.baseUrl}/${taskId}/history`);
+  }
   
 }

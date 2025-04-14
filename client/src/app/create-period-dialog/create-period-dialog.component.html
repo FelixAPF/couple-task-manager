@@ -1,88 +1,137 @@
-<div>
-
-    <p-stepper [value]="1" class="basis-[50rem]">
-        <p-step-list>
-            <p-step [value]="1">Sélection de la période</p-step>
-            <p-step [value]="2">Assignation des tâches</p-step>
-        </p-step-list>
+<form [formGroup]="formGroup">
+    <p-stepper>
+      <!-- Step 1: Period Configuration -->
         <p-step-panels>
-            <p-step-panel [value]="1">
-                <ng-template #content let-activateCallback="activateCallback">
-                    <form [formGroup]="formGroup">
-                        <div class="d-block gap-4">
-                            <p-select [options]="taskPeriods"  class="input-width" optionValue="value" optionLabel="label" (onChange)="disableOtherFields($event)" placeholder="Choisir une période existante" formControlName="taskPeriod"></p-select>
-                        </div>
-                        <div>
-                            <p class="font-semibold">Date début de période:</p>
-                            <p-datepicker appendTo="body" size="large" class="dp-margin" placeholder="Date de début"formControlName="startDate" showIcon iconDisplay="input" />
-                        </div>
-                        <div class="flex flex-wrap gap-8 d-block">
-                        
-                            <p class="font-semibold">Durée de la période:</p>
-                            <div class="mb-8">
-                                <p-checkbox formControlName="durationType" [binary]="true" inputId="periodType" /> 
-                                <label for="weekly" class="ml-2">Choisir un deadline fixe</label>
-                            </div>
-                            <div *ngIf="!durationType?.value else explicitDate">
-                                <div class="flex items-center">
-                                    <p-radiobutton name="duration" size="large" [value]="FREQUENCY.WEEKLY" formControlName="duration" inputId="weekly" />
-                                    <label for="weekly" class="ml-2">1 semaine</label>
-                                </div>                    
-                    
-                                <div class="flex items-center">
-                                    <p-radiobutton name="duration" size="large" [value]="FREQUENCY.BIWEEKLY" formControlName="duration" inputId="biweekly" />
-                                    <label for="biweekly" class="ml-2">2 semaines</label>
-                                </div>
-                            
-                                <div class="flex items-center">
-                                    <p-radiobutton name="duration" size="large" [value]="FREQUENCY.MONTHLY" formControlName="duration" inputId="monthly" />
-                                    <label for="monthly" class="ml-2">1 mois</label>
-                                </div>
-                                <div class="flex items-center">
-                                    <p-radiobutton name="duration" size="large" [value]="FREQUENCY.BIYEARLY" formControlName="duration" inputId="biyearly" />
-                                    <label for="monthly" class="ml-2">6 mois</label>
-                                </div>
-                            
-                                <div class="flex items-center">
-                                    <p-radiobutton name="duration" size="large" [value]="FREQUENCY.YEARLY" formControlName="duration" inputId="yearly" />
-                                    <label for="yearly" class="ml-2">1 an</label>
-                                </div>
-                            </div>
-                            <ng-template #explicitDate>
-                                <p-datepicker appendTo="body" size="large" class="dp-margin" placeholder="Date de fin" formControlName="explicitDueDate" showIcon iconDisplay="input" />
-                            </ng-template>
-                        </div>
-                
-                        <div class="mb-8 gap-8">
-                            <p class="font-semibold">Méthode d'assignation des tâches</p>
-                            <div class="flex items-center">
-                                <p-radiobutton name="creationMethod" size="large" [value]="CREATION_METHOD.AUTOMATIC" formControlName="creationMethod" inputId="automatic" />
-                                <label for="automatic" class="ml-2">Automatiquement créer les tâches attitrées</label>
-                            </div>
-                        
-                            <div class="flex items-center">
-                                <p-radiobutton name="creationMethod" size="large" [value]="CREATION_METHOD.MANUAL" formControlName="creationMethod" inputId="manual" />
-                                <label for="manual" class="ml-2">Manuellement sélectionner les tâches à créer</label>
-                            </div>
-                        </div>
-                        <div class="button-space">
-                            <p-button *ngIf="isAutomaticCreation else nextButton" size="large" (onClick)="submit()" label="Soumettre"></p-button>
-                            <ng-template #nextButton>
-                                <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" size="large" (onClick)="activateSecondFormGroup(activateCallback)" />
-                            </ng-template>  
-                            <p-button severity="secondary" size="large" (onClick)="close()" label="Annuler"></p-button>
-                        </div>
-                    </form>
+            <p-step-panel header="Configuration Période" [hidden]="manualStepActivated">
+                <ng-template pTemplate="content" let-activateCallback="activateCallback" let-index="index">
+                <div class="p-fluid flex flex-col gap-5 p-4"> <!-- Main content area -->
+        
+                    <!-- Existing Period Selection -->
+                    <div class="field flex flex-col gap-2">
+                    <label for="taskPeriod" class="font-semibold">Période Existante (Optionnel)</label>
+                    <p-select
+                        id="taskPeriod"
+                        formControlName="taskPeriod"
+                        [options]="taskPeriods"
+                        placeholder="Utiliser une période existante ou laisser vide pour créer"
+                        optionLabel="label"
+                        optionValue="value"
+                        [showClear]="true"
+                        (onChange)="disableOtherFields($event)"
+                        appendTo="body">
+                    </p-select>
+                    <small class="text-surface-500 dark:text-surface-400">Si sélectionné, les options de durée et date de début seront ignorées.</small>
+                    </div>
+        
+                    <!-- Start Date -->
+                    <div class="field flex flex-col gap-2">
+                    <label for="startDate" class="font-semibold">Date de début</label>
+                    <p-datePicker
+                        id="startDate"
+                        formControlName="startDate"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        [disabled]="existingPeriodSelected"
+                        appendTo="body">
+                    </p-datePicker>
+                    <small *ngIf="formGroup.get('startDate')?.invalid && formGroup.get('startDate')?.touched" class="p-error block">
+                        La date de début est requise.
+                    </small>
+                    </div>
+        
+                    <!-- Duration Type -->
+                    <div class="field flex flex-col gap-2">
+                    <label class="font-semibold">Type de Durée</label>
+                    <p-selectButton
+                        [options]="[{label: 'Période', value: DURATION_TYPE.PERIOD}, {label: 'Date Explicite', value: DURATION_TYPE.EXPLICIT}]"
+                        formControlName="durationType"
+                        optionLabel="label"
+                        optionValue="value"
+                        [disabled]="existingPeriodSelected"
+                        (onChange)="onDurationTypeChange()">
+                    </p-selectButton>
+                    </div>
+        
+                    <!-- Duration (Frequency) - Conditional -->
+                    <div *ngIf="durationType?.value === DURATION_TYPE.PERIOD && !existingPeriodSelected" class="field flex flex-col gap-2">
+                    <label for="duration" class="font-semibold">Durée de la période</label>
+                    <p-select
+                        id="duration"
+                        formControlName="duration"
+                        [options]="frequencies"
+                        placeholder="Choisir la durée"
+                        optionLabel="label"
+                        optionValue="value"
+                        appendTo="body">
+                    </p-select>
+                    <small *ngIf="formGroup.get('duration')?.invalid && formGroup.get('duration')?.touched" class="p-error block">
+                        La durée est requise pour ce type.
+                    </small>
+                    </div>
+        
+                    <!-- Explicit Due Date - Conditional -->
+                    <div *ngIf="durationType?.value === DURATION_TYPE.EXPLICIT && !existingPeriodSelected" class="field flex flex-col gap-2">
+                    <label for="explicitDueDate" class="font-semibold">Date d'échéance explicite</label>
+                    <p-datePicker
+                        id="explicitDueDate"
+                        formControlName="explicitDueDate"
+                        dateFormat="dd/mm/yy"
+                        [showIcon]="true"
+                        appendTo="body">
+                    </p-datePicker>
+                    <small *ngIf="formGroup.get('explicitDueDate')?.invalid && formGroup.get('explicitDueDate')?.touched" class="p-error block">
+                        La date d'échéance est requise pour ce type.
+                    </small>
+                    </div>
+        
+                    <!-- Creation Method -->
+                    <div class="field flex flex-col gap-2">
+                    <label class="font-semibold">Méthode de Création des Tâches</label>
+                    <p-selectButton
+                        [options]="[{label: 'Automatique', value: CREATION_METHOD.AUTOMATIC}, {label: 'Manuelle', value: CREATION_METHOD.MANUAL}]"
+                        formControlName="creationMethod"
+                        optionLabel="label"
+                        optionValue="value">
+                    </p-selectButton>
+                    </div>
+        
+                </div>
+                <!-- Footer for Step 1 -->
+                <div class="flex justify-end gap-2 p-4 border-t border-surface-200 dark:border-surface-700 mt-2">
+                    <p-button type="button" label="Annuler" severity="secondary" (click)="close()"></p-button>
+                    <!-- If Automatic, submit directly. If Manual, go to next step -->
+                    <p-button
+                    *ngIf="isAutomaticCreation"
+                    type="button"
+                    label="Créer (Auto)"
+                    icon="pi pi-check"
+                    (click)="submit()"
+                    [disabled]="formGroup.invalid">
+                    </p-button>
+                    <p-button
+                    *ngIf="!isAutomaticCreation"
+                    type="button"
+                    label="Suivant (Assignation)"
+                    icon="pi pi-arrow-right"
+                    iconPos="right"
+                    (click)="activateSecondFormGroup(activateCallback)"
+                    [disabled]="formGroup.invalid"> <!-- Basic check, might need refinement -->
+                    </p-button>
+                </div>
                 </ng-template>
             </p-step-panel>
-    
-            <p-step-panel [value]="2">
-                <ng-template #content let-activateCallback="activateCallback">
-                    <app-task-assignment [showCreateEachTaskOnce]="true" (submit)="submit($event)" (cancel)="close()"></app-task-assignment>
+        
+            <!-- Step 2: Manual Assignment (Only shown if method is Manual) -->
+            <p-step-panel header="Assignation Manuelle" [hidden]="!manualStepActivated">
+                <ng-template pTemplate="content" let-prevCallback="prevCallback" let-index="index">
+                    <!-- Embed the task assignment component -->
+                    <app-task-assignment
+                    [showCreateEachTaskOnce]="true"
+                    (submit)="submit($event)"
+                    (cancel)="handleManualCancel()"> <!-- Use prevCallback to go back -->
+                    </app-task-assignment>
                 </ng-template>
             </p-step-panel>
         </p-step-panels>
     </p-stepper>
-    
-    
-</div>
+  </form>

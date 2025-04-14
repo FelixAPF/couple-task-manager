@@ -1,12 +1,13 @@
 import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { SharedModule } from '../../shared.module';
 import { Task } from '../../model/task';
-import { FormArray, FormBuilder, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TaskWithAssignee } from '../../create-period-dialog/create-period-dialog.component';
 import { Assignee } from '../../model/task-period';
 import { Observable, Subscription, timer } from 'rxjs';
 import { TaskAssignmentService } from '../../service/task-assignment.service';
 import { CheckboxChangeEvent } from 'primeng/checkbox';
+import { RoomPipe } from '../../shared/pipes/room-pipe';
 
 enum FormControlName {
   TASK_ID = "taskId",
@@ -26,7 +27,7 @@ export interface TasksInputParameter {
 
 @Component({
   selector: 'app-task-assignment',
-  imports: [SharedModule, ReactiveFormsModule],
+  imports: [SharedModule, ReactiveFormsModule, RoomPipe, FormsModule],
   templateUrl: './task-assignment.component.html',
   styleUrl: './task-assignment.component.css'
 })
@@ -42,7 +43,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
 
   @Output() submit: EventEmitter<{ taskWithAssignees: TaskWithAssignee[], createEachOnce: boolean }> = new EventEmitter();
   @Output() cancel: EventEmitter<boolean> = new EventEmitter();
-  
+
   constructor(private taskAssignmentService: TaskAssignmentService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
@@ -54,7 +55,20 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
   ngOnDestroy(){
     this.subscription.unsubscribe();
   }
-  
+
+  log(rowIndex:any){
+    console.log(rowIndex);
+  }
+
+  sortByAssignee(): void {
+    this.taskAssignments.controls.sort((a, b) => {
+      const assigneeA = a.get(FormControlName.ASSIGNEE)?.value;
+      const assigneeB = b.get(FormControlName.ASSIGNEE)?.value;
+      return (assigneeA > assigneeB) ? 1 : -1;
+    });
+    this.cdr.detectChanges();
+  }
+
   loadData(){
     this.subscription.add(
       this.taskAssignmentService.getTaskAssignments().subscribe((data) => {
@@ -73,7 +87,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
     [FormControlName.TASK_ASSIGNMENTS]: this.fb.array([]),
     [FormControlName.CREATE_EACH_TASK_ONCE]: [false, []]
   });
-  
+
   patchValues(taskLink: TaskWithAssignee) {
     return this.fb.group({
       [FormControlName.TASK_TITLE]: [taskLink?.task.title || ""],
@@ -82,12 +96,14 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
       [FormControlName.FREQUENCY]: [taskLink?.task.frequency || ""],
       [FormControlName.TASK_ID]: [taskLink?.task.id],
       [FormControlName.ASSIGNEE]: [taskLink?.assignee || null]
-    })    
+    });
   }
 
-  getFormControl(index: number, controlName: string): FormControl {
-    const control = this.taskAssignments.at(index)?.get(controlName);
-    return control as FormControl;
+  getFormControl(id: number, controlName: string): FormControl {
+    return this.taskAssignments.controls.find((control) => {
+      const taskId = control.get(FormControlName.TASK_ID)?.value;
+      return taskId === id;
+    })?.get(controlName) as FormControl;
   }
 
   onSubmit(){
@@ -108,6 +124,6 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
     this.cancel.emit(true);
   }
 
-  
+
 
 }

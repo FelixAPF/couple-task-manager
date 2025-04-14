@@ -1,44 +1,78 @@
-<div class="p-4 bg-white rounded-md shadow-md">
-    <div class="flex items-center mb-4">
-      <label for="hideCompletedTasksCB" class="mr-4 text-sm font-medium text-gray-700">
-        Cacher les tâches complétées aujourd'hui
-      </label>
+<!-- dashboard.component.html -->
+<div class="container p-4 mx-auto flex flex-col gap-6"> <!-- Main container with padding and gap between sections -->
+
+  <!-- Section 1: Controls (Hide Completed Checkbox) -->
+  <div class="p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+    <div class="flex items-center gap-3">
       <p-checkbox
         inputId="hideCompletedTasksCB"
         [(ngModel)]="hideCompletedTasks"
         (onChange)="onHideCompletedTasks($event)"
         [binary]="true"
       ></p-checkbox>
+      <label for="hideCompletedTasksCB" class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">
+        Cacher les tâches complétées aujourd'hui
+      </label>
+      <!-- Optional: Add an icon for visual cue -->
+      <i class="pi pi-eye-slash ml-auto text-surface-500 dark:text-surface-400"></i>
     </div>
-  
-    <div class="text-center">
-        <p-accordion value="0" 
-        class="mb-4"
-        *ngIf="expiredTasks?.length">
-            <p-accordion-panel value="0">  
-                <p-accordion-header class="text-2xl font-semibold">Tâches expirées</p-accordion-header>
-                <p-accordion-content>
-                    <app-warning-tasks-due [expiredTasks]="expiredTasks"></app-warning-tasks-due>
-                </p-accordion-content>
-            </p-accordion-panel>
-        </p-accordion>
-    </div>
-
-  
-    <div class="text-center">
-    <p-accordion [value]="collapseCompletedTasks"  (onClose)="saveHideStorage('collapseCompletedTasks',false)" (onOpen)="saveHideStorage('collapseCompletedTasks',true)"  *ngIf="taskAssignments?.length">
-        <p-accordion-panel value="0">
-            <p-accordion-header class="text-2xl font-semibold">Tâches complétées <p-badge [value]="taskAssignments.length" severity="success" /></p-accordion-header>
-            <p-accordion-content>
-                <app-completed-tasks [taskAssignments]="taskAssignments"></app-completed-tasks>
-            </p-accordion-content>
-        </p-accordion-panel>
-    </p-accordion>
-    </div>
-  
-    <p-card>
-      <div class="text-center">
-        <app-my-tasks (taskCompleteEmitter)="refreshExpiredTasks($event)"></app-my-tasks>
-      </div>
-    </p-card>
   </div>
+
+  <!-- Section 2: Expired Tasks Accordion -->
+  <!-- Only show if there are expired tasks -->
+  <div *ngIf="expiredTasks?.length">
+    <p-accordion>
+      <!-- Use value="0" to potentially have it open by default, or remove/manage state if needed -->
+      <p-accordion-panel value="0">
+        <p-accordion-header styleClass="dashboard-accordion-header">
+          <!-- Custom Header Content -->
+          <div class="flex items-center justify-between w-full px-1 py-1"> <!-- Adjusted padding -->
+            <div class="flex items-center gap-2">
+              <i class="pi pi-exclamation-triangle text-red-500 dark:text-red-400 text-xl"></i>
+              <span class="text-lg font-semibold text-red-600 dark:text-red-300">Tâches expirées</span>
+            </div>
+            <p-badge [value]="expiredTasks.length" severity="danger" styleClass="ml-auto"></p-badge>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <!-- Embed the styled warning component -->
+          <app-warning-tasks-due [expiredTasks]="expiredTasks"></app-warning-tasks-due>
+        </p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
+  </div>
+
+  <!-- Section 3: Completed Tasks Accordion -->
+  <!-- Only show if there are completed tasks AND they are not hidden by the checkbox -->
+  <div *ngIf="taskAssignments?.length && !hideCompletedTasks">
+    <p-accordion [value]="collapseCompletedTasks" (onClose)="saveHideStorage('collapseCompletedTasks',false)" (onOpen)="saveHideStorage('collapseCompletedTasks',true)">
+       <!-- Use value="0" to potentially have it open by default, or manage state -->
+       <p-accordion-panel value="0">
+        <p-accordion-header styleClass="dashboard-accordion-header">
+           <!-- Custom Header Content -->
+           <div class="flex items-center justify-between w-full px-1 py-1"> <!-- Adjusted padding -->
+            <div class="flex items-center gap-2">
+              <i class="pi pi-check-circle text-green-500 dark:text-green-400 text-xl"></i>
+              <span class="text-lg font-semibold text-green-600 dark:text-green-300">Tâches complétées aujourd'hui</span>
+            </div>
+            <p-badge [value]="taskAssignments.length" severity="success" styleClass="ml-auto"></p-badge>
+          </div>
+        </p-accordion-header>
+        <p-accordion-content>
+          <!-- Embed the styled completed tasks component -->
+          <app-completed-tasks [taskAssignments]="taskAssignments"></app-completed-tasks>
+        </p-accordion-content>
+      </p-accordion-panel>
+    </p-accordion>
+  </div>
+
+  <!-- Section 4: Active Tasks -->
+  <div>
+    <!-- Optional: Add a title for this main section -->
+    <!-- <h2 class="text-xl font-semibold mb-3 text-surface-800 dark:text-surface-100">Mes Tâches Actives</h2> -->
+
+    <!-- The app-my-tasks component now contains the p-card and styled list internally -->
+    <app-my-tasks (taskCompleteEmitter)="refreshExpiredTasks($event)"></app-my-tasks>
+  </div>
+
+</div>

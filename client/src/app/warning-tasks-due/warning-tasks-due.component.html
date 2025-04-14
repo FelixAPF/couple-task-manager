@@ -1,8 +1,34 @@
-<div>
-    <div class="d-block text-center">
-        <p-message severity="warn" class="text-center mt-8" *ngFor="let task of expiredTasks">{{task.task.title}}, 
-            <span *ngIf="task.completedDate else neverCompleted"> Complété pour la dernière fois le {{task.completedDate | date: 'longDate'}}</span> 
-            <ng-template #neverCompleted> Jamais complété</ng-template>
-        </p-message>
+<div class="flex flex-col gap-1.5"> <!-- Slightly reduced gap between items -->
+
+    <!-- Optional: Message if list is somehow empty despite accordion check -->
+    <div *ngIf="!expiredTasks || expiredTasks.length === 0" class="text-center text-xs text-surface-500 dark:text-surface-400 p-2 border rounded-md bg-surface-50 dark:bg-surface-800"> <!-- Reduced padding and font size -->
+      <i class="pi pi-check-circle mr-1"></i> Aucune tâche expirée pour le moment.
     </div>
-</div>
+
+    <!-- List of expired tasks -->
+    <div *ngFor="let task of expiredTasks">
+      <!-- Using a simple div with reduced padding -->
+      <div class="expired-task-item flex items-center gap-2 px-2 py-1 border rounded-md shadow-sm bg-white dark:bg-surface-800 border-l-4 border-red-500 dark:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150">
+        <!-- Reduced padding (px-2 py-1) and gap (gap-2) -->
+
+        <!-- Task Details (Compact) -->
+        <div class="flex-grow min-w-0"> <!-- min-w-0 prevents text overflow -->
+          <!-- Task Title (Smaller Font) -->
+          <p class="text-sm font-medium text-surface-800 dark:text-surface-100 truncate" [pTooltip]="task.task.title" tooltipPosition="top"> <!-- Kept text-sm, changed font-semibold to font-medium -->
+            {{ task.task.title }}
+          </p>
+          <!-- Due Date (Very Small Font) -->
+          <div class="text-xs text-red-600 dark:text-red-400 flex items-center gap-1"> <!-- Removed mt-0.5 -->
+            <i class="pi pi-calendar text-xs"></i> <!-- Matched icon size to text -->
+            <span>Dernière fois: {{ task.completedDate ? (task.completedDate | date:'dd/MM/yy') : ' Jamais'}}</span> <!-- Shortened date format -->
+          </div>
+        </div>
+
+        <!-- Alert Icon (Smaller) -->
+        <div class="ml-auto flex-shrink-0">
+           <i class="pi pi-exclamation-triangle text-red-500 dark:text-red-400 text-base" pTooltip="Cette tâche est en retard" tooltipPosition="left"></i> <!-- Reduced icon size to text-base -->
+        </div>
+
+      </div>
+    </div>
+  </div>

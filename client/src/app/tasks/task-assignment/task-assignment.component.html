@@ -1,59 +1,117 @@
-<div>
-
-    <div #tableContainer [formGroup]="secondFormGroup">
-        <div class="mb-8" *ngIf="showCreateEachTaskOnce">
-            <p-checkbox formControlName="createEachTaskOnce" [binary]="true" inputId="createEachTaskOnce" /> 
-            <label for="createEachTaskOnce" class="ml-2">Créer les tâches seulement une fois</label>
+<form [formGroup]="secondFormGroup" (ngSubmit)="onSubmit()">
+    <div class="flex flex-col gap-4"> <!-- Main container -->
+  
+      <!-- Top Controls -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3 p-3 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+        <!-- Show Description Toggle -->
+        <div class="flex items-center gap-2">
+          <p-checkbox
+            [(ngModel)]="showDescription"
+            [ngModelOptions]="{standalone: true}"
+            [binary]="true"
+            inputId="showDescCheck">
+          </p-checkbox>
+          <label for="showDescCheck" class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">
+            Afficher descriptions
+          </label>
         </div>
-        <div class="mb-8">
-            <p-checkbox [binary]="true"  (onChange)="onChange($event)" inputId="showDescription" /> 
-            <label for="showDescription" class="ml-2">Afficher la description</label>
+  
+        <!-- Create Each Task Once Toggle (Conditional) -->
+        <div *ngIf="showCreateEachTaskOnce" class="flex items-center gap-2">
+          <p-checkbox
+            formControlName="createEachTaskOnce"
+            [binary]="true"
+            inputId="createOnceCheck">
+          </p-checkbox>
+          <label for="createOnceCheck" class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">
+            Créer chaque tâche 1 seule fois
+          </label>
+          <i class="pi pi-info-circle text-surface-500 dark:text-surface-400 ml-1" pTooltip="Si coché, même si une tâche est assignée aux deux, elle ne sera créée qu'une fois (assignée au premier trouvé)." tooltipPosition="top"></i>
         </div>
-        <p-table
-        class="table-resize"
-        [value]="taskAssignments.value"
-        [paginator]="true"
-        [rows]="50"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        [rowsPerPageOptions]="[10, 25,50, 75, 100]"
-        >
-        <ng-template #header>
-            <tr>
-            <th style="width:25%">Titre</th>
-            <th *ngIf="showDescription" style="width:30%">Description</th>
-            <th pSortableColumn="room" style="width:15%">Pièce</th>
-            <th pSortableColumn="frequency" style="width:10%">Fréquence</th>
-            <th style="width:20%">Assigner</th>
-            </tr>
-        </ng-template>
-        <ng-template #body let-element let-rowIndex="rowIndex">
-            <tr>
-            <td>{{ element.title }}</td>
-            <td *ngIf="showDescription">{{ element.description }}</td>
-            <td>{{ `ROOM.${element.room}` | translate }}</td>
-            <td>{{ `FREQUENCY.${element.frequency}` | translate }}</td>
-            <td>
-                <div class="card flex justify-center flex-wrap gap-4">
-                    <div class="flex flex-wrap gap-4">
-                        <div class="flex items-center">           
-                            <p-radiobutton name="selected-{{rowIndex}}" [value]="ASSIGNEE.Camille" [formControl]="getFormControl(rowIndex, 'assignee')" inputId="selected1-{{rowIndex}}" />
-                            <label for="selected1-{{rowIndex}}" class="ml-2">{{ASSIGNEE.Camille }}</label>
-                        </div>                    
-    
-                        <div class="flex items-center">
-                            <p-radiobutton name="selected-{{rowIndex}}" [value]="ASSIGNEE.Felix"  [formControl]="getFormControl(rowIndex, 'assignee')" inputId="selected2-{{rowIndex}}" />
-                            <label for="selected2-{{rowIndex}}" class="ml-2">{{ASSIGNEE.Felix }}</label>
-                        </div>
-                    </div>
+  
+        <!-- Sort Button (Optional) -->
+        <p-button
+          type="button"
+          icon="pi pi-sort-alt"
+          label="Trier"
+          styleClass="p-button-sm p-button-outlined p-button-secondary"
+          (click)="sortByAssignee()"
+          pTooltip="Trier par assigné"
+          tooltipPosition="top">
+        </p-button>
+      </div>
+  
+      <!-- Task Assignment List -->
+      <div formArrayName="taskAssignments" class="flex flex-col gap-4">
+        <!-- Iterate through the FormArray -->
+        <div *ngFor="let taskControl of taskAssignments.controls; let i = index" [formGroupName]="i">
+          <p-card [styleClass]="'task-assign-card shadow-sm hover:shadow-md transition-shadow duration-150 border-l-4 border-primary-500 dark:border-primary-400'">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+  
+              <!-- Task Details -->
+              <div class="flex-grow min-w-0">
+                <!-- Title -->
+                <p class="text-base font-medium text-surface-800 dark:text-surface-100 mb-0.5 truncate" [pTooltip]="taskControl.get('title')?.value" tooltipPosition="top">
+                  {{ taskControl.get('title')?.value }}
+                </p>
+                <!-- Metadata (Room, Frequency) - Smaller -->
+                <div class="text-xs text-surface-600 dark:text-surface-400 flex flex-wrap items-center gap-x-3 gap-y-0.5 mb-1">
+                  <span class="flex items-center gap-1" pTooltip="Pièce" tooltipPosition="bottom">
+                    <i class="pi pi-map-marker text-primary-500 dark:text-primary-400"></i>
+                    <span>{{ taskControl.get('room')?.value | roomPipe }}</span>
+                  </span>
+                   <span class="flex items-center gap-1" pTooltip="Fréquence" tooltipPosition="bottom">
+                    <i class="pi pi-sync text-primary-500 dark:text-primary-400"></i>
+                    <span>{{ `FREQUENCY.${taskControl.get('frequency')?.value}` | translate }}</span>
+                  </span>
                 </div>
-            </td>
-            </tr>
-        </ng-template>
-        </p-table>
+                <!-- Description (Conditional) -->
+                <p *ngIf="showDescription" class="text-xs text-surface-500 dark:text-surface-500 mt-1 italic">
+                  {{ taskControl.get('description')?.value }}
+                </p>
+              </div>
+  
+              <!-- Assignee Selection -->
+              <div class="flex-shrink-0 w-full sm:w-auto sm:ml-auto">
+                <p-selectButton
+                  [options]="[
+                    { label: 'Felix', value: ASSIGNEE.Felix, icon: 'pi pi-user' },
+                    { label: 'Camille', value: ASSIGNEE.Camille, icon: 'pi pi-user' },
+                    { label: 'Aucun', value: null, icon: 'pi pi-ban' }
+                  ]"
+                  formControlName="assignee"
+                  optionLabel="label"
+                  optionValue="value"
+                  [allowEmpty]="true"
+                  styleClass="assignee-select-button"> <!-- Add custom class if needed -->
+                   <!-- Optional: Template for icons if needed, but label might suffice -->
+                   <!-- <ng-template let-item pTemplate="item">
+                       <i [class]="item.icon" style="font-size: 1rem; margin-right: 0.5rem;"></i>
+                       <span>{{item.label}}</span>
+                   </ng-template> -->
+                </p-selectButton>
+              </div>
+  
+            </div>
+          </p-card>
+        </div>
+      </div>
+  
+      <!-- Footer Actions -->
+      <div class="flex justify-end gap-2 p-4 border-t border-surface-200 dark:border-surface-700 mt-2">
+        <p-button
+          type="button"
+          label="Annuler"
+          severity="secondary"
+          (click)="onCancel()">
+        </p-button>
+        <p-button
+          type="submit"
+          label="Sauvegarder Assignations"
+          icon="pi pi-check">
+          <!-- Add [disabled]="!secondFormGroup.valid" if needed -->
+        </p-button>
+      </div>
+  
     </div>
-    <div class="flex pt-6 justify-between">
-        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="onCancel()" />
-        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="onSubmit()" />
-    </div>
-</div>
+  </form>

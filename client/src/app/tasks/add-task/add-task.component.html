@@ -1,73 +1,99 @@
-
-
-<div class="container flex flex-col gap-6 w-full sm:w-auto">
-    <div>
-        <form [formGroup]="formGroup" class="form-container" (submit)="save()">
-          <div class="card grid gap-4">
-            <p-inputgroup>
-              <p-inputgroup-addon>
-                <i class="pi pi-user"></i>
-              </p-inputgroup-addon>
-              <input pInputText formControlName="title" placeholder="Titre" />
-            </p-inputgroup>
-
-            <p-inputgroup>
-              <p-inputgroup-addon>
-                <i class="pi pi-user"></i>
-              </p-inputgroup-addon>
-              <input pInputText formControlName="description" placeholder="Description" />
-            </p-inputgroup>
+<form [formGroup]="formGroup" (ngSubmit)="save()">
+    <div class="flex flex-col"> <!-- Main container for content + footer -->
+  
+      <!-- Dialog Content Area -->
+      <div class="p-fluid flex flex-col gap-5 p-4">
+  
+        <!-- Dialog Title -->
+        <h3 class="text-xl font-semibold text-center mb-1 text-surface-800 dark:text-surface-100">
+          Ajouter une tâche
+        </h3>
+  
+        <!-- Title Input -->
+        <div class="field flex flex-col gap-2">
+          <label for="title" class="font-semibold">Titre</label>
+          <p-iconField iconPosition="left" class="w-full"> <!-- Added w-full -->
+            <p-inputIcon class="pi pi-tag"></p-inputIcon>
+            <input id="title" type="text" pInputText formControlName="title" placeholder="Nom de la tâche" />
+          </p-iconField>
+          <small *ngIf="formGroup.get('title')?.invalid && formGroup.get('title')?.touched" class="p-error block">
+            Le titre est requis.
+          </small>
+        </div>
+  
+        <!-- Description Input -->
+        <div class="field flex flex-col gap-2">
+          <label for="description" class="font-semibold">Description (Optionnel)</label>
+          <!-- Add w-full to p-iconField -->
+          <p-iconField iconPosition="left" class="w-full">
+             <p-inputIcon class="pi pi-align-left"></p-inputIcon>
+             <textarea
+               id="description"
+               pTextarea 
+               formControlName="description"
+               placeholder="Détails supplémentaires..."
+               rows="5"
+               cols="35"
+               [autoResize]="true">
+               <!-- Removed w-full from textarea itself, let p-fluid handle it -->
+             </textarea>
+          </p-iconField>
+          <!-- No validation needed for optional field -->
+        </div>
+  
+        <!-- Room Selection -->
+        <div class="field flex flex-col gap-2">
+          <label for="room" class="font-semibold">Pièce</label>
+          <p-select
+            id="room"
+            [options]="rooms"
+            optionValue="value"
+            optionLabel="label"
+            formControlName="room"
+            placeholder="Choisir une pièce"
+            appendTo="body">
+          </p-select>
+          <small *ngIf="formGroup.get('room')?.invalid && formGroup.get('room')?.touched" class="p-error block">
+            La sélection d'une pièce est requise.
+          </small>
+        </div>
+  
+        <!-- Frequency Selection -->
+        <div class="field flex flex-col gap-2">
+          <label class="font-semibold">Fréquence</label>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-3 p-3 border rounded-md bg-surface-50 dark:bg-surface-700/50 border-surface-200 dark:border-surface-700">
+            <div *ngFor="let freq of frequencies" class="flex items-center">
+              <p-radiobutton
+                [name]="FORM_CONTROL_NAME.FREQUENCY"
+                [value]="freq.value"
+                [formControlName]="FORM_CONTROL_NAME.FREQUENCY"
+                [inputId]="freq.value">
+              </p-radiobutton>
+              <label [for]="freq.value" class="ml-2 cursor-pointer text-sm">{{ freq.label }}</label>
+            </div>
           </div>
-
-            <label for="room" class="block font-semibold mb-2">Pièce</label>
-            <div class="flex flex-wrap gap-4">
-                <p-select [options]="rooms" id="room" appendTo="body" class="input-width block" optionValue="value" optionLabel="label" formControlName="room"></p-select>
-            </div>
-
-            <div>
-                <!-- <div *ngFor="let frequence of frequencies; let i = index">
-                    <div>
-                        <p-radiobutton name="frequency" [value]="frequence.value" formControlName="frequency" [inputId]="'frequence-' + i" />
-                        <label [for]="'frequence-' + i" class="ml-2">{{ frequence.label }}</label>
-                    </div>
-                </div>      -->
-                <label for="frequency" class="block font-semibold mb-2">Fréquence</label>
-                <div id="frequency">
-                    <div>
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.DAILY" formControlName="frequency" [inputId]="FREQUENCY.DAILY" />
-                        <label [for]="FREQUENCY.DAILY">Quotidien</label>
-                    </div>
-                    <div>
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.WEEKLY" formControlName="frequency" [inputId]="FREQUENCY.WEEKLY" />
-                        <label [for]="FREQUENCY.WEEKLY">Hebdomadaire</label>
-                    </div>
-                    <div>
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIWEEKLY" formControlName="frequency" [inputId]="FREQUENCY.BIWEEKLY" />
-                        <label [for]="FREQUENCY.BIWEEKLY">Bi-mensuel</label>
-                    </div>
-                    <div>
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.MONTHLY" formControlName="frequency" [inputId]="FREQUENCY.MONTHLY" />
-                        <label [for]="FREQUENCY.MONTHLY">Mensuel</label>
-                    </div>
-                    <div>
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.QUARTERLY" formControlName="frequency" [inputId]="FREQUENCY.QUARTERLY" />
-                        <label [for]="FREQUENCY.QUARTERLY">Trimestriel</label>
-                    </div>
-                    <div>
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.BIYEARLY" formControlName="frequency" [inputId]="FREQUENCY.BIYEARLY" />
-                        <label [for]="FREQUENCY.BIYEARLY">Bi-annuel</label>
-                    </div>
-                    <div>
-                        <p-radiobutton name="frequency" [value]="FREQUENCY.YEARLY" formControlName="frequency" [inputId]="FREQUENCY.YEARLY" />
-                        <label [for]="FREQUENCY.YEARLY">Annuel</label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="button-space">
-                <p-button type="submit" class="submit-button">Sauvegarder</p-button>
-                <p-button (onClick)="close()" class="submit-button" severity="secondary">Annuler</p-button>
-            </div>
-        </form>
+           <small *ngIf="formGroup.get('frequency')?.invalid && formGroup.get('frequency')?.touched" class="p-error block">
+            La sélection d'une fréquence est requise.
+          </small>
+        </div>
+  
+      </div>
+  
+      <!-- Footer Actions -->
+      <div class="flex justify-end gap-2 p-4 border-t border-surface-200 dark:border-surface-700 mt-auto">
+        <p-button
+          type="button"
+          label="Annuler"
+          severity="secondary"
+          (click)="close()">
+        </p-button>
+        <p-button
+          type="submit"
+          label="Sauvegarder"
+          icon="pi pi-check"
+          [disabled]="formGroup.invalid">
+        </p-button>
+      </div>
+  
     </div>
-</div>
+  </form>

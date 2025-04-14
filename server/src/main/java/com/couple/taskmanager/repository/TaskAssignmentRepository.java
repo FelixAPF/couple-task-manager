@@ -35,4 +35,7 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
 
     List<TaskAssignment> findAllByTaskPeriodId(Long periodId);
 
+    @Query("SELECT ta FROM TaskAssignment ta WHERE ta.completed = true AND ta.task.id = :taskId")
+    List<TaskAssignment> findAllCompletedTrueAndTaskId(Long taskId);
+
 }

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { TaskService } from './service/task-service.service';
 import { SharedModule } from "../app/shared.module"
@@ -10,6 +10,9 @@ import { StatusBar, StatusBarStyle, Style } from '@capacitor/status-bar';
 import { AppUpdate, AppUpdateInfo } from '@capawesome/capacitor-app-update';
 import { Platform } from '@angular/cdk/platform';
 import { App } from '@capacitor/app';
+import { Location } from '@angular/common';
+import { PluginListenerHandle } from '@capacitor/core';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 
 
 @Component({
@@ -18,15 +21,17 @@ import { App } from '@capacitor/app';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   public appUpdateInfo: AppUpdateInfo | undefined;
+  currentVersion: string = "1.38";
 
   title = 'client';
   swipeTransform = 'translateX(0)';
 
   isMobile = false;
 
-  constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router, private platform: Platform){
+  constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
+  private dialogService: DialogService, private zone: NgZone){
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');
@@ -37,14 +42,49 @@ export class AppComponent implements OnInit {
     return this.platform;
   }
 
-  version: string = '-';
-  versionName: string = '-';
-  versionBuild: string = '-';
-  versionId: string = '-';
+  backButtonListener: PluginListenerHandle; 
 
-
-  ngOnInit(): void {
+  async ngOnInit() {
+    this.performImmediateUpdate();
     this.checkScreenWidth();
+    this.setupBackButtonListener(); // Call helper function
+
+  }
+
+  async setupBackButtonListener(): Promise<void> {
+    if (this.platform.ANDROID) {
+      try {
+        this.backButtonListener = await App.addListener('backButton', () => {
+          this.zone.run(() => {
+            if (this.dialogService.dialogComponentRefMap && this.dialogService.dialogComponentRefMap.size > 0) {
+              const dialogRefsArray = Array.from(this.dialogService.dialogComponentRefMap.keys());
+              const topmostDialogRef = dialogRefsArray[dialogRefsArray.length - 1];
+
+              // Safety check and close
+              if (topmostDialogRef && typeof topmostDialogRef.close === 'function') {
+                topmostDialogRef.close();
+              } else {
+                 console.warn('Back button: Could not find close method on topmost dialog ref.');
+              }
+            }
+            // --- If no dialogs are open (or closing failed), proceed with navigation/exit ---
+            else if (this.router.url === '/dashboard') {
+              App.exitApp();
+            } else {
+              this.location.back();
+            }
+          });
+        });
+      } catch (error) {
+        console.error('Error adding back button listener:', error);
+      }
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.backButtonListener) {
+      this.backButtonListener.remove();
+    }
   }
 
   @HostListener('window:resize', ['$event'])
@@ -87,5 +127,9 @@ export class AppComponent implements OnInit {
         }, 200); // Reduced delay
       }
     }
+  }
+
+  public async performImmediateUpdate(): Promise<void> {
+    await AppUpdate.performImmediateUpdate();
   }
 }

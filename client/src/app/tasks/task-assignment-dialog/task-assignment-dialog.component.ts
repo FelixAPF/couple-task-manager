@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { SharedModule } from '../../shared.module';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -14,6 +14,9 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { TaskAssignmentComponent, TasksInputParameter } from '../task-assignment/task-assignment.component';
 import { TaskWithAssignee } from '../../create-period-dialog/create-period-dialog.component';
 import { TaskAssignmentService } from '../../service/task-assignment.service';
+import { Platform } from '@angular/cdk/platform';
+import { PluginListenerHandle } from '@capacitor/core';
+import { App } from '@capacitor/app';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -71,13 +74,14 @@ AssignmentRow = AssignmentRow;
     private renderer: Renderer2, public taskAssignmentService: TaskAssignmentService,
     public ref: DynamicDialogRef) {    
   }
+  backButtonListener: PluginListenerHandle; 
 
   ngOnInit(){
     this.loadTaskAssignments();
   }
 
   submit(tasksWithAssignment: { taskWithAssignees: TaskWithAssignee[], createEachOnce: boolean }){
-    const basicTaskAssignmentRqsts: any[] = tasksWithAssignment.taskWithAssignees.map(taskWithAssignee => ({ assignee: taskWithAssignee.assignee, taskId: taskWithAssignee.task.id }));
+    const basicTaskAssignmentRqsts: any[] = tasksWithAssignment?.taskWithAssignees?.map(taskWithAssignee => ({ assignee: taskWithAssignee.assignee, taskId: taskWithAssignee.task.id }));
 
         
     this.taskListService.saveTasksToExistingTaskList(basicTaskAssignmentRqsts).subscribe(() => {

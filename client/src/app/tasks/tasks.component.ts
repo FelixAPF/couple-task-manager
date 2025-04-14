@@ -15,7 +15,7 @@ import { DialogService } from 'primeng/dynamicdialog';
   imports: [SharedModule, RoomPipe],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.css',
-  providers: [ConfirmationService, MessageService, DialogService]
+  providers: [ConfirmationService, MessageService]
 })
 export class TasksComponent {
   tasks: Task[] = [];
@@ -58,7 +58,6 @@ export class TasksComponent {
 
       openNewTaskDialog(task: Task | null = null){
         const dialogRef = this.dialogService.open(AddTaskComponent, {
-          header: (task?.id === undefined ? 'Ajouter' : 'Modifier') + ' une tâche',
           width: '40vw',
           dismissableMask: true,
           modal:true,
@@ -74,7 +73,8 @@ export class TasksComponent {
         })
       }
   
-    delete(event: any, id: number){
+    delete(event: any, id: number | undefined){
+      if(!id) return;
       this.confirmationService.confirm({
         target: event.target as EventTarget,
         message: 'Voulez-vous réellement supprimer la tâche? \n Cela supprimera toute assignation reliée à celle-ci.',

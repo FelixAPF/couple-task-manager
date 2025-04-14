@@ -11,7 +11,7 @@ import { AddShoppingItemDialogComponent } from '../add-shopping-item-dialog/add-
   imports: [SharedModule],
   templateUrl: './shopping-list.component.html',
   styleUrl: './shopping-list.component.css',
-  providers: [MessageService, ConfirmationService, DialogService]
+  providers: [MessageService, ConfirmationService]
 })
 export class ShoppingListComponent implements OnInit {
   shoppingItems: ShoppingItem[] = [];
@@ -47,9 +47,12 @@ export class ShoppingListComponent implements OnInit {
     this.shoppingService.deleteTaskList(id).subscribe(() => this.retrieveShoppingList());
   }
 
+  public trackById(index: number, item: any): string | number { // <-- Use your actual item type instead of 'any'
+    return item.id; // Assuming each item has a unique 'id' property
+  }
+
   openNewTaskDialog(shoppingItem: ShoppingItem | null = null){
     const dialogRef = this.dialogService.open(AddShoppingItemDialogComponent, {
-      header: `${shoppingItem ? 'Modifier un article' : 'Ajouter un article'}`,
       width: '20vw',
       dismissableMask: true,
       modal:true,

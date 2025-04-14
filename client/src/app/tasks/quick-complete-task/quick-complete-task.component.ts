@@ -6,6 +6,10 @@ import { TaskService } from '../../service/task-service.service';
 import { Task } from '../../model/task';
 import { Subscription } from 'rxjs';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
+import { Platform } from '@angular/cdk/platform';
+import { PluginListenerHandle } from '@capacitor/core';
+import { App } from '@capacitor/app';
+import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -22,6 +26,7 @@ export class QuickCompleteTaskComponent implements OnInit {
   subscription: Subscription = new Subscription();
   formGroup: FormGroup;
   ASSIGNEE = Assignee;
+  filteredTasks: Task[] = [];
   tasks: Task[] = [];
 
   constructor(private taskService: TaskService, private ref: DynamicDialogRef){
@@ -32,10 +37,27 @@ export class QuickCompleteTaskComponent implements OnInit {
   }
   get assignee() { return this.formGroup.get(FormControlName.ASSIGNEE); }
   get taskId() { return this.formGroup.get(FormControlName.TASK_ID); }
+
+  srcMap = {
+    [Assignee.Camille]: "assets/person2.jpg",
+    [Assignee.Felix]: "assets/person1.jpg",
+    [Assignee.Deux]: "assets/placeholder.jpg",
+  }
+
+  assigneeOptions: any[] = [];
   
   ngOnInit(): void {
     this.buildFormGroup();
     this.retrieveTasks();
+
+    this.assigneeOptions = Object.values(this.ASSIGNEE)
+      .map((assigneeValue: Assignee) => ({
+        label: assigneeValue, 
+        src: this.srcMap[assigneeValue] 
+    // Filter out "Deux" if it shouldn't be selectable here
+    }));
+
+  console.log(this.assigneeOptions);
   }
 
   buildFormGroup(){
@@ -51,12 +73,41 @@ export class QuickCompleteTaskComponent implements OnInit {
     }));
   }
 
-  quickComplete(){
-    if(this.formGroup.invalid) return;
-    
-    this.subscription.add(this.taskService.quickComplete(this.taskId?.value, this.assignee?.value).subscribe(() => {
-      this.ref.close(true);
-    }))
+  searchTask(event: AutoCompleteCompleteEvent) {
+    const query = event.query.toLowerCase(); // Get the user's query, lowercase
+    if (!this.tasks) {
+      this.filteredTasks = []; // Handle case where tasks haven't loaded yet
+      return;
+    }
+
+    this.filteredTasks = this.tasks.filter(task =>
+      task.title?.toLowerCase().includes(query)
+    );
+    // console.log('Filtered tasks:', this.filteredTasks); // Optional log
+  }
+
+  quickComplete() {
+    if (this.formGroup.valid) {
+      // Get the full task object from the form control
+      const selectedTaskObject = this.formGroup.value[FormControlName.TASK_ID];
+      const assignee = this.formGroup.value[FormControlName.ASSIGNEE];
+  
+      // --- CHANGE HERE: Access the 'id' property from the object ---
+      if (selectedTaskObject && selectedTaskObject.id) { // Add a check
+        const taskId = selectedTaskObject.id; // Extract the ID
+  
+        this.taskService.quickComplete(taskId, assignee).subscribe({
+          next: () => {
+            this.ref.close(true); // Close dialog and indicate success
+          },
+          error: (err) => {
+            console.error("Error during quick complete:", err);
+          }
+        });
+      } else {
+        console.error("Selected task object or its ID is missing:", selectedTaskObject);
+      }
+    }
   }
 
   onCancel(){

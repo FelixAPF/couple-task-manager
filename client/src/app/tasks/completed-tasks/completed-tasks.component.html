@@ -1,7 +1,47 @@
-<div>
-    <div class="d-block text-center">
-        <p-message class="text-center mt-8" *ngFor="let taskAssignment of taskAssignments">
-            {{taskAssignment.task.title}} a été complété aujourd'hui par {{taskAssignment.assignee}}
-        </p-message>
+<!-- completed-tasks.component.html -->
+<div class="flex flex-col gap-2"> <!-- Vertical list with spacing -->
+
+    <!-- Message if no tasks are completed (or shown based on filter) -->
+    <div *ngIf="!taskAssignments || taskAssignments.length === 0" class="text-center text-sm text-surface-500 dark:text-surface-400 p-3 border rounded-md bg-surface-50 dark:bg-surface-800">
+      <i class="pi pi-check-square mr-1"></i> Aucune tâche complétée à afficher.
     </div>
-</div>
+  
+    <!-- List of completed tasks -->
+    <div *ngFor="let taskAssignment of taskAssignments">
+      <!-- Item container with completion styling -->
+      <div class="completed-task-item flex items-center gap-3 p-2 border rounded-md shadow-sm bg-white dark:bg-surface-800 border-l-4 border-green-500 dark:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors duration-150">
+  
+        <!-- Assignee Image (Consistent Size) -->
+        <div class="flex-shrink-0">
+          <img
+            [src]="taskAssignment.assignee === 'Felix' ? 'assets/person1.jpg' : 'assets/person2.jpg'"
+            [alt]="'Photo de ' + taskAssignment.assignee"
+            class="w-10 h-10 rounded-full object-cover border border-green-300 dark:border-green-600 shadow-sm"
+            onError="this.src='assets/placeholder.jpg'"
+            pTooltip="{{taskAssignment.assignee}}"
+            tooltipPosition="top"
+          />
+        </div>
+  
+        <!-- Task Details -->
+        <div class="flex-grow min-w-0"> <!-- min-w-0 prevents text overflow -->
+          <!-- Task Title -->
+          <p class="text-sm font-medium text-surface-800 dark:text-surface-100 truncate" [pTooltip]="taskAssignment.task.title" tooltipPosition="top">
+            {{ taskAssignment.task.title }} <!-- Assuming taskTitle is directly on taskAssignment based on history component -->
+          </p>
+          <!-- Completion Date/Time -->
+          <div class="text-xs text-surface-600 dark:text-surface-400 flex items-center gap-1 mt-0.5">
+            <i class="pi pi-calendar-check text-xs text-green-600 dark:text-green-400"></i> <!-- Specific icon for completed date -->
+            <!-- Displaying time might be useful if completed today -->
+            <span>Complété aujourd'hui</span>
+          </div>
+        </div>
+  
+        <!-- Completion Checkmark Icon -->
+        <div class="ml-auto flex-shrink-0">
+           <i class="pi pi-check-circle text-green-500 dark:text-green-400 text-lg" pTooltip="Tâche complétée" tooltipPosition="left"></i>
+        </div>
+  
+      </div>
+    </div>
+  </div>

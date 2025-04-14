@@ -105,13 +105,14 @@ public class TaskListService implements IGenericService<TaskList> {
             }
         }
 
+        List<TaskList> toUpdateTaskLists = new ArrayList<>();
         for(String assignee : assigneeTasks.keySet()){
-            TaskList existingTasks = taskListRepository.findByAssignee(Assignee.valueOf(assignee));
-            if(existingTasks != null){
-                List<Task> newTasks = taskRepository.findAllById(assigneeTasks.get(assignee));
-                existingTasks.setTasks(newTasks); // Completely replace the existing tasks
-                taskListRepository.save(existingTasks);
-            }
+            TaskList existingTaskList = taskListRepository.findByAssignee(Assignee.valueOf(assignee));
+            if(existingTaskList == null) continue;
+            List<Task> newTasks = taskRepository.findAllById(assigneeTasks.get(assignee));
+            existingTaskList.setTasks(newTasks); // Completely replace the existing tasks
+            toUpdateTaskLists.add(existingTaskList);
         }
+        taskListRepository.saveAllAndFlush(toUpdateTaskLists);
     }
 }

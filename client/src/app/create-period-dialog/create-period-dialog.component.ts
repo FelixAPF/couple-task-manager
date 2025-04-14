@@ -10,6 +10,10 @@ import { TaskLink } from '../model/local-model';
 import { TaskService } from '../service/task-service.service';
 import { TaskAssignmentComponent, TasksInputParameter } from "../tasks/task-assignment/task-assignment.component";
 import { TaskAssignmentService } from '../service/task-assignment.service';
+import { PluginListenerHandle } from '@capacitor/core';
+import { App } from '@capacitor/app';
+import { Platform } from '@angular/cdk/platform';
+import { TranslateService } from '@ngx-translate/core';
 
 enum FormControlName {
   DURATION = "duration",
@@ -37,6 +41,7 @@ export interface TaskWithAssignee {
 })
 export class CreatePeriodDialogComponent implements OnInit {
   fb: FormBuilder = inject(FormBuilder);
+  manualStepActivated: boolean = false;
   existingTaskPeriods: TaskPeriod[] = [];
   formGroup = this.fb.group({
     [FormControlName.DURATION]: [null, Validators.required],
@@ -47,8 +52,17 @@ export class CreatePeriodDialogComponent implements OnInit {
     [FormControlName.DURATION_TYPE]: [DurationType.PERIOD, Validators.required],
     [FormControlName.EXPLICIT_DUE_DATE]: [new Date(), []]
   })
+
+  constructor(private taskPeriodService: TaskPeriodService, private ref: DynamicDialogRef, private datePipe: DatePipe, private taskService: TaskService, public taskAssignmentService: TaskAssignmentService,
+    private platform: Platform, private translate: TranslateService
+   ){
+      this.frequencies = Array.from(Object.values(Frequency)).map((frequency) => ({ label: this.translate.instant(`FREQUENCY.${frequency}`), value: frequency }));;
+
+   }
+
   ASSIGNEE = Assignee;
   FREQUENCY = Frequency;
+  frequencies;
   CREATION_METHOD = CreationMethod;
   DURATION_TYPE = DurationType;
   date: DatePipe
@@ -73,14 +87,12 @@ export class CreatePeriodDialogComponent implements OnInit {
       })
     });
   }
-
-  constructor(private taskPeriodService: TaskPeriodService, private ref: DynamicDialogRef, private datePipe: DatePipe, private taskService: TaskService, public taskAssignmentService: TaskAssignmentService ){}
-
   ngOnInit(): void {
     this.taskPeriodService.retrieveTaskPeriodsIncomplete().subscribe(periods => {
       this.existingTaskPeriods = periods;
     });
   }
+
   submit(rqst: any = null){
     if(!this.formGroup.valid) return;
     const result:PeriodCreationRequest = {
@@ -140,6 +152,10 @@ export class CreatePeriodDialogComponent implements OnInit {
   activateSecondFormGroup(activateCallback: any, ){
     if(!this.formGroup.valid) return;
     this.retrieveTaskPeriod();
-    activateCallback(2);
+    this.manualStepActivated = true; 
+  }
+
+  handleManualCancel() {
+    this.manualStepActivated = false;
   }
 }

@@ -16,14 +16,14 @@ import { AssigneeTaskListComponent } from "./assignee-task-list/assignee-task-li
   imports: [SharedModule, AssigneeTaskListComponent],
   templateUrl: './split-task.component.html',
   styleUrl: './split-task.component.css',
-  providers:[DialogService]
+  providers:[]
 })
 export class SplitTaskComponent implements OnInit {
   subscription: Subscription = new Subscription();
   taskLists: TaskList[] = [];
   tasksCopine?: TaskList;
   tasksCopain?: TaskList;
-  constructor(public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
+  constructor(private taskPeriodService: TaskPeriodService, private taskListService: TaskListService, private dialog: DialogService){}
 
   ngOnInit(): void {
     this.retrieveTasks();

@@ -24,7 +24,7 @@ enum FormControlName {
   imports: [SharedModule, ReactiveFormsModule, RoomPipe, InputTextModule],
   templateUrl: './my-tasks.component.html',
   styleUrl: './my-tasks.component.css',
-  providers: [DialogService,   {provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {dateFormat: 'longDate', locale: 'fr'}}]
+  providers: [{provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {dateFormat: 'longDate', locale: 'fr'}}]
 })
 export class MyTasksComponent implements OnInit {
   DISPLAY_DURATION = FormControlName;
@@ -78,7 +78,14 @@ export class MyTasksComponent implements OnInit {
   retrieveTaskByAssignee(){
     const frequency = this.formGroup.get(FormControlName.DISPLAY_DURATION)?.value || Frequency.MONTHLY;
     this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssignee, frequency).subscribe(taskAssignments => {
-      this.tasks = taskAssignments;
+      this.tasks = taskAssignments.sort((a, b) => {
+        // Create Date objects for reliable comparison
+        const dateA = new Date(a.dueDate).getTime();
+        const dateB = new Date(b.dueDate).getTime();
+
+        // Sort ascending (earliest date first)
+        return dateA - dateB;
+      });
     }))
   }
 

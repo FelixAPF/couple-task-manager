@@ -7,6 +7,7 @@ import { ShoppingListComponent } from './shopping-planning/shopping-list/shoppin
 import { MealsListComponent } from './meal-planning/meals-list/meals-list.component';
 import { RecipesListComponent } from './meal-planning/recipes-list/recipes-list.component';
 import { MealsSectionComponent } from './meal-planning/meals-section/meals-section.component';
+import { TaskHistoryComponent } from './tasks/task-history/task-history.component';
 
 export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -20,6 +21,7 @@ export const routes: Routes = [
     { path: 'tasks', children: [
         { path: "", component: TasksComponent },
         { path: "add-task", component: AddTaskComponent },
+        { path: "history/:id", component: TaskHistoryComponent}
         ]
     },
 

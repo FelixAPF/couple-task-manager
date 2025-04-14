@@ -46,11 +46,16 @@ public class TaskController extends GenericController<Task, TaskService> {
     public void completeTask(@PathVariable("assignmentId") Long assignmentId){
         service.completeTask(assignmentId);
     }
+
     @PostMapping("quick-complete/{taskId}")
     public Long completeTask(@PathVariable("taskId") Long taskId, @RequestBody QuickCompleteRqstV1 rqst){
         return service.quickCompleteTask(taskId, rqst.getAssignee());
     }
 
+    @GetMapping("{taskId}/history")
+    public List<TaskAssignmentDto> retrieveTaskHistory(@PathVariable("taskId") Long taskId){
+        return service.list(taskId);
+    }
 
     @GetMapping("not-completed-in-long-time")
     public List<TaskWithCompletedDateV1> retrieveTasksNotCompletedInLongTime(){

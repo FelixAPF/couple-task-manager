@@ -9,6 +9,9 @@ import { Subscription } from 'rxjs';
 import { FrequencyPipe } from '../../shared/pipes/frequency-pipe';
 import { RoomPipe } from '../../shared/pipes/room-pipe';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { PluginListenerHandle } from '@capacitor/core';
+import { App } from '@capacitor/app';
+import { Platform } from '@angular/cdk/platform';
 
 enum FormControlName {
   ID = 'id',
@@ -30,6 +33,7 @@ export class AddTaskComponent implements OnInit {
 log() {
   this.display=true;
 }
+  FORM_CONTROL_NAME = FormControlName;
   ROOM = Room;
   FREQUENCY = Frequency;
   fb = inject(FormBuilder);
@@ -69,7 +73,9 @@ log() {
   }
 
 
-  constructor(private taskService: TaskService, private ref: DynamicDialogRef, private config: DynamicDialogConfig, private router: Router, private _location: Location, private route: ActivatedRoute){
+  constructor(private taskService: TaskService, private ref: DynamicDialogRef, private config: DynamicDialogConfig, private router: Router, private _location: Location, private route: ActivatedRoute
+    , private platform: Platform
+  ){
     this.buildFormGroup();
   }
 
@@ -85,6 +91,24 @@ log() {
 
   ngOnInit(): void {
     this.buildFormGroup(this.config.data.task);
+  }
+
+  backButtonListener: PluginListenerHandle; 
+
+  
+  async setupBackButtonListener(): Promise<void> {
+    // Only add listener on Android platform
+    if (!this.platform.ANDROID) return;
+    // Use await to get the actual handle from the promise
+    this.backButtonListener = await App.addListener('backButton', () => {
+      this.close();
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.backButtonListener) {
+      this.backButtonListener.remove();
+    }
   }
 
   save(){

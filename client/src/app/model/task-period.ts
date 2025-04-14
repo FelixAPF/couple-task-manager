@@ -23,9 +23,11 @@ export interface TaskAssignmentDto {
     taskDescription: string;
     assignee: Assignee;
     creationDate: Date;
+    completedDate: Date;
     dueDate: Date;
     room: Room;
     completed: boolean;
+    frequency: Frequency;
     taskPeriodId: number;
     taskId: number;
 }

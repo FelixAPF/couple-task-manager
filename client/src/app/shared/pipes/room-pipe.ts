@@ -5,7 +5,8 @@ import { Frequency, Room } from '../../model/task';
   name: 'roomPipe',
 })
 export class RoomPipe implements PipeTransform {
-  transform(value: string): string {
+  transform(value: string | undefined): string {
+    if(value === undefined) return 'Autre';
     switch(value){
         case Room.BATHROOM: return 'Salle de bain';
         case Room.BEDROOM: return 'Chambre';

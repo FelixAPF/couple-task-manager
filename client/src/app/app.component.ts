@@ -13,13 +13,15 @@ import { App } from '@capacitor/app';
 import { Location } from '@angular/common';
 import { PluginListenerHandle } from '@capacitor/core';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { routeAnimations } from './animations';
 
 
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, SharedModule, NavbarComponent, FooterNavbarComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
+  animations: [routeAnimations],
 })
 export class AppComponent implements OnInit, OnDestroy {
   public appUpdateInfo: AppUpdateInfo | undefined;
@@ -52,33 +54,38 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async setupBackButtonListener(): Promise<void> {
-    if (this.platform.ANDROID) {
-      try {
-        this.backButtonListener = await App.addListener('backButton', () => {
-          this.zone.run(() => {
-            if (this.dialogService.dialogComponentRefMap && this.dialogService.dialogComponentRefMap.size > 0) {
-              const dialogRefsArray = Array.from(this.dialogService.dialogComponentRefMap.keys());
-              const topmostDialogRef = dialogRefsArray[dialogRefsArray.length - 1];
+    if (!this.platform.ANDROID) return;
+    try {
+      this.backButtonListener = await App.addListener('backButton', () => {
+        this.zone.run(() => {
+          if (this.dialogService.dialogComponentRefMap && this.dialogService.dialogComponentRefMap.size > 0) {
+            const dialogRefsArray = Array.from(this.dialogService.dialogComponentRefMap.keys());
+            const topmostDialogRef = dialogRefsArray[dialogRefsArray.length - 1];
 
-              // Safety check and close
-              if (topmostDialogRef && typeof topmostDialogRef.close === 'function') {
-                topmostDialogRef.close();
-              } else {
-                 console.warn('Back button: Could not find close method on topmost dialog ref.');
-              }
-            }
-            // --- If no dialogs are open (or closing failed), proceed with navigation/exit ---
-            else if (this.router.url === '/dashboard') {
-              App.exitApp();
+            // Safety check and close
+            if (topmostDialogRef && typeof topmostDialogRef.close === 'function') {
+              topmostDialogRef.close();
             } else {
-              this.location.back();
+                console.warn('Back button: Could not find close method on topmost dialog ref.');
             }
-          });
+          }
+          // --- If no dialogs are open (or closing failed), proceed with navigation/exit ---
+          else if (this.router.url === '/dashboard') {
+            App.exitApp();
+          } else {
+            this.location.back();
+          }
         });
-      } catch (error) {
-        console.error('Error adding back button listener:', error);
-      }
+      });
+    } catch (error) {
+      console.error('Error adding back button listener:', error);
     }
+  }
+
+  prepareRoute(outlet: RouterOutlet) {
+    // Use the component reference string as the animation state.
+    // This ensures the value changes whenever the activated component changes.
+    return outlet && outlet.isActivated && outlet.activatedRoute && outlet.activatedRoute.snapshot && outlet.activatedRoute.snapshot.url.join('/');
   }
 
   ngOnDestroy(): void {

@@ -1,6 +1,5 @@
 @import '../node_modules/primeicons/primeicons.css';
 @import "tailwindcss";
-@import "tailwindcss";
 @import "tailwindcss-primeui";
 /* You can add global styles to this file, and also import other style files */
 html, body {
@@ -13,7 +12,16 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; padding: en
 .d-block{
     display: block;
 }
+.nav-item.active-link {
+  /* Use the CSS variable for the primary color */
+  color: var(--primary-500);
+}
 
+/* Apply dark mode color when .dark class is present on a parent (usually html or body) */
+.dark .nav-item.active-link {
+  /* Use the CSS variable for the dark mode primary color */
+  color: var(--primary-400);
+}
 .hover {
     cursor: pointer;
 }

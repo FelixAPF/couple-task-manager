@@ -1,24 +1,72 @@
-<nav class="fixed bottom-0 left-0 w-full bg-white shadow-md z-50 sm:hidden">
-    <div class="flex justify-around items-center p-4">
-      <a routerLink="/dashboard" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-        <i class="pi pi-home text-2xl"></i>
-        <span class="text-sm">Dashboard</span>
-      </a>
-      <a routerLink="/tasks" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-        <i class="pi pi-list text-2xl"></i>
-        <span class="text-sm">Tâches</span>
-      </a>
-      <a routerLink="/split" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-        <i class="pi pi-sitemap text-2xl"></i>
-        <span class="text-sm">Assigner</span>
-      </a>
-      <a routerLink="/shopping-list" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-        <i class="pi pi-shopping-cart text-2xl"></i>
-        <span class="text-sm">Panier</span>
-      </a>
-      <a (click)="openAppStore()" class="flex flex-col items-center text-gray-600 hover:text-blue-500">
-        <i class="pi pi-download text-2xl"></i>
-        <span class="text-sm">Mise à jour</span>
-      </a>
-    </div>
-  </nav>
+<div class="fixed bottom-0 left-0 right-0 z-50 h-16  
+  bg-surface-0 dark:bg-surface-900        
+  border-t border-surface-200 dark:border-surface-700 
+  shadow-[0_-2px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_5px_rgba(0,0,0,0.3)] lg:hidden">
+
+<!-- Flex container for navigation items -->
+<div class="fixed bottom-0 left-0 right-0 z-50 h-16
+            bg-surface-0 dark:bg-surface-900
+            border-t border-surface-200 dark:border-surface-700
+            shadow-[0_-2px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_5px_rgba(0,0,0,0.3)]">
+
+  <!-- Flex container for navigation items -->
+  <div class="flex justify-around items-center h-full px-1 sm:px-2"> <!-- Reduced padding slightly -->
+
+    <!-- Dashboard Link -->
+    <a routerLink="/dashboard"
+       routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}"
+       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
+              text-surface-600 dark:text-surface-300
+              hover:text-primary-500 dark:hover:text-primary-400
+              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
+      <i class="pi pi-home text-xl mb-1"></i>
+      <span class="text-xs font-medium">Dashboard</span>
+    </a>
+
+    <!-- Tasks Link -->
+    <a routerLink="/tasks"
+       routerLinkActive="active-link"
+       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
+              text-surface-600 dark:text-surface-300
+              hover:text-primary-500 dark:hover:text-primary-400
+              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
+      <i class="pi pi-list text-xl mb-1"></i>
+      <span class="text-xs font-medium">Tâches</span>
+    </a>
+
+    <!-- Split Link -->
+    <a routerLink="/split"
+       routerLinkActive="active-link"
+       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
+              text-surface-600 dark:text-surface-300
+              hover:text-primary-500 dark:hover:text-primary-400
+              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
+      <i class="pi pi-users text-xl mb-1"></i>
+      <span class="text-xs font-medium">Répartir</span>
+    </a>
+
+    <!-- Shopping List Link -->
+    <a routerLink="/shopping-list"
+       routerLinkActive="active-link"
+       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
+              text-surface-600 dark:text-surface-300
+              hover:text-primary-500 dark:hover:text-primary-400
+              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
+      <i class="pi pi-shopping-cart text-xl mb-1"></i>
+      <span class="text-xs font-medium">Courses</span>
+    </a>
+
+    <!-- Mise à jour Button -->
+    <button type="button"
+            (click)="openAppStore()"
+            class="nav-item flex flex-col items-center justify-center p-2 rounded-md
+                   text-surface-600 dark:text-surface-300
+                   hover:text-primary-500 dark:hover:text-primary-400
+                   transition-colors duration-150 w-1/5"
+            aria-label="Vérifier les mises à jour">
+      <i class="pi pi-sync text-xl mb-1"></i> <!-- Or pi-download -->
+      <span class="text-xs font-medium">Mise à jour</span>
+    </button>
+
+  </div>
+</div>

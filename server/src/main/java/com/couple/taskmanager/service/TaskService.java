@@ -101,7 +101,9 @@ public class TaskService implements IGenericService<Task> {
     @Transactional
     public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee, Date date, Frequency frequency){
         date.setTime(date.getTime() + (long) frequency.getDaysAmount() * 24 * 60 * 60 * 1000);
-        return taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(assignee, date);
+        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(assignee, date);
+        taskAssignments.addAll(taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee.Deux, date));
+        return taskAssignments;
     }
 
     public void completeTask(Long assignmentId) {

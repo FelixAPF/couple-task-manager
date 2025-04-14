@@ -10,6 +10,7 @@ import { Platform } from '@angular/cdk/platform';
 import { PluginListenerHandle } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
+import { SourceMap } from '../my-tasks/my-tasks.component';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -38,12 +39,6 @@ export class QuickCompleteTaskComponent implements OnInit {
   get assignee() { return this.formGroup.get(FormControlName.ASSIGNEE); }
   get taskId() { return this.formGroup.get(FormControlName.TASK_ID); }
 
-  srcMap = {
-    [Assignee.Camille]: "assets/person2.jpg",
-    [Assignee.Felix]: "assets/person1.jpg",
-    [Assignee.Deux]: "assets/placeholder.jpg",
-  }
-
   assigneeOptions: any[] = [];
   
   ngOnInit(): void {
@@ -53,11 +48,8 @@ export class QuickCompleteTaskComponent implements OnInit {
     this.assigneeOptions = Object.values(this.ASSIGNEE)
       .map((assigneeValue: Assignee) => ({
         label: assigneeValue, 
-        src: this.srcMap[assigneeValue] 
-    // Filter out "Deux" if it shouldn't be selectable here
+        src: SourceMap[assigneeValue] 
     }));
-
-  console.log(this.assigneeOptions);
   }
 
   buildFormGroup(){

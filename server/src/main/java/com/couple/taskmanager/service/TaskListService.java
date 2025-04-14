@@ -28,8 +28,11 @@ public class TaskListService implements IGenericService<TaskList> {
         throw new IllegalArgumentException();
     }
 
-    public TaskList get(Assignee assignee) {
-        return taskListRepository.findByAssignee(assignee);
+    public List<TaskList> get(Assignee assignee) {
+        List<TaskList> taskLists = new ArrayList<>();
+        taskLists.add(taskListRepository.findByAssignee(assignee));
+        taskLists.add(taskListRepository.findByAssignee(Assignee.Deux));
+        return taskLists;
     }
 
     @Override
@@ -94,13 +97,12 @@ public class TaskListService implements IGenericService<TaskList> {
 
     public void addTasksToExistingList(List<BasicTaskAssignmentRqstV1> taskWithIds){
         Map<String, List<Long>> assigneeTasks = new HashMap<>();
+        for(Assignee assignee : Assignee.values()){
+            assigneeTasks.put(assignee.toString(), new ArrayList<>());
+        }
         for(BasicTaskAssignmentRqstV1 rqst : taskWithIds){
             List<Long> value = assigneeTasks.get(rqst.getAssignee().toString());
-            if(value == null){
-                List<Long> newList = new ArrayList<>();
-                newList.add(rqst.getTaskId());
-                assigneeTasks.put(rqst.getAssignee().toString(), newList);
-            } else {
+            if(value != null){
                 value.add(rqst.getTaskId());
             }
         }

@@ -14,6 +14,9 @@ import { Location } from '@angular/common';
 import { PluginListenerHandle } from '@capacitor/core';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { routeAnimations } from './animations';
+import { VersionControlService } from './service/version-control.service';
+import { Subscription } from 'rxjs';
+import * as BackEndVersion from "../../version.json";
 
 
 @Component({
@@ -25,15 +28,17 @@ import { routeAnimations } from './animations';
 })
 export class AppComponent implements OnInit, OnDestroy {
   public appUpdateInfo: AppUpdateInfo | undefined;
-  currentVersion: string = "1.38";
 
   title = 'client';
   swipeTransform = 'translateX(0)';
 
   isMobile = false;
+  subscription: Subscription = new Subscription();
+  outdatedVersion: boolean = false;
+  
 
   constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
-  private dialogService: DialogService, private zone: NgZone){
+  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService) {
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');
@@ -46,11 +51,19 @@ export class AppComponent implements OnInit, OnDestroy {
 
   backButtonListener: PluginListenerHandle; 
 
+  public async openAppStore(): Promise<void> {
+    await AppUpdate.openAppStore();
+  }
+
   async ngOnInit() {
     this.performImmediateUpdate();
     this.checkScreenWidth();
     this.setupBackButtonListener(); // Call helper function
-
+    this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
+      if(version.toString() !== BackEndVersion.version.toString()) {
+        this.openAppStore();
+      }
+    }));
   }
 
   async setupBackButtonListener(): Promise<void> {

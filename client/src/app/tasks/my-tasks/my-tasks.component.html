@@ -67,7 +67,7 @@
           <!-- Assignee Image -->
           <div class="flex-shrink-0">
             <img
-              [src]="task.assignee === 'Felix' ? 'assets/person1.jpg' : 'assets/person2.jpg'"
+              [src]="SOURCE_MAP[task.assignee]"
               [alt]="'Photo de ' + task.assignee"
               class="w-12 h-12 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm"
               onError="this.src='assets/placeholder.jpg'"

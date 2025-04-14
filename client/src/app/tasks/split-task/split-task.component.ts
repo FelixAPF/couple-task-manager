@@ -30,12 +30,28 @@ export class SplitTaskComponent implements OnInit {
   }
 
   retrieveTasks(){
-    this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Felix).subscribe((taskList) => {
-      this.tasksCopain = taskList;
+    this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Felix).subscribe((taskLists) => {
+      const newTaskList: TaskList = {
+        assignee: Assignee.Felix,
+        tasks: [],
+        id: taskLists.find((taskList) => taskList.assignee === Assignee.Felix)?.id,
+      }
+      for(const taskList of taskLists){
+        newTaskList.tasks!.push(...taskList.tasks!);
+      }
+      this.tasksCopain = newTaskList;
     }))
 
-    this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Camille).subscribe((taskList) => {
-      this.tasksCopine = taskList;
+    this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Camille).subscribe((taskLists) => {
+      const newTaskList: TaskList = {
+        assignee: Assignee.Felix,
+        tasks: [],
+        id: taskLists.find((taskList) => taskList.assignee === Assignee.Felix)?.id,
+      }
+      for(const taskList of taskLists){
+        newTaskList.tasks!.push(...taskList.tasks!);
+      }
+      this.tasksCopine = newTaskList;
     }))
   }
 

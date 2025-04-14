@@ -16,6 +16,12 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
 import { QuickCompleteTaskComponent } from '../quick-complete-task/quick-complete-task.component';
 
+export const SourceMap = {
+    [Assignee.Camille]: "assets/person2.jpg",
+    [Assignee.Felix]: "assets/person1.jpg",
+    [Assignee.Deux]: "assets/deux.jpg",
+  }
+    
 enum FormControlName {
   DISPLAY_DURATION = 'displayDuration'
 }
@@ -36,6 +42,8 @@ export class MyTasksComponent implements OnInit {
   @Output() taskCompleteEmitter: EventEmitter<number> = new EventEmitter();
   
   selectedAssignee: Assignee = Assignee.Camille;
+  assigneeOptions: any[] = [];
+  readonly SOURCE_MAP = SourceMap;
   taskAssignments: TaskAssignment[] = [];
   today: any = new Date();
   hideCompletedTasks: boolean = false;
@@ -63,6 +71,7 @@ export class MyTasksComponent implements OnInit {
     }
 
     this.retrieveTaskByAssignee();
+
   }
 
   setMyTaskFrequencyStorage(frequency: Frequency){
@@ -138,5 +147,5 @@ export class MyTasksComponent implements OnInit {
   datePastDeadline(dueDate: any): boolean {
     return new Date(dueDate) < this.today;
   }
-    
+
 }

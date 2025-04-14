@@ -122,7 +122,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         Date periodEndDate = DateUtils.calculateDueDate(rqst.getStartDate(), rqst.getDuration());
 
         TaskPeriod taskPeriod = generatePeriod(rqst, periodEndDate);
-        List<TaskAssignment> taskAssignments = Stream.of(Assignee.Felix, Assignee.Camille)
+        List<TaskAssignment> taskAssignments = Stream.of(Assignee.values())
                 .flatMap(assignee -> generateTaskAssignments(assignee, rqst, taskPeriod, periodEndDate).stream())
                 .toList();
 

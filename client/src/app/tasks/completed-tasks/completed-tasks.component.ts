@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { TaskService } from '../../service/task-service.service';
 import { TaskAssignment } from '../../model/task-period';
 import { SharedModule } from '../../shared.module';
+import { SourceMap } from '../my-tasks/my-tasks.component';
 
 @Component({
   selector: 'app-completed-tasks',
@@ -12,6 +13,7 @@ import { SharedModule } from '../../shared.module';
 export class CompletedTasksComponent implements OnInit {
   @Input() completedDate: Date = new Date();
   @Input() taskAssignments: TaskAssignment[] = [];
+  readonly SOURCE_MAP = SourceMap;
 
   constructor(private taskService: TaskService){
   }

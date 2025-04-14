@@ -11,32 +11,11 @@ import { TaskWithAssignee } from '../create-period-dialog/create-period-dialog.c
   providedIn: 'root'
 })
 export class VersionControlService {
-  readonly baseUrl: string = `${environment.apiUrl}task-list`;
+  readonly baseUrl: string = `${environment.apiUrl}version`;
+  
   constructor(private http: HttpClient) { }
-
-
-  retrieveTaskList(assignee: Assignee): Observable<TaskList> {
-    return this.http.get<TaskList>(`${this.baseUrl}/by-assignee/${assignee}`);
+  
+  retrieveVersion(): Observable<string> {
+    return this.http.get<string>(this.baseUrl);
   }
-
-  retrieveTaskLists(): Observable<TaskList[]> {
-    return this.http.get<TaskList[]>(this.baseUrl);
-  }
-
-  saveTaskList(taskList: TaskList): Observable<void>{
-    return this.http.post<void>(this.baseUrl, taskList);
-  }
-
-  saveTasksToExistingTaskList(basicTaskAssignmentRqst: BasicTaskAssignmentRqst[]): Observable<void>{
-    return this.http.post<void>(`${this.baseUrl}/assign`, basicTaskAssignmentRqst);
-  }
-
-  deleteTaskList(taskList: TaskListRequest): Observable<TaskList>{
-    return this.http.post<TaskList>(`${this.baseUrl}/unassign`, taskList);
-  }
-
-  retrieveWithUnassigned(): Observable<TaskList[]> {
-    return this.http.get<TaskList[]>(`${this.baseUrl}/with-unassigned`);
-  }
-
 }

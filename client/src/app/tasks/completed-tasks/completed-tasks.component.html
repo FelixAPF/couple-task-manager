@@ -14,7 +14,7 @@
         <!-- Assignee Image (Consistent Size) -->
         <div class="flex-shrink-0">
           <img
-            [src]="taskAssignment.assignee === 'Felix' ? 'assets/person1.jpg' : 'assets/person2.jpg'"
+            [src]="SOURCE_MAP[taskAssignment.assignee!]"
             [alt]="'Photo de ' + taskAssignment.assignee"
             class="w-10 h-10 rounded-full object-cover border border-green-300 dark:border-green-600 shadow-sm"
             onError="this.src='assets/placeholder.jpg'"

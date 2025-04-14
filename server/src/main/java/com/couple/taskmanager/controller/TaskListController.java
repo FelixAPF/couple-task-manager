@@ -16,7 +16,7 @@ import java.util.List;
 public class TaskListController extends GenericController<TaskList, TaskListService> {
 
     @GetMapping("/by-assignee/{assignee}")
-    public TaskList get(@PathVariable("assignee") Assignee assignee){
+    public List<TaskList> get(@PathVariable("assignee") Assignee assignee){
         return service.get(assignee);
     }
 

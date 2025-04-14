@@ -68,6 +68,15 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
     });
     this.cdr.detectChanges();
   }
+  
+  sortByFrequency(): void {
+    this.taskAssignments.controls.sort((a, b) => {
+      const frequencyA = a.get(FormControlName.FREQUENCY)?.value;
+      const frequencyB = b.get(FormControlName.FREQUENCY)?.value;
+      return (frequencyA > frequencyB) ? 1 : -1;
+    });
+    this.cdr.detectChanges();
+  }
 
   loadData(){
     this.subscription.add(

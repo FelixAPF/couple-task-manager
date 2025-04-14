@@ -24,7 +24,7 @@ enum FormControlName {
   imports: [SharedModule, ReactiveFormsModule, RoomPipe, InputTextModule],
   templateUrl: './my-tasks.component.html',
   styleUrl: './my-tasks.component.css',
-  providers: [{provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {dateFormat: 'longDate', locale: 'fr'}}]
+  providers: [{provide: DATE_PIPE_DEFAULT_OPTIONS, useValue: {dateFormat: 'longDate'}}]
 })
 export class MyTasksComponent implements OnInit {
   DISPLAY_DURATION = FormControlName;

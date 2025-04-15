@@ -28,6 +28,7 @@ import { BadgeModule } from 'primeng/badge';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { FieldsetModule } from 'primeng/fieldset';
 import { ToolbarModule } from 'primeng/toolbar';
+import { RippleModule } from 'primeng/ripple';
 import { RouterModule } from '@angular/router';
 import { TaskAssignmentComponent } from './tasks/task-assignment/task-assignment.component';
 import {  Textarea } from 'primeng/inputtextarea';

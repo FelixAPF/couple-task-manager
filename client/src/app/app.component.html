@@ -1,14 +1,42 @@
 <body>
   <div class="flex flex-col min-h-screen">
     <app-navbar></app-navbar>
+
+    <!-- Outdated Version Banner -->
+    <div *ngIf="outdatedVersion && !acknowledgeUpdate"
+         class="bg-yellow-100 dark:bg-yellow-900/60 border-l-4 border-yellow-500 dark:border-yellow-400
+                text-yellow-800 dark:text-yellow-100
+                p-3 mx-2 sm:mx-4
+                mt-[calc(3rem+env(safe-area-inset-top)+0.5rem)] sm:mt-[calc(4rem+0.5rem)] /* Position below header + small gap */
+                rounded-md shadow-lg
+                flex items-center justify-between gap-3
+                relative z-30">
+
+      <span class="text-sm font-medium flex items-center">
+        <i class="pi pi-exclamation-triangle mr-2 flex-shrink-0"></i>
+        <span>Une nouvelle version de l'application est disponible. Veuillez mettre à jour.</span>
+      </span>
+
+      <button pButton pRipple type="button" icon="pi pi-times"
+              class="p-button-rounded p-button-text p-button-sm flex-shrink-0
+                     !text-yellow-800 dark:!text-yellow-100
+                     hover:!bg-yellow-200/50 dark:hover:!bg-yellow-700/50"
+              (click)="closeUpdateDialog()"
+              aria-label="Fermer l'avertissement de mise à jour">
+      </button>
+    </div>
+
     <div
-      class="flex-grow transition-transform duration-300 relative overflow-hidden" 
-      [style.transform]="swipeTransform"
-      (swipe)="swipeNavigation($event)"
+      class="flex-grow
+             pt-[calc(3rem+env(safe-area-inset-top))] sm:pt-16 {/* Header padding */}
+             relative overflow-hidden"
       [@routeAnimations]="prepareRoute(outlet)"
     >
-      <router-outlet #outlet="outlet"></router-outlet>
+      <div [class.pt-16]="outdatedVersion && !acknowledgeUpdate" class="h-full">
+         <router-outlet #outlet="outlet"></router-outlet>
+      </div>
     </div>
+
     <div class="lg:hidden">
       <app-footer-navbar></app-footer-navbar>
     </div>

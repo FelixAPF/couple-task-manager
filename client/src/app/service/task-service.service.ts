@@ -5,6 +5,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Assignee, TaskAssignment, TaskAssignmentDto, TaskPeriod } from '../model/task-period';
 import { environment } from '../environment';
 import { addTimeToCurrentDate } from '../utils/DateUtils';
+import { TaskHistoryDto } from '../model/task-history';
 
 @Injectable({
   providedIn: 'root'
@@ -70,8 +71,8 @@ export class TaskService implements OnDestroy {
     return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assignee }));
   }
 
-  retrieveTaskHistory(taskId: number): Observable<TaskAssignmentDto[]> {
-    return this.http.get<TaskAssignmentDto[]>(`${this.baseUrl}/${taskId}/history`);
+  retrieveTaskHistory(taskId: number): Observable<TaskHistoryDto> {
+    return this.http.get<TaskHistoryDto>(`${this.baseUrl}/${taskId}/history`);
   }
   
 }

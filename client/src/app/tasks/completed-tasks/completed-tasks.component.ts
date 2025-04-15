@@ -15,7 +15,7 @@ export class CompletedTasksComponent implements OnInit {
   @Input() taskAssignments: TaskAssignment[] = [];
   readonly SOURCE_MAP = SourceMap;
 
-  constructor(private taskService: TaskService){
+  constructor(){
   }
 
   ngOnInit(){

@@ -27,8 +27,8 @@ android {
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
     // versionCode will be read from the modified file
-    versionCode 74
-    versionName "1.67"
+    versionCode 83
+    versionName "1.74"
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')
     setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate)
@@ -74,26 +74,9 @@ try {
   logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
 
-tasks.register('incrementVersionName') {
-  doLast {
-    def powershellPath = 'powershell'
-    def scriptPath = file('../../../server/increment_version.ps1').absolutePath // Adjusted path
 
-    def command = [powershellPath, '-ExecutionPolicy', 'Bypass', '-File', scriptPath, '-FilePath', file('build.gradle').absolutePath]
 
-    println "Executing PowerShell script: ${command.join(' ')}"
 
-    def process = command.execute()
-    process.waitFor()
 
-    if (process.exitValue() != 0) {
-      def errorOutput = new BufferedReader(new InputStreamReader(process.errorStream)).getText()
-      logger.error "PowerShell script execution failed with error:\n${errorOutput}"
-      throw new GradleException("Failed to increment versionName")
-    } else {
-      def standardOutput = new BufferedReader(new InputStreamReader(process.inputStream)).getText()
-      println "PowerShell script executed successfully:\n${standardOutput}"
-    }
-  }
-}
-preBuild.dependsOn incrementVersionName
+
+

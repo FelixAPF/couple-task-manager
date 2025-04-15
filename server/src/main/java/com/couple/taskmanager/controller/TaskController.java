@@ -7,6 +7,7 @@ import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.dto.QuickCompleteRqstV1;
 import com.couple.taskmanager.model.dto.TaskAssignmentDto;
 import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.model.dto.TaskHistoryDto;
 import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.service.TaskService;
 import com.couple.taskmanager.utils.StreamUtils;
@@ -53,8 +54,8 @@ public class TaskController extends GenericController<Task, TaskService> {
     }
 
     @GetMapping("{taskId}/history")
-    public List<TaskAssignmentDto> retrieveTaskHistory(@PathVariable("taskId") Long taskId){
-        return service.list(taskId);
+    public TaskHistoryDto retrieveTaskHistory(@PathVariable("taskId") Long taskId){
+        return service.getTaskHistory(taskId);
     }
 
     @GetMapping("not-completed-in-long-time")

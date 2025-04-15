@@ -17,4 +17,9 @@ public class VersionController {
     public String getVersionNumber(){
         return service.get();
     }
+
+    @PostMapping("/{versionNumber}")
+    public void updateVersion(@PathVariable("versionNumber") String versionNumber){
+        service.create(versionNumber);
+    }
 }

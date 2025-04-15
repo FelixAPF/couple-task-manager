@@ -8,6 +8,7 @@ import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.model.dto.TaskAssignmentDto;
+import com.couple.taskmanager.model.dto.TaskHistoryDto;
 import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.repository.ITaskPeriodRepository;
 import com.couple.taskmanager.repository.TaskAssignmentRepository;
@@ -44,14 +45,19 @@ public class TaskService implements IGenericService<Task> {
         return taskRepository.findAll();
     }
 
-    public List<TaskAssignmentDto> list(Long taskId){
-        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(taskId))
-                .map(TaskAssignmentDto::new)
-                .toList();
+    public TaskHistoryDto getTaskHistory(Long taskId){
+        Task task = taskRepository.findById(taskId).orElseThrow(() -> new NoSuchElementException("No task with id " + taskId));
+        return new TaskHistoryDto(task, StreamUtils.mapToList(taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(taskId), TaskAssignmentDto::new));
     }
 
     public List<TaskAssignmentDto> list(Boolean completed){
         return StreamUtils.ofNullable(taskAssignmentRepository.findAllByCompletedEquals(completed))
+                .map(TaskAssignmentDto::new)
+                .toList();
+    }
+
+    public List<TaskAssignmentDto> list(Long taskId){
+        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(taskId))
                 .map(TaskAssignmentDto::new)
                 .toList();
     }

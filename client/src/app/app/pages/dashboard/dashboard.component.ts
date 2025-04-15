@@ -79,6 +79,7 @@ export class DashboardComponent {
     if(isTaskExpired){
       this.retrieveExpiredTasks();
     }
+    this.retrieveTaskAssignmentsByDate();
     return;
   }
 

@@ -35,6 +35,7 @@ export class AppComponent implements OnInit, OnDestroy {
   isMobile = false;
   subscription: Subscription = new Subscription();
   outdatedVersion: boolean = false;
+  acknowledgeUpdate: boolean = false;
   
 
   constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
@@ -60,8 +61,8 @@ export class AppComponent implements OnInit, OnDestroy {
     this.checkScreenWidth();
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
-      if(version.toString() !== BackEndVersion.version.toString()) {
-        this.openAppStore();
+      if(parseFloat(BackEndVersion.version).toFixed(4) !== parseFloat(version).toFixed(4)) {
+        this.outdatedVersion = true;
       }
     }));
   }
@@ -147,6 +148,10 @@ export class AppComponent implements OnInit, OnDestroy {
         }, 200); // Reduced delay
       }
     }
+  }
+
+  public closeUpdateDialog(): void {
+    this.acknowledgeUpdate = true;
   }
 
   public async performImmediateUpdate(): Promise<void> {

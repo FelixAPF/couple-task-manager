@@ -4,7 +4,7 @@
   <!-- Add a message if there are no assignments -->
   <div *ngIf="!taskAssignments || taskAssignments.length === 0" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-4 border rounded-lg bg-surface-100 dark:bg-surface-800">
     <i class="pi pi-info-circle mr-2"></i>
-    Aucun historique de tâche trouvé pour {{task?.title || 'cette tâche'}}. <!-- Added safe navigation operator -->
+    Aucun historique de tâche trouvé pour {{task.title || 'cette tâche'}}. <!-- Added safe navigation operator -->
   </div>
 
   <!-- List of completed tasks -->

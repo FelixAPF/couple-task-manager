@@ -1,11 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Observable, of, Subscription } from 'rxjs';
+import { Observable, of, Subscription, tap } from 'rxjs';
 import { Frequency, Task, TaskCreationRqst, TaskWithCompletedDate } from '../model/task';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Assignee, TaskAssignment, TaskAssignmentDto, TaskPeriod } from '../model/task-period';
 import { environment } from '../environment';
 import { addTimeToCurrentDate } from '../utils/DateUtils';
 import { TaskHistoryDto } from '../model/task-history';
+import { ConfettiService } from './confetti.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ import { TaskHistoryDto } from '../model/task-history';
 export class TaskService implements OnDestroy {
   readonly baseUrl: string = `${environment.apiUrl}tasks`;
   subscription: Subscription = new Subscription();
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private confettiService: ConfettiService) { }
   tasks: Observable<Task[]> = of([]);
 
   
@@ -54,7 +55,9 @@ export class TaskService implements OnDestroy {
   }
 
   completeTask(assignmentId: number): Observable<void>{
-    return this.http.post<void>(`${this.baseUrl}/complete-assignment/${assignmentId}`, {});
+    return this.http.post<void>(`${this.baseUrl}/complete-assignment/${assignmentId}`, {}).pipe(tap(() => {
+      this.confettiService.fireBasicConfetti();
+    }));
   }
 
   deleteTask(id: number): Observable<void>{
@@ -68,7 +71,9 @@ export class TaskService implements OnDestroy {
   }
 
   quickComplete(taskId: number, assignee: Assignee): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assignee }));
+    return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assignee })).pipe(tap(() => {
+      this.confettiService.fireConfetti();
+    }));
   }
 
   retrieveTaskHistory(taskId: number): Observable<TaskHistoryDto> {

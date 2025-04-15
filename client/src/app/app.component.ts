@@ -62,6 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
       if(parseFloat(BackEndVersion.version).toFixed(4) !== parseFloat(version).toFixed(4)) {
+        console.log(parseFloat(BackEndVersion.version).toFixed(4), parseFloat(version).toFixed(4))
         this.outdatedVersion = true;
       }
     }));
@@ -76,14 +77,12 @@ export class AppComponent implements OnInit, OnDestroy {
             const dialogRefsArray = Array.from(this.dialogService.dialogComponentRefMap.keys());
             const topmostDialogRef = dialogRefsArray[dialogRefsArray.length - 1];
 
-            // Safety check and close
             if (topmostDialogRef && typeof topmostDialogRef.close === 'function') {
               topmostDialogRef.close();
             } else {
                 console.warn('Back button: Could not find close method on topmost dialog ref.');
             }
           }
-          // --- If no dialogs are open (or closing failed), proceed with navigation/exit ---
           else if (this.router.url === '/dashboard') {
             App.exitApp();
           } else {
@@ -97,8 +96,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   prepareRoute(outlet: RouterOutlet) {
-    // Use the component reference string as the animation state.
-    // This ensures the value changes whenever the activated component changes.
     return outlet && outlet.isActivated && outlet.activatedRoute && outlet.activatedRoute.snapshot && outlet.activatedRoute.snapshot.url.join('/');
   }
 
@@ -119,37 +116,7 @@ export class AppComponent implements OnInit, OnDestroy {
   checkScreenWidth() {
     this.isMobile = window.innerWidth < 640; // Tailwind 'sm' breakpoint (640px)
   }
-  swipeNavigation(event: any) {
-    if (this.isMobile) {
-      const currentRoute = this.router.url;
-      if (event.direction === 2) { // Swipe left
-        this.swipeTransform = 'translateX(-30%)'; // Reduced translation
-        setTimeout(() => {
-          if (currentRoute === '/dashboard') {
-            this.router.navigate(['/tasks']);
-          } else if (currentRoute === '/tasks') {
-            this.router.navigate(['/split']);
-          } else if(currentRoute === '/split'){
-            this.router.navigate(['/shopping-list']);
-          }
-          this.swipeTransform = 'translateX(0)';
-        }, 200); // Reduced delay
-      } else if (event.direction === 4) { // Swipe right
-        this.swipeTransform = 'translateX(30%)'; // Reduced translation
-        setTimeout(() => {
-          if (currentRoute === '/tasks') {
-            this.router.navigate(['/dashboard']);
-          } else if (currentRoute === '/split') {
-            this.router.navigate(['/tasks']);
-          }  else if(currentRoute === '/shopping-list'){
-            this.router.navigate(['/split']);
-          }
-          this.swipeTransform = 'translateX(0)';
-        }, 200); // Reduced delay
-      }
-    }
-  }
-
+  
   public closeUpdateDialog(): void {
     this.acknowledgeUpdate = true;
   }

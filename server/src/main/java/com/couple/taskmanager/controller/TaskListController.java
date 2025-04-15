@@ -35,4 +35,10 @@ public class TaskListController extends GenericController<TaskList, TaskListServ
         return service.unassign(rqst);
     }
 
+    @PostMapping("/move/{taskId}/{assignee}")
+    public void unassign(@PathVariable("taskId") Long taskId, @PathVariable("assignee") Assignee assignee){
+        service.moveTaskToNewAssignee(taskId, assignee);
+    }
+
+
 }

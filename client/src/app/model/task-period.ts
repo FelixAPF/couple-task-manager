@@ -33,7 +33,7 @@ export interface TaskAssignmentDto {
 }
 
 export enum Assignee {
-    Felix = "Felix", Camille = "Camille", Deux = "Deux"
+    Felix = "Felix", Camille = "Camille", Deux = "Deux", Unassigned = "Unassigned"
 }
 
 export interface BasicTaskAssignmentRqst {

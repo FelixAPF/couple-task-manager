@@ -4,11 +4,8 @@ import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
-import com.couple.taskmanager.model.dto.QuickCompleteRqstV1;
-import com.couple.taskmanager.model.dto.TaskAssignmentDto;
+import com.couple.taskmanager.model.dto.*;
 import com.couple.taskmanager.model.TaskPeriod;
-import com.couple.taskmanager.model.dto.TaskHistoryDto;
-import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.service.TaskService;
 import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +23,11 @@ public class TaskController extends GenericController<Task, TaskService> {
     @GetMapping("/keep-alive")
     public String keepAlive(){
         return "alive";
+    }
+
+    @PostMapping("/create")
+    public Task createTask(@RequestBody CreateTaskV1 rqst){
+        return this.service.createRqst(rqst);
     }
 
     @PostMapping("by-date")

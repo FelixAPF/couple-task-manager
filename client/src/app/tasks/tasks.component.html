@@ -1,102 +1,84 @@
-<!-- tasks.component.html -->
-<div class="flex flex-col min-h-screen">
-  <div class="container p-4 mx-auto flex-grow">
+<div class="container p-4 mx-auto flex flex-col flex-grow">
 
-    <!-- Top Header and Add Button -->
-    <div class="flex justify-between items-center mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-      <h2 class="text-2xl font-semibold text-surface-800 dark:text-surface-100">Gérer les tâches</h2>
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 gap-4">
+    <!-- Title -->
+    <h2 class="text-xl sm:text-2xl font-semibold text-surface-800 dark:text-surface-100 text-center sm:text-left">
+      Gestion & Répartition
+    </h2>
+
+    <!-- Button Group Container -->
+    <div class="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
+      <!-- Planifier Période Button (Was Assigner) -->
       <p-button
-        (onClick)="openNewTaskDialog()"
-        label="Ajouter"
-        icon="pi pi-plus"
-        styleClass="p-button-raised p-button-primary create-button"
-        pTooltip="Créer une nouvelle définition de tâche"
-        tooltipPosition="left">
+        (click)="create()"
+        label="Assigner les tâches"        
+        icon="pi pi-user-plus"      
+        styleClass="p-button-outlined p-button-secondary flex-1 sm:flex-none" 
+        pTooltip="Planifier les tâches pour une nouvelle période"
+        tooltipPosition="bottom">
       </p-button>
+
+      <!-- Créer Tâche Button -->
+      <p-button
+        (click)="openNewTaskDialog()"
+        label="Créer Tâche"
+        icon="pi pi-plus"
+        styleClass="p-button-raised p-button-primary flex-1 sm:flex-none"
+        pTooltip="Créer une nouvelle définition de tâche"
+        tooltipPosition="bottom">
+      </p-button>
+    </div> <!-- End Button Group Container -->
+
+  </div>
+
+  <!-- Container for the two assignee lists -->
+  <div class="flex flex-col sm:flex-row gap-6 flex-grow">
+    <!-- Column for Felix's Tasks -->
+    <div class="w-full sm:w-1/3 flex flex-col">
+      <!-- The app-assignee-task-list component handles its own internal styling (header, cards) -->
+      <app-assignee-task-list
+        (unassignEmitter)="unassign($event)"
+        [taskList]="tasksCopain"
+        title="Tâches Copain"
+        [assignee]="ASSIGNEE.Felix"
+        (editTaskEmitter)="openNewTaskDialog($event)"
+        (deleteTaskEmitter)="deleteTask($event)"
+        class="flex-grow"> <!-- Allows this component to fill vertical space -->
+      </app-assignee-task-list>
     </div>
 
-    <!-- Empty State Message -->
-    <div *ngIf="!tasks || tasks.length === 0" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border border-dashed rounded-lg bg-surface-100 dark:bg-surface-800">
-      <i class="pi pi-list mr-2 text-xl align-middle"></i>
-      <span>Aucune tâche définie pour le moment. Cliquez sur "Ajouter" pour en créer une.</span>
+    <!-- Column for Camille's Tasks -->
+    <div class="w-full sm:w-1/3 flex flex-col">
+      <!-- The app-assignee-task-list component handles its own internal styling (header, cards) -->
+      <app-assignee-task-list
+        (unassignEmitter)="unassign($event)"
+        [taskList]="tasksCopine"
+        title="Tâches Copine"
+        (editTaskEmitter)="openNewTaskDialog($event)"
+        (deleteTaskEmitter)="deleteTask($event)"
+        [assignee]="ASSIGNEE.Camille"
+        class="flex-grow"> <!-- Allows this component to fill vertical space -->
+      </app-assignee-task-list>
     </div>
 
-    <!-- Task List using Cards -->
-    <div class="flex flex-col gap-4 pb-16" *ngIf="tasks && tasks.length > 0">
-      <div *ngFor="let task of tasks">
-        <p-card [styleClass]="'task-definition-card shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 border-primary-500 dark:border-primary-400'">
-          <!-- Main flex container inside card: Details on left, Actions on right -->
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3"> <!-- Reduced gap -->
+    <!-- Column for Camille's Tasks -->
+    <div class="w-full sm:w-1/3 flex flex-col">
+      <!-- The app-assignee-task-list component handles its own internal styling (header, cards) -->
+      <app-assignee-task-list
+        (unassignEmitter)="unassign($event)"
+        (editTaskEmitter)="openNewTaskDialog($event)"
+        (deleteTaskEmitter)="deleteTask($event)"
+        [taskList]="unassignedTasks"
+        title="Tâches non assignées"
+        [assignee]="ASSIGNEE.Unassigned"
+        class="flex-grow"> <!-- Allows this component to fill vertical space -->
+      </app-assignee-task-list>
+    </div>
+  </div>
 
-            <!-- Task Details -->
-            <div class="flex-grow min-w-0"> <!-- min-w-0 prevents text overflow -->
-              <!-- Title -->
-              <p class="text-lg font-semibold text-surface-800 dark:text-surface-100 mb-1 truncate" [pTooltip]="task.title" tooltipPosition="top">
-                {{ task.title }}
-              </p>
-              <!-- Description (Optional display) -->
-              <p *ngIf="task.description" class="text-sm text-surface-600 dark:text-surface-400 mb-2 italic">
-                {{ task.description }}
-              </p>
-              <!-- Metadata (Frequency, Room) -->
-              <div class="text-sm text-surface-600 dark:text-surface-400 flex flex-wrap items-center gap-x-4 gap-y-1">
-                <!-- Frequency -->
-                <span class="flex items-center gap-1" pTooltip="Fréquence" tooltipPosition="bottom">
-                  <i class="pi pi-sync text-primary-500 dark:text-primary-400"></i>
-                  <span>{{ `FREQUENCY.${task.frequency}` | translate }}</span>
-                </span>
-                <!-- Room -->
-                <span class="flex items-center gap-1" pTooltip="Pièce" tooltipPosition="bottom">
-                  <i class="pi pi-map-marker text-primary-500 dark:text-primary-400"></i>
-                  <span>{{ task.room | roomPipe }}</span>
-                </span>
-              </div>
-            </div>
+  <!-- Add some padding at the bottom -->
+  <div class="pb-12"></div>
+  <p-confirmDialog></p-confirmDialog>
 
-            <!-- Action Buttons (Revised Layout & Style) -->
-            <div class="flex-shrink-0 flex flex-row items-center gap-1 ml-auto mt-3 sm:mt-0">
-              <!-- Consistent horizontal row, smaller gap, pushed right -->
-
-              <!-- History Button -->
-              <button pButton type="button"
-                      icon="pi pi-history"
-                      class="p-button-rounded p-button-secondary p-button-text"
-                      [routerLink]="['history', task.id]"
-                      pTooltip="Voir l'historique"
-                      tooltipPosition="left">
-              </button>
-
-              <!-- Edit Button -->
-              <button pButton type="button"
-                      icon="pi pi-pencil"
-                      class="p-button-rounded p-button-info p-button-text"
-                      (click)="openNewTaskDialog(task)"
-                      pTooltip="Modifier"
-                      tooltipPosition="left">
-              </button>
-
-              <!-- Delete Button -->
-              <button pButton type="button"
-                      icon="pi pi-trash"
-                      class="p-button-rounded p-button-danger p-button-text"
-                      (click)="delete($event, task.id)"
-                      pTooltip="Supprimer"
-                      tooltipPosition="left">
-              </button>
-
-            </div> <!-- End Action Buttons -->
-
-          </div> <!-- End main flex container -->
-        </p-card>
-      </div> <!-- End *ngFor -->
-    </div> <!-- End task list container -->
-
-    <!-- Toast and Confirm Dialog (Keep these outside the loop/card structure) -->
-    <p-toast></p-toast>
-    <p-confirmdialog></p-confirmdialog>
-
-    <!-- Add some padding at the bottom -->
-    <div class="pb-12"></div>
-
-  </div> <!-- End container -->
-</div> <!-- End main flex container -->
+</div>

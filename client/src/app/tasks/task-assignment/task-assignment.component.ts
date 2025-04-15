@@ -56,10 +56,6 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  log(rowIndex:any){
-    console.log(rowIndex);
-  }
-
   sortByAssignee(): void {
     this.taskAssignments.controls.sort((a, b) => {
       const assigneeA = a.get(FormControlName.ASSIGNEE)?.value;

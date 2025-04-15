@@ -7,6 +7,7 @@ import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.model.dto.CreateTaskV1;
 import com.couple.taskmanager.model.dto.TaskAssignmentDto;
 import com.couple.taskmanager.model.dto.TaskHistoryDto;
 import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
@@ -32,6 +33,8 @@ public class TaskService implements IGenericService<Task> {
     TaskAssignmentRepository taskAssignmentRepository;
     @Autowired
     TaskListRepository taskListRepository;
+    @Autowired
+    TaskListService taskListService;
 
 
     @Override
@@ -94,6 +97,14 @@ public class TaskService implements IGenericService<Task> {
     @Override
     public Task create(Task task) {
         return taskRepository.save(task);
+    }
+
+    public Task createRqst(CreateTaskV1 task) {
+        Task savedTask = create(task.getTask());
+        if(task.getAssignee() != null){
+            taskListService.moveTaskToNewAssignee(savedTask.getId(), task.getAssignee());
+        }
+        return savedTask;
     }
 
     public List<TaskPeriod> retrieveTasksByDate(Date date){

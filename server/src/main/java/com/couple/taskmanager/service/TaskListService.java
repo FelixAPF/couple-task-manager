@@ -66,6 +66,47 @@ public class TaskListService implements IGenericService<TaskList> {
         return taskLists;
     }
 
+    @Transactional // Add this annotation for atomicity
+    public void moveTaskToNewAssignee(Long taskId, Assignee newAssignee){
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new NoSuchElementException("No task with id " + taskId));
+
+        TaskList sourceList = taskListRepository.findByTaskId(taskId);
+
+        TaskList targetList = taskListRepository.findByAssignee(newAssignee);
+        if(targetList == null) {
+            throw new IllegalStateException("Target TaskList for assignee " + newAssignee + " not found.");
+        }
+
+        if (sourceList != null && sourceList.getId().equals(targetList.getId())) {
+            System.out.println("Task " + taskId + " is already assigned to " + newAssignee);
+            return; // No changes needed
+        }
+
+        List<TaskList> listsToSave = new ArrayList<>();
+
+        if(sourceList != null) {
+            boolean removed = sourceList.getTasks().remove(task);
+            if (removed) {
+                listsToSave.add(sourceList);
+            } else {
+                System.err.println("Warning: Task " + taskId + " found in list " + sourceList.getId() + " via query, but not in its loaded tasks collection.");
+            }
+        }
+
+        if (!targetList.getTasks().contains(task)) {
+            targetList.getTasks().add(task);
+            // Add targetList to save list *only if* it wasn't already added as the sourceList
+            if (!listsToSave.contains(targetList)) {
+                listsToSave.add(targetList);
+            }
+        }
+
+        if (!listsToSave.isEmpty()) {
+            taskListRepository.saveAll(listsToSave); // Save all modified lists together
+        }
+    }
+
 
     @Override
     public TaskList update(Long id, TaskList taskList) {

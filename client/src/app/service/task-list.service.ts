@@ -27,6 +27,10 @@ export class TaskListService {
     return this.http.post<void>(this.baseUrl, taskList);
   }
 
+  assignTaskToAssigneeList(taskId: number, newAssignee: Assignee): Observable<void>{
+    return this.http.post<void>(`${this.baseUrl}/move/${taskId}/${newAssignee}`, {});
+  }
+
   saveTasksToExistingTaskList(basicTaskAssignmentRqst: BasicTaskAssignmentRqst[]): Observable<void>{
     return this.http.post<void>(`${this.baseUrl}/assign`, basicTaskAssignmentRqst);
   }

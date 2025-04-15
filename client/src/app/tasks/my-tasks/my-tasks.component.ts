@@ -20,6 +20,7 @@ export const SourceMap = {
     [Assignee.Camille]: "assets/person2.jpg",
     [Assignee.Felix]: "assets/person1.jpg",
     [Assignee.Deux]: "assets/deux.jpg",
+    [Assignee.Unassigned]: "assets/placeholder.jpg",
   }
     
 enum FormControlName {

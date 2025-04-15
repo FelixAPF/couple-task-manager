@@ -75,7 +75,6 @@ export class QuickCompleteTaskComponent implements OnInit {
     this.filteredTasks = this.tasks.filter(task =>
       task.title?.toLowerCase().includes(query)
     );
-    // console.log('Filtered tasks:', this.filteredTasks); // Optional log
   }
 
   quickComplete() {

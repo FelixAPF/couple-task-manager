@@ -32,7 +32,7 @@
              relative overflow-hidden"
       [@routeAnimations]="prepareRoute(outlet)"
     >
-      <div [class.pt-16]="outdatedVersion && !acknowledgeUpdate" class="h-full">
+      <div class="h-full">
          <router-outlet #outlet="outlet"></router-outlet>
       </div>
     </div>

@@ -1,9 +1,16 @@
+import { Assignee } from "./task-period";
+
 export interface Task {
     id?: number;
     title?: string;
     description?: string;
     frequency?: Frequency;
     room?: Room;
+}
+
+export interface TaskCreationRqst {
+    task: Task;
+    assignee: Assignee | null;
 }
 
 export interface TaskWithCompletedDate {

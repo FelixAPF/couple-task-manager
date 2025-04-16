@@ -111,8 +111,11 @@ public class TaskService implements IGenericService<Task> {
         return taskPeriodRepository.retrieveTasksInPeriod(date);
     }
 
-    public List<TaskAssignment> retrieveTaskAssignmentsByDate(Date date){
-        return taskAssignmentRepository.findAllByCompletedTrueAndCompletedDateSameDay(date);
+    public List<TaskAssignmentDto> retrieveTaskAssignmentsByDate(Date date){
+        List<TaskAssignment> assignments = taskAssignmentRepository.findAllByCompletedTrueAndCompletedDateSameDay(date);
+        return assignments.stream()
+                .map(TaskAssignmentDto::new)
+                .toList();
     }
 
     @Transactional

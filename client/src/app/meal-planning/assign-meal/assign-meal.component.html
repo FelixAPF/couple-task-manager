@@ -1,0 +1,77 @@
+<div class="p-4">
+    <p-toast></p-toast>
+  
+    <h3 class="text-xl font-semibold mb-1 text-surface-800 dark:text-surface-100">
+      Assigner un repas
+    </h3>
+    <p class="text-sm text-surface-600 dark:text-surface-400 mb-4">
+      Pour le {{ formattedTargetDate }}
+    </p>
+  
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-6">
+      <p-progressSpinner styleClass="w-6 h-6" strokeWidth="5"></p-progressSpinner>
+    </div>
+  
+    <!-- Error Message -->
+    <div *ngIf="!isLoading && errorLoading" class="flex justify-content-center py-6">
+       <p-message severity="error" text="Impossible de charger les recettes."></p-message>
+    </div>
+  
+    <!-- Recipe List -->
+    <div *ngIf="!isLoading && !errorLoading">
+      <div *ngIf="recipes.length > 0; else noRecipes" class="recipe-list-container border border-surface-200 dark:border-surface-700 rounded-md overflow-y-auto max-h-[40vh] mb-4">
+        <!-- Use max-h-[40vh] or similar to constrain height and enable scrolling -->
+        <div *ngFor="let recipe of recipes"
+             class="recipe-item flex items-center gap-3 p-3 border-b border-surface-100 dark:border-surface-700 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors duration-150"
+             [class.selected-recipe-item]="recipe === selectedRecipe"
+             (click)="selectRecipe(recipe)"
+             pRipple>
+  
+          <!-- Optional Image -->
+          <img *ngIf="recipe.imageUrl" [src]="recipe.imageUrl" [alt]="recipe.name" class="w-10 h-10 object-cover rounded-md flex-shrink-0">
+          <div *ngIf="!recipe.imageUrl" class="w-10 h-10 flex items-center justify-center bg-surface-100 dark:bg-surface-600 rounded-md text-surface-400 dark:text-surface-500 flex-shrink-0">
+            <i class="pi pi-image text-xl"></i>
+          </div>
+  
+          <!-- Name and Category -->
+          <div class="flex-grow min-w-0"> <!-- min-w-0 prevents text overflow issues -->
+            <p class="text-sm font-medium text-surface-800 dark:text-surface-100 truncate">{{ recipe.name }}</p>
+            <p *ngIf="recipe.category" class="text-xs text-surface-500 dark:text-surface-400">{{ recipe.category | titlecase }}</p>
+          </div>
+  
+          <!-- Selection Indicator -->
+          <i *ngIf="recipe === selectedRecipe" class="pi pi-check text-primary-500 dark:text-primary-400 text-xl ml-auto flex-shrink-0"></i>
+        </div>
+      </div>
+  
+      <!-- No Recipes Found -->
+      <ng-template #noRecipes>
+        <div class="text-center py-6">
+          <p class="text-surface-500 dark:text-surface-400 italic mb-3">Aucune recette trouvée.</p>
+        </div>
+      </ng-template>
+  
+      <!-- Create Recipe Button -->
+      <div class="flex justify-center mb-4">
+         <button pButton pRipple type="button" label="Créer une nouvelle recette" icon="pi pi-plus"
+                class="p-button-link p-button-sm"
+                (click)="openCreateRecipeDialog()"></button>
+      </div>
+  
+    </div>
+  
+    <!-- Dialog Actions -->
+    <div class="flex justify-end gap-2 border-t border-surface-200 dark:border-surface-700 pt-4">
+      <button pButton pRipple type="button" label="Annuler"
+              class="p-button-secondary"
+              (click)="closeDialog()">
+      </button>
+      <button pButton pRipple type="button" label="Assigner"
+              class="p-button-primary"
+              [disabled]="!selectedRecipe || isLoading"
+              (click)="assignSelectedMeal()">
+      </button>
+    </div>
+  
+  </div>

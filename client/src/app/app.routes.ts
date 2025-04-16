@@ -12,11 +12,14 @@ export const routes: Routes = [
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     { path: 'dashboard', component: DashboardComponent },
     { path: 'shopping-list', component: ShoppingListComponent },
-    { path: 'meals', children: [
-        { path: "", component: MealsSectionComponent },
-        { path: "meals-list", outlet: "meals", component: MealsListComponent },
-        { path: "recipes", outlet: "meals", component: RecipesListComponent },
-    ] },
+    {
+        path: 'meals', // Matches /meals
+        component: MealsSectionComponent, // This component should contain <router-outlet name="meals"></router-outlet>
+        children: [
+            { path: '', component: MealsListComponent, outlet: 'meals' },
+            { path: 'recipes', component: RecipesListComponent, outlet: 'meals' },
+        ]
+    },
     { path: 'tasks', children: [
         { path: "", component: TasksComponent },
         { path: "add-task", component: AddTaskComponent },

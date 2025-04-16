@@ -1,0 +1,16 @@
+.selected-recipe-item {
+    background-color: var(--primary-50) !important; /* Use PrimeNG theme variables */
+    border-left: 3px solid var(--primary-500);
+    padding-left: calc(0.75rem - 3px) !important; /* Adjust padding slightly */
+  }
+  
+  /* Dark mode adjustments for selected item */
+  :host-context(.dark) .selected-recipe-item {
+    background-color: color-mix(in srgb, var(--primary-700) 20%, transparent) !important;
+    border-left-color: var(--primary-400);
+  }
+  
+  /* Ensure last item doesn't have bottom border if needed */
+  .recipe-list-container .recipe-item:last-child {
+    border-bottom: none;
+  }

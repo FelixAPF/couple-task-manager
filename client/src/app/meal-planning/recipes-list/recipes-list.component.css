@@ -1,0 +1,16 @@
+:host ::ng-deep .recipe-details-accordion .p-accordion-header-link {
+    padding: 0.75rem 1rem; /* Adjust padding */
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  :host ::ng-deep .recipe-details-accordion .p-accordion-content {
+    padding: 0.5rem 1rem 1rem 1rem; /* Adjust padding */
+  }
+  
+  /* Add line-clamp utility if not available via Tailwind plugin */
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TaskService } from '../../service/task-service.service';
-import { TaskAssignment } from '../../model/task-period';
+import { TaskAssignment, TaskAssignmentDto } from '../../model/task-period';
 import { SharedModule } from '../../shared.module';
 import { SourceMap } from '../my-tasks/my-tasks.component';
 
@@ -12,7 +12,7 @@ import { SourceMap } from '../my-tasks/my-tasks.component';
 })
 export class CompletedTasksComponent implements OnInit {
   @Input() completedDate: Date = new Date();
-  @Input() taskAssignments: TaskAssignment[] = [];
+  @Input() taskAssignments: TaskAssignmentDto[] = [];
   readonly SOURCE_MAP = SourceMap;
 
   constructor(){

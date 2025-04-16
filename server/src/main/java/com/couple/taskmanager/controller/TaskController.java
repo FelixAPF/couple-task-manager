@@ -36,7 +36,7 @@ public class TaskController extends GenericController<Task, TaskService> {
     }
 
     @GetMapping("by-date/{completedDate}")
-    public List<TaskAssignment> retrieveTaskAssignmentsByDate(@PathVariable("completedDate") Date date){
+    public List<TaskAssignmentDto> retrieveTaskAssignmentsByDate(@PathVariable("completedDate") Date date){
         return service.retrieveTaskAssignmentsByDate(date);
     }
 

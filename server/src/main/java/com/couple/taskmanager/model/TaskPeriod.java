@@ -21,8 +21,8 @@ public class TaskPeriod {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @OneToMany(mappedBy = "taskPeriod", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference("taskPeriod-taskAssignments")
     private List<TaskAssignment> taskAssignments;
 
     private Date startDate;

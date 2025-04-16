@@ -19,14 +19,14 @@ public class TaskAssignment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @NonNull
+    @ManyToOne
+    @JsonBackReference
     private Task task;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JsonBackReference
-    private TaskPeriod taskPeriod;;
+    @JsonBackReference("taskPeriod-taskAssignments")
+    private TaskPeriod taskPeriod;
 
     @NonNull
     private Assignee assignee;

@@ -5,7 +5,7 @@ import { MyTasksComponent } from '../../../tasks/my-tasks/my-tasks.component';
 import { WarningTasksDueComponent } from "../../../warning-tasks-due/warning-tasks-due.component";
 import { Task, TaskWithCompletedDate } from '../../../model/task';
 import { CompletedTasksComponent } from "../../../tasks/completed-tasks/completed-tasks.component";
-import { TaskAssignment } from '../../../model/task-period';
+import { TaskAssignment, TaskAssignmentDto } from '../../../model/task-period';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -20,7 +20,7 @@ export class DashboardComponent {
   expiredTasks: TaskWithCompletedDate[] = [];
   tasks: Task[] = [];
   completedTasks: TaskAssignment[] = [];
-  taskAssignments: TaskAssignment[] = [];
+  taskAssignments: TaskAssignmentDto[] = [];
   todayDate: Date = new Date();
 
   hideCompletedTasks: boolean = false;

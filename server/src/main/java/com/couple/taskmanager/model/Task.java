@@ -3,6 +3,7 @@ package com.couple.taskmanager.model;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.enums.Room;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,6 +27,10 @@ public class Task {
 
     @NonNull
     private Frequency frequency;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<TaskAssignment> taskAssignments;
 
     @NonNull
     private Room room;

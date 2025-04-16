@@ -26,8 +26,8 @@
         <!-- Task Details -->
         <div class="flex-grow min-w-0"> <!-- min-w-0 prevents text overflow -->
           <!-- Task Title -->
-          <p class="text-sm font-medium text-surface-800 dark:text-surface-100 truncate" [pTooltip]="taskAssignment.task.title" tooltipPosition="top">
-            {{ taskAssignment.task.title }} <!-- Assuming taskTitle is directly on taskAssignment based on history component -->
+          <p class="text-sm font-medium text-surface-800 dark:text-surface-100 truncate" [pTooltip]="taskAssignment?.taskTitle" tooltipPosition="top">
+            {{ taskAssignment?.taskTitle }} <!-- Assuming taskTitle is directly on taskAssignment based on history component -->
           </p>
           <!-- Completion Date/Time -->
           <div class="text-xs text-surface-600 dark:text-surface-400 flex items-center gap-1 mt-0.5">

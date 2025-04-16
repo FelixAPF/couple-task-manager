@@ -19,7 +19,7 @@ export class TaskService implements OnDestroy {
 
   
   getTaskAssignmentsByDate(completedDate: Date) {
-    return this.http.get<TaskAssignment[]>(`${this.baseUrl}/by-date/${completedDate}`);
+    return this.http.get<TaskAssignmentDto[]>(`${this.baseUrl}/by-date/${completedDate}`);
   }
   
   ngOnDestroy(): void {

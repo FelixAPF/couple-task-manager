@@ -29,6 +29,6 @@ export class RecipeCardComponent {
 
   // Helper to format ingredient display
   formatIngredient(ingredient: Ingredient): string {
-    return `${ingredient.quantity} ${ingredient.unit || ''} ${ingredient.name}`.trim();
+    return `${ingredient.quantity  === 0 ? '' : ingredient.quantity} ${ingredient.unit || ''} ${ingredient.name}`.trim();
   }
 }

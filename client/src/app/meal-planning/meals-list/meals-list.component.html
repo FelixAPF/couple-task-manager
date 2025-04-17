@@ -52,7 +52,7 @@
       <!-- Day Card Loop -->
       <div *ngFor="let day of weekDays" class="day-card-wrapper">
         <app-meal-card [customTemplate]="customTemplate" [noMealPlanned]="noMealPlanned"
-          [title]="day.formattedDate" [meal]="day.meal"></app-meal-card>
+          [title]="day.formattedDate" [borderHighlightClass]="day.borderClass" [meal]="day.meal"></app-meal-card>
           <ng-template #customTemplate>
                           <!-- Action Buttons -->
               <div class="flex justify-center gap-2 mt-auto">

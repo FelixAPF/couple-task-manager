@@ -18,6 +18,7 @@ import { MealCardComponent } from '../meal-card/meal-card.component';
 interface WeekDay {
   date: Date;
   formattedDate: string;
+  borderClass: string;
   isoDate: string;
   meal?: Meal;
 }
@@ -61,7 +62,6 @@ export class MealsListComponent implements OnInit {
     private dialogService: DialogService,
     @Inject(LOCALE_ID) private locale: string
   ) {
-    console.log(locale);
 
   }
 
@@ -91,6 +91,7 @@ export class MealsListComponent implements OnInit {
       this.weekDays.push({
         date: dayDate,
         formattedDate: formatted.charAt(0).toUpperCase() + formatted.slice(1),
+        borderClass: this.getPositionInCycle(dayDate) || '',
         isoDate: iso,
         meal: undefined
       });
@@ -121,14 +122,12 @@ export class MealsListComponent implements OnInit {
 
     const startDateMillis = this.weekDays[0].date.getTime();
     const endDateMillis = this.weekDays[6].date.getTime() + (24 * 60 * 60 * 1000);
-    console.log(startDateMillis, endDateMillis);
 
     this.mealService.getMealsByDateRange(startDateMillis, endDateMillis).subscribe({
       next: (meals) => {
         meals.forEach(meal => {
           // Ensure date comparison is robust (handle timezones/normalization)
           const mealDate = new Date(meal.date);
-          console.log(`Meal Date for ${meal.recipe.name}: ${mealDate}`)
           const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd');
           if (mealIsoDate) {
             this.mealsMap.set(mealIsoDate, meal);
@@ -143,7 +142,6 @@ export class MealsListComponent implements OnInit {
         });
 
         this.isLoading = false;
-        console.log(this.mealsMap)
       },
       error: (err) => {
         this.isLoading = false;
@@ -262,6 +260,24 @@ export class MealsListComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: "Impossible d'ouvrir la fenêtre d'assignation." });
     }
   }
+  
+  getPositionInCycle(date: Date): "first" | "last" | null {
+    const cycleStartUTC = Date.UTC(2024, 0, 1); // 1er janvier 2024 à minuit UTC
+    const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  
+    const msInDay = 24 * 60 * 60 * 1000;
+    const daysSinceStart = Math.floor((dateUTC - cycleStartUTC) / msInDay);
+  
+    if (daysSinceStart < 0) return null;
+  
+    const cycleLength = 14;
+    const position = daysSinceStart % cycleLength;
+  
+    if (position === 0) return "first";
+    if (position === cycleLength - 1) return "last";
+    return null;
+  }
+  
   // Updated to accept a Meal object (can be partial for creation, needs ID for update)
   private saveAssignedMeal(meal: Meal): void {
     this.isLoading = true; // Or a more specific loading indicator

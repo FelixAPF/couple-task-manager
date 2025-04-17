@@ -28,8 +28,7 @@
            (click)="selectRecipe(recipe)">
          <img [src]="recipe.imageUrl || 'assets/recipe_placeholder.jpg'"
               alt="{{ recipe.name }}"
-              class="w-12 h-12 object-cover rounded-md mr-3 flex-shrink-0"
-              onError="this.src='assets/recipe_placeholder.jpg'">
+              class="w-12 h-12 object-cover rounded-md mr-3 flex-shrink-0">
          <div class="flex-grow">
            <div class="font-medium text-sm text-surface-800 dark:text-surface-100">{{ recipe.name }}</div>
            <p-tag *ngIf="recipe.category" [value]="recipe.category" severity="info" styleClass="text-xs mt-1"></p-tag>

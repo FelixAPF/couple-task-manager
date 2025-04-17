@@ -85,7 +85,6 @@ export class AssignMealComponent implements OnInit {
   }
 
   loadRecipes(): void {
-    console.log("Loading recipes");
     this.isLoading = true;
     this.errorLoading = false;
     this.recipeService.getAllRecipes().subscribe({

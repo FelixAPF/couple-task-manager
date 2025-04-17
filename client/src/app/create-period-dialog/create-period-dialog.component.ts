@@ -146,7 +146,6 @@ export class CreatePeriodDialogComponent implements OnInit {
       }));
       this.taskAssignmentService.setTaskAssignments(this.taskAssignments);
     });
-    
   }
 
   activateSecondFormGroup(activateCallback: any, ){

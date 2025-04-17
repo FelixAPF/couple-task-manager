@@ -39,8 +39,7 @@ interface WeekDay {
   providers: [
     ConfirmationService,
     MessageService,
-    DatePipe,
-    DialogService // <-- Ensure DialogService is provided if not globally
+    DatePipe
   ]
 })
 export class MealsListComponent implements OnInit {
@@ -223,34 +222,40 @@ export class MealsListComponent implements OnInit {
     });
   }
 
-  assignMealDialogRef: DynamicDialogRef | undefined;
-
-  assignMeal(date: Date, existingMeal?: Meal): void { // Accept existingMeal
-    this.assignMealDialogRef = this.dialogService.open(AssignMealComponent, {
-        width: '90%', // Adjust as needed for mobile/desktop
+  assignMeal(date: Date, existingMeal?: Meal): void {
+    // Use local const dialogRef instead of this.assignMealDialogRef
+    const dialogRef: DynamicDialogRef | undefined = this.dialogService.open(AssignMealComponent, {
+        width: '90%',
+        modal: true,
+        dismissableMask: true,
         contentStyle: {"max-height": "80vh", "overflow": "auto"},
         baseZIndex: 10000,
         data: {
           date: date,
-          meal: existingMeal // Pass the existing meal object if editing
+          meal: existingMeal
         }
     });
 
-    // Handle dialog close
-    this.assignMealDialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string }) => { // <-- Expect location
-        if (result && result.recipe && result.date && result.location !== undefined) { // <-- Check location exists
-            // If editing, we need the existing meal's ID
-            const mealToSave: Meal = {
-                id: existingMeal?.id, // Include ID if editing, undefined if creating
-                recipe: result.recipe,
-                date: result.date,
-                location: result.location // <-- Use received location
-            };
-            this.saveAssignedMeal(mealToSave); // Pass the full Meal object
-        }
-    });
+    // Handle dialog close using the local const
+    // Add a check in case dialogRef is somehow undefined (though unlikely)
+    if (dialogRef) {
+      dialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string }) => {
+          if (result && result.recipe && result.date && result.location !== undefined) {
+              const mealToSave: Meal = {
+                  id: existingMeal?.id,
+                  recipe: result.recipe,
+                  date: result.date,
+                  location: result.location
+              };
+              this.saveAssignedMeal(mealToSave);
+          }
+      });
+    } else {
+        console.error("Failed to open AssignMealComponent dialog.");
+        // Optionally show an error message to the user
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: "Impossible d'ouvrir la fenêtre d'assignation." });
+    }
   }
-
   // Updated to accept a Meal object (can be partial for creation, needs ID for update)
   private saveAssignedMeal(meal: Meal): void {
     this.isLoading = true; // Or a more specific loading indicator

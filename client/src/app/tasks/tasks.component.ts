@@ -32,7 +32,7 @@ export class TasksComponent implements OnInit {
   tasks?: Task[];
   unassignedTasks?: TaskList;
   
-  constructor(private taskPeriodService: TaskPeriodService, private taskListService: TaskListService, private dialog: DialogService, private taskService: TaskService, private messageService: MessageService, private router: Router, private confirmationService: ConfirmationService, private dialogService: DialogService){}
+  constructor(private taskPeriodService: TaskPeriodService, private taskListService: TaskListService, private taskService: TaskService, private messageService: MessageService, private router: Router, private confirmationService: ConfirmationService, private dialogService: DialogService){}
 
   ngOnInit(): void {
     this.retrieveTasks();
@@ -86,7 +86,7 @@ export class TasksComponent implements OnInit {
   }
 
   create(){
-    const dialogRef = this.dialog.open(TaskAssignmentDialogComponent, {
+    const dialogRef = this.dialogService.open(TaskAssignmentDialogComponent, {
       header: 'Assigner des tâches',
       width: '30vw',
       dismissableMask: true,

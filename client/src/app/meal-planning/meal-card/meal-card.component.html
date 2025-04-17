@@ -16,10 +16,11 @@
         <div *ngIf="meal" class="w-full flex flex-col items-center">
           <!-- Optional: Display Recipe Image -->
           <img (click)="openRecipeView()"
-               [src]="meal?.recipe?.imageUrl || 'assets/recipe_placeholder.jpg'"
+               [src]="meal?.recipe?.imageUrl"
                [alt]="recipeName"
-               class="w-20 h-20 object-cover rounded-md mb-2 shadow-sm">
-          <div *ngIf="!meal.recipe.imageUrl" class="w-20 h-20 flex items-center justify-center bg-surface-100 dark:bg-surface-600 rounded-md mb-2 text-surface-400 dark:text-surface-500">
+               class="w-20 h-20 object-cover rounded-md mb-2 shadow-sm"
+               onError="this.src='assets/recipe_placeholder.jpg'">
+               <div *ngIf="!meal.recipe.imageUrl" class="w-20 h-20 flex items-center justify-center bg-surface-100 dark:bg-surface-600 rounded-md mb-2 text-surface-400 dark:text-surface-500">
               <i class="pi pi-image text-3xl"></i>
           </div>
 

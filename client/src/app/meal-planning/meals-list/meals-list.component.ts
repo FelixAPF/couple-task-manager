@@ -1,6 +1,6 @@
+// c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\meal-planning\meals-list\meals-list.component.ts
 import { Component, OnInit, LOCALE_ID, Inject } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common'; // Removed registerLocaleData, assuming fr-CA from SharedModule is enough
-// import localeFr from '@angular/common/locales/fr'; // Likely not needed if fr-CA is globally registered
+import { CommonModule, DatePipe } from '@angular/common';
 import { SharedModule } from '../../shared.module';
 import { Meal } from '../../model/meals';
 import { MealService } from '../../service/meal.service';
@@ -14,8 +14,6 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AssignMealComponent } from '../assign-meal/assign-meal.component';
 import { Recipe } from '../../model/recipes';
 import { MealCardComponent } from '../meal-card/meal-card.component';
-
-// registerLocaleData(localeFr); // Keep if fr-CA isn't sufficient or registered
 
 interface WeekDay {
   date: Date;
@@ -41,7 +39,8 @@ interface WeekDay {
   providers: [
     ConfirmationService,
     MessageService,
-    DatePipe
+    DatePipe,
+    DialogService // <-- Ensure DialogService is provided if not globally
   ]
 })
 export class MealsListComponent implements OnInit {
@@ -51,10 +50,8 @@ export class MealsListComponent implements OnInit {
   errorLoading: boolean = false;
   private mealsMap = new Map<string, Meal>();
 
-  // --- New properties for week navigation ---
-  currentWeekStartDate!: Date; // The Monday of the currently displayed week
-  formattedWeekRange: string = ''; // e.g., "Semaine du 29 juil. au 4 août"
-  // --- End new properties ---
+  currentWeekStartDate!: Date;
+  formattedWeekRange: string = '';
 
   constructor(
     private mealService: MealService,
@@ -67,23 +64,20 @@ export class MealsListComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.goToCurrentWeek(); // Initialize to the current week
+    this.goToCurrentWeek();
   }
 
-  // --- New method to set the week and load data ---
   displayWeek(): void {
     this.generateWeekDays();
     this.loadMealsForWeek();
   }
-  // --- End new method ---
 
   generateWeekDays(): void {
     this.weekDays = [];
-    // Use currentWeekStartDate instead of today
     const monday = new Date(this.currentWeekStartDate);
-    monday.setHours(0, 0, 0, 0); // Normalize time
+    monday.setHours(0, 0, 0, 0);
 
-    let weekEndDate: Date | null = null; // To store the Sunday date for range display
+    let weekEndDate: Date | null = null;
 
     for (let i = 0; i < 7; i++) {
       const dayDate = new Date(monday);
@@ -99,19 +93,17 @@ export class MealsListComponent implements OnInit {
         meal: undefined
       });
 
-      if (i === 6) { // Store the last day (Sunday)
+      if (i === 6) {
         weekEndDate = dayDate;
       }
     }
 
-    // --- Update formatted week range ---
     const startFormatted = this.datePipe.transform(this.currentWeekStartDate, 'd MMM', this.locale);
-    const endFormatted = this.datePipe.transform(weekEndDate, 'd MMM yyyy', this.locale); // Include year on end date
+    const endFormatted = this.datePipe.transform(weekEndDate, 'd MMM yyyy', this.locale);
     this.formattedWeekRange = `Semaine du ${startFormatted} au ${endFormatted}`;
   }
 
   loadMealsForWeek(): void {
-    // ... (rest of the method remains the same, using the generated weekDays) ...
     if (this.weekDays.length === 0) {
        console.error("Cannot load meals, week days not generated.");
        this.isLoading = false;
@@ -120,7 +112,10 @@ export class MealsListComponent implements OnInit {
 
     this.isLoading = true;
     this.errorLoading = false;
-    this.mealsMap.clear();
+    this.mealsMap.clear(); // Clear previous week's data
+
+    // Clear existing meals from weekDays before loading new ones
+    this.weekDays.forEach(day => day.meal = undefined);
 
     const startDate = this.weekDays[0].isoDate;
     const endDate = this.weekDays[6].isoDate;
@@ -128,14 +123,19 @@ export class MealsListComponent implements OnInit {
     this.mealService.getMealsByDateRange(startDate, endDate).subscribe({
       next: (meals) => {
         meals.forEach(meal => {
+          // Ensure date comparison is robust (handle timezones/normalization)
           const mealDate = new Date(meal.date);
+          // Convert meal date to UTC YYYY-MM-DD for reliable map key
           const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'UTC');
           if (mealIsoDate) {
             this.mealsMap.set(mealIsoDate, meal);
+          } else {
+            console.warn("Could not format meal date:", meal.date);
           }
         });
 
         this.weekDays.forEach(day => {
+          // Use the same ISO format for lookup
           day.meal = this.mealsMap.get(day.isoDate);
         });
 
@@ -145,14 +145,13 @@ export class MealsListComponent implements OnInit {
         this.isLoading = false;
         this.errorLoading = true;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger le plan de repas.' });
+        console.error("Error loading meals:", err);
       }
     });
   }
 
-  // --- New navigation methods ---
   previousWeek(): void {
     this.currentWeekStartDate.setDate(this.currentWeekStartDate.getDate() - 7);
-    // Create a new Date object to trigger change detection if needed, though modifying might be okay
     this.currentWeekStartDate = new Date(this.currentWeekStartDate);
     this.displayWeek();
   }
@@ -165,26 +164,26 @@ export class MealsListComponent implements OnInit {
 
   goToCurrentWeek(): void {
     const today = new Date();
-    const currentDayOfWeek = (today.getDay() + 6) % 7; // 0=Mon
+    const currentDayOfWeek = (today.getDay() + 6) % 7; // 0=Mon, 1=Tue, ..., 6=Sun
     const monday = new Date(today);
     monday.setDate(today.getDate() - currentDayOfWeek);
-    monday.setHours(0, 0, 0, 0);
+    monday.setHours(0, 0, 0, 0); // Normalize to start of day
     this.currentWeekStartDate = monday;
     this.displayWeek();
   }
-  // --- End navigation methods ---
 
-  // ... (editMeal, confirmRemoveMeal, removeMeal, assignMeal, getRecipeName remain the same) ...
-  editMeal(meal: any): void {
-    this.messageService.add({ severity: 'info', summary: 'Action', detail: `Modification du repas (non implémenté).` });
+  editMeal(meal: Meal): void {
+    // Re-use assignMeal for editing, passing the existing meal data
+    this.assignMeal(meal.date, meal);
   }
 
-  confirmRemoveMeal(event: any, meal: any): void {
-    if (!meal.id) return;
+  confirmRemoveMeal(event: Event, meal: Meal | undefined): void {
+    if (!meal || !meal.id) return;
 
+    const formattedDate = this.datePipe.transform(meal.date, 'EEEE d MMMM', this.locale) || 'cette date';
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `Êtes-vous sûr de vouloir supprimer le repas prévu pour le ${this.datePipe.transform(meal.date, 'EEEE d MMMM', this.locale)} ?`,
+      message: `Êtes-vous sûr de vouloir supprimer le repas "${meal.recipe?.name || 'ce repas'}" prévu pour le ${formattedDate} ?`,
       header: 'Confirmation de suppression',
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Oui',
@@ -193,72 +192,84 @@ export class MealsListComponent implements OnInit {
         this.removeMeal(meal);
       },
       reject: () => {
-        this.messageService.add({ severity: 'warn', summary: 'Annulé', detail: 'Suppression annulée.' });
+        // Optional: Add message if needed
+        // this.messageService.add({ severity: 'info', summary: 'Annulé', detail: 'Suppression annulée.' });
       }
     });
   }
 
-  private removeMeal(meal: any): void {
+  private removeMeal(meal: Meal): void {
     if (!meal.id) return;
+    // Optional: Show loading state on the specific card
+    this.isLoading = true; // Or a more specific indicator
     this.mealService.deleteMeal(meal.id).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas supprimé.' });
+        // Find the day and remove the meal visually immediately
         const mealDate = new Date(meal.date);
-        const day = this.weekDays.find(d => d.isoDate === this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'UTC'));
+        const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'UTC');
+        const day = this.weekDays.find(d => d.isoDate === mealIsoDate);
         if (day) {
           day.meal = undefined;
         }
+        this.mealsMap.delete(mealIsoDate!); // Also remove from map
+        this.isLoading = false;
       },
       error: (err) => {
+        this.isLoading = false;
         console.error("Error deleting meal:", err);
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer le repas.' });
       }
     });
   }
+
   assignMealDialogRef: DynamicDialogRef | undefined;
 
-  assignMeal(date: any, meal: any): void {
-    const dateStr = this.datePipe.transform(date, 'yyyy-MM-dd');
-
+  assignMeal(date: Date, existingMeal?: Meal): void { // Accept existingMeal
     this.assignMealDialogRef = this.dialogService.open(AssignMealComponent, {
-        header: `Assigner un repas`, // Header can be simple
-        width: '90%',
-        contentStyle: {"max-height": "70vh", "overflow": "auto"},
+        width: '90%', // Adjust as needed for mobile/desktop
+        contentStyle: {"max-height": "80vh", "overflow": "auto"},
         baseZIndex: 10000,
-        data: { // Pass the target date
-          date,
-          meal
+        data: {
+          date: date,
+          meal: existingMeal // Pass the existing meal object if editing
         }
     });
 
     // Handle dialog close
-    this.assignMealDialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date }) => {
-        if (result && result.recipe && result.date) {
-            this.saveAssignedMeal(result.recipe, result.date);
+    this.assignMealDialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string }) => { // <-- Expect location
+        if (result && result.recipe && result.date && result.location !== undefined) { // <-- Check location exists
+            // If editing, we need the existing meal's ID
+            const mealToSave: Meal = {
+                id: existingMeal?.id, // Include ID if editing, undefined if creating
+                recipe: result.recipe,
+                date: result.date,
+                location: result.location // <-- Use received location
+            };
+            this.saveAssignedMeal(mealToSave); // Pass the full Meal object
         }
     });
   }
 
-  private saveAssignedMeal(recipe: Recipe, date: Date): void {
-    const newMeal: Partial<Meal> = { // Use Partial<Meal> if ID is generated by backend
-      date: date,
-      recipe: recipe, // Assign the full recipe object
-      location: 'Maison' // Default location or leave empty/null
-      // Add other default Meal properties if needed
-    };
-
-    // Optional: Show loading state on the specific day card?
+  // Updated to accept a Meal object (can be partial for creation, needs ID for update)
+  private saveAssignedMeal(meal: Meal): void {
     this.isLoading = true; // Or a more specific loading indicator
 
-    this.mealService.addMeal(newMeal as Meal).subscribe({ // Cast if necessary, ensure addMeal exists
+    const saveObservable = meal.id
+        ? this.mealService.updateMeal(meal) // Use update if ID exists
+        : this.mealService.addMeal(meal);   // Use add if no ID (new meal)
+
+    saveObservable.subscribe({
       next: (savedMeal) => {
-        this.messageService.add({ severity: 'success', summary: 'Succès', detail: `Repas "${recipe.name}" assigné.` });
-        this.loadMealsForWeek(); // Reload the week view to show the new meal
+        const action = meal.id ? 'mis à jour' : 'assigné';
+        this.messageService.add({ severity: 'success', summary: 'Succès', detail: `Repas "${meal.recipe.name}" ${action}.` });
+        this.loadMealsForWeek(); // Reload the week view
       },
       error: (err) => {
-        this.isLoading = false; // Ensure loading state is reset on error
-        console.error("Error assigning meal:", err);
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible d\'assigner le repas.' });
+        this.isLoading = false;
+        const action = meal.id ? 'mettre à jour' : 'assigner';
+        console.error(`Error ${action} meal:`, err);
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `Impossible de ${action} le repas.` });
       }
     });
   }

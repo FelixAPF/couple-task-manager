@@ -23,7 +23,7 @@
   
         <div class="field col-12 md:col-6">
           <label for="category" class="block text-sm font-medium mb-1 text-surface-600 dark:text-surface-300">
-            Catégorie <span class="text-red-500">*</span>
+            Catégorie
           </label>
           <p-dropdown id="category" [options]="recipeTypes" formControlName="category"
                       optionLabel="label" optionValue="value" placeholder="Sélectionner une catégorie"
@@ -74,7 +74,7 @@
                       <!-- Quantity Field -->
                       <div class="flex-1 min-w-0"> <!-- flex-1 allows fields to share space -->
                           <label [for]="'quantity' + i" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
-                              Qté <span class="text-red-500">*</span>
+                              Qté
                           </label>
                           <input [id]="'quantity' + i" type="text" pInputText formControlName="quantity" placeholder="100" class="w-full p-inputtext-sm" />
                           <!-- Add validation message if needed -->

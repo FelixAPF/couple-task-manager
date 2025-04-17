@@ -16,7 +16,7 @@
         <div *ngIf="meal" class="w-full flex flex-col items-center">
           <!-- Optional: Display Recipe Image -->
           <img (click)="openRecipeView()"
-               [src]="meal?.recipe?.imageUrl"
+               [src]="meal.recipe.imageUrl"
                [alt]="recipeName"
                class="w-20 h-20 object-cover rounded-md mb-2 shadow-sm"
                onError="this.src='assets/recipe_placeholder.jpg'">

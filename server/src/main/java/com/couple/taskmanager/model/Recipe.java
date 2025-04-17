@@ -20,6 +20,7 @@ public class Recipe {
     @NonNull
     private String name;
 
+    @Column(name = "description", length = 5000)
     private String description;
 
     private RecipeType category; //TODO: CHANGER POUR ENUM

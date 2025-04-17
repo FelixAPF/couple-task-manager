@@ -19,15 +19,19 @@ export class MealService {
     return this.http.get<Meal>(`${this.baseUrl}/${id}`);
   }
   addMeal(meal: Meal) {
+    console.log("About to call endpoint for meal", meal)
     return this.http.post<Meal>(`${this.baseUrl}`, meal);
   }
   updateMeal(meal: Meal) {
+    console.log("About to call update endpoint for meal", meal)
+
     return this.http.put<Meal>(`${this.baseUrl}/${meal.id}`, meal);
   }
   deleteMeal(id: number) {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
-  getMealsByDateRange(startDate: string, endDate: string) {
+  getMealsByDateRange(startDate: number, endDate: number) {
+    console.log("Start date is ", startDate, " end date is ", endDate)
     return this.http.post<Meal[]>(`${this.baseUrl}/by-date-range`, { startDate, endDate });
   }
   getMealByDate(date: Date){

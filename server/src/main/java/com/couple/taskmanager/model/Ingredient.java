@@ -22,5 +22,5 @@ public class Ingredient {
 
     private String unit;
 
-    private int quantity;
+    private float quantity;
 }

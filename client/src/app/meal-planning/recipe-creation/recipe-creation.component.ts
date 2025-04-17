@@ -73,7 +73,7 @@ export class RecipeCreationComponent implements OnInit {
     this.recipeForm = this.fb.group({
       name: ['', Validators.required],
       description: [''],
-      category: [null, Validators.required], // Use null for initial dropdown state
+      category: [null, []], // Use null for initial dropdown state
       imageUrl: [''], // Add validation (e.g., pattern) if desired
       ingredients: this.fb.array([]) // Initialize as empty FormArray
     });
@@ -105,7 +105,7 @@ export class RecipeCreationComponent implements OnInit {
   createIngredientGroup(ingredient?: Ingredient): FormGroup {
     return this.fb.group({
       name: [ingredient?.name || '', Validators.required],
-      quantity: [ingredient?.quantity || '', Validators.required], // Consider type (string allows "1/2 cup")
+      quantity: [ingredient?.quantity || '', []], // Consider type (string allows "1/2 cup")
       unit: [ingredient?.unit || ''] // Unit is optional
     });
   }

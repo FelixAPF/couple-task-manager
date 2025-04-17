@@ -60,7 +60,10 @@ export class MealsListComponent implements OnInit {
     private router: Router,
     private dialogService: DialogService,
     @Inject(LOCALE_ID) private locale: string
-  ) {}
+  ) {
+    console.log(locale);
+
+  }
 
   ngOnInit(): void {
     this.goToCurrentWeek();
@@ -116,16 +119,17 @@ export class MealsListComponent implements OnInit {
     // Clear existing meals from weekDays before loading new ones
     this.weekDays.forEach(day => day.meal = undefined);
 
-    const startDate = this.weekDays[0].isoDate;
-    const endDate = this.weekDays[6].isoDate;
+    const startDateMillis = this.weekDays[0].date.getTime();
+    const endDateMillis = this.weekDays[6].date.getTime() + (24 * 60 * 60 * 1000);
+    console.log(startDateMillis, endDateMillis);
 
-    this.mealService.getMealsByDateRange(startDate, endDate).subscribe({
+    this.mealService.getMealsByDateRange(startDateMillis, endDateMillis).subscribe({
       next: (meals) => {
         meals.forEach(meal => {
           // Ensure date comparison is robust (handle timezones/normalization)
           const mealDate = new Date(meal.date);
-          // Convert meal date to UTC YYYY-MM-DD for reliable map key
-          const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'UTC');
+          console.log(`Meal Date for ${meal.recipe.name}: ${mealDate}`)
+          const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd');
           if (mealIsoDate) {
             this.mealsMap.set(mealIsoDate, meal);
           } else {
@@ -139,6 +143,7 @@ export class MealsListComponent implements OnInit {
         });
 
         this.isLoading = false;
+        console.log(this.mealsMap)
       },
       error: (err) => {
         this.isLoading = false;
@@ -206,7 +211,7 @@ export class MealsListComponent implements OnInit {
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas supprimé.' });
         // Find the day and remove the meal visually immediately
         const mealDate = new Date(meal.date);
-        const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'UTC');
+        const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'EST');
         const day = this.weekDays.find(d => d.isoDate === mealIsoDate);
         if (day) {
           day.meal = undefined;
@@ -247,6 +252,7 @@ export class MealsListComponent implements OnInit {
                   date: result.date,
                   location: result.location
               };
+              console.log("ABOUT TO SAVE MEAL", mealToSave)
               this.saveAssignedMeal(mealToSave);
           }
       });

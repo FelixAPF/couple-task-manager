@@ -58,4 +58,8 @@ public class MealService implements IGenericService<Meal> {
         List<Meal> byDateBetween = repository.findByDateBetween(startDate, endDate);
         return byDateBetween;
     }
+
+    public Meal retrieveByDate(Date date) {
+        return repository.findByDate(date);
+    }
 }

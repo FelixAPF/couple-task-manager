@@ -18,6 +18,7 @@ export class AssigneeTaskListComponent {
   @Input() taskList: TaskList | undefined;
   @Input() title: string = "";
   @Input() assignee: Assignee = Assignee.Unassigned;
+  @Input() index: number;
   @Output() unassignEmitter = new EventEmitter<any>();
   @Output() editTaskEmitter = new EventEmitter<any>();
   @Output() deleteTaskEmitter = new EventEmitter<any>();

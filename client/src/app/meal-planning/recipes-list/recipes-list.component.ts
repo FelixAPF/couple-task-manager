@@ -16,7 +16,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog'; // For delete confi
 import { ToastModule } from 'primeng/toast'; // For feedback messages
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { RecipeCreationComponent } from '../recipe-creation/recipe-creation.component';
-type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
+import { RecipeCardComponent } from '../recipe-card/recipe-card.component';
+export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
 
 @Component({
   selector: 'app-recipes-list',
@@ -26,7 +27,8 @@ type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contr
     SharedModule,
     ConfirmDialogModule,
     ToastModule,
-    AccordionModule
+    AccordionModule,
+    RecipeCardComponent
   ],
   templateUrl: './recipes-list.component.html',
   styleUrls: ['./recipes-list.component.css'], // Use styleUrls
@@ -106,10 +108,7 @@ export class RecipesListComponent implements OnInit {
     });
   }
 
-  // Helper to format ingredient display
-  formatIngredient(ingredient: Ingredient): string {
-    return `${ingredient.quantity} ${ingredient.unit || ''} ${ingredient.name}`.trim();
-  }
+
 
   // Helper for image errors (optional, can be handled in template too)
   onImageError(event: Event) {
@@ -134,9 +133,7 @@ export class RecipesListComponent implements OnInit {
     // Optional: Handle dialog close event
     this.ref.onClose.subscribe((savedRecipe?: Recipe) => {
         if (savedRecipe) {
-            console.log('Recipe created/saved:', savedRecipe);
-            // Add the new recipe to the list or reload the list
-            this.loadRecipes(); // Example: reload list
+            this.loadRecipes()
         }
     });
   }
@@ -155,7 +152,6 @@ export class RecipesListComponent implements OnInit {
 
     this.ref.onClose.subscribe((savedRecipe?: Recipe) => {
         if (savedRecipe) {
-            console.log('Recipe updated:', savedRecipe);
             // Update the recipe in the list or reload the list
             this.loadRecipes(); // Example: reload list
             this.messageService.add({ severity: 'info', summary: 'Action', detail: `Modification de la recette "${recipe.name}" (non implémenté).` });
@@ -169,16 +165,4 @@ export class RecipesListComponent implements OnInit {
     this.openEditRecipeDialog(recipe);
   }
 
-  // Optional: Map RecipeType enum to severity for p-tag styling
-  getCategoryTagSeverity(category: RecipeType): TagSeverity { // Use the specific TagSeverity type
-    switch (category) {
-      case RecipeType.SANTE: return 'success';
-      case RecipeType.VIANDE: return 'danger';
-      case RecipeType.PATES: return 'warn';
-      // Add cases for other RecipeType values if they exist and map them
-      // case RecipeType.POISSON: return 'info';
-      // case RecipeType.VEGETARIEN: return 'success';
-      default: return 'info'; // Default severity
-    }
-  }
 }

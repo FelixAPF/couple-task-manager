@@ -51,74 +51,37 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-6">
       <!-- Day Card Loop -->
       <div *ngFor="let day of weekDays" class="day-card-wrapper">
-        <p-card [styleClass]="'day-card h-full flex flex-col bg-surface-0 dark:bg-surface-800 shadow-md rounded-lg overflow-hidden border border-surface-200 dark:border-surface-700'">
-
-          <!-- Card Header (Date) -->
-          <ng-template pTemplate="header">
-            <div class="p-3 bg-surface-50 dark:bg-surface-700 border-b border-surface-200 dark:border-surface-600">
-              <h3 class="text-center text-md font-semibold text-primary-600 dark:text-primary-300">
-                {{ day.formattedDate }}
-              </h3>
-            </div>
-          </ng-template>
-
-          <!-- Card Content (Meal Details or Placeholder) -->
-          <ng-template pTemplate="content">
-            <div class="p-3 flex-grow flex flex-col justify-center items-center text-center min-h-[120px]">
-              <!-- If Meal is Planned -->
-              <div *ngIf="day.meal; else noMealPlanned" class="w-full flex flex-col items-center">
-                <!-- Optional: Display Recipe Image -->
-                <img *ngIf="day.meal.recipe?.imageUrl"
-                     [src]="day.meal.recipe.imageUrl"
-                     [alt]="getRecipeName(day.meal)"
-                     class="w-20 h-20 object-cover rounded-md mb-2 shadow-sm">
-                <div *ngIf="!day.meal.recipe?.imageUrl" class="w-20 h-20 flex items-center justify-center bg-surface-100 dark:bg-surface-600 rounded-md mb-2 text-surface-400 dark:text-surface-500">
-                    <i class="pi pi-image text-3xl"></i>
-                </div>
-
-                <!-- Recipe Name -->
-                <p class="text-sm font-medium text-surface-800 dark:text-surface-100 mb-1 truncate w-full"
-                   [pTooltip]="getRecipeName(day.meal)" tooltipPosition="top">
-                  {{ getRecipeName(day.meal) }}
-                </p>
-                <!-- Meal Location -->
-                 <p *ngIf="day.meal.location" class="text-xs text-surface-500 dark:text-surface-400 mb-3">
-                   <i class="pi pi-map-marker mr-1"></i>{{ day.meal.location }}
-                 </p>
-
-                <!-- Action Buttons -->
-                <div class="flex justify-center gap-2 mt-auto">
-                  <button pButton pRipple type="button" icon="pi pi-pencil"
-                          class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
-                          (click)="editMeal(day.meal)" aria-label="Modifier le repas"
-                          pTooltip="Modifier" tooltipPosition="top">
-                  </button>
-                  <button pButton pRipple type="button" icon="pi pi-trash"
-                          class="p-button-rounded p-button-text p-button-sm p-button-danger"
-                          (click)="confirmRemoveMeal($event, day.meal)" aria-label="Supprimer le repas"
-                          pTooltip="Supprimer" tooltipPosition="top">
-                  </button>
-                </div>
+        <app-meal-card [customTemplate]="customTemplate" [noMealPlanned]="noMealPlanned"
+          [title]="day.formattedDate" [meal]="day.meal"></app-meal-card>
+          <ng-template #customTemplate>
+                          <!-- Action Buttons -->
+              <div class="flex justify-center gap-2 mt-auto">
+                <button pButton pRipple type="button" icon="pi pi-pencil"
+                        class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
+                        (click)="assignMeal(day.date, day.meal)" aria-label="Modifier le repas"
+                        pTooltip="Modifier" tooltipPosition="top">
+                </button>
+                <button pButton pRipple type="button" icon="pi pi-trash"
+                        class="p-button-rounded p-button-text p-button-sm p-button-danger"
+                        (click)="confirmRemoveMeal($event, day.meal)" aria-label="Supprimer le repas"
+                        pTooltip="Supprimer" tooltipPosition="top">
+                </button>
               </div>
-
-              <!-- If No Meal is Planned -->
-              <ng-template #noMealPlanned>
-                <div class="flex flex-col items-center">
-                  <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>
-                  <p class="text-xs text-surface-500 dark:text-surface-400 italic mb-3">
-                    Aucun repas prévu
-                  </p>
-                  <button pButton pRipple type="button" icon="pi pi-plus" label="Assigner"
-                          class="p-button-sm p-button-outlined"
-                          (click)="assignMeal(day.date)"
-                          aria-label="Assigner un repas">
-                  </button>
-                </div>
-              </ng-template>
-            </div>
           </ng-template>
-
-        </p-card>
+            <!-- If No Meal is Planned -->
+            <ng-template #noMealPlanned>
+              <div class="flex flex-col items-center">
+                <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>
+                <p class="text-xs text-surface-500 dark:text-surface-400 italic mb-3">
+                  Aucun repas prévu
+                </p>
+                <button pButton pRipple type="button" icon="pi pi-plus" label="Assigner"
+                        class="p-button-sm p-button-outlined"
+                        (click)="assignMeal(day.date, day.meal)"
+                        aria-label="Assigner un repas">
+                </button>
+              </div>
+            </ng-template>
       </div> <!-- End Day Card Loop -->
     </div> <!-- End Week Grid -->
 

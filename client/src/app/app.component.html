@@ -27,9 +27,8 @@
     </div>
 
     <div
-      class="flex-grow
-             pt-[calc(3rem+env(safe-area-inset-top))] sm:pt-16 {/* Header padding */}
-             relative overflow-hidden"
+      class="flex-grow sm:pt-16 {} relative overflow-hidden"
+      [class.pt-[calc(3rem+env(safe-area-inset-top))]]="acknowledgeUpdate"
       [@routeAnimations]="prepareRoute(outlet)"
     >
       <div class="h-full">

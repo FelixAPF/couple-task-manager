@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AssignMealComponent } from '../assign-meal/assign-meal.component';
 import { Recipe } from '../../model/recipes';
+import { MealCardComponent } from '../meal-card/meal-card.component';
 
 // registerLocaleData(localeFr); // Keep if fr-CA isn't sufficient or registered
 
@@ -33,6 +34,7 @@ interface WeekDay {
     ToastModule,
     ProgressSpinnerModule,
     MessageModule,
+    MealCardComponent
   ],
   templateUrl: './meals-list.component.html',
   styleUrls: ['./meals-list.component.css'],
@@ -106,9 +108,6 @@ export class MealsListComponent implements OnInit {
     const startFormatted = this.datePipe.transform(this.currentWeekStartDate, 'd MMM', this.locale);
     const endFormatted = this.datePipe.transform(weekEndDate, 'd MMM yyyy', this.locale); // Include year on end date
     this.formattedWeekRange = `Semaine du ${startFormatted} au ${endFormatted}`;
-    // --- End update ---
-
-    console.log("Generated Week Days:", this.weekDays);
   }
 
   loadMealsForWeek(): void {
@@ -128,11 +127,9 @@ export class MealsListComponent implements OnInit {
 
     this.mealService.getMealsByDateRange(startDate, endDate).subscribe({
       next: (meals) => {
-        console.log("Fetched Meals:", meals);
         meals.forEach(meal => {
           const mealDate = new Date(meal.date);
           const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'UTC');
-          console.log(`Mapping meal ${meal.id} with date ${meal.date} to ISO ${mealIsoDate}`);
           if (mealIsoDate) {
             this.mealsMap.set(mealIsoDate, meal);
           }
@@ -140,13 +137,11 @@ export class MealsListComponent implements OnInit {
 
         this.weekDays.forEach(day => {
           day.meal = this.mealsMap.get(day.isoDate);
-           console.log(`Day ${day.isoDate}, Meal assigned:`, day.meal);
         });
 
         this.isLoading = false;
       },
       error: (err) => {
-        console.error("Error loading meals:", err);
         this.isLoading = false;
         this.errorLoading = true;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger le plan de repas.' });
@@ -180,12 +175,11 @@ export class MealsListComponent implements OnInit {
   // --- End navigation methods ---
 
   // ... (editMeal, confirmRemoveMeal, removeMeal, assignMeal, getRecipeName remain the same) ...
-  editMeal(meal: Meal): void {
-    console.log('Editing meal:', meal.id);
+  editMeal(meal: any): void {
     this.messageService.add({ severity: 'info', summary: 'Action', detail: `Modification du repas (non implémenté).` });
   }
 
-  confirmRemoveMeal(event: Event, meal: Meal): void {
+  confirmRemoveMeal(event: any, meal: any): void {
     if (!meal.id) return;
 
     this.confirmationService.confirm({
@@ -204,7 +198,7 @@ export class MealsListComponent implements OnInit {
     });
   }
 
-  private removeMeal(meal: Meal): void {
+  private removeMeal(meal: any): void {
     if (!meal.id) return;
     this.mealService.deleteMeal(meal.id).subscribe({
       next: () => {
@@ -223,9 +217,8 @@ export class MealsListComponent implements OnInit {
   }
   assignMealDialogRef: DynamicDialogRef | undefined;
 
-  assignMeal(date: Date): void {
+  assignMeal(date: any, meal: any): void {
     const dateStr = this.datePipe.transform(date, 'yyyy-MM-dd');
-    console.log('Opening assign meal dialog for date:', dateStr);
 
     this.assignMealDialogRef = this.dialogService.open(AssignMealComponent, {
         header: `Assigner un repas`, // Header can be simple
@@ -233,17 +226,15 @@ export class MealsListComponent implements OnInit {
         contentStyle: {"max-height": "70vh", "overflow": "auto"},
         baseZIndex: 10000,
         data: { // Pass the target date
-          date: date
+          date,
+          meal
         }
     });
 
     // Handle dialog close
     this.assignMealDialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date }) => {
         if (result && result.recipe && result.date) {
-            console.log('Assigning recipe:', result.recipe, 'to date:', result.date);
             this.saveAssignedMeal(result.recipe, result.date);
-        } else {
-            console.log('Assign meal dialog closed without selection.');
         }
     });
   }
@@ -272,7 +263,4 @@ export class MealsListComponent implements OnInit {
     });
   }
 
-  getRecipeName(meal: Meal | undefined): string {
-    return meal?.recipe?.name || 'Recette inconnue';
-  }
 }

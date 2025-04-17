@@ -1,0 +1,44 @@
+<p-card [styleClass]="'day-card h-full flex flex-col bg-surface-0 dark:bg-surface-800 shadow-md rounded-lg overflow-hidden border border-surface-200 dark:border-surface-700'">
+
+    <!-- Card Header (Date) -->
+    <ng-template pTemplate="header">
+      <div class="p-3 bg-surface-50 dark:bg-surface-700 border-b border-surface-200 dark:border-surface-600">
+        <h3 class="text-center text-md font-semibold text-primary-600 dark:text-primary-300">
+          {{ title }}
+        </h3>
+      </div>
+    </ng-template>
+
+    <!-- Card Content (Meal Details or Placeholder) -->
+    <ng-template pTemplate="content">
+      <div class="p-3 flex-grow flex flex-col justify-center items-center text-center min-h-[120px]">
+        <!-- If Meal is Planned -->
+        <div *ngIf="meal" class="w-full flex flex-col items-center">
+          <!-- Optional: Display Recipe Image -->
+          <img (click)="openRecipeView()"
+               [src]="meal?.recipe?.imageUrl || 'assets/recipe_placeholder.jpg'"
+               [alt]="recipeName"
+               class="w-20 h-20 object-cover rounded-md mb-2 shadow-sm">
+          <div *ngIf="!meal.recipe.imageUrl" class="w-20 h-20 flex items-center justify-center bg-surface-100 dark:bg-surface-600 rounded-md mb-2 text-surface-400 dark:text-surface-500">
+              <i class="pi pi-image text-3xl"></i>
+          </div>
+
+          <!-- Recipe Name -->
+          <p class="text-sm font-medium text-surface-800 dark:text-surface-100 mb-1 truncate w-full"
+             [pTooltip]="recipeName" tooltipPosition="top">
+            {{ recipeName }}
+          </p>
+          <!-- Meal Location -->
+           <p *ngIf="meal.location" class="text-xs text-surface-500 dark:text-surface-400 mb-3">
+             <i class="pi pi-map-marker mr-1"></i>{{ meal.location }}
+           </p>
+
+           <ng-container [ngTemplateOutlet]="customTemplate"></ng-container>
+
+        </div>
+        <ng-container *ngIf="!meal && noMealPlanned" [ngTemplateOutlet]="noMealPlanned"></ng-container>
+        
+      </div>
+    </ng-template>
+
+  </p-card>

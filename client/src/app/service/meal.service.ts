@@ -30,4 +30,7 @@ export class MealService {
   getMealsByDateRange(startDate: string, endDate: string) {
     return this.http.post<Meal[]>(`${this.baseUrl}/by-date-range`, { startDate, endDate });
   }
+  getMealByDate(date: Date){
+    return this.http.get<Meal>(`${this.baseUrl}/by-date/${date}`);
+  }
 }

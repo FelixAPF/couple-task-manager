@@ -62,7 +62,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
       if(parseFloat(BackEndVersion.version).toFixed(4) !== parseFloat(version).toFixed(4)) {
-        console.log(parseFloat(BackEndVersion.version).toFixed(4), parseFloat(version).toFixed(4))
         this.outdatedVersion = true;
       }
     }));

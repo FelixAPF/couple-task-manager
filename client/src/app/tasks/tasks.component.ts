@@ -111,9 +111,7 @@ export class TasksComponent implements OnInit {
     }
 
     generateUnassignedTasks(){
-      const assignedTasks: Task[] = [];
-      assignedTasks.push(...this.tasksCopain?.tasks!);
-      assignedTasks.push(...this.tasksCopine?.tasks!);
+      const assignedTasks: Task[] = [...this.tasksCopain?.tasks!, ...this.tasksCopine?.tasks!];
       const unassignedTasks = this.tasks?.filter((task) => !assignedTasks.some((assignedTask) => assignedTask.id === task.id));
       this.unassignedTasks = {
         assignee: Assignee.Unassigned,

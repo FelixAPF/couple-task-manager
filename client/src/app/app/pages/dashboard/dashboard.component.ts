@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, Inject, LOCALE_ID } from '@angular/core';
 import { TaskService } from '../../../service/task-service.service';
 import { SharedModule } from '../../../shared.module';
 import { MyTasksComponent } from '../../../tasks/my-tasks/my-tasks.component';
@@ -7,13 +7,19 @@ import { Task, TaskWithCompletedDate } from '../../../model/task';
 import { CompletedTasksComponent } from "../../../tasks/completed-tasks/completed-tasks.component";
 import { TaskAssignment, TaskAssignmentDto } from '../../../model/task-period';
 import { FormsModule } from '@angular/forms';
+import { Meal } from '../../../model/meals';
+import { MealService } from '../../../service/meal.service';
+import { Subscription } from 'rxjs';
+import { MealCardComponent } from '../../../meal-planning/meal-card/meal-card.component';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [SharedModule, MyTasksComponent, WarningTasksDueComponent, CompletedTasksComponent, FormsModule],
+  imports: [SharedModule, MyTasksComponent, WarningTasksDueComponent, CompletedTasksComponent, FormsModule, MealCardComponent, DatePipe],
   standalone: true,
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
+  providers: [DatePipe]
 })
 export class DashboardComponent {
 
@@ -22,12 +28,16 @@ export class DashboardComponent {
   completedTasks: TaskAssignment[] = [];
   taskAssignments: TaskAssignmentDto[] = [];
   todayDate: Date = new Date();
+  todayNormalizedDate: Date = new Date();
+  formattedTodayDate: string = '';
 
   hideCompletedTasks: boolean = false;
   collapseCompletedTasks: string = '0';
+  todayMeal: Meal | undefined;
+  subscription: Subscription = new Subscription();
   
 
-  constructor(private taskService: TaskService){}
+  constructor(private taskService: TaskService, private mealService: MealService, private datePipe: DatePipe, @Inject(LOCALE_ID) private locale: string){}
 
   initializeStoredDescription(property: any, propertyName: string){
     const storedValue = localStorage.getItem(propertyName);
@@ -37,6 +47,10 @@ export class DashboardComponent {
   }
 
   ngOnInit(): void {
+    this.todayNormalizedDate.setHours(0, 0, 0, 0);
+    this.formattedTodayDate = this.datePipe.transform(this.todayNormalizedDate, 'EEEE d MMMM', this.locale) || '';
+    this.formattedTodayDate = this.formattedTodayDate.charAt(0).toUpperCase() + this.formattedTodayDate.slice(1);
+
     const storedHideCompletedTasks = localStorage.getItem("hideCompletedTasks");
     if (storedHideCompletedTasks !== null) {
       this.hideCompletedTasks = JSON.parse(storedHideCompletedTasks);
@@ -53,10 +67,15 @@ export class DashboardComponent {
     }
 
     this.retrieveExpiredTasks();
+    this.retrieveTodayMeal();
   }
 
+  retrieveTodayMeal(): void {
+    this.subscription.add(this.mealService.getMealByDate(this.todayNormalizedDate).subscribe(meal => {
+      this.todayMeal = meal;
+    }));
+  }
 
-  
   saveHideStorage(arg0: string,arg1: boolean) {
     localStorage.setItem(arg0, arg1.toString());
   }
@@ -84,7 +103,7 @@ export class DashboardComponent {
   }
 
   retrieveExpiredTasks(){
-    this.taskService.retrieveTasksNotDoneInLongTime().subscribe(tasks => {
+    this.subscription.add(this.taskService.retrieveTasksNotDoneInLongTime().subscribe(tasks => {
       this.tasks = tasks.map(task => task.task);
       this.expiredTasks = tasks.sort((a: TaskWithCompletedDate, b: TaskWithCompletedDate) => {
         if (a.completedDate === null && b.completedDate === null) {
@@ -100,14 +119,14 @@ export class DashboardComponent {
         // Both are not null, compare dates
         return new Date(a.completedDate).getTime() - new Date(b.completedDate).getTime(); // Oldest first
       });
-    });
+    }));
   }
 
   
   retrieveTaskAssignmentsByDate(){
-    this.taskService.getTaskAssignmentsByDate(this.todayDate).subscribe((taskAssignments) => {
+    this.subscription.add(this.taskService.getTaskAssignmentsByDate(this.todayDate).subscribe((taskAssignments) => {
       this.taskAssignments = taskAssignments;
-    });
+    }));
   }
 
 

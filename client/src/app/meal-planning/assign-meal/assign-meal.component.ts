@@ -62,12 +62,17 @@ export class AssignMealComponent implements OnInit {
   }
 
   loadRecipes(): void {
+    console.log("Loading recipe");
     this.isLoading = true;
     this.errorLoading = false;
     this.recipeService.getAllRecipes().subscribe({
       next: (data) => {
         this.recipes = data;
         this.isLoading = false;
+        const selectedRecipe = this.recipes.find(r => r.id === this.dialogConfig.data?.meal?.recipe?.id);
+        if (selectedRecipe) {
+          this.selectRecipe(selectedRecipe);
+        }
       },
       error: (err) => {
         console.error("Error loading recipes:", err);

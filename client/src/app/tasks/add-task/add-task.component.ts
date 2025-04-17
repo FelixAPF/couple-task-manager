@@ -127,7 +127,6 @@ export class AddTaskComponent implements OnInit {
         room: this.roomFormControl?.value
       }
     }
-    console.log(taskCreateRqst, "RQST");
     this.taskService.saveTask(taskCreateRqst).subscribe(() => this.close());
   }
 

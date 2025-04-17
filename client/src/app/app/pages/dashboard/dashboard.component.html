@@ -1,23 +1,16 @@
 <!-- dashboard.component.html -->
 <div class="container p-4 mx-auto flex flex-col gap-6"> <!-- Main container with padding and gap between sections -->
-
-  <!-- Section 1: Controls (Hide Completed Checkbox) -->
-  <div class="p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-    <div class="flex items-center gap-3">
-      <p-checkbox
-        inputId="hideCompletedTasksCB"
-        [(ngModel)]="hideCompletedTasks"
-        (onChange)="onHideCompletedTasks($event)"
-        [binary]="true"
-      ></p-checkbox>
-      <label for="hideCompletedTasksCB" class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">
-        Cacher les tâches complétées aujourd'hui
-      </label>
-      <!-- Optional: Add an icon for visual cue -->
-      <i class="pi pi-eye-slash ml-auto text-surface-500 dark:text-surface-400"></i>
-    </div>
+  <div>
+    <app-meal-card [title]="'Repas du Jour'" [noMealPlanned]="noMealPlanned" [meal]="todayMeal"></app-meal-card>
+    <ng-template #noMealPlanned>
+      <div class="flex flex-col items-center" routerLink="/meals">
+        <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>
+        <p class="text-xs text-surface-500 dark:text-surface-400 italic mb-3">
+          Aucun repas prévu
+        </p>
+      </div>
+    </ng-template>
   </div>
-
   <!-- Section 2: Expired Tasks Accordion -->
   <!-- Only show if there are expired tasks -->
   <div *ngIf="expiredTasks?.length">
@@ -44,7 +37,7 @@
 
   <!-- Section 3: Completed Tasks Accordion -->
   <!-- Only show if there are completed tasks AND they are not hidden by the checkbox -->
-  <div *ngIf="taskAssignments?.length && !hideCompletedTasks">
+  <div *ngIf="taskAssignments?.length">
     <p-accordion [value]="collapseCompletedTasks" (onClose)="saveHideStorage('collapseCompletedTasks',false)" (onOpen)="saveHideStorage('collapseCompletedTasks',true)">
        <!-- Use value="0" to potentially have it open by default, or manage state -->
        <p-accordion-panel value="0">

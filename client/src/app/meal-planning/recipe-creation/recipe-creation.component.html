@@ -35,12 +35,42 @@
           </small>
         </div>
   
-         <div class="field col-12 md:col-6">
-          <label for="imageUrl" class="block text-sm font-medium mb-1 text-surface-600 dark:text-surface-300">
-            URL de l'image
+        <div class="field col-12 md:col-6">
+          <label class="block text-sm font-medium mb-1 text-surface-600 dark:text-surface-300">
+            Image de la recette
           </label>
-          <input id="imageUrl" type="text" pInputText formControlName="imageUrl" class="w-full" placeholder="https://..." />
-          <!-- Add pattern validation message if needed -->
+          <!-- Image Preview -->
+          <!-- Show preview if a new file is selected OR if there's an existing imageUrl and no new file -->
+          <div *ngIf="imagePreviewUrl || (imageUrl.value && !imagePreviewUrl)" class="mb-2 relative w-full aspect-video bg-surface-100 dark:bg-surface-700 rounded overflow-hidden flex items-center justify-center border border-surface-200 dark:border-surface-600">
+             <img [src]="imagePreviewUrl || imageUrl.value" alt="Aperçu de la recette" class="object-cover w-full h-full">
+             <!-- Remove Button Overlay -->
+             <button pButton pRipple type="button" icon="pi pi-times"
+                     class="p-button-rounded p-button-danger absolute top-1 right-1 p-button-sm opacity-80 hover:opacity-100"
+                     (click)="removeImage()"
+                     pTooltip="Supprimer l'image" tooltipPosition="left">
+             </button>
+          </div>
+
+          <!-- File Upload Component -->
+          <!-- We use customUpload=true because FileService handles the actual upload logic -->
+          <p-fileUpload mode="basic" name="recipeImage" #fileUploader
+                        accept="image/*" maxFileSize="2000000" 
+                        chooseLabel="Choisir une image" chooseIcon="pi pi-upload"
+                        class="p-button-sm w-full md:w-auto"
+                        [auto]="true" 
+                        customUpload="true"
+                        (uploadHandler)="onFileSelect($event)">
+                        <!-- Note: The (uploadHandler) is triggered when the user selects a file in basic mode with customUpload=true -->
+          </p-fileUpload>
+
+          <!-- Display selected file name -->
+          <small *ngIf="selectedFile" class="block mt-1 text-surface-500 dark:text-surface-400">
+            Fichier sélectionné : {{ selectedFile.name }}
+          </small>
+          <!-- Hidden form control to store the final image URL -->
+          <input type="hidden" formControlName="imageUrl">
+          <!-- Add validation message for image if needed, e.g., file type or size -->
+          <!-- <small *ngIf="imageControlHasError" class="p-error block mt-1"> Error message for image </small> -->
         </div>
   
         <div class="field col-12">

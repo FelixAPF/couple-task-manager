@@ -154,7 +154,7 @@ export class RecipesListComponent implements OnInit {
         if (savedRecipe) {
             // Update the recipe in the list or reload the list
             this.loadRecipes(); // Example: reload list
-            this.messageService.add({ severity: 'info', summary: 'Action', detail: `Modification de la recette "${recipe.name}" (non implémenté).` });
+            this.messageService.add({ severity: 'info', summary: 'Action', detail: `Modification de la recette "${recipe.name}"` });
 
         }
     });

@@ -30,7 +30,10 @@ public class RecipeService implements IGenericService<Recipe> {
 
     @Override
     public Recipe update(Long id, Recipe recipe) {
-        return null;
+        if(!repository.existsById(id)){
+            throw new NoSuchElementException("No recipe with id " + id);
+        }
+        return this.repository.save(recipe);
     }
 
     @Override

@@ -19,6 +19,7 @@ import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { DropdownModule } from 'primeng/dropdown';
+import { TranslateService } from '@ngx-translate/core';
 
 
 // --- Define Recipe Type options (example) ---
@@ -52,11 +53,21 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
 
   @ViewChild('fileUploader') fileUploader?: FileUpload; // Reference to the p-fileUpload component
 
+  constructor(
+    private fb: FormBuilder,
+    private recipeService: RecipeService,
+    private fileService: FileService, // Inject FileService
+    private messageService: MessageService,
+    private translateService: TranslateService,
+    private dialogRef: DynamicDialogRef,
+    private config: DynamicDialogConfig,
+    private cdRef: ChangeDetectorRef // Inject ChangeDetectorRef for preview updates if needed
+  ) {}
   recipeForm!: FormGroup;
   isEditMode = false;
   isLoading = false;
   recipeToEdit?: Recipe;
-  recipeTypes: RecipeTypeOption[] = Object.keys(RecipeType).map(key => ({ label: key, value: key }));
+  recipeTypes: RecipeTypeOption[];
 
   selectedFile: File | null = null;
   imagePreviewUrl: string | ArrayBuffer | null = null;
@@ -64,20 +75,12 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
 
   private subscriptions = new Subscription();
 
-  constructor(
-    private fb: FormBuilder,
-    private recipeService: RecipeService,
-    private fileService: FileService, // Inject FileService
-    private messageService: MessageService,
-    private dialogRef: DynamicDialogRef,
-    private config: DynamicDialogConfig,
-    private cdRef: ChangeDetectorRef // Inject ChangeDetectorRef for preview updates if needed
-  ) {}
 
   ngOnInit(): void {
     this.recipeToEdit = this.config.data?.recipe;
     this.isEditMode = !!this.recipeToEdit;
     this.initForm();
+    this.recipeTypes =  Object.keys(RecipeType).map(key => ({ label: this.translateService.instant(`RECIPE_CATEGORY.${key}`), value: key }));
 
     if (this.isEditMode && this.recipeToEdit) {
       this.loadRecipeData(this.recipeToEdit);

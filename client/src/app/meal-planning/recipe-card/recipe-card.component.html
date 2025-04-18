@@ -26,9 +26,18 @@
     <!-- Card Content -->
     <ng-template pTemplate="content">
       <div class="flex-grow">
-        <p *ngIf="recipe.description" class="text-sm text-surface-700 dark:text-surface-300 mb-3 line-clamp-3">
-          {{ recipe.description }}
-        </p>
+        <p #descriptionParagraph *ngIf="recipe.description"
+        class="text-sm text-surface-700 dark:text-surface-300 mb-1 description-paragraph"
+        [class.line-clamp-3]="clampDescription && !overrideDescriptionClamp">
+       {{ recipe.description }}
+     </p>
+        <!-- Combined and Styled Show More/Less Link -->
+        <span *ngIf="clampDescription && isDescriptionOverflowing"
+        (click)="toggleDescriptionClamp()"
+        class="text-xs text-primary-600 dark:text-primary-400 hover:underline cursor-pointer font-medium mt-1 inline-block mb-3  description-paragraph">
+        <!-- Text still depends on the override flag -->
+          {{ overrideDescriptionClamp ? 'Voir moins' : 'Voir plus' }}
+        </span>
 
         <!-- Accordion for Ingredients -->
         <p-accordion [value]="openIngredients ? 'ingredients' : ''" *ngIf="recipe.ingredients && recipe.ingredients.length > 0"

@@ -14,3 +14,8 @@
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
+
+  .description-paragraph {
+    white-space: pre-wrap; /* Preserves whitespace (newlines, spaces) and allows text wrapping */
+    word-break: break-word; /* Optional: Helps break long words/URLs if they might overflow */
+  }

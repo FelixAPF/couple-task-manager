@@ -47,7 +47,7 @@
     <!-- Use filteredRecipes here -->
     <div *ngFor="let recipe of filteredRecipes; trackBy: trackById" class="recipe-card-wrapper">
       <!-- Pass the recipe object to the card component -->
-      <app-recipe-card [buttonsTemplate]="buttonsTemplate" [recipe]="recipe"></app-recipe-card>
+      <app-recipe-card [buttonsTemplate]="buttonsTemplate" [recipe]="recipe" [clampDescription]="true"></app-recipe-card>
       <!-- Template for action buttons, passed to the card -->
       <ng-template #buttonsTemplate>
         <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400" (click)="editRecipe(recipe)" aria-label="Modifier la recette" pTooltip="Modifier" tooltipPosition="top"></button>

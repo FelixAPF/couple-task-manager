@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common'; // Import CommonModule directly
 import { SharedModule } from '../../shared.module'; // Keep for PrimeNG components etc.
 import { Recipe, Ingredient, RecipeType } from '../../model/recipes'; // Use your actual model
@@ -17,6 +17,7 @@ import { ToastModule } from 'primeng/toast'; // For feedback messages
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { RecipeCreationComponent } from '../recipe-creation/recipe-creation.component';
 import { RecipeCardComponent } from '../recipe-card/recipe-card.component';
+import { FormsModule } from '@angular/forms';
 export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
 
 @Component({
@@ -26,6 +27,7 @@ export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' |
     CommonModule,
     SharedModule,
     ConfirmDialogModule,
+    FormsModule,
     ToastModule,
     AccordionModule,
     RecipeCardComponent
@@ -35,10 +37,12 @@ export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' |
   providers: [ConfirmationService, MessageService] // Provide services for dialog/toast
 })
 export class RecipesListComponent implements OnInit {
-  recipes: Recipe[] = [];
+  allRecipes: Recipe[] = [];
+  filteredRecipes: Recipe[] = [];
   isLoading: boolean = true;
   errorLoading: boolean = false;
   ref: DynamicDialogRef | undefined; // To hold dialog reference
+  searchTerm: string = "";
 
 
   // Expose Enum to template if needed for specific logic (e.g. styling tags)
@@ -48,7 +52,8 @@ export class RecipesListComponent implements OnInit {
     private recipeService: RecipeService,
     private confirmationService: ConfirmationService, // Inject confirmation service
     private messageService: MessageService ,
-    private dialogService: DialogService// Inject message service
+    private dialogService: DialogService,
+    private cdRef: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {
@@ -59,17 +64,40 @@ export class RecipesListComponent implements OnInit {
     this.isLoading = true;
     this.errorLoading = false; // Reset error state
     this.recipeService.getAllRecipes().subscribe({
-      next: (data: Recipe[]) => {
-        this.recipes = data;
+      next: (recipes) => {
+        this.allRecipes = recipes; // Store the full list
+        this.filterRecipes(); // Apply initial filter (shows all if searchTerm is empty)
         this.isLoading = false;
+        this.cdRef.detectChanges(); // Trigger change detection
       },
       error: (err) => {
-        console.error("Error loading recipes:", err);
+        console.error('Error loading recipes:', err);
+        this.errorLoading = true;
         this.isLoading = false;
-        this.errorLoading = true; // Set error state
+        this.allRecipes = []; // Clear lists on error
+        this.filteredRecipes = [];
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les recettes.' });
+        this.cdRef.detectChanges(); // Trigger change detection
       }
     });
+  }
+
+  filterRecipes(): void {
+    const lowerCaseSearchTerm = this.searchTerm.trim().toLowerCase();
+
+    if (!lowerCaseSearchTerm) {
+      // If search term is empty, show all recipes
+      this.filteredRecipes = [...this.allRecipes];
+    } else {
+      // Otherwise, filter the original list
+      this.filteredRecipes = this.allRecipes.filter(recipe =>
+        recipe.name.toLowerCase().includes(lowerCaseSearchTerm)
+        // You could extend this to search descriptions or ingredients:
+        // || (recipe.description && recipe.description.toLowerCase().includes(lowerCaseSearchTerm))
+        // || recipe.ingredients.some(ing => ing.name.toLowerCase().includes(lowerCaseSearchTerm))
+      );
+    }
+    // No need for cdRef.detectChanges() here usually, as ngModelChange triggers it.
   }
 
   confirmDelete(event: Event, recipe: Recipe): void {
@@ -97,7 +125,8 @@ export class RecipesListComponent implements OnInit {
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Recette supprimée avec succès.' });
         // Remove recipe from the local list
-        this.recipes = this.recipes.filter(r => r.id !== id);
+        this.allRecipes = this.allRecipes.filter(r => (r.id) !== id);
+        this.filterRecipes();
         this.isLoading = false;
       },
       error: (err) => {

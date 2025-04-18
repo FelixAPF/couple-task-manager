@@ -1,36 +1,58 @@
 <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 <p-toast></p-toast>
 
-<div class="p-4 md:p-6 pb-16">
-  <!-- Loading, Error, Empty States... -->
-  <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-10">
-    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
-  </div>
-  <div *ngIf="!isLoading && errorLoading" class="flex justify-content-center py-10">
-     <p-message severity="error" text="Une erreur est survenue lors du chargement des recettes."></p-message>
-  </div>
+<div class="p-4 md:p-6 pb-16"> <!-- Added pb-16 for bottom padding, adjust if needed -->
 
-  <div *ngIf="!isLoading && !errorLoading" class="flex justify-end mb-4 md:mb-6">
+  <!-- Top Section: Search and Add Button -->
+  <div class="mb-4 md:mb-6 flex flex-col sm:flex-row gap-3 justify-between items-center">
+    <!-- Search Input -->
+    <span class="p-input-icon-left w-full sm:w-auto flex-grow">
+      <!-- Use [(ngModel)] for two-way binding and (ngModelChange) to trigger filtering -->
+      <input type="text" pInputText [(ngModel)]="searchTerm" (ngModelChange)="filterRecipes()" placeholder="Rechercher par nom..." class="w-full"/>
+    </span>
+
+    <!-- Add Recipe Button -->
     <button pButton pRipple
             type="button"
             icon="pi pi-plus"
             label="Ajouter une recette"
-            class="p-button-raised"
+            class="p-button-raised w-full sm:w-auto flex-shrink-0"
             (click)="openCreateRecipeDialog()">
     </button>
-</div>
+  </div>
 
-  <div *ngIf="!isLoading && !errorLoading && recipes.length === 0" class="flex justify-content-center py-10">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-10">
+    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!isLoading && errorLoading" class="flex justify-content-center py-10">
+     <p-message severity="error" text="Une erreur est survenue lors du chargement des recettes."></p-message>
+  </div>
+
+  <!-- Empty State (No recipes at all) -->
+  <div *ngIf="!isLoading && !errorLoading && allRecipes.length === 0" class="flex justify-content-center py-10">
      <p-message severity="info" text="Aucune recette trouvée. Commencez par en ajouter une !"></p-message>
   </div>
 
+  <!-- Empty State (No search results) -->
+  <div *ngIf="!isLoading && !errorLoading && allRecipes.length > 0 && filteredRecipes.length === 0" class="flex justify-content-center py-10">
+     <p-message severity="info" [text]="'Aucune recette ne correspond à votre recherche \'' + searchTerm + '\''"></p-message>
+  </div>
+
   <!-- Recipes Grid -->
-  <div *ngIf="!isLoading && !errorLoading && recipes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-    <div *ngFor="let recipe of recipes; trackBy: trackById" class="recipe-card-wrapper">
+  <!-- Iterate over filteredRecipes instead of recipes -->
+  <div *ngIf="!isLoading && !errorLoading && filteredRecipes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+    <!-- Use filteredRecipes here -->
+    <div *ngFor="let recipe of filteredRecipes; trackBy: trackById" class="recipe-card-wrapper">
+      <!-- Pass the recipe object to the card component -->
       <app-recipe-card [buttonsTemplate]="buttonsTemplate" [recipe]="recipe"></app-recipe-card>
+      <!-- Template for action buttons, passed to the card -->
       <ng-template #buttonsTemplate>
         <button pButton pRipple type="button" icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400" (click)="editRecipe(recipe)" aria-label="Modifier la recette" pTooltip="Modifier" tooltipPosition="top"></button>
-        <button pButton pRipple type="button" icon="pi pi-trash" class="p-button-rounded p-button-text p-button-sm p-button-danger" (click)="confirmDelete($event, recipe)" aria-label="Supprimer la recette" pTooltip="Supprimer" tooltipPosition="top" [disabled]="!recipe.id"></button>
+        <!-- Ensure recipe.id or recipe._id exists before enabling delete -->
+        <button pButton pRipple type="button" icon="pi pi-trash" class="p-button-rounded p-button-text p-button-sm p-button-danger" (click)="confirmDelete($event, recipe)" aria-label="Supprimer la recette" pTooltip="Supprimer" tooltipPosition="top" [disabled]="!(recipe.id)"></button>
       </ng-template>
     </div>
   </div>

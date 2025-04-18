@@ -28,7 +28,7 @@
 
     <div
       class="flex-grow sm:pt-16 {} relative overflow-hidden"
-      [class.pt-[calc(3rem+env(safe-area-inset-top))]]="acknowledgeUpdate"
+      [class.pt-[calc(3rem+env(safe-area-inset-top))]]="acknowledgeUpdate || !outdatedVersion"
       [@routeAnimations]="prepareRoute(outlet)"
     >
       <div class="h-full">

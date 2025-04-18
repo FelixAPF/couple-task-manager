@@ -27,7 +27,7 @@ android {
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
     // versionCode will be read from the modified file
-    versionCode 104
+    versionCode 106
     versionName "1.83"
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')

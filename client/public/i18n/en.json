@@ -44,6 +44,23 @@
         "QUARTERLY": "Quarterly",
         "BIYEARLY": "Bi-annualy",
         "YEARLY": "Annualy"
-    }
+    },
+    "RECIPE_CATEGORY": {
+        "PATES": "Pasta",
+        "VIANDE": "Meat",
+        "SANDWICH": "Sandwich",
+        "BURGER": "Burger",
+        "SANTE": "Healthy",
+        "AUTRE": "Other",
+        "POULET": "Chicken",
+        "BOEUF": "Beef",
+        "WRAP": "Wrap",
+        "SOUPE": "Soup",
+        "FRUITS_DE_MER": "Seafood",
+        "ENTREE": "Appetizer",
+        "POISSON": "Fish",
+        "TREMPETTE": "Dip",
+        "SALADE": "Salad"
+      }
 
 }

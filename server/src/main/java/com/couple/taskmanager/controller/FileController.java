@@ -3,6 +3,7 @@ package com.couple.taskmanager.controller;
 import com.couple.taskmanager.exception.StorageFileNotFoundException;
 import com.couple.taskmanager.service.IFileService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,8 @@ import java.util.Map;
 @CrossOrigin("*")
 public class FileController {
     private final IFileService storageService;
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @Autowired
     public FileController(IFileService storageService) {
@@ -38,7 +41,7 @@ public class FileController {
         return "uploadForm";
     }
 
-    @GetMapping("/files/{filename:.+}")
+    @GetMapping("/{filename:.+}")
     @ResponseBody
     public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
 
@@ -54,11 +57,7 @@ public class FileController {
     @PostMapping
     public ResponseEntity<?> handleFileUpload(@RequestParam("file") MultipartFile file) {
         String fileName = storageService.store(file);
-
-        // Build URL to the file
-        String fileUrl = MvcUriComponentsBuilder
-                .fromMethodName(FileController.class, "serveFile", fileName)
-                .build().toUri().toString();
+        String fileUrl = baseUrl + "/files/" + fileName;
 
         return ResponseEntity.ok().body(Map.of(
                 "fileName", fileName,

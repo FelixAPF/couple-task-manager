@@ -14,6 +14,7 @@ import com.couple.taskmanager.exception.StorageException;
 import com.couple.taskmanager.exception.StorageFileNotFoundException;
 import com.couple.taskmanager.model.StorageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileServiceImpl implements IFileService{
 
     private final Path rootLocation;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @Autowired
     public FileServiceImpl(StorageProperties properties) {

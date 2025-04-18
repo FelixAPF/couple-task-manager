@@ -43,5 +43,22 @@
         "QUARTERLY": "Trimestrel",
         "BIYEARLY": "Bi-annuel",
         "YEARLY": "Annuel"
-    }
+    },
+    "RECIPE_CATEGORY": {
+        "PATES": "Pâtes",
+        "VIANDE": "Viande",
+        "SANDWICH": "Sandwich",
+        "BURGER": "Burger",
+        "SANTE": "Santé",
+        "AUTRE": "Autre",
+        "POULET": "Poulet",
+        "BOEUF": "Bœuf",
+        "WRAP": "Wrap",
+        "SOUPE": "Soupe",
+        "FRUITS_DE_MER": "Fruits de mer",
+        "ENTREE": "Entrée",
+        "POISSON": "Poisson",
+        "TREMPETTE": "Trempette",
+        "SALADE": "Salade"
+      }
 }

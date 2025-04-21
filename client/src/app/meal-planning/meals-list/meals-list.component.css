@@ -43,3 +43,7 @@
   /* .dark .highlight-monday { ... } */ /* Move to meal-card.component.css */
   /* .dark .highlight-wednesday { ... } */ /* Move to meal-card.component.css */
   
+  [style*="transform"][style*="translateX"].flex-grow {
+    /* Target the div with the (swipe) binding more specifically */
+    touch-action: pan-y !important; /* Allow vertical scrolling, use !important to increase specificity */
+  }

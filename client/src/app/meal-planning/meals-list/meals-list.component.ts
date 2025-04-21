@@ -14,6 +14,7 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AssignMealComponent } from '../assign-meal/assign-meal.component';
 import { Recipe } from '../../model/recipes';
 import { MealCardComponent } from '../meal-card/meal-card.component';
+import { HammerModule } from '@angular/platform-browser';
 
 interface WeekDay {
   date: Date;
@@ -40,7 +41,8 @@ interface WeekDay {
   providers: [
     ConfirmationService,
     MessageService,
-    DatePipe
+    DatePipe,
+    HammerModule
   ]
 })
 export class MealsListComponent implements OnInit {
@@ -110,12 +112,15 @@ export class MealsListComponent implements OnInit {
   }
 
   swipeNavigation(event: any) {
-    console.log("Swipe event detected:", event);
-    if(event.deltaX > 0) {
-      this.previousWeek();
-    }
-    else if(event.deltaX < 0) {
-      this.nextWeek();
+    switch (event.direction) {
+      case 2: // Swipe left
+        this.previousWeek();
+        break;
+      case 4: // Swipe right
+        this.nextWeek();
+        break;
+      default:
+        break;
     }
   }
 

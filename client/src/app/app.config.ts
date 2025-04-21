@@ -8,8 +8,10 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 
 
 import { routes } from './app.routes';
+import * as Hammer from 'hammerjs';
+
 import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { HammerGestureConfig, HammerModule } from '@angular/platform-browser';
+import { HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule } from '@angular/platform-browser';
 import { DialogService } from 'primeng/dynamicdialog';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
@@ -17,7 +19,10 @@ const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: Http
 
 export class MyHammerConfig extends HammerGestureConfig {
   override overrides = <any> {
-    'swipe': { direction: Hammer.DIRECTION_RIGHT | Hammer.DIRECTION_LEFT },
+    'swipe':  {
+       direction: Hammer.DIRECTION_ALL, // Keep detecting all directions
+       touchAction: 'pan-y' // *** ADD THIS LINE: Allow vertical scrolling ***
+    },
   }
 }
 
@@ -31,7 +36,7 @@ const inMemoryScrollingFeature: InMemoryScrollingFeature =
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, inMemoryScrollingFeature),
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimations(),
@@ -46,10 +51,6 @@ export const appConfig: ApplicationConfig = {
           }
       }
   }),
-  {
-    provide: HammerModule,
-    useValue: MyHammerConfig,
-  },
     importProvidersFrom([TranslateModule.forRoot({
       loader: {
         provide: TranslateLoader,
@@ -57,5 +58,6 @@ export const appConfig: ApplicationConfig = {
         deps: [HttpClient],
       },
     }), HammerModule]),
+    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig }
   ]
 };

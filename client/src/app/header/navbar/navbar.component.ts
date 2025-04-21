@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { SharedModule } from '../../shared.module';
 import { Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { AuthService } from '../../service/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +14,11 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 export class NavbarComponent {
   isMenuOpen = false;
   nextBackgroundTheme = Style.Dark;
+  private authService = inject(AuthService);
+
+
+  isLoggedIn$ = this.authService.isLoggedIn$; // Make public for template access
+
 
   constructor(private router: Router, private translate: TranslateService){}
 
@@ -27,6 +33,11 @@ toggleMenu(): void {
   switchStyle(){
     StatusBar.setStyle({ style: this.nextBackgroundTheme });
     this.nextBackgroundTheme = this.nextBackgroundTheme === Style.Dark ? Style.Light : Style.Dark;
+  }
+
+  logout(): void {
+    this.isMenuOpen = false; // Close menu if open
+    this.authService.logout();
   }
 
 }

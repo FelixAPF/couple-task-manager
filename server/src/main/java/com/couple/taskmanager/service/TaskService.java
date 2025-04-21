@@ -2,11 +2,7 @@ package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
-import com.couple.taskmanager.enums.Room;
-import com.couple.taskmanager.model.Task;
-import com.couple.taskmanager.model.TaskAssignment;
-import com.couple.taskmanager.model.TaskList;
-import com.couple.taskmanager.model.TaskPeriod;
+import com.couple.taskmanager.model.*;
 import com.couple.taskmanager.model.dto.CreateTaskV1;
 import com.couple.taskmanager.model.dto.TaskAssignmentDto;
 import com.couple.taskmanager.model.dto.TaskHistoryDto;
@@ -35,17 +31,23 @@ public class TaskService implements IGenericService<Task> {
     TaskListRepository taskListRepository;
     @Autowired
     TaskListService taskListService;
+    @Autowired
+    CTMUserService userService;
 
 
     @Override
-    public Task get(Long id) {
+    public Task get(Long id, CTMUser user) {
         return taskRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No task with id " + id));
     }
 
     @Override
-    public List<Task> list() {
-        return taskRepository.findAll();
+    public List<Task> list(CTMUser user) {
+        return taskRepository.findAllByHouseholdId(user.getHousehold().getId());
+    }
+
+    public List<Task> listByHouseholdId(Long householdId){
+        return taskRepository.findAllByHouseholdId(householdId);
     }
 
     public TaskHistoryDto getTaskHistory(Long taskId){
@@ -66,13 +68,13 @@ public class TaskService implements IGenericService<Task> {
     }
 
     @Override
-    public Task update(Long id, Task task) {
+    public Task update(Long id, Task task, CTMUser user) {
         return taskRepository.save(task);
     }
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, CTMUser user) {
         Optional<Task> taskOptional = taskRepository.findById(id);
         if (taskOptional.isEmpty()) return;
         Task taskToDelete = taskOptional.get();
@@ -95,12 +97,12 @@ public class TaskService implements IGenericService<Task> {
     }
 
     @Override
-    public Task create(Task task) {
+    public Task create(Task task, CTMUser user) {
         return taskRepository.save(task);
     }
 
-    public Task createRqst(CreateTaskV1 task) {
-        Task savedTask = create(task.getTask());
+    public Task createRqst(CreateTaskV1 task, CTMUser user) {
+        Task savedTask = create(task.getTask(), user);
         if(task.getAssignee() != null){
             taskListService.moveTaskToNewAssignee(savedTask.getId(), task.getAssignee());
         }

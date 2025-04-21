@@ -1,6 +1,7 @@
 package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.enums.Assignee;
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.dto.BasicTaskAssignmentRqstV1;
@@ -24,7 +25,7 @@ public class TaskListService implements IGenericService<TaskList> {
 
 
     @Override
-    public TaskList get(Long id) {
+    public TaskList get(Long id, CTMUser user) {
         throw new IllegalArgumentException();
     }
 
@@ -36,7 +37,7 @@ public class TaskListService implements IGenericService<TaskList> {
     }
 
     @Override
-    public List<TaskList> list() {
+    public List<TaskList> list(CTMUser user) {
         return taskListRepository.findAll();
     }
 
@@ -109,13 +110,13 @@ public class TaskListService implements IGenericService<TaskList> {
 
 
     @Override
-    public TaskList update(Long id, TaskList taskList) {
+    public TaskList update(Long id, TaskList taskList, CTMUser user) {
         return null;
     }
 
     @Override
     @Transactional
-    public void delete(Long id) {
+    public void delete(Long id, CTMUser user) {
         taskListRepository.deleteById(id);
     }
 
@@ -132,7 +133,7 @@ public class TaskListService implements IGenericService<TaskList> {
     }
 
     @Override
-    public TaskList create(TaskList taskList) {
+    public TaskList create(TaskList taskList, CTMUser user) {
         return taskListRepository.save(taskList);
     }
 

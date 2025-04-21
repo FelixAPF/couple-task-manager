@@ -28,13 +28,13 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     TaskListRepository taskListRepository;
 
     @Override
-    public TaskPeriod get(Long id) {
+    public TaskPeriod get(Long id, CTMUser user) {
         return taskPeriodRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No task period with id " + id));
     }
 
     @Override
-    public List<TaskPeriod> list() {
+    public List<TaskPeriod> list(CTMUser user) {
         return taskPeriodRepository.findAll();
     }
 
@@ -43,7 +43,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     }
 
     @Override
-    public TaskPeriod update(Long id, TaskPeriod taskPeriod) {
+    public TaskPeriod update(Long id, TaskPeriod taskPeriod, CTMUser user) {
         throw new IllegalArgumentException();
     }
 
@@ -56,24 +56,24 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, CTMUser user) {
         taskPeriodRepository.deleteById(id);
     }
 
     @Override
     @Transactional
-    public TaskPeriod create(TaskPeriod taskPeriod) {
+    public TaskPeriod create(TaskPeriod taskPeriod, CTMUser user) {
         return taskPeriodRepository.save(taskPeriod);
     }
 
-    public TaskPeriod createPeriod(PeriodCreationRqstV1 rqst){
+    public TaskPeriod createPeriod(PeriodCreationRqstV1 rqst, CTMUser user){
         return switch (rqst.getCreationMethod()){
-            case AUTOMATIC -> createPeriodAutomatically(rqst);
-            case MANUAL -> createPeriodManually(rqst);
+            case AUTOMATIC -> createPeriodAutomatically(rqst, user);
+            case MANUAL -> createPeriodManually(rqst, user);
         };
     }
 
-    public TaskPeriod createPeriodManually(PeriodCreationRqstV1 rqst){
+    public TaskPeriod createPeriodManually(PeriodCreationRqstV1 rqst, CTMUser user){
         Date periodEndDate = DateUtils.calculateDueDate(rqst.getStartDate(), rqst.getDuration());
         List<Task> tasks = taskRepository.findAll();
 
@@ -83,7 +83,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
                         .map(BasicTaskAssignmentRqstV1::getTaskId)
                         .anyMatch(taskId -> Objects.equals(t.getId(), taskId)))
                 .collect(Collectors.toMap(Task::getId, task -> task));
-        if(taskMap.isEmpty()) return create(taskPeriod);
+        if(taskMap.isEmpty()) return create(taskPeriod, user);
 
         List<TaskAssignment> taskAssignments = new ArrayList<>();
 
@@ -100,7 +100,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
         if(taskPeriod.getId() == null){
             taskPeriod.setTaskAssignments(taskAssignments);
-            return create(taskPeriod);
+            return create(taskPeriod, user);
         } else {
             return update(taskPeriod, taskAssignments);
         }
@@ -118,7 +118,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         return taskAssignment;
     }
 
-    public TaskPeriod createPeriodAutomatically(PeriodCreationRqstV1 rqst){
+    public TaskPeriod createPeriodAutomatically(PeriodCreationRqstV1 rqst, CTMUser user){
         Date periodEndDate = DateUtils.calculateDueDate(rqst.getStartDate(), rqst.getDuration());
 
         TaskPeriod taskPeriod = generatePeriod(rqst, periodEndDate);
@@ -128,7 +128,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
         if(taskPeriod.getId() == null){
             taskPeriod.setTaskAssignments(taskAssignments);
-            return create(taskPeriod);
+            return create(taskPeriod, user);
         } else {
             return update(taskPeriod, taskAssignments);
         }

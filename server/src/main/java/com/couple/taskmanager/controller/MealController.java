@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/meals")
-@CrossOrigin("*")
 public class MealController extends GenericController<Meal, MealService> {
 
     @PostMapping("/by-date-range")

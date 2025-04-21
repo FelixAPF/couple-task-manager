@@ -1,21 +1,11 @@
 package com.couple.taskmanager.service;
 
-import com.couple.taskmanager.enums.Assignee;
-import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.*;
-import com.couple.taskmanager.model.dto.ShoppingItemV1;
-import com.couple.taskmanager.model.dto.TaskWithCompletedDateV1;
 import com.couple.taskmanager.repository.*;
-import com.couple.taskmanager.utils.DateUtils;
-import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Service
 public class ShoppingItemService implements IGenericService<ShoppingItem> {
@@ -23,13 +13,13 @@ public class ShoppingItemService implements IGenericService<ShoppingItem> {
     ShoppingItemRepository repository;
 
     @Override
-    public ShoppingItem get(Long id) {
+    public ShoppingItem get(Long id, CTMUser user) {
         return repository.findById(id)
                 .orElseThrow(IllegalArgumentException::new);
     }
 
     @Override
-    public List<ShoppingItem> list() {
+    public List<ShoppingItem> list(CTMUser user) {
         return repository.findAll();
     }
 
@@ -42,17 +32,17 @@ public class ShoppingItemService implements IGenericService<ShoppingItem> {
     }
 
     @Override
-    public ShoppingItem update(Long id, ShoppingItem shoppingItem) {
+    public ShoppingItem update(Long id, ShoppingItem shoppingItem, CTMUser user) {
         return repository.save(shoppingItem);
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, CTMUser user) {
         repository.markAsBought(id);
     }
 
     @Override
-    public ShoppingItem create(ShoppingItem shoppingItem) {
+    public ShoppingItem create(ShoppingItem shoppingItem, CTMUser user) {
         return repository.save(shoppingItem);
     }
 

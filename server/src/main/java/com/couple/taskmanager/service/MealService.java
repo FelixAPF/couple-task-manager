@@ -1,5 +1,6 @@
 package com.couple.taskmanager.service;
 
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Meal;
 import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.repository.MealRepository;
@@ -21,27 +22,27 @@ public class MealService implements IGenericService<Meal> {
 
 
     @Override
-    public Meal get(Long id) {
+    public Meal get(Long id, CTMUser user) {
         return repository.findById(id).orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " found"));
     }
 
     @Override
-    public List<Meal> list() {
+    public List<Meal> list(CTMUser user) {
         return repository.findAll();
     }
 
     @Override
-    public Meal update(Long id, Meal meal) {
+    public Meal update(Long id, Meal meal, CTMUser user) {
         return null;
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, CTMUser user) {
         repository.deleteById(id);
     }
 
     @Override
-    public Meal create(Meal meal) {
+    public Meal create(Meal meal, CTMUser user) {
         Recipe recipe = meal.getRecipe();
         Optional<Recipe> byId = recipeRepository.findById(recipe.getId());
         if(byId.isEmpty()){

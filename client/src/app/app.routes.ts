@@ -7,23 +7,30 @@ import { MealsListComponent } from './meal-planning/meals-list/meals-list.compon
 import { RecipesListComponent } from './meal-planning/recipes-list/recipes-list.component';
 import { MealsSectionComponent } from './meal-planning/meals-section/meals-section.component';
 import { TaskHistoryComponent } from './tasks/task-history/task-history.component';
+import { LoginComponent } from './authentication/login/login.component';
+import { RegisterComponent } from './authentication/register/register.component';
+import { authGuard } from './guard/authentication/auth.guard';
 
 export const routes: Routes = [
-    { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-    { path: 'dashboard', component: DashboardComponent },
-    { path: 'shopping-list', component: ShoppingListComponent },
+      // --- Public Routes ---
+    { path: 'login', component: LoginComponent },
+    { path: 'register', component: RegisterComponent },
+    { path: '', pathMatch: 'full', redirectTo: 'dashboard'
+    },
+    { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+    { path: 'shopping-list', component: ShoppingListComponent, canActivate: [authGuard] },
     {
         path: 'meals', // Matches /meals
         component: MealsSectionComponent, // This component should contain <router-outlet name="meals"></router-outlet>
         children: [
-            { path: '', component: MealsListComponent, outlet: 'meals' },
-            { path: 'recipes', component: RecipesListComponent, outlet: 'meals' },
-        ]
+            { path: '', component: MealsListComponent, outlet: 'meals', canActivate: [authGuard] },
+            { path: 'recipes', component: RecipesListComponent, outlet: 'meals', canActivate: [authGuard] },
+        ], canActivate: [authGuard]
     },
     { path: 'tasks', children: [
-        { path: "", component: TasksComponent },
-        { path: "add-task", component: AddTaskComponent },
-        { path: "history/:id", component: TaskHistoryComponent}
+        { path: "", component: TasksComponent, canActivate: [authGuard] },
+        { path: "add-task", component: AddTaskComponent, canActivate: [authGuard] },
+        { path: "history/:id", component: TaskHistoryComponent, canActivate: [authGuard]}
         ]
     },
 ];

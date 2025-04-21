@@ -2,12 +2,15 @@ package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Task;
 import com.couple.taskmanager.model.TaskAssignment;
 import com.couple.taskmanager.model.dto.*;
 import com.couple.taskmanager.model.TaskPeriod;
 import com.couple.taskmanager.service.TaskService;
 import com.couple.taskmanager.utils.StreamUtils;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -17,7 +20,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tasks")
-@CrossOrigin("*")
 public class TaskController extends GenericController<Task, TaskService> {
 
     @GetMapping("/keep-alive")
@@ -26,8 +28,8 @@ public class TaskController extends GenericController<Task, TaskService> {
     }
 
     @PostMapping("/create")
-    public Task createTask(@RequestBody CreateTaskV1 rqst){
-        return this.service.createRqst(rqst);
+    public Task createTask(@RequestBody CreateTaskV1 rqst,  @AuthenticationPrincipal UserDetails userDetails){
+        return this.service.createRqst(rqst, (CTMUser) userDetails);
     }
 
     @PostMapping("by-date")

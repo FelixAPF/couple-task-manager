@@ -1,0 +1,52 @@
+package com.couple.taskmanager.model;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.Data;
+
+import java.util.List;
+
+@Entity
+@Data
+public class Household {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToMany
+    @JsonManagedReference
+    private List<CTMUser> users;
+
+    private String name;
+
+    private String householdJoinKey;
+
+    @OneToMany
+    @JsonManagedReference("household-recipes")
+    private List<Recipe> recipes;
+
+    @OneToMany
+    @JsonManagedReference("household-meals")
+    private List<Meal> meals;
+
+    @OneToMany
+    @JsonManagedReference("household-task-lists")
+    private List<TaskList> taskLists;
+
+    @OneToMany
+    @JsonManagedReference("household-task-periods")
+    private List<TaskPeriod> taskPeriods;
+
+    @OneToMany
+    @JsonManagedReference("household-tasks")
+    private List<Task> tasks;
+
+    @OneToMany
+    @JsonManagedReference("household-task-assignments")
+    private List<TaskAssignment> taskAssignments;
+
+    @OneToMany
+    @JsonManagedReference("household-shopping-items")
+    private List<ShoppingItem> shoppingItems;
+}

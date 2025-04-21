@@ -1,0 +1,180 @@
+<!-- Toast for displaying messages -->
+<p-toast></p-toast>
+
+<!-- Centering Container -->
+<div class="flex items-center justify-center min-h-screen px-4 py-12 bg-surface-100 dark:bg-surface-900">
+
+  <p-card header="Create Account" styleClass="w-full max-w-md shadow-xl">
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+
+      <!-- Username Field -->
+      <div class="flex flex-col gap-2">
+        <label for="name" class="font-medium text-surface-700 dark:text-surface-200">Name</label>
+        <input
+          pInputText
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="Choose a name"
+          class="w-full"
+          [ngClass]="{'p-invalid': name?.invalid && (name?.dirty || name?.touched)}"
+          aria-describedby="name-error"
+        />
+        <small
+          *ngIf="name?.invalid && (name?.dirty || name?.touched)"
+          id="name-error"
+          class="p-error text-xs">
+          <span *ngIf="name?.errors?.['required']">Name is required.</span>
+        </small>
+      </div>
+
+      <!-- Email Field -->
+      <div class="flex flex-col gap-2">
+        <label for="email" class="font-medium text-surface-700 dark:text-surface-200">Email</label>
+        <input
+          pInputText
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="your.email@example.com"
+          class="w-full"
+          [ngClass]="{'p-invalid': email?.invalid && (email?.dirty || email?.touched)}"
+          aria-describedby="email-error"
+        />
+        <small
+          *ngIf="email?.invalid && (email?.dirty || email?.touched)"
+          id="email-error"
+          class="p-error text-xs">
+          <span *ngIf="email?.errors?.['required']">Email is required.</span>
+          <span *ngIf="email?.errors?.['email']">Please enter a valid email address.</span>
+        </small>
+      </div>
+
+      <!-- Password Field -->
+      <div class="flex flex-col gap-2">
+        <label for="password" class="font-medium text-surface-700 dark:text-surface-200">Password</label>
+        <p-password
+          id="password"
+          formControlName="password"
+          placeholder="Create a password"
+          [toggleMask]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [feedback]="true"
+          [ngClass]="{'p-invalid': password?.invalid && (password?.dirty || password?.touched)}"
+          aria-describedby="password-error">
+        </p-password>
+        <small
+          *ngIf="password?.invalid && (password?.dirty || password?.touched)"
+          id="password-error"
+          class="p-error text-xs">
+          <span *ngIf="password?.errors?.['required']">Password is required.</span>
+          <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters long.</span>
+        </small>
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="flex flex-col gap-2">
+        <label for="confirmPassword" class="font-medium text-surface-700 dark:text-surface-200">Confirm Password</label>
+        <p-password
+          id="confirmPassword"
+          formControlName="confirmPassword"
+          placeholder="Re-enter your password"
+          [toggleMask]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [feedback]="false"
+          [ngClass]="{'p-invalid': (confirmPassword?.invalid || registerForm.errors?.['passwordMismatch']) && (confirmPassword?.dirty || confirmPassword?.touched)}"
+          aria-describedby="confirmPassword-error">
+        </p-password>
+        <small
+          *ngIf="(confirmPassword?.invalid || registerForm.errors?.['passwordMismatch']) && (confirmPassword?.dirty || confirmPassword?.touched)"
+          id="confirmPassword-error"
+          class="p-error text-xs">
+          <span *ngIf="confirmPassword?.errors?.['required']">Please confirm your password.</span>
+          <!-- Check for the custom error set by the validator -->
+          <span *ngIf="confirmPassword?.errors?.['passwordMismatch'] && !confirmPassword?.errors?.['required']">Passwords do not match.</span>
+        </small>
+      </div>
+
+      <!-- Create New Household Checkbox -->
+      <div class="flex items-center gap-2">
+        <p-checkbox
+            formControlName="createNewHousehold"
+            [binary]="true"
+            inputId="createNewHouseholdCheck">
+        </p-checkbox>
+        <label for="createNewHouseholdCheck" class="text-sm text-surface-700 dark:text-surface-200 cursor-pointer">
+            Create a new household
+        </label>
+      </div>
+
+      <!-- Household Token Field (Conditional) -->
+      <div *ngIf="!createNewHousehold?.value" class="flex flex-col gap-2">
+        <label for="householdToken" class="font-medium text-surface-700 dark:text-surface-200">Household Token</label>
+        <p-iconField iconPosition="left" class="w-full">
+          <p-inputIcon class="pi pi-key"></p-inputIcon>
+          <input
+            pInputText
+            id="householdToken"
+            type="text"
+            formControlName="householdToken"
+            placeholder="Enter the household invitation token"
+            class="w-full"
+            [ngClass]="{'p-invalid': householdToken?.invalid && (householdToken?.dirty || householdToken?.touched)}"
+            aria-describedby="householdToken-error"
+          />
+        </p-iconField>
+        <small
+          *ngIf="householdToken?.invalid && (householdToken?.dirty || householdToken?.touched) && !createNewHousehold?.value"
+          id="householdToken-error"
+          class="p-error text-xs">
+          <span *ngIf="householdToken?.errors?.['required']">Household Token is required.</span>
+        </small>
+      </div>
+
+      <div *ngIf="createNewHousehold?.value" class="flex flex-col gap-2">
+        <label for="newHouseholdName" class="font-medium text-surface-700 dark:text-surface-200">Household Name</label>
+        <input
+          pInputText
+          id="newHouseholdName"
+          type="text"
+          formControlName="newHouseholdName"
+          placeholder="Enter a name for your new household"
+          class="w-full"
+          [ngClass]="{'p-invalid': newHouseholdName?.invalid && (newHouseholdName?.dirty || newHouseholdName?.touched)}"
+          aria-describedby="householdName-error"
+        />
+        <!-- Show error only if field is invalid AND we ARE creating a new household -->
+        <small
+          *ngIf="newHouseholdName?.invalid && (newHouseholdName?.dirty || newHouseholdName?.touched) && createNewHousehold?.value"
+          id="newHouseholdName-error"
+          class="p-error text-xs">
+          <span *ngIf="newHouseholdName?.errors?.['required']">Household Name is required.</span>
+        </small>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        pButton
+        pRipple
+        type="submit"
+        label="Register"
+        icon="pi pi-user-plus"
+        class="w-full mt-3"
+        [loading]="isLoading()"
+        [disabled]="isLoading()">
+      </button>
+
+      <!-- Login Link -->
+      <div class="text-center mt-3">
+        <span class="text-surface-600 dark:text-surface-400 text-sm">Already have an account? </span>
+        <a routerLink="/login" class="text-primary-500 dark:text-primary-400 hover:underline text-sm font-medium">
+          Login here
+        </a>
+      </div>
+
+    </form>
+  </p-card>
+
+</div>

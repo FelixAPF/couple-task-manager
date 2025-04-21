@@ -18,7 +18,7 @@
     <ng-template pTemplate="subtitle">
       <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-surface-600 dark:text-surface-400 mb-2">
         <span *ngIf="recipe.category">
-           <p-tag [value]="recipe.category | titlecase" [severity]="getCategoryTagSeverity(recipe.category)" [rounded]="true"></p-tag>
+           <p-tag [value]="`RECIPE_CATEGORY.${recipe.category}` | translate | titlecase" [severity]="getCategoryTagSeverity(recipe.category)" [rounded]="true"></p-tag>
         </span>
       </div>
     </ng-template>

@@ -59,6 +59,7 @@
         "ENTREE": "Entrée",
         "POISSON": "Poisson",
         "TREMPETTE": "Trempette",
-        "SALADE": "Salade"
+        "SALADE": "Salade",
+        "ALL": "Tous"
       }
 }

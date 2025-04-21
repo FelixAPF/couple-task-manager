@@ -17,4 +17,9 @@ public class RecipeController extends GenericController<Recipe, RecipeService> {
     public List<Recipe> batchSave(@RequestBody List<Recipe> recipes){
         return this.service.create(recipes);
     }
+
+    @GetMapping("/type/{recipeType}")
+    public List<Recipe> findByRecipeType(@PathVariable String recipeType) {
+        return this.service.findByRecipeType(recipeType);
+    }
 }

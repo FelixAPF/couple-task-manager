@@ -60,7 +60,8 @@
         "ENTREE": "Appetizer",
         "POISSON": "Fish",
         "TREMPETTE": "Dip",
-        "SALADE": "Salad"
+        "SALADE": "Salad",
+        "ALL": "All"
       }
 
 }

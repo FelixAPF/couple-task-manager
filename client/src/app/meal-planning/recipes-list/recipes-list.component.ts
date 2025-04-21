@@ -34,7 +34,7 @@ export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' |
   ],
   templateUrl: './recipes-list.component.html',
   styleUrls: ['./recipes-list.component.css'], // Use styleUrls
-  providers: [ConfirmationService, MessageService] // Provide services for dialog/toast
+  providers: [ConfirmationService, MessageService], // Provide services for dialog/toast,
 })
 export class RecipesListComponent implements OnInit {
   allRecipes: Recipe[] = [];
@@ -46,7 +46,7 @@ export class RecipesListComponent implements OnInit {
 
 
   // Expose Enum to template if needed for specific logic (e.g. styling tags)
-  // RecipeType = RecipeType;
+  RecipeType = ['ALL',...Object.keys(RecipeType)];
 
   constructor(
     private recipeService: RecipeService,
@@ -82,7 +82,23 @@ export class RecipesListComponent implements OnInit {
     });
   }
 
-  filterRecipes(): void {
+  displayRecipeTypeSuggestion: boolean = false;
+
+  openCloseSuggestionsForSearch(){
+    this.displayRecipeTypeSuggestion = !this.displayRecipeTypeSuggestion;
+    this.filteredRecipes = this.displayRecipeTypeSuggestion ? [] : this.allRecipes;
+  }
+
+  filterRecipes(recipeType: string = ""): void {
+    this.displayRecipeTypeSuggestion = false;
+    if(recipeType){
+      if(recipeType === 'ALL') {
+        this.filteredRecipes = [...this.allRecipes];
+      } else {
+        this.filteredRecipes = this.allRecipes.filter(recipe => recipe.category === recipeType);
+      }
+      return;
+    }
     const lowerCaseSearchTerm = this.searchTerm.trim().toLowerCase();
 
     if (!lowerCaseSearchTerm) {

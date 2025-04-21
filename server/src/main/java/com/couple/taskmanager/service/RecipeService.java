@@ -50,4 +50,8 @@ public class RecipeService implements IGenericService<Recipe> {
     public List<Recipe> create(List<Recipe> recipes) {
         return repository.saveAll(recipes);
     }
+
+    public List<Recipe> findByRecipeType(String recipeType) {
+        return repository.findByRecipeType(recipeType);
+    }
 }

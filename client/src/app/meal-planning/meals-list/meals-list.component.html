@@ -1,7 +1,9 @@
 <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 <p-toast></p-toast>
 
-<div class="p-4 md:p-6 pb-16">
+<div class="p-4 md:p-6 pb-16 flex-grow transition-transform duration-300 ease-in-out"
+[style.transform]="swipeTransform"
+(swipe)="swipeNavigation($event)">
 
   <!-- Loading Indicator -->
   <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-10">

@@ -49,6 +49,7 @@ export class MealsListComponent implements OnInit {
   isLoading: boolean = true;
   errorLoading: boolean = false;
   private mealsMap = new Map<string, Meal>();
+  swipeTransform = 'translateX(0)';
 
   currentWeekStartDate!: Date;
   formattedWeekRange: string = '';
@@ -64,6 +65,8 @@ export class MealsListComponent implements OnInit {
   ) {
 
   }
+
+  
 
   ngOnInit(): void {
     this.goToCurrentWeek();
@@ -104,6 +107,16 @@ export class MealsListComponent implements OnInit {
     const startFormatted = this.datePipe.transform(this.currentWeekStartDate, 'd MMM', this.locale);
     const endFormatted = this.datePipe.transform(weekEndDate, 'd MMM yyyy', this.locale);
     this.formattedWeekRange = `Semaine du ${startFormatted} au ${endFormatted}`;
+  }
+
+  swipeNavigation(event: any) {
+    console.log("Swipe event detected:", event);
+    if(event.deltaX > 0) {
+      this.previousWeek();
+    }
+    else if(event.deltaX < 0) {
+      this.nextWeek();
+    }
   }
 
   loadMealsForWeek(): void {

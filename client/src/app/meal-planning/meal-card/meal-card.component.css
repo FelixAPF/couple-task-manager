@@ -39,10 +39,15 @@
     border: 2px solid #a7f3d0 !important;
     box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
     border-radius: 0.5rem;
-  }
-  
+  }  
   .last .p-card {
     border: 2px solid #3d535a !important;
-    box-shadow: 0 0 8px rgba(90, 178, 255, 0.5);
+    box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
+    border-radius: 0.5rem;
+  }
+  
+  .today .p-card {
+    border: 2px solid #feffac !important;
+    box-shadow: 0 0 8px rgba(128, 128, 128, 0.5);
     border-radius: 0.5rem;
   }

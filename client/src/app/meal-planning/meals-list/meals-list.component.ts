@@ -279,9 +279,15 @@ export class MealsListComponent implements OnInit {
     }
   }
   
-  getPositionInCycle(date: Date): "first" | "last" | null {
+  today: string = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
+  getPositionInCycle(date: Date): "first" | "today" | "last" | null {
     const cycleStartUTC = Date.UTC(2024, 0, 1); // 1er janvier 2024 à minuit UTC
     const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+    let compareDate = date.toISOString().slice(0, 10);
+    if(compareDate === this.today){
+      console.log("Match date today", date);
+      return "today";
+    }  // Today check
   
     const msInDay = 24 * 60 * 60 * 1000;
     const daysSinceStart = Math.floor((dateUTC - cycleStartUTC) / msInDay);

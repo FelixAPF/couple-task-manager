@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/shopping-list")
-@CrossOrigin("*")
 public class ShoppingItemController extends GenericController<ShoppingItem, ShoppingItemService> {
     @GetMapping("/name/suggestions")
     public List<String> getSuggestions() {

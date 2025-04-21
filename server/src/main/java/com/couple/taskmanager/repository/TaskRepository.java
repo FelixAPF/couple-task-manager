@@ -19,4 +19,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             "OR (EXISTS (SELECT 1 FROM TaskAssignment ta2 WHERE ta2.task = t AND ta2.completedDate IS NOT NULL) " +
             "AND (SELECT MAX(ta3.completedDate) FROM TaskAssignment ta3 WHERE ta3.task = t) < :longTime)")
     List<Tuple> retrieveTasksNotCompletedInLongTime(@Param("longTime") Date longTime);
+
+    @Query("SELECT t FROM Task t WHERE t.household.id = :householdId")
+    List<Task> findAllByHouseholdId(@Param("householdId") Long householdId);
 }

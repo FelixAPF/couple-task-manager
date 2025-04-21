@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/version")
-@CrossOrigin("*")
 public class VersionController {
     @Autowired
     VersionService service;

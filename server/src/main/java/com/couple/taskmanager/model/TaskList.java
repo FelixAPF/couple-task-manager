@@ -1,6 +1,7 @@
 package com.couple.taskmanager.model;
 
 import com.couple.taskmanager.enums.Assignee;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -24,8 +25,13 @@ public class TaskList {
     @NonNull
     private Assignee assignee;
 
+    @ManyToOne
+    @JsonBackReference("household-task-lists")
+    private Household household;
+
     public TaskList(@NonNull List<Task> tasks, @NonNull Assignee assignee) {
         this.tasks = tasks;
         this.assignee = assignee;
     }
+
 }

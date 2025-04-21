@@ -35,4 +35,8 @@ public class Task {
     @NonNull
     private Room room;
 
+    @ManyToOne
+    @JsonBackReference("household-tasks")
+    private Household household;
+
 }

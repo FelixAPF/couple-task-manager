@@ -10,9 +10,10 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import { routes } from './app.routes';
 import * as Hammer from 'hammerjs';
 
-import { HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule } from '@angular/platform-browser';
 import { DialogService } from 'primeng/dynamicdialog';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
   new TranslateHttpLoader(http, './i18n/', '.json');
@@ -58,6 +59,11 @@ export const appConfig: ApplicationConfig = {
         deps: [HttpClient],
       },
     }), HammerModule]),
-    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig }
+    { provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true, // Required because multiple interceptors can exist
+    }
   ]
 };

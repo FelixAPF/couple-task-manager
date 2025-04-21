@@ -1,6 +1,7 @@
 package com.couple.taskmanager.model;
 
 import com.couple.taskmanager.enums.RecipeType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NonNull;
@@ -21,4 +22,8 @@ public class Meal {
 
     private Date date;
     private String location;
+
+    @ManyToOne
+    @JsonBackReference("household-meals")
+    private Household household;
 }

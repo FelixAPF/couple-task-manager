@@ -1,0 +1,8 @@
+/* Add any specific overrides if needed */
+:host ::ng-deep .p-password input {
+    width: 100%;
+  }
+  
+  /* Optional: Style the password strength meter if needed */
+  /* :host ::ng-deep .p-password-panel { ... } */
+  

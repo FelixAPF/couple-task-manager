@@ -1,11 +1,8 @@
 package com.couple.taskmanager.service;
 
-import com.couple.taskmanager.model.Ingredient;
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Recipe;
-import com.couple.taskmanager.model.ShoppingItem;
-import com.couple.taskmanager.repository.IngredientRepository;
 import com.couple.taskmanager.repository.RecipeRepository;
-import com.couple.taskmanager.repository.ShoppingItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,17 +16,17 @@ public class RecipeService implements IGenericService<Recipe> {
 
 
     @Override
-    public Recipe get(Long id) {
+    public Recipe get(Long id, CTMUser user) {
         return repository.findById(id).orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " found"));
     }
 
     @Override
-    public List<Recipe> list() {
+    public List<Recipe> list(CTMUser user) {
         return repository.findAll();
     }
 
     @Override
-    public Recipe update(Long id, Recipe recipe) {
+    public Recipe update(Long id, Recipe recipe, CTMUser user) {
         if(!repository.existsById(id)){
             throw new NoSuchElementException("No recipe with id " + id);
         }
@@ -37,12 +34,12 @@ public class RecipeService implements IGenericService<Recipe> {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, CTMUser user) {
         repository.deleteById(id);
     }
 
     @Override
-    public Recipe create(Recipe recipe) {
+    public Recipe create(Recipe recipe, CTMUser user) {
         return repository.save(recipe);
     }
 

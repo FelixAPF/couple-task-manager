@@ -1,0 +1,77 @@
+<!-- Toast for displaying messages -->
+<p-toast></p-toast>
+
+<!-- Centering Container -->
+<div class="flex items-center justify-center min-h-screen px-4 py-12 bg-surface-100 dark:bg-surface-900">
+
+  <p-card header="Login" styleClass="w-full max-w-md shadow-xl">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+
+      <!-- Email Field -->
+      <div class="flex flex-col gap-2">
+        <label for="email" class="font-medium text-surface-700 dark:text-surface-200">Email</label>
+        <input
+          pInputText
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="your.email@example.com"
+          class="w-full"
+          [ngClass]="{'p-invalid': email?.invalid && (email?.dirty || email?.touched)}"
+          aria-describedby="email-error"
+        />
+        <small
+          *ngIf="email?.invalid && (email?.dirty || email?.touched)"
+          id="email-error"
+          class="p-error text-xs">
+          <span *ngIf="email?.errors?.['required']">Email is required.</span>
+          <span *ngIf="email?.errors?.['email']">Please enter a valid email address.</span>
+        </small>
+      </div>
+
+      <!-- Password Field -->
+      <div class="flex flex-col gap-2">
+        <label for="password" class="font-medium text-surface-700 dark:text-surface-200">Password</label>
+        <p-password
+          id="password"
+          formControlName="password"
+          placeholder="Enter your password"
+          [toggleMask]="true"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [feedback]="false"
+          [ngClass]="{'p-invalid': password?.invalid && (password?.dirty || password?.touched)}"
+          aria-describedby="password-error">
+        </p-password>
+        <small
+          *ngIf="password?.invalid && (password?.dirty || password?.touched)"
+          id="password-error"
+          class="p-error text-xs">
+          <span *ngIf="password?.errors?.['required']">Password is required.</span>
+        </small>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        pButton
+        pRipple
+        type="submit"
+        label="Login"
+        icon="pi pi-sign-in"
+        class="w-full mt-3"
+        [loading]="isLoading()"
+        [disabled]="isLoading()">
+      </button>
+
+      <!-- Registration Link -->
+      <div class="text-center mt-3">
+        <span class="text-surface-600 dark:text-surface-400 text-sm">Don't have an account? </span>
+        <a routerLink="/register" class="text-primary-500 dark:text-primary-400 hover:underline text-sm font-medium">
+          Register here
+        </a>
+      </div>
+
+    </form>
+  </p-card>
+
+</div>

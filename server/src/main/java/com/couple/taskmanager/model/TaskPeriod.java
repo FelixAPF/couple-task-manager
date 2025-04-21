@@ -1,6 +1,7 @@
 package com.couple.taskmanager.model;
 
 import com.couple.taskmanager.enums.Assignee;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -29,4 +30,10 @@ public class TaskPeriod {
     private Date endDate;
     private Boolean completed;
     private Date completedDate;
+
+    @ManyToOne
+    @JsonBackReference("household-task-periods")
+    private Household household;
+
+
 }

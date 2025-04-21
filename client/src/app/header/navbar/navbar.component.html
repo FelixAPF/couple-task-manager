@@ -1,20 +1,80 @@
-<nav class="bg-surface-0 dark:bg-surface-900 shadow-md h-16 flex items-center px-6 lg:px-20 hidden sm:flex">
-  <div class="flex items-center space-x-4">
-    <a mat-button [routerLink]="'dashboard'" class="text-gray-700 hover:text-blue-500 font-medium">Dashboard</a>
-    <a mat-button [routerLink]="'tasks'" class="text-gray-700 hover:text-blue-500 font-medium">Tâches</a>
-    <a mat-button [routerLink]="'meals'" class="text-gray-700 hover:text-blue-500 font-medium">Recettes</a>
-    <a mat-button [routerLink]="'shopping-list'" class="text-gray-700 hover:text-blue-500 font-medium">Liste d'achat</a>
+
+
+<!-- Main Navigation Bar -->
+<nav class="bg-surface-100 dark:bg-surface-800 shadow-md fixed top-0 left-0 right-0 z-50 h-12 sm:h-16 flex items-center px-4 sm:px-6">
+  <div class="container mx-auto flex justify-between items-center h-full">
+
+    <!-- Left Side: Logo/Brand (Example) -->
+    <img src="assets/Gemini_Generated_Image_fw61ocfw61ocfw61-modified.png" alt="App Icon" class="h-6 w-6 mr-2">
+    <div class="font-semibold text-lg text-surface-600 dark:text-surface-300">
+     Couple Task Manager
+    </div>
+
+    <!-- Center/Right Side: Desktop Menu Items & Logout -->
+    <div class="hidden sm:flex items-center space-x-4">
+      <!-- Add other desktop nav links here if needed -->
+      <!-- Example: <a routerLink="/tasks" pButton pRipple class="p-button-text">Tasks</a> -->
+
+      <!-- Desktop Logout Button -->
+      <!-- Use *ngIf with async pipe to check login status -->
+      <button *ngIf="isLoggedIn$ | async"
+              pButton
+              pRipple
+              type="button"
+              label="Logout"
+              icon="pi pi-sign-out"
+              class="p-button-danger p-button-text"
+              (click)="logout()">
+      </button>
+    </div>
+
+    <!-- Mobile Menu Button (Hamburger) -->
+    <div class="sm:hidden">
+      <button pButton pRipple type="button" icon="pi pi-bars" class="p-button-text" (click)="toggleMenu()"></button>
+    </div>
+
   </div>
 </nav>
 
-<header class="bg-surface-0 dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700 shadow-[0_-2px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_5px_rgba(0,0,0,0.3)] h-12 fixed top-0 left-0 right-0 z-10
-               flex items-center justify-center px-4
-               lg:hidden
-               pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-top)]">
-  <img src="assets/Gemini_Generated_Image_fw61ocfw61ocfw61-modified.png" alt="App Icon" class="h-6 w-6 mr-2">
-  <div class="font-semibold text-lg text-surface-600 dark:text-surface-300">
-   Couple Task Manager
-  </div>
-</header>
+<!-- Mobile Menu Overlay & Panel (Example Structure) -->
+<!-- Overlay to close menu on outside click -->
+<div *ngIf="isMenuOpen" class="sm:hidden fixed inset-0 z-40" (click)="toggleMenu()"></div>
 
-<div class="border-b border-gray-200 lg:block hidden"></div>
+<!-- Sliding Menu Panel -->
+<div *ngIf="isMenuOpen"
+     class="sm:hidden fixed top-0 right-0 h-full w-64 bg-surface-0 dark:bg-surface-900 shadow-lg z-50 p-4 transition-transform duration-300 ease-in-out transform"
+     [class.translate-x-0]="isMenuOpen"
+     [class.translate-x-full]="!isMenuOpen">
+
+  <!-- Menu Header -->
+  <div class="flex justify-between items-center mb-6">
+    <span class="font-semibold text-lg text-surface-800 dark:text-surface-100">Menu</span>
+    <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text p-button-rounded" (click)="toggleMenu()"></button>
+  </div>
+
+  <!-- Menu Items -->
+  <div class="flex flex-col space-y-2">
+    <!-- Add other mobile navigation links here -->
+    <!-- Example: <a routerLink="/dashboard" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Dashboard</a> -->
+    <!-- Example: <a routerLink="/tasks" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Tasks</a> -->
+
+    <!-- Mobile Logout Button -->
+    <!-- Use *ngIf with async pipe to check login status -->
+    <button *ngIf="isLoggedIn$ | async"
+            pButton
+            pRipple
+            type="button"
+            label="Logout"
+            icon="pi pi-sign-out"
+            class="p-button-danger p-button-text text-left w-full justify-start"
+            (click)="logout()">
+    </button>
+
+    <!-- Optional: Add language/theme switches at the bottom -->
+    <div class="mt-auto pt-4 border-t border-surface-200 dark:border-surface-700">
+       <button pButton pRipple (click)="useLanguage('en')" label="EN" class="p-button-text p-button-sm"></button>
+       <button pButton pRipple (click)="useLanguage('fr')" label="FR" class="p-button-text p-button-sm"></button>
+       <!-- Add theme switch button if needed -->
+    </div>
+  </div>
+</div>

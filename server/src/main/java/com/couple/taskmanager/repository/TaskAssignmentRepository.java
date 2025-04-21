@@ -2,6 +2,7 @@ package com.couple.taskmanager.repository;
 
 import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.model.TaskAssignment;
+import com.couple.taskmanager.model.TaskList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -38,4 +39,6 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     @Query("SELECT ta FROM TaskAssignment ta WHERE ta.completed = true AND ta.task.id = :taskId")
     List<TaskAssignment> findAllCompletedTrueAndTaskId(Long taskId);
 
+    @Query("SELECT ta FROM TaskAssignment ta WHERE ta.task.household.id = :householdId")
+    List<TaskAssignment> findAllByHouseholdId(@Param("householdId") Long householdId);
 }

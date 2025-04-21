@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/task-list")
-@CrossOrigin("*")
 public class TaskListController extends GenericController<TaskList, TaskListService> {
 
     @GetMapping("/by-assignee/{assignee}")

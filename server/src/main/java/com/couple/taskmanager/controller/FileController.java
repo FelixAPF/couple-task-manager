@@ -19,7 +19,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/files")
-@CrossOrigin("*")
 public class FileController {
     private final IFileService storageService;
     @Value("${app.base-url}")

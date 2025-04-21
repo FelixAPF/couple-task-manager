@@ -45,6 +45,10 @@ public class TaskAssignment {
 
     private Date completedDate;
 
+    @ManyToOne
+    @JsonBackReference("household-task-assignments")
+    private Household household;
+
     public TaskAssignment(@NonNull Task task, @NonNull TaskPeriod taskPeriod, @NonNull Assignee assignee, @NonNull Date creationDate, @NonNull Date startDate, @NonNull Date dueDate) {
         this.task = task;
         this.taskPeriod = taskPeriod;

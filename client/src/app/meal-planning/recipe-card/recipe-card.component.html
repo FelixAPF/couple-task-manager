@@ -63,7 +63,7 @@
       </div>
     </ng-template>
 
-    <ng-template pTemplate="footer">
+    <ng-template pTemplate="footer" *ngIf="buttonsTemplate">
         <div class="flex justify-end gap-2 pt-2 border-t border-surface-100 dark:border-surface-700 mt-auto">
             <ng-container [ngTemplateOutlet]="buttonsTemplate"></ng-container>
 

@@ -70,6 +70,7 @@ export class AddTaskComponent implements OnInit {
       { label: 'Hebdomadaire', value: Frequency.WEEKLY },
       { label: 'Bi-mensuel', value: Frequency.BIWEEKLY },
       { label: 'Mensuel', value: Frequency.MONTHLY },
+      { label: 'Trimestriel', value: Frequency.QUARTERLY },
       { label: 'Bi-annuel', value: Frequency.BIYEARLY },
       { label: 'Annuel', value: Frequency.YEARLY }
     ]

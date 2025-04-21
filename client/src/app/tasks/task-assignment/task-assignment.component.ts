@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, inject, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { SharedModule } from '../../shared.module';
-import { Task } from '../../model/task';
+import { Frequency, Task } from '../../model/task';
 import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TaskWithAssignee } from '../../create-period-dialog/create-period-dialog.component';
 import { Assignee } from '../../model/task-period';
@@ -64,12 +64,28 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
     });
     this.cdr.detectChanges();
   }
+
+  frequencyPriority: any = {
+    [Frequency.DAILY]: 0,
+    [Frequency.WEEKLY]: 1,
+    [Frequency.BIWEEKLY]: 2,
+    [Frequency.MONTHLY]: 3,
+    [Frequency.QUARTERLY]: 4,
+    [Frequency.BIYEARLY]: 5,
+    [Frequency.YEARLY]: 6
+  }
   
   sortByFrequency(): void {
     this.taskAssignments.controls.sort((a, b) => {
       const frequencyA = a.get(FormControlName.FREQUENCY)?.value;
       const frequencyB = b.get(FormControlName.FREQUENCY)?.value;
-      return (frequencyA > frequencyB) ? 1 : -1;
+      const priorityA: any = this.frequencyPriority[frequencyA] || 0;
+      const priorityB: any = this.frequencyPriority[frequencyB] || 0;
+      if (priorityA === priorityB) {
+        return 0; // If frequencies are the same, keep original order
+      }
+
+      return (priorityA > priorityB) ? 1 : -1;
     });
     this.cdr.detectChanges();
   }

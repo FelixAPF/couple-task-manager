@@ -28,7 +28,7 @@ public class Task {
     @NonNull
     private Frequency frequency;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<TaskAssignment> taskAssignments;
 

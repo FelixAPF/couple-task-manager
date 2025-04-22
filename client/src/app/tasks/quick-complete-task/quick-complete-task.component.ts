@@ -11,6 +11,7 @@ import { PluginListenerHandle } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SourceMap } from '../my-tasks/my-tasks.component';
+import { HouseholdService } from '../../service/household.service';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -30,7 +31,7 @@ export class QuickCompleteTaskComponent implements OnInit {
   filteredTasks: Task[] = [];
   tasks: Task[] = [];
 
-  constructor(private taskService: TaskService, private ref: DynamicDialogRef){
+  constructor(private taskService: TaskService, private ref: DynamicDialogRef, private householdService: HouseholdService){
   }
 
   get assignees(){

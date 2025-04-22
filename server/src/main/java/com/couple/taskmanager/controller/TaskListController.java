@@ -2,10 +2,13 @@ package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.TaskList;
 import com.couple.taskmanager.model.dto.BasicTaskAssignmentRqstV1;
 import com.couple.taskmanager.model.dto.TaskListRequestV1;
 import com.couple.taskmanager.service.TaskListService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,18 +18,18 @@ import java.util.List;
 public class TaskListController extends GenericController<TaskList, TaskListService> {
 
     @GetMapping("/by-assignee/{assignee}")
-    public List<TaskList> get(@PathVariable("assignee") Assignee assignee){
-        return service.get(assignee);
+    public List<TaskList> get(@PathVariable("assignee") Assignee assignee, @AuthenticationPrincipal UserDetails userDetails){
+        return service.get(assignee, (CTMUser) userDetails);
     }
 
     @GetMapping("/with-unassigned")
-    public List<TaskList> listWithUnassigned(){
-        return service.listWithUnassigned();
+    public List<TaskList> listWithUnassigned(@AuthenticationPrincipal UserDetails userDetails){
+        return service.listWithUnassigned((CTMUser) userDetails);
     }
 
     @PostMapping("/assign")
-    public void addTasksToExistingList(@RequestBody List<BasicTaskAssignmentRqstV1> taskWithIds){
-        service.addTasksToExistingList(taskWithIds);
+    public void addTasksToExistingList(@RequestBody List<BasicTaskAssignmentRqstV1> taskWithIds, @AuthenticationPrincipal UserDetails userDetails){
+        service.addTasksToExistingList(taskWithIds, (CTMUser) userDetails);
     }
 
     @PostMapping("/unassign")
@@ -35,8 +38,8 @@ public class TaskListController extends GenericController<TaskList, TaskListServ
     }
 
     @PostMapping("/move/{taskId}/{assignee}")
-    public void unassign(@PathVariable("taskId") Long taskId, @PathVariable("assignee") Assignee assignee){
-        service.moveTaskToNewAssignee(taskId, assignee);
+    public void unassign(@PathVariable("taskId") Long taskId, @PathVariable("assignee") Assignee assignee, @AuthenticationPrincipal UserDetails userDetails){
+        service.moveTaskToNewAssignee(taskId, assignee, (CTMUser) userDetails);
     }
 
 

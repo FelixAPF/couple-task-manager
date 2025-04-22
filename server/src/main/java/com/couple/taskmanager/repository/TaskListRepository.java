@@ -12,10 +12,11 @@ import java.util.List;
 
 @Repository
 public interface TaskListRepository extends JpaRepository<TaskList, Long> {
-    TaskList findByAssignee(Assignee assignee);
+    @Query("SELECT tl FROM TaskList tl WHERE tl.assignee = :assignee AND tl.household.id = :householdId")
+    TaskList findByAssignee(Assignee assignee, @Param("householdId") Long householdId);
 
-    @Query("SELECT tl FROM TaskList tl JOIN tl.tasks t WHERE t.id = :taskId")
-    TaskList findByTaskId(@Param("taskId") Long taskId);
+    @Query("SELECT tl FROM TaskList tl JOIN tl.tasks t WHERE t.id = :taskId AND tl.household.id = :householdId")
+    TaskList findByTaskId(@Param("taskId") Long taskId, @Param("householdId") Long householdId);
 
     @Query("SELECT tl FROM TaskList tl WHERE tl.household.id = :householdId")
     List<TaskList> findAllByHouseholdId(@Param("householdId") Long householdId);

@@ -1,0 +1,64 @@
+<p-toast></p-toast> <!-- For displaying feedback messages -->
+
+<div class="p-fluid flex flex-col gap-4 px-2 py-4"> <!-- Added padding -->
+  <!-- Warning Message -->
+  <p-message severity="warn" styleClass="mb-3">
+    <div class="flex flex-col">
+        <span>Rejoindre un foyer vous liera aux tâches et aux plans de ce foyer.</span>
+        <span>Assurez-vous d'avoir le bon code d'invitation.</span>
+        <span>**Si plus personne n'est dans votre ancien foyer, il sera supprimé automatiquement</span>
+    </div>
+  </p-message>
+
+  <!-- Form -->
+  <form [formGroup]="joinForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4">
+    <!-- Join Key Input -->
+    <div class="flex flex-col gap-2">
+      <label for="joinKey" class="font-medium text-surface-700 dark:text-surface-200">Code d'invitation du foyer</label>
+      <p-iconField iconPosition="left" class="w-full">
+        <p-inputIcon class="pi pi-key"></p-inputIcon>
+        <input
+          pInputText
+          id="joinKey"
+          type="text"
+          formControlName="joinKey"
+          placeholder="Entrez le code ici"
+          class="w-full"
+          [ngClass]="{'p-invalid': joinKey?.invalid && (joinKey?.dirty || joinKey?.touched)}"
+          aria-describedby="joinKey-error"
+        />
+      </p-iconField>
+      <small
+        *ngIf="joinKey?.invalid && (joinKey?.dirty || joinKey?.touched)"
+        id="joinKey-error"
+        class="p-error text-xs">
+        <span *ngIf="joinKey?.errors?.['required']">Le code est requis.</span>
+        <span *ngIf="joinKey?.errors?.['minlength']">Le code semble trop court.</span>
+        <!-- Add other validation messages -->
+      </small>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-2 mt-4">
+       <button
+        pButton
+        pRipple
+        type="button"
+        label="Annuler"
+        icon="pi pi-times"
+        class="p-button-secondary"
+        (click)="closeDialog()"
+        [disabled]="isLoading()">
+      </button>
+      <button
+        pButton
+        pRipple
+        type="submit"
+        label="Rejoindre"
+        icon="pi pi-check"
+        [loading]="isLoading()"
+        [disabled]="isLoading() || joinForm.invalid">
+      </button>
+    </div>
+  </form>
+</div>

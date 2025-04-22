@@ -13,16 +13,20 @@ import java.util.List;
 
 @Repository
 public interface ITaskPeriodRepository extends JpaRepository<TaskPeriod, Long> {
-    List<TaskPeriod> findByCompletedFalse();
+    @Query("SELECT tp FROM TaskPeriod tp WHERE tp.household.id = :householdId AND tp.completed = false")
+    List<TaskPeriod> findByCompletedFalse(Long householdId);
 
-    @Query("SELECT tp FROM TaskPeriod tp WHERE :date BETWEEN tp.startDate AND tp.endDate")
-    List<TaskPeriod> retrieveTasksInPeriod(Date date);
+    @Query("SELECT tp FROM TaskPeriod tp WHERE :date BETWEEN tp.startDate AND tp.endDate AND tp.household.id = :householdId")
+    List<TaskPeriod> retrieveTasksInPeriod(Date date, Long householdId);
 
-    @Query("SELECT ta.taskPeriod FROM TaskAssignment ta WHERE ta.id = :assignmentId")
-    TaskPeriod findByTaskAssignmentId(Long assignmentId);
+    @Query("SELECT ta.taskPeriod FROM TaskAssignment ta WHERE ta.id = :assignmentId AND ta.household.id = :householdId")
+    TaskPeriod findByTaskAssignmentId(Long assignmentId, Long householdId);
 
     @Modifying
     @Transactional
     @Query("UPDATE TaskPeriod tp SET tp.completed = true, tp.completedDate = :date WHERE tp.id = :periodId")
     void markAsCompleted(Long periodId, @Param("date") Date date);
+
+    @Query("SELECT tp FROM TaskPeriod tp WHERE tp.household.id = :householdId")
+    List<TaskPeriod> findAllByHouseholdId(Long householdId);
 }

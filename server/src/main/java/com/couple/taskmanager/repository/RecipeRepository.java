@@ -14,7 +14,12 @@ import java.util.List;
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
-    @Query("SELECT r FROM Recipe r WHERE r.category = :recipeType")
-    List<Recipe> findByRecipeType(String recipeType);
+    @Query("SELECT r FROM Recipe r WHERE r.category = :recipeType AND r.household.id = :householdId")
+    List<Recipe> findByRecipeTypeAndHouseholdId(String recipeType, Long householdId);
 
+    @Query("SELECT r FROM Recipe r WHERE r.household.id = :householdId")
+    List<Recipe> findAllByHouseholdId(Long householdId);
+
+    @Query("DELETE FROM Recipe r WHERE r.id = :recipeId AND r.household.id = :householdId")
+    void deleteByRecipeIdAndHouseholdId(Long recipeId, Long householdId);
 }

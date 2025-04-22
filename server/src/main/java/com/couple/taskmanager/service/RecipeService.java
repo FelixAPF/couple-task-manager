@@ -16,13 +16,13 @@ public class RecipeService implements IGenericService<Recipe> {
 
 
     @Override
-    public Recipe get(Long id, CTMUser user) {
+    public Recipe get(Long id, Long householdId, CTMUser user) {
         return repository.findById(id).orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " found"));
     }
 
     @Override
-    public List<Recipe> list(CTMUser user) {
-        return repository.findAll();
+    public List<Recipe> list(Long householdId, CTMUser user) {
+        return repository.findAllByHouseholdId(user.getHousehold().getId());
     }
 
     @Override
@@ -34,21 +34,29 @@ public class RecipeService implements IGenericService<Recipe> {
     }
 
     @Override
-    public void delete(Long id, CTMUser user) {
-        repository.deleteById(id);
+    public void delete(Long id, Long householdId, CTMUser user) {
+        repository.deleteByRecipeIdAndHouseholdId(id, householdId);
     }
 
     @Override
     public Recipe create(Recipe recipe, CTMUser user) {
+        if(recipe.getHousehold() == null){
+            recipe.setHousehold(user.getHousehold());
+        }
         return repository.save(recipe);
     }
 
 
-    public List<Recipe> create(List<Recipe> recipes) {
+    public List<Recipe> create(List<Recipe> recipes, CTMUser user) {
+        recipes.forEach(recipe -> {
+            if(recipe.getHousehold() == null){
+                recipe.setHousehold(user.getHousehold());
+            }
+        });
         return repository.saveAll(recipes);
     }
 
-    public List<Recipe> findByRecipeType(String recipeType) {
-        return repository.findByRecipeType(recipeType);
+    public List<Recipe> findByRecipeType(String recipeType, CTMUser user) {
+        return repository.findByRecipeTypeAndHouseholdId(recipeType, user.getHousehold().getId());
     }
 }

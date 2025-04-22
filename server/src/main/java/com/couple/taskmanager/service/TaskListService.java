@@ -25,35 +25,35 @@ public class TaskListService implements IGenericService<TaskList> {
 
 
     @Override
-    public TaskList get(Long id, CTMUser user) {
+    public TaskList get(Long id, Long householdId, CTMUser user) {
         throw new IllegalArgumentException();
     }
 
-    public List<TaskList> get(Assignee assignee) {
+    public List<TaskList> get(Assignee assignee, CTMUser user) {
         List<TaskList> taskLists = new ArrayList<>();
-        taskLists.add(taskListRepository.findByAssignee(assignee));
-        taskLists.add(taskListRepository.findByAssignee(Assignee.Deux));
+        taskLists.add(taskListRepository.findByAssignee(assignee, user.getHousehold().getId()));
+        taskLists.add(taskListRepository.findByAssignee(Assignee.Deux, user.getHousehold().getId()));
         return taskLists;
     }
 
     @Override
-    public List<TaskList> list(CTMUser user) {
-        return taskListRepository.findAll();
+    public List<TaskList> list(Long householdId, CTMUser user) {
+        return taskListRepository.findAllByHouseholdId(householdId);
     }
 
     @PostConstruct
     public void init(){
         for (Assignee assignee : Assignee.values()) {
-            if(taskListRepository.findByAssignee(assignee) == null){
-                TaskList taskList = new TaskList(new ArrayList<>(), assignee);
-                taskListRepository.save(taskList);
-            }
+            //if(taskListRepository.findByAssignee(assignee) == null){
+            //    TaskList taskList = new TaskList(new ArrayList<>(), assignee);
+            //    taskListRepository.save(taskList);
+            //}
         }
     }
 
-    public List<TaskList> listWithUnassigned(){
-        List<TaskList> taskLists = taskListRepository.findAll();
-        List<Task> tasks = taskRepository.findAll();
+    public List<TaskList> listWithUnassigned(CTMUser user){
+        List<TaskList> taskLists = taskListRepository.findAllByHouseholdId(user.getHousehold().getId());
+        List<Task> tasks = taskRepository.findAllByHouseholdId(user.getHousehold().getId());
         TaskList unassignedTaskList = new TaskList();
         List<Long> assignedTaskIds = StreamUtils.ofNullable(taskLists)
                 .flatMap(taskList -> StreamUtils.ofNullable(taskList.getTasks()).map(Task::getId))
@@ -68,13 +68,13 @@ public class TaskListService implements IGenericService<TaskList> {
     }
 
     @Transactional // Add this annotation for atomicity
-    public void moveTaskToNewAssignee(Long taskId, Assignee newAssignee){
+    public void moveTaskToNewAssignee(Long taskId, Assignee newAssignee, CTMUser user){
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new NoSuchElementException("No task with id " + taskId));
 
-        TaskList sourceList = taskListRepository.findByTaskId(taskId);
+        TaskList sourceList = taskListRepository.findByTaskId(taskId, user.getHousehold().getId());
 
-        TaskList targetList = taskListRepository.findByAssignee(newAssignee);
+        TaskList targetList = taskListRepository.findByAssignee(newAssignee, user.getHousehold().getId());
         if(targetList == null) {
             throw new IllegalStateException("Target TaskList for assignee " + newAssignee + " not found.");
         }
@@ -116,7 +116,7 @@ public class TaskListService implements IGenericService<TaskList> {
 
     @Override
     @Transactional
-    public void delete(Long id, CTMUser user) {
+    public void delete(Long id, Long householdId, CTMUser user) {
         taskListRepository.deleteById(id);
     }
 
@@ -134,10 +134,13 @@ public class TaskListService implements IGenericService<TaskList> {
 
     @Override
     public TaskList create(TaskList taskList, CTMUser user) {
+        if(taskList.getHousehold() == null){
+            taskList.setHousehold(user.getHousehold());
+        }
         return taskListRepository.save(taskList);
     }
 
-    public void addTasksToExistingList(List<BasicTaskAssignmentRqstV1> taskWithIds){
+    public void addTasksToExistingList(List<BasicTaskAssignmentRqstV1> taskWithIds, CTMUser user){
         Map<String, List<Long>> assigneeTasks = new HashMap<>();
         for(Assignee assignee : Assignee.values()){
             assigneeTasks.put(assignee.toString(), new ArrayList<>());
@@ -151,8 +154,12 @@ public class TaskListService implements IGenericService<TaskList> {
 
         List<TaskList> toUpdateTaskLists = new ArrayList<>();
         for(String assignee : assigneeTasks.keySet()){
-            TaskList existingTaskList = taskListRepository.findByAssignee(Assignee.valueOf(assignee));
-            if(existingTaskList == null) continue;
+            TaskList existingTaskList = taskListRepository.findByAssignee(Assignee.valueOf(assignee), user.getHousehold().getId());
+            if(existingTaskList == null) {
+                existingTaskList = new TaskList();
+                existingTaskList.setAssignee(Assignee.valueOf(assignee));
+                existingTaskList.setHousehold(user.getHousehold());
+            }
             List<Task> newTasks = taskRepository.findAllById(assigneeTasks.get(assignee));
             existingTaskList.setTasks(newTasks); // Completely replace the existing tasks
             toUpdateTaskLists.add(existingTaskList);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -15,12 +16,14 @@ public class Household {
     private Long id;
 
     @OneToMany
-    @JsonManagedReference
+    @JsonManagedReference("household-users")
     private List<CTMUser> users;
 
     private String name;
 
     private String householdJoinKey;
+
+    private Date createdDated;
 
     @OneToMany
     @JsonManagedReference("household-recipes")

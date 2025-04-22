@@ -13,18 +13,18 @@ public class ShoppingItemService implements IGenericService<ShoppingItem> {
     ShoppingItemRepository repository;
 
     @Override
-    public ShoppingItem get(Long id, CTMUser user) {
+    public ShoppingItem get(Long id, Long householdId, CTMUser user) {
         return repository.findById(id)
                 .orElseThrow(IllegalArgumentException::new);
     }
 
     @Override
-    public List<ShoppingItem> list(CTMUser user) {
+    public List<ShoppingItem> list(Long householdId, CTMUser user) {
         return repository.findAll();
     }
 
-    public List<ShoppingItem> listByNotBought(){
-        return repository.findAllByBoughtFalse();
+    public List<ShoppingItem> listByNotBought(CTMUser user){
+        return repository.findAllByBoughtFalseAndHouseholdId(user.getHousehold().getId());
     }
 
     public List<String> listNameSuggestions(){
@@ -37,12 +37,15 @@ public class ShoppingItemService implements IGenericService<ShoppingItem> {
     }
 
     @Override
-    public void delete(Long id, CTMUser user) {
-        repository.markAsBought(id);
+    public void delete(Long id, Long householdId, CTMUser user) {
+        repository.markAsBought(id, user.getHousehold().getId());
     }
 
     @Override
     public ShoppingItem create(ShoppingItem shoppingItem, CTMUser user) {
+        if(shoppingItem.getHousehold() == null){
+            shoppingItem.setHousehold(user.getHousehold());
+        }
         return repository.save(shoppingItem);
     }
 

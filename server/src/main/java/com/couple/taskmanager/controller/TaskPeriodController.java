@@ -19,7 +19,7 @@ public class TaskPeriodController extends GenericController<TaskPeriod, TaskPeri
     }
 
     @GetMapping("/incomplete")
-    public List<TaskPeriod> findALlIncompletePeriod(){
-        return service.listIncomplete();
+    public List<TaskPeriod> findALlIncompletePeriod(@AuthenticationPrincipal UserDetails userDetails){
+        return service.listIncomplete((CTMUser) userDetails);
     }
 }

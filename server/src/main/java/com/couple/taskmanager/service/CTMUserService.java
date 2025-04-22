@@ -12,11 +12,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class CTMUserService implements UserDetailsService {
@@ -71,9 +69,9 @@ public class CTMUserService implements UserDetailsService {
         return ctmUserRepository.save(user);
     }
 
+    @Transactional // Add transactional annotation to manage the persistence context
     public CTMUser register(RegisterRequestDto user) {
         if(!user.isCreateNewHousehold() && user.getHouseholdToken() == null) throw new IllegalArgumentException();
-
 
         // Check if email already exists
         Optional<CTMUser> existingUser = ctmUserRepository.findByEmail(user.getEmail());
@@ -91,7 +89,11 @@ public class CTMUserService implements UserDetailsService {
             household = new Household();
             household.setName(user.getNewHouseholdName());
             household.setHouseholdJoinKey(String.valueOf(UUID.randomUUID()));
-            household.setUsers(List.of(ctmUser));
+            household.setUsers(new ArrayList<>()); // Initialize the list
+            household.setCreatedDated(new Date());
+
+            householdRepository.save(household); // Save the new household FIRST
+            household.getUsers().add(ctmUser); // Now add the user
             ctmUser.setHousehold(household);
         } else {
             List<CTMUser> users = household.getUsers();

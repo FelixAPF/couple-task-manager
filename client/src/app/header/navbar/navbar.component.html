@@ -51,15 +51,51 @@
     <span class="font-semibold text-lg text-surface-800 dark:text-surface-100">Menu</span>
     <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text p-button-rounded" (click)="toggleMenu()"></button>
   </div>
+  <!-- Optional: Add language/theme switches at the bottom -->
+  <div class="mt-auto pt-4 border-t border-surface-200 dark:border-surface-700">
+     <button pButton pRipple (click)="useLanguage('en')" label="EN" class="p-button-text p-button-sm"></button>
+     <button pButton pRipple (click)="useLanguage('fr')" label="FR" class="p-button-text p-button-sm"></button>
+     <!-- Add theme switch button if needed -->
+  </div>
 
+  <div class="mt-auto pt-4 border-t border-surface-200 dark:border-surface-700 flex-shrink-0"> <!-- Added flex-shrink-0 -->
+
+    <!-- Household Join Code Section -->
+    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
+        <div *ngIf="household && household.householdJoinKey" class="mb-4">
+            <label class="block text-xs font-medium text-surface-500 dark:text-surface-400 mb-1">Code d'invitation du foyer :</label>
+            <div class="flex items-center justify-between gap-2 p-2 rounded bg-surface-100 dark:bg-surface-700 border border-surface-200 dark:border-surface-600">
+                <span class="font-mono text-sm text-surface-700 dark:text-surface-200 truncate">
+                    {{ household.householdJoinKey }}
+                </span>
+                <button pButton pRipple type="button" icon="pi pi-copy"
+                        class="p-button-sm p-button-text p-button-secondary flex-shrink-0"
+                        pTooltip="Copier le code" tooltipPosition="top"
+                        [cdkCopyToClipboard]="household.householdJoinKey"
+                        (cdkCopyToClipboardCopied)="onCopySuccess()">
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+    <button *ngIf="(isLoggedIn$ | async)"
+            pButton
+            pRipple
+            type="button"
+            label="Rejoindre un foyer"
+            icon="pi pi-users"
+            class="p-button-secondary p-button-text text-left w-full justify-start mb-2"
+            (click)="openJoinHouseholdDialog()">
+    </button>
+
+    
   <!-- Menu Items -->
-  <div class="flex flex-col space-y-2">
+  <div class="flex flex-col space-y-2 flex-grow overflow-y-auto">
     <!-- Add other mobile navigation links here -->
     <!-- Example: <a routerLink="/dashboard" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Dashboard</a> -->
     <!-- Example: <a routerLink="/tasks" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Tasks</a> -->
 
-    <!-- Mobile Logout Button -->
-    <!-- Use *ngIf with async pipe to check login status -->
+    <!-- *** ADD MOBILE LOGOUT BUTTON BACK *** -->
     <button *ngIf="isLoggedIn$ | async"
             pButton
             pRipple
@@ -69,12 +105,9 @@
             class="p-button-danger p-button-text text-left w-full justify-start"
             (click)="logout()">
     </button>
+    <!-- *** END MOBILE LOGOUT BUTTON *** -->
 
-    <!-- Optional: Add language/theme switches at the bottom -->
-    <div class="mt-auto pt-4 border-t border-surface-200 dark:border-surface-700">
-       <button pButton pRipple (click)="useLanguage('en')" label="EN" class="p-button-text p-button-sm"></button>
-       <button pButton pRipple (click)="useLanguage('fr')" label="FR" class="p-button-text p-button-sm"></button>
-       <!-- Add theme switch button if needed -->
-    </div>
+  </div> <!-- End Menu Items -->
+  
   </div>
 </div>

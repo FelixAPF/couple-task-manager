@@ -30,8 +30,10 @@ public class CTMUser implements UserDetails {
     @Enumerated(EnumType.STRING) // Added role enum
     private UserRole role;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JsonBackReference
+    private String imageUrl;
+
+    @ManyToOne
+    @JsonBackReference("household-users")
     private Household household;
 
     @Override

@@ -13,8 +13,15 @@ import java.util.List;
 @Repository
 public interface MealRepository extends JpaRepository<Meal, Long> {
 
-    List<Meal> findByDateBetween(Date startDate, Date endDate);
+    @Query("SELECT m FROM Meal m WHERE m.household.id = :householdId AND m.date BETWEEN :startDate AND :endDate ")
+    List<Meal> findByDateBetweenAndHouseholdId(Date startDate, Date endDate, Long householdId);
 
-    @Query("SELECT m FROM Meal m WHERE m.date = :date")
-    Meal findByDate(@Param("date") Date date);
+    @Query("SELECT m FROM Meal m WHERE m.household.id = :householdId")
+    List<Meal> findAllByHouseholdId(Long householdId);
+
+    @Query("SELECT m FROM Meal m WHERE m.date = :date AND m.household.id = :householdId")
+    Meal findByDateAndHouseholdId(@Param("date") Date date, @Param("householdId") Long householdId);
+
+    @Query("DELETE FROM Meal m WHERE m.id = :mealId AND m.household.id = :householdId")
+    void deleteByMealIdAndHouseholdId(Long mealId, Long householdId);
 }

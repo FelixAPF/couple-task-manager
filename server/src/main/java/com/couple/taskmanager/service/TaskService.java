@@ -14,6 +14,7 @@ import com.couple.taskmanager.repository.TaskRepository;
 import com.couple.taskmanager.utils.DateUtils;
 import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,51 +37,50 @@ public class TaskService implements IGenericService<Task> {
 
 
     @Override
-    public Task get(Long id, CTMUser user) {
-        return taskRepository.findById(id)
+    public Task get(Long id, Long householdId, CTMUser user) {
+        return taskRepository.findByIdAndHouseholdId(id, householdId)
                 .orElseThrow(() -> new NoSuchElementException("No task with id " + id));
     }
 
     @Override
-    public List<Task> list(CTMUser user) {
+    public List<Task> list(Long householdId, CTMUser user) {
         return taskRepository.findAllByHouseholdId(user.getHousehold().getId());
     }
 
-    public List<Task> listByHouseholdId(Long householdId){
-        return taskRepository.findAllByHouseholdId(householdId);
-    }
-
-    public TaskHistoryDto getTaskHistory(Long taskId){
+    public TaskHistoryDto getTaskHistory(Long taskId, CTMUser user){
         Task task = taskRepository.findById(taskId).orElseThrow(() -> new NoSuchElementException("No task with id " + taskId));
-        return new TaskHistoryDto(task, StreamUtils.mapToList(taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(taskId), TaskAssignmentDto::new));
+        return new TaskHistoryDto(task, StreamUtils.mapToList(taskAssignmentRepository.findAllByTaskIdAndCompletedTrueAndHouseholdId(taskId, user.getHousehold().getId()), TaskAssignmentDto::new));
     }
 
-    public List<TaskAssignmentDto> list(Boolean completed){
-        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByCompletedEquals(completed))
+    public List<TaskAssignmentDto> list(Boolean completed, CTMUser user){
+        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByCompletedEqualsAndHouseholdId(completed, user.getHousehold().getId()))
                 .map(TaskAssignmentDto::new)
                 .toList();
     }
 
-    public List<TaskAssignmentDto> list(Long taskId){
-        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(taskId))
+    public List<TaskAssignmentDto> listTaskAssignments(Long taskId, CTMUser user){
+        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByTaskIdAndCompletedTrueAndHouseholdId(taskId, user.getHousehold().getId()))
                 .map(TaskAssignmentDto::new)
                 .toList();
     }
 
     @Override
     public Task update(Long id, Task task, CTMUser user) {
+        if(task.getHousehold() == null){
+            task.setHousehold(user.getHousehold());
+        }
         return taskRepository.save(task);
     }
 
     @Override
     @Transactional
-    public void delete(Long id, CTMUser user) {
+    public void delete(Long id, Long householdId, CTMUser user) {
         Optional<Task> taskOptional = taskRepository.findById(id);
         if (taskOptional.isEmpty()) return;
         Task taskToDelete = taskOptional.get();
 
         // Delete TaskAssignments associated with the Task
-        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(id);
+        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByTaskIdAndCompletedTrueAndHouseholdId(id, user.getHousehold().getId());
         taskAssignmentRepository.deleteAll(taskAssignments);
 
         // Remove the Task from TaskLists
@@ -93,53 +93,54 @@ public class TaskService implements IGenericService<Task> {
         }
 
         // Finally, delete the Task
-        taskRepository.deleteById(id);
+        taskRepository.deleteByIdAndHouseholdId(id, user.getHousehold().getId());
     }
 
     @Override
     public Task create(Task task, CTMUser user) {
+        task.setHousehold(user.getHousehold());
         return taskRepository.save(task);
     }
 
     public Task createRqst(CreateTaskV1 task, CTMUser user) {
         Task savedTask = create(task.getTask(), user);
         if(task.getAssignee() != null){
-            taskListService.moveTaskToNewAssignee(savedTask.getId(), task.getAssignee());
+            taskListService.moveTaskToNewAssignee(savedTask.getId(), task.getAssignee(), user);
         }
         return savedTask;
     }
 
-    public List<TaskPeriod> retrieveTasksByDate(Date date){
-        return taskPeriodRepository.retrieveTasksInPeriod(date);
+    public List<TaskPeriod> retrieveTasksByDate(Date date, CTMUser user){
+        return taskPeriodRepository.retrieveTasksInPeriod(date, user.getHousehold().getId());
     }
 
-    public List<TaskAssignmentDto> retrieveTaskAssignmentsByDate(Date date){
-        List<TaskAssignment> assignments = taskAssignmentRepository.findAllByCompletedTrueAndCompletedDateSameDay(date);
+    public List<TaskAssignmentDto> retrieveTaskAssignmentsByDate(Date date, CTMUser user){
+        List<TaskAssignment> assignments = taskAssignmentRepository.findAllByCompletedTrueAndCompletedDateSameDayAndHouseholdId(date, user.getHousehold().getId());
         return assignments.stream()
                 .map(TaskAssignmentDto::new)
                 .toList();
     }
 
     @Transactional
-    public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee, Date date, Frequency frequency){
+    public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Assignee assignee, Date date, Frequency frequency, CTMUser user){
         date.setTime(date.getTime() + (long) frequency.getDaysAmount() * 24 * 60 * 60 * 1000);
-        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(assignee, date);
-        taskAssignments.addAll(taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee.Deux, date));
+        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(assignee, date, user.getHousehold().getId());
+        taskAssignments.addAll(taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee.Deux, date, user.getHousehold().getId()));
         return taskAssignments;
     }
 
-    public void completeTask(Long assignmentId) {
+    public void completeTask(Long assignmentId, CTMUser user) {
         Date completionDate = new Date();
         taskAssignmentRepository.setAssignmentCompleted(assignmentId, true, completionDate);
 
-        TaskPeriod taskPeriod = taskPeriodRepository.findByTaskAssignmentId(assignmentId);
+        TaskPeriod taskPeriod = taskPeriodRepository.findByTaskAssignmentId(assignmentId, user.getHousehold().getId());
         boolean isTaskPeriodCompleted = taskPeriod.getTaskAssignments().stream().allMatch(TaskAssignment::getCompleted);
         if(isTaskPeriodCompleted){
             taskPeriodRepository.markAsCompleted(taskPeriod.getId(), completionDate);
         }
     }
 
-    public Long quickCompleteTask(Long taskId, Assignee assignee) {
+    public Long quickCompleteTask(Long taskId, Assignee assignee, CTMUser user) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(IllegalArgumentException::new);
 
@@ -148,16 +149,17 @@ public class TaskService implements IGenericService<Task> {
         assignment.setTask(task);
         assignment.setAssignee(assignee);
         assignment.setCreationDate(todayDate);
+        assignment.setHousehold(user.getHousehold());
         assignment.setCompletedDate(todayDate);
         assignment.setCompleted(true);
         assignment.setTaskPeriod(null);
         return taskAssignmentRepository.save(assignment).getId();
     }
 
-    public List<TaskWithCompletedDateV1> retrieveTasksNotCompletedInLongTime() {
+    public List<TaskWithCompletedDateV1> retrieveTasksNotCompletedInLongTime(CTMUser user) {
         int numberOfMonths = -3;
         Date date = DateUtils.addMonthsToDate(new Date(), numberOfMonths);
-        return StreamUtils.ofNullable(taskRepository.retrieveTasksNotCompletedInLongTime(date))
+        return StreamUtils.ofNullable(taskRepository.retrieveTasksNotCompletedInLongTime(date, user.getHousehold().getId()))
                 .map(tuple -> new TaskWithCompletedDateV1(tuple.get(0, Task.class), tuple.get(1, Date.class)))
                 .toList();
     }

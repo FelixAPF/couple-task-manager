@@ -15,19 +15,20 @@ import java.util.List;
 
 @Repository
 public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, Long> {
+    @Query("SELECT ta FROM TaskAssignment ta WHERE ta.task.id = :taskId AND ta.completed = true AND ta.task.household.id = :householdId")
+    List<TaskAssignment> findAllByTaskIdAndCompletedTrueAndHouseholdId(Long taskId,@Param("householdId") Long householdId);
 
-    List<TaskAssignment> findAllByTaskIdAndCompletedTrue(Long taskId);
-
-    List<TaskAssignment> findAllByCompletedEquals(Boolean completed);
+    @Query("SELECT ta FROM TaskAssignment ta WHERE ta.completed = :completed AND ta.task.household.id = :householdId")
+    List<TaskAssignment> findAllByCompletedEqualsAndHouseholdId(Boolean completed, @Param("householdId") Long householdId);
 
     @Transactional
     void deleteAllByTaskId(Long taskId);
 
-    @Query("SELECT ta FROM TaskAssignment ta JOIN FETCH ta.taskPeriod WHERE ta.completed = false AND ta.assignee = :assignee AND ta.dueDate <= :dueDateInMonth")
-    List<TaskAssignment> findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee assignee, Date dueDateInMonth);
+    @Query("SELECT ta FROM TaskAssignment ta JOIN FETCH ta.taskPeriod WHERE ta.completed = false AND ta.assignee = :assignee AND ta.dueDate <= :dueDateInMonth AND ta.task.household.id = :householdId")
+    List<TaskAssignment> findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee assignee, Date dueDateInMonth, @Param("householdId") Long householdId);
 
-    @Query("SELECT ta FROM TaskAssignment ta WHERE ta.completed = true AND DATE(ta.completedDate) = DATE(:completedDate)")
-    List<TaskAssignment> findAllByCompletedTrueAndCompletedDateSameDay(Date completedDate);
+    @Query("SELECT ta FROM TaskAssignment ta WHERE ta.completed = true AND DATE(ta.completedDate) = DATE(:completedDate) AND ta.task.household.id = :householdId")
+    List<TaskAssignment> findAllByCompletedTrueAndCompletedDateSameDayAndHouseholdId(Date completedDate, @Param("householdId") Long householdId);
 
     @Modifying
     @Transactional

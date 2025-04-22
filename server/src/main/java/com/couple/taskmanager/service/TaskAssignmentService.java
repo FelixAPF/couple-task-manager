@@ -18,17 +18,17 @@ public class TaskAssignmentService implements IGenericService<TaskAssignment> {
 
 
     @Override
-    public TaskAssignment get(Long id, CTMUser user) {
+    public TaskAssignment get(Long id, Long householdId, CTMUser user) {
         return taskAssignmentRepository.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
     @Override
-    public List<TaskAssignment> list(CTMUser user) {
+    public List<TaskAssignment> list(Long householdId, CTMUser user) {
         return taskAssignmentRepository.findAll();
     }
 
-    public List<TaskAssignmentDto> list(Long taskId){
-        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByTaskIdAndCompletedTrue(taskId))
+    public List<TaskAssignmentDto> listDto(Long taskId, CTMUser user){
+        return StreamUtils.ofNullable(taskAssignmentRepository.findAllByTaskIdAndCompletedTrueAndHouseholdId(taskId, user.getHousehold().getId()))
                 .map(TaskAssignmentDto::new)
                 .toList();
     }
@@ -39,7 +39,7 @@ public class TaskAssignmentService implements IGenericService<TaskAssignment> {
     }
 
     @Override
-    public void delete(Long id, CTMUser user) {
+    public void delete(Long id, Long householdId, CTMUser user) {
 
     }
 

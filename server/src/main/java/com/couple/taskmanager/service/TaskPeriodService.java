@@ -28,18 +28,18 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     TaskListRepository taskListRepository;
 
     @Override
-    public TaskPeriod get(Long id, CTMUser user) {
+    public TaskPeriod get(Long id, Long householdId, CTMUser user) {
         return taskPeriodRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("No task period with id " + id));
     }
 
     @Override
-    public List<TaskPeriod> list(CTMUser user) {
-        return taskPeriodRepository.findAll();
+    public List<TaskPeriod> list(Long householdId, CTMUser user) {
+        return taskPeriodRepository.findAllByHouseholdId(user.getHousehold().getId());
     }
 
-    public List<TaskPeriod> listIncomplete() {
-        return taskPeriodRepository.findByCompletedFalse();
+    public List<TaskPeriod> listIncomplete(CTMUser user) {
+        return taskPeriodRepository.findByCompletedFalse(user.getHousehold().getId());
     }
 
     @Override
@@ -56,13 +56,16 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     }
 
     @Override
-    public void delete(Long id, CTMUser user) {
+    public void delete(Long id, Long householdId, CTMUser user) {
         taskPeriodRepository.deleteById(id);
     }
 
     @Override
     @Transactional
     public TaskPeriod create(TaskPeriod taskPeriod, CTMUser user) {
+        if(taskPeriod.getHousehold() == null){
+            taskPeriod.setHousehold(user.getHousehold());
+        }
         return taskPeriodRepository.save(taskPeriod);
     }
 
@@ -123,7 +126,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
         TaskPeriod taskPeriod = generatePeriod(rqst, periodEndDate);
         List<TaskAssignment> taskAssignments = Stream.of(Assignee.values())
-                .flatMap(assignee -> generateTaskAssignments(assignee, rqst, taskPeriod, periodEndDate).stream())
+                .flatMap(assignee -> generateTaskAssignments(assignee, rqst, taskPeriod, periodEndDate, user).stream())
                 .toList();
 
         if(taskPeriod.getId() == null){
@@ -134,8 +137,8 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         }
     }
 
-    private List<TaskAssignment> generateTaskAssignments(Assignee assignee, PeriodCreationRqstV1 rqst, TaskPeriod taskPeriod, Date periodEndDate) {
-        TaskList taskList = taskListRepository.findByAssignee(assignee);
+    private List<TaskAssignment> generateTaskAssignments(Assignee assignee, PeriodCreationRqstV1 rqst, TaskPeriod taskPeriod, Date periodEndDate, CTMUser user) {
+        TaskList taskList = taskListRepository.findByAssignee(assignee, user.getHousehold().getId());
         if (taskList == null) return new ArrayList<>();
         Date startDate = rqst.getStartDate();
 

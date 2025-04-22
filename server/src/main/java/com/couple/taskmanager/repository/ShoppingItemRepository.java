@@ -14,11 +14,12 @@ import java.util.List;
 public interface ShoppingItemRepository extends JpaRepository<ShoppingItem, Long> {
     @Modifying
     @Transactional
-    @Query(value = "UPDATE ShoppingItem s SET s.bought = true WHERE s.id = :id")
-    void markAsBought(@Param("id")  Long id);
+    @Query(value = "UPDATE ShoppingItem s SET s.bought = true WHERE s.id = :id AND s.household.id = :householdId")
+    void markAsBought(@Param("id")  Long id, @Param("householdId") Long householdId);
 
     @Query("SELECT DISTINCT s.name FROM ShoppingItem s")
     List<String> findDistinctByName();
 
-    List<ShoppingItem> findAllByBoughtFalse();
+    @Query("SELECT s FROM ShoppingItem s WHERE s.bought = false AND s.household.id = :householdId")
+    List<ShoppingItem> findAllByBoughtFalseAndHouseholdId(Long householdId);
 }

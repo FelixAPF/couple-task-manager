@@ -14,4 +14,5 @@ public interface HouseholdRepository extends JpaRepository<Household, Long> {
 
     @Query("SELECT h FROM Household h WHERE h.householdJoinKey = :token")
     Optional<Household> findByToken(@PathVariable("token") String token);
+
 }

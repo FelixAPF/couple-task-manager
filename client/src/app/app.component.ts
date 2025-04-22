@@ -17,6 +17,7 @@ import { routeAnimations } from './animations';
 import { VersionControlService } from './service/version-control.service';
 import { Subscription } from 'rxjs';
 import * as BackEndVersion from "../../version.json";
+import { HouseholdService } from './service/household.service';
 
 
 @Component({
@@ -39,7 +40,7 @@ export class AppComponent implements OnInit, OnDestroy {
   
 
   constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
-  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService) {
+  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private householdService: HouseholdService) {
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');
@@ -64,6 +65,10 @@ export class AppComponent implements OnInit, OnDestroy {
       if(parseFloat(BackEndVersion.version).toFixed(4) !== parseFloat(version).toFixed(4)) {
         this.outdatedVersion = true;
       }
+    }));
+
+    this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
+      this.householdService.setHousehold(household);
     }));
   }
 

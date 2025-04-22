@@ -17,26 +17,31 @@ public abstract class GenericController<T, S extends IGenericService<T>> {
 
     @GetMapping("/{id}")
     T retrieve(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails userDetails){
-        return service.get(id, (CTMUser)userDetails);
+        CTMUser user = (CTMUser)userDetails;
+        return service.get(id, user.getHousehold().getId(), user);
     }
 
     @GetMapping
     List<T> retrieveList(@AuthenticationPrincipal UserDetails userDetails){
-        return service.list((CTMUser)userDetails);
+        CTMUser user = (CTMUser)userDetails;
+        return service.list(user.getHousehold().getId(), (CTMUser)userDetails);
     }
 
     @PostMapping
     T create(@RequestBody T t,@AuthenticationPrincipal UserDetails userDetails){
-        return service.create(t, (CTMUser)userDetails);
+        CTMUser user = (CTMUser)userDetails;
+        return service.create(t, user);
     }
 
     @PutMapping("/{id}")
     T update(@PathVariable("id") Long id, @RequestBody T t, @AuthenticationPrincipal UserDetails userDetails){
-        return service.update(id, t, (CTMUser)userDetails);
+        CTMUser user = (CTMUser)userDetails;
+        return service.update(id, t, user);
     }
 
     @DeleteMapping("/{id}")
     void delete(@PathVariable("id") Long id,@AuthenticationPrincipal UserDetails userDetails){
-        service.delete(id, (CTMUser)userDetails);
+        CTMUser user = (CTMUser)userDetails;
+        service.delete(id, user.getHousehold().getId(), (CTMUser)userDetails);
     }
 }

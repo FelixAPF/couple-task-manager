@@ -10,16 +10,25 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("SELECT t, (SELECT MAX(ta.completedDate) FROM TaskAssignment ta WHERE ta.task = t) FROM Task t " +
-            "WHERE NOT EXISTS (SELECT 1 FROM TaskAssignment ta WHERE ta.task = t AND ta.completedDate IS NOT NULL) " +
+            "WHERE t.household.id = :householdId " +
+            "AND (NOT EXISTS (SELECT 1 FROM TaskAssignment ta WHERE ta.task = t AND ta.completedDate IS NOT NULL) " +
             "OR (EXISTS (SELECT 1 FROM TaskAssignment ta2 WHERE ta2.task = t AND ta2.completedDate IS NOT NULL) " +
-            "AND (SELECT MAX(ta3.completedDate) FROM TaskAssignment ta3 WHERE ta3.task = t) < :longTime)")
-    List<Tuple> retrieveTasksNotCompletedInLongTime(@Param("longTime") Date longTime);
+            "AND (SELECT MAX(ta3.completedDate) FROM TaskAssignment ta3 WHERE ta3.task = t) < :longTime))")
+    List<Tuple> retrieveTasksNotCompletedInLongTime(@Param("longTime") Date longTime, @Param("householdId") Long householdId);
 
     @Query("SELECT t FROM Task t WHERE t.household.id = :householdId")
     List<Task> findAllByHouseholdId(@Param("householdId") Long householdId);
+
+    @Query("SELECT t FROM Task t WHERE t.id = :taskId AND t.household.id = :householdId")
+    Optional<Task> findByIdAndHouseholdId(@Param("taskId")Long taskId,@Param("householdId") Long householdId);
+
+    @Query("DELETE FROM Task t WHERE t.id = :taskId AND t.household.id = :householdId")
+    void deleteByIdAndHouseholdId(@Param("taskId")Long taskId,@Param("householdId") Long householdId);
+
 }

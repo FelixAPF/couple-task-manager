@@ -2,6 +2,7 @@ package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Recipe;
+import com.couple.taskmanager.model.dto.RecipeDto;
 import com.couple.taskmanager.repository.RecipeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,27 +11,27 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-public class RecipeService implements IGenericService<Recipe> {
+public class RecipeService implements IGenericService<Recipe, RecipeDto> {
     @Autowired
     RecipeRepository repository;
 
 
     @Override
-    public Recipe get(Long id, Long householdId, CTMUser user) {
-        return repository.findById(id).orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " found"));
+    public RecipeDto get(Long id, Long householdId, CTMUser user) {
+        return repository.findById(id).map(RecipeDto::new).orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " found"));
     }
 
     @Override
-    public List<Recipe> list(Long householdId, CTMUser user) {
-        return repository.findAllByHouseholdId(user.getHousehold().getId());
+    public List<RecipeDto> list(Long householdId, CTMUser user) {
+        return repository.findAllByHouseholdId(user.getHousehold().getId()).stream().map(RecipeDto::new).toList();
     }
 
     @Override
-    public Recipe update(Long id, Recipe recipe, CTMUser user) {
+    public RecipeDto update(Long id, Recipe recipe, CTMUser user) {
         if(!repository.existsById(id)){
             throw new NoSuchElementException("No recipe with id " + id);
         }
-        return this.repository.save(recipe);
+        return new RecipeDto(this.repository.save(recipe));
     }
 
     @Override
@@ -39,24 +40,24 @@ public class RecipeService implements IGenericService<Recipe> {
     }
 
     @Override
-    public Recipe create(Recipe recipe, CTMUser user) {
+    public RecipeDto create(Recipe recipe, CTMUser user) {
         if(recipe.getHousehold() == null){
             recipe.setHousehold(user.getHousehold());
         }
-        return repository.save(recipe);
+        return new RecipeDto(repository.save(recipe));
     }
 
 
-    public List<Recipe> create(List<Recipe> recipes, CTMUser user) {
+    public List<RecipeDto> create(List<Recipe> recipes, CTMUser user) {
         recipes.forEach(recipe -> {
             if(recipe.getHousehold() == null){
                 recipe.setHousehold(user.getHousehold());
             }
         });
-        return repository.saveAll(recipes);
+        return repository.saveAll(recipes).stream().map(RecipeDto::new).toList();
     }
 
-    public List<Recipe> findByRecipeType(String recipeType, CTMUser user) {
-        return repository.findByRecipeTypeAndHouseholdId(recipeType, user.getHousehold().getId());
+    public List<RecipeDto> findByRecipeType(String recipeType, CTMUser user) {
+        return repository.findByRecipeTypeAndHouseholdId(recipeType, user.getHousehold().getId()).stream().map(RecipeDto::new).toList();
     }
 }

@@ -15,8 +15,8 @@ export class TaskListService {
   constructor(private http: HttpClient) { }
 
 
-  retrieveTaskList(assignee: Assignee): Observable<TaskList[]> {
-    return this.http.get<TaskList[]>(`${this.baseUrl}/by-assignee/${assignee}`);
+  retrieveTaskList(assigneeUserId: number): Observable<TaskList[]> {
+    return this.http.get<TaskList[]>(`${this.baseUrl}/by-assignee/${assigneeUserId}`);
   }
 
   retrieveTaskLists(): Observable<TaskList[]> {
@@ -40,6 +40,7 @@ export class TaskListService {
   }
 
   retrieveWithUnassigned(): Observable<TaskList[]> {
+    console.log('retrieveWithUnassigned called');
     return this.http.get<TaskList[]>(`${this.baseUrl}/with-unassigned`);
   }
 

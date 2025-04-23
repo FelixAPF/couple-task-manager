@@ -1,7 +1,7 @@
 package com.couple.taskmanager.model;
 
-import com.couple.taskmanager.enums.Assignee;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,6 +12,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "household_id"})
+)
 public class TaskList {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,17 +24,14 @@ public class TaskList {
     @NonNull
     private List<Task> tasks = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @NonNull
-    private Assignee assignee;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    @JsonBackReference("user-task-list")
+    private CTMUser user;
 
     @ManyToOne
+    @JoinColumn(name = "household_id") // Explicitly specify the column name
     @JsonBackReference("household-task-lists")
     private Household household;
-
-    public TaskList(@NonNull List<Task> tasks, @NonNull Assignee assignee) {
-        this.tasks = tasks;
-        this.assignee = assignee;
-    }
 
 }

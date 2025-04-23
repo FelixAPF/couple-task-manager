@@ -17,6 +17,8 @@ import { TaskAssignmentService } from '../../service/task-assignment.service';
 import { Platform } from '@angular/cdk/platform';
 import { PluginListenerHandle } from '@capacitor/core';
 import { App } from '@capacitor/app';
+import { HouseholdService } from '../../service/household.service';
+import { HouseholdMember } from '../../model/household';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -40,11 +42,12 @@ enum AssignmentRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TaskAssignmentDialogComponent implements OnInit {
-  ASSIGNEE = Assignee;
+  householdService: HouseholdService = inject(HouseholdService);
   fb = inject(FormBuilder);
   subscription: Subscription = new Subscription();
   taskList: any | null = null;
   tasks: Task[] = [];
+  assignees: HouseholdMember[] = [];
   displayedColumns = ["title", "assignment"]
   @ViewChild('tableContainer') tableContainer!: ElementRef;
 
@@ -81,7 +84,7 @@ AssignmentRow = AssignmentRow;
   }
 
   submit(tasksWithAssignment: { taskWithAssignees: TaskWithAssignee[], createEachOnce: boolean }){
-    const basicTaskAssignmentRqsts: any[] = tasksWithAssignment?.taskWithAssignees?.map(taskWithAssignee => ({ assignee: taskWithAssignee.assignee, taskId: taskWithAssignee.task.id }));
+    const basicTaskAssignmentRqsts: any[] = tasksWithAssignment?.taskWithAssignees?.map(taskWithAssignee => ({ assigneeUserId: taskWithAssignee.assigneeUserId, taskId: taskWithAssignee.task.id }));
 
         
     this.taskListService.saveTasksToExistingTaskList(basicTaskAssignmentRqsts).subscribe(() => {
@@ -91,13 +94,27 @@ AssignmentRow = AssignmentRow;
 
   loadTaskAssignments() {
     return this.taskListService.retrieveWithUnassigned().subscribe((taskLists) => {
-      const newDataList = [];
+      // 1. Explicitly type the array
+      const newDataList: TaskWithAssignee[] = [];
+
       for (let list of taskLists) {
-        if (list.tasks == undefined) continue;
+        // Use stricter check for tasks array
+        if (!list.tasks || list.tasks.length === 0) continue;
+
+        // Extract the assignee's ID. Use optional chaining and nullish coalescing
+        // Assumes list.assignee is of type HouseholdMember | null | undefined
+        // If list.assignee represents "Unassigned" without an ID, this will correctly result in null.
+        const assigneeId: number | null = list.assignee?.id ?? null;
+
         for (let task of list.tasks) {
-          newDataList.push({ task: task, assignee: list.assignee });
+          // 2. Push an object matching the TaskWithAssignee interface
+          newDataList.push({
+            task: task,
+            assigneeUserId: assigneeId // Use the extracted ID
+          });
         }
       }
+      // Now newDataList has the correct type TaskWithAssignee[]
       this.taskAssignmentService.setTaskAssignments(newDataList);
     });
   }

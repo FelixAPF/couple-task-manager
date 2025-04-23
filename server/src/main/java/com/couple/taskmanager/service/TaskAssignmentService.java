@@ -12,19 +12,19 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-public class TaskAssignmentService implements IGenericService<TaskAssignment> {
+public class TaskAssignmentService implements IGenericService<TaskAssignment, TaskAssignmentDto> {
     @Autowired
     TaskAssignmentRepository taskAssignmentRepository;
 
 
     @Override
-    public TaskAssignment get(Long id, Long householdId, CTMUser user) {
-        return taskAssignmentRepository.findById(id).orElseThrow(NoSuchElementException::new);
+    public TaskAssignmentDto get(Long id, Long householdId, CTMUser user) {
+        return taskAssignmentRepository.findById(id).map(TaskAssignmentDto::new).orElseThrow(NoSuchElementException::new);
     }
 
     @Override
-    public List<TaskAssignment> list(Long householdId, CTMUser user) {
-        return taskAssignmentRepository.findAll();
+    public List<TaskAssignmentDto> list(Long householdId, CTMUser user) {
+        return StreamUtils.mapToList(taskAssignmentRepository.findAll(), TaskAssignmentDto::new);
     }
 
     public List<TaskAssignmentDto> listDto(Long taskId, CTMUser user){
@@ -34,7 +34,7 @@ public class TaskAssignmentService implements IGenericService<TaskAssignment> {
     }
 
     @Override
-    public TaskAssignment update(Long id, TaskAssignment taskAssignment, CTMUser user) {
+    public TaskAssignmentDto update(Long id, TaskAssignment taskAssignment, CTMUser user) {
         return null;
     }
 
@@ -44,7 +44,7 @@ public class TaskAssignmentService implements IGenericService<TaskAssignment> {
     }
 
     @Override
-    public TaskAssignment create(TaskAssignment taskAssignment, CTMUser user) {
+    public TaskAssignmentDto create(TaskAssignment taskAssignment, CTMUser user) {
         return null;
     }
 }

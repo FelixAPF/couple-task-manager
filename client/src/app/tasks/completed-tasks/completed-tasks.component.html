@@ -14,11 +14,11 @@
         <!-- Assignee Image (Consistent Size) -->
         <div class="flex-shrink-0">
           <img
-            [src]="SOURCE_MAP[taskAssignment.assignee!]"
-            [alt]="'Photo de ' + taskAssignment.assignee"
+            [src]="taskAssignment.householdMemberDto?.imageUrl || 'assets/placeholder.jpg'"
+            [alt]="'Photo de ' + taskAssignment.householdMemberDto?.name"
             class="w-10 h-10 rounded-full object-cover border border-green-300 dark:border-green-600 shadow-sm"
             onError="this.src='assets/placeholder.jpg'"
-            pTooltip="{{taskAssignment.assignee}}"
+            pTooltip="{{taskAssignment.householdMemberDto?.name}}"
             tooltipPosition="top"
           />
         </div>

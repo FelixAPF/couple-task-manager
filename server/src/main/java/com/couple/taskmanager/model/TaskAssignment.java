@@ -1,9 +1,7 @@
 package com.couple.taskmanager.model;
 
-import com.couple.taskmanager.config.AssigneeDeserializer;
-import com.couple.taskmanager.enums.Assignee;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.OnDelete;
@@ -29,7 +27,9 @@ public class TaskAssignment {
     private TaskPeriod taskPeriod;
 
     @NonNull
-    private Assignee assignee;
+    @ManyToOne
+    @JsonBackReference("user-task-assignments")
+    private CTMUser assignee;
 
     @NonNull
     private Date creationDate;
@@ -49,7 +49,7 @@ public class TaskAssignment {
     @JsonBackReference("household-task-assignments")
     private Household household;
 
-    public TaskAssignment(@NonNull Task task, @NonNull TaskPeriod taskPeriod, @NonNull Assignee assignee, @NonNull Date creationDate, @NonNull Date startDate, @NonNull Date dueDate) {
+    public TaskAssignment(@NonNull Task task, @NonNull TaskPeriod taskPeriod, @NonNull CTMUser assignee, @NonNull Date creationDate, @NonNull Date startDate, @NonNull Date dueDate) {
         this.task = task;
         this.taskPeriod = taskPeriod;
         this.assignee = assignee;

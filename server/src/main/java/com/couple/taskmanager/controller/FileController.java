@@ -1,6 +1,7 @@
 package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.exception.StorageFileNotFoundException;
+import com.couple.taskmanager.service.HouseholdService;
 import com.couple.taskmanager.service.IFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,9 @@ public class FileController {
     private final IFileService storageService;
     @Value("${app.base-url}")
     private String baseUrl;
+
+    @Autowired
+    HouseholdService householdService;
 
     @Autowired
     public FileController(IFileService storageService) {
@@ -61,6 +65,15 @@ public class FileController {
         return ResponseEntity.ok().body(Map.of(
                 "fileName", fileName,
                 "url", fileUrl,
+                "message", "Upload successful"
+        ));
+    }
+
+    @PostMapping("/household/{memberId}/image")
+    public ResponseEntity<?> handleHouseholdImageUpload(@RequestParam("file") MultipartFile file, @PathVariable("memberId") Long memberId){
+        String filePath = storageService.store(file);
+        householdService.setHouseholdMemberImage(memberId, filePath);
+        return ResponseEntity.ok().body(Map.of(
                 "message", "Upload successful"
         ));
     }

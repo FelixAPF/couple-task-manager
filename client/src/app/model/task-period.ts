@@ -1,3 +1,4 @@
+import { HouseholdMember } from "./household";
 import { CreationMethod, Frequency, Room, Task } from "./task";
 
 export interface TaskPeriod {
@@ -10,18 +11,21 @@ export interface TaskPeriod {
 
 export interface TaskAssignment {
     id?: number;
-    task: Task;
-    assignee: Assignee | null;
+    task: Task; // Assuming you have this
+    assignee: HouseholdMember | null; // Add this line with the correct type
+    assigneeUserId: number | null; // This might be redundant if 'assignee' is the full object
     period?: number;
-    creationDate: Date;
-    dueDate: Date | null;
-}
+    creationDate: Date | string; // Adjust type if needed
+    dueDate: Date | string | null; // Adjust type if needed
+    completed?: boolean;
+    // Add other properties if needed
+  }
 
 export interface TaskAssignmentDto {
     id: number;
     taskTitle: string;
     taskDescription: string;
-    assignee: Assignee;
+    householdMemberDto: HouseholdMember | null;
     creationDate: Date;
     completedDate: Date;
     dueDate: Date;
@@ -38,7 +42,7 @@ export enum Assignee {
 
 export interface BasicTaskAssignmentRqst {
     taskId?: number;
-    assignee?: Assignee;
+    assigneeUserId?: number | null;
 }
 
 export interface PeriodCreationRequest {

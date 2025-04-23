@@ -14,6 +14,9 @@ import { PluginListenerHandle } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Platform } from '@angular/cdk/platform';
 import { TranslateService } from '@ngx-translate/core';
+import { HouseholdService } from '../service/household.service';
+import { Subscription } from 'rxjs';
+import { HouseholdMember } from '../model/household';
 
 enum FormControlName {
   DURATION = "duration",
@@ -29,7 +32,7 @@ enum FormControlName {
 
 export interface TaskWithAssignee {
   task: Task;
-  assignee: Assignee | null;
+  assigneeUserId: number | null;
 }
 
 @Component({
@@ -40,8 +43,10 @@ export interface TaskWithAssignee {
   providers: [DatePipe]
 })
 export class CreatePeriodDialogComponent implements OnInit {
+  householdService: HouseholdService = inject(HouseholdService);
   fb: FormBuilder = inject(FormBuilder);
   manualStepActivated: boolean = false;
+  subscription: Subscription = new Subscription();
   existingTaskPeriods: TaskPeriod[] = [];
   formGroup = this.fb.group({
     [FormControlName.DURATION]: [null, Validators.required],
@@ -60,7 +65,7 @@ export class CreatePeriodDialogComponent implements OnInit {
 
    }
 
-  ASSIGNEE = Assignee;
+  assignees: HouseholdMember[] = [];
   FREQUENCY = Frequency;
   frequencies;
   CREATION_METHOD = CreationMethod;
@@ -91,6 +96,9 @@ export class CreatePeriodDialogComponent implements OnInit {
     this.taskPeriodService.retrieveTaskPeriodsIncomplete().subscribe(periods => {
       this.existingTaskPeriods = periods;
     });
+    this.subscription.add(this.householdService.household$.subscribe((household) => {
+      this.assignees = household?.members || [];
+    }));
   }
 
   submit(rqst: any = null){
@@ -100,7 +108,7 @@ export class CreatePeriodDialogComponent implements OnInit {
       duration: this.duration?.value || Frequency.MONTHLY,
       startDate: this.startDate?.value || new Date(),
       creationMethod: this.creationMethod?.value || CreationMethod.AUTOMATIC,
-      taskAssignmentRqst: rqst?.taskWithAssignees?.map((taskWithAssignee: TaskWithAssignee) => ({ taskId: taskWithAssignee.task.id, assignee: taskWithAssignee.assignee })) || [],
+      taskAssignmentRqst: rqst?.taskWithAssignees?.map((taskWithAssignee: TaskWithAssignee) => ({ taskId: taskWithAssignee.task.id, assignee: taskWithAssignee.assigneeUserId })) || [],
       explicitDueDate: this.durationType?.value ? this.explicitDueDate?.value : null,
       createEachTaskOnce: rqst?.createEachOnce || false
     }
@@ -141,7 +149,7 @@ export class CreatePeriodDialogComponent implements OnInit {
     this.taskService.retrieveTasks().subscribe(tasks => {
       this.tasks = tasks;
       this.taskAssignments = this.tasks.map(task => ({
-        assignee: null,
+        assigneeUserId: null,
         task
       }));
       this.taskAssignmentService.setTaskAssignments(this.taskAssignments);

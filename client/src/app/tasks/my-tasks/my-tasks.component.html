@@ -40,7 +40,7 @@
   <!-- Title and User Switcher -->
   <div class="flex justify-center items-center gap-3 mb-6">
     <h2 class="text-2xl font-semibold text-center text-surface-800 dark:text-surface-100">
-      Mes tâches - {{ selectedAssignee }}
+      Mes tâches - {{ selectedAssignee?.name }}
     </h2>
     <i
       class="pi pi-users text-primary-500 dark:text-primary-400 cursor-pointer hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200"
@@ -54,7 +54,7 @@
   <!-- Empty State Message -->
   <div *ngIf="!tasks || tasks.length === 0" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border border-dashed rounded-lg bg-surface-100 dark:bg-surface-800">
     <i class="pi pi-check-square mr-2 text-xl align-middle"></i>
-    <span>Aucune tâche à afficher pour {{ selectedAssignee }} avec les filtres actuels.</span>
+    <span>Aucune tâche à afficher pour {{ selectedAssignee?.name }} avec les filtres actuels.</span>
   </div>
 
   <!-- Task List using Cards -->
@@ -67,11 +67,11 @@
           <!-- Assignee Image -->
           <div class="flex-shrink-0">
             <img
-              [src]="SOURCE_MAP[task.assignee]"
-              [alt]="'Photo de ' + task.assignee"
+              [src]="task.householdMemberDto?.imageUrl || 'assets/placeholder.jpg'"
+              [alt]="'Photo de ' + task.householdMemberDto?.name"
               class="w-12 h-12 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm"
               onError="this.src='assets/placeholder.jpg'"
-              pTooltip="{{task.assignee}}"
+              pTooltip="{{task.householdMemberDto?.name}}"
               tooltipPosition="top"
             />
           </div>

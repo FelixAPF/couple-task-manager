@@ -1,23 +1,23 @@
 package com.couple.taskmanager.service;
 
-import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.*;
 import com.couple.taskmanager.model.dto.BasicTaskAssignmentRqstV1;
 import com.couple.taskmanager.model.dto.PeriodCreationRqstV1;
+import com.couple.taskmanager.model.dto.TaskPeriodDto;
 import com.couple.taskmanager.repository.*;
 import com.couple.taskmanager.utils.DateUtils;
 import com.couple.taskmanager.utils.StreamUtils;
+import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
-public class TaskPeriodService implements IGenericService<TaskPeriod> {
+public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriodDto> {
     @Autowired
     ITaskPeriodRepository taskPeriodRepository;
     @Autowired
@@ -26,33 +26,38 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
     TaskAssignmentRepository taskAssignmentRepository;
     @Autowired
     TaskListRepository taskListRepository;
+    @Autowired
+    CTMUserRepository userRepository;
+    @Autowired
+    HouseholdRepository householdRepository;
 
     @Override
-    public TaskPeriod get(Long id, Long householdId, CTMUser user) {
+    public TaskPeriodDto get(Long id, Long householdId, CTMUser user) {
         return taskPeriodRepository.findById(id)
+                .map(TaskPeriodDto::new)
                 .orElseThrow(() -> new NoSuchElementException("No task period with id " + id));
     }
 
     @Override
-    public List<TaskPeriod> list(Long householdId, CTMUser user) {
-        return taskPeriodRepository.findAllByHouseholdId(user.getHousehold().getId());
+    public List<TaskPeriodDto> list(Long householdId, CTMUser user) {
+        return StreamUtils.mapToList(taskPeriodRepository.findAllByHouseholdId(user.getHousehold().getId()), TaskPeriodDto::new);
     }
 
-    public List<TaskPeriod> listIncomplete(CTMUser user) {
-        return taskPeriodRepository.findByCompletedFalse(user.getHousehold().getId());
+    public List<TaskPeriodDto> listIncomplete(CTMUser user) {
+        return StreamUtils.mapToList(taskPeriodRepository.findByCompletedFalse(user.getHousehold().getId()), TaskPeriodDto::new);
     }
 
     @Override
-    public TaskPeriod update(Long id, TaskPeriod taskPeriod, CTMUser user) {
+    public TaskPeriodDto update(Long id, TaskPeriod taskPeriod, CTMUser user) {
         throw new IllegalArgumentException();
     }
 
     @Transactional
-    public TaskPeriod update(TaskPeriod taskPeriod, List<TaskAssignment> taskAssignments) {
+    public TaskPeriodDto update(TaskPeriod taskPeriod, List<TaskAssignment> taskAssignments) {
         List<TaskAssignment> list = taskAssignments.stream()
                 .peek(taskAssignment -> taskAssignment.setTaskPeriod(taskPeriod)).toList();
         taskAssignmentRepository.saveAll(list);
-        return taskPeriodRepository.save(taskPeriod);
+        return new TaskPeriodDto(taskPeriodRepository.save(taskPeriod));
     }
 
     @Override
@@ -62,21 +67,21 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
     @Override
     @Transactional
-    public TaskPeriod create(TaskPeriod taskPeriod, CTMUser user) {
+    public TaskPeriodDto create(TaskPeriod taskPeriod, CTMUser user) {
         if(taskPeriod.getHousehold() == null){
             taskPeriod.setHousehold(user.getHousehold());
         }
-        return taskPeriodRepository.save(taskPeriod);
+        return new TaskPeriodDto(taskPeriodRepository.save(taskPeriod));
     }
 
-    public TaskPeriod createPeriod(PeriodCreationRqstV1 rqst, CTMUser user){
+    public TaskPeriodDto createPeriod(PeriodCreationRqstV1 rqst, CTMUser user) throws SystemException {
         return switch (rqst.getCreationMethod()){
             case AUTOMATIC -> createPeriodAutomatically(rqst, user);
             case MANUAL -> createPeriodManually(rqst, user);
         };
     }
 
-    public TaskPeriod createPeriodManually(PeriodCreationRqstV1 rqst, CTMUser user){
+    public TaskPeriodDto createPeriodManually(PeriodCreationRqstV1 rqst, CTMUser user){
         Date periodEndDate = DateUtils.calculateDueDate(rqst.getStartDate(), rqst.getDuration());
         List<Task> tasks = taskRepository.findAll();
 
@@ -92,12 +97,12 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
 
         if(rqst.getCreateEachTaskOnce()){
             taskAssignments.addAll(StreamUtils.ofNullable(rqst.getTaskAssignmentRqst()).map((r) ->
-                    map(taskMap.get(r.getTaskId()), taskPeriod, r.getAssignee(), periodEndDate, taskPeriod.getStartDate(), rqst.getExplicitDueDate(), new Date()))
+                    map(taskMap.get(r.getTaskId()), taskPeriod, r.getAssigneeUserId(), periodEndDate, taskPeriod.getStartDate(), rqst.getExplicitDueDate(), new Date()))
                     .toList());
         } else {
             taskAssignments.addAll(StreamUtils.ofNullable(rqst.getTaskAssignmentRqst())
                     .flatMap(task -> occurenceButAtLeastOne(rqst.getStartDate(), periodEndDate, rqst.getExplicitDueDate(), taskMap.get(task.getTaskId()).getFrequency()).stream()
-                            .map(dueDate -> map(taskMap.get(task.getTaskId()), taskPeriod,  task.getAssignee(), dueDate, taskPeriod.getStartDate(), rqst.getExplicitDueDate(), new Date())))
+                            .map(dueDate -> map(taskMap.get(task.getTaskId()), taskPeriod,  task.getAssigneeUserId(), dueDate, taskPeriod.getStartDate(), rqst.getExplicitDueDate(), new Date())))
                     .toList());
         }
 
@@ -109,10 +114,11 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         }
     }
 
-    private TaskAssignment map(Task task, TaskPeriod taskPeriod, Assignee assignee, Date dueDate, Date startDate, Date explicitDueDate, Date creationDate){
+    private TaskAssignment map(Task task, TaskPeriod taskPeriod, Long assigneeUserId, Date dueDate, Date startDate, Date explicitDueDate, Date creationDate){
         TaskAssignment taskAssignment = new TaskAssignment();
         taskAssignment.setTask(task);
-        taskAssignment.setAssignee(assignee);
+
+        taskAssignment.setAssignee(userRepository.findById(assigneeUserId).orElseThrow(NoSuchElementException::new));
         taskAssignment.setCompleted(false);
         taskAssignment.setStartDate(startDate);
         taskAssignment.setCreationDate(creationDate == null ? new Date() : creationDate);
@@ -121,11 +127,12 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         return taskAssignment;
     }
 
-    public TaskPeriod createPeriodAutomatically(PeriodCreationRqstV1 rqst, CTMUser user){
+    public TaskPeriodDto createPeriodAutomatically(PeriodCreationRqstV1 rqst, CTMUser user) throws SystemException {
         Date periodEndDate = DateUtils.calculateDueDate(rqst.getStartDate(), rqst.getDuration());
+        Household household = householdRepository.findById(user.getHousehold().getId()).orElseThrow(SystemException::new);
 
         TaskPeriod taskPeriod = generatePeriod(rqst, periodEndDate);
-        List<TaskAssignment> taskAssignments = Stream.of(Assignee.values())
+        List<TaskAssignment> taskAssignments = StreamUtils.ofNullable(household.getUsers())
                 .flatMap(assignee -> generateTaskAssignments(assignee, rqst, taskPeriod, periodEndDate, user).stream())
                 .toList();
 
@@ -137,14 +144,14 @@ public class TaskPeriodService implements IGenericService<TaskPeriod> {
         }
     }
 
-    private List<TaskAssignment> generateTaskAssignments(Assignee assignee, PeriodCreationRqstV1 rqst, TaskPeriod taskPeriod, Date periodEndDate, CTMUser user) {
-        TaskList taskList = taskListRepository.findByAssignee(assignee, user.getHousehold().getId());
+    private List<TaskAssignment> generateTaskAssignments(CTMUser assignee, PeriodCreationRqstV1 rqst, TaskPeriod taskPeriod, Date periodEndDate, CTMUser user) {
+        TaskList taskList = taskListRepository.findByAssignee(assignee.getId(), user.getHousehold().getId()).orElse(null);
         if (taskList == null) return new ArrayList<>();
         Date startDate = rqst.getStartDate();
 
         return taskList.getTasks().stream()
                 .flatMap(task -> occurenceInPeriod(startDate, periodEndDate, rqst.getExplicitDueDate(), task.getFrequency()).stream()
-                        .map(dueDate -> map(task, taskPeriod, assignee, dueDate, startDate, rqst.getExplicitDueDate(), new Date())))
+                        .map(dueDate -> map(task, taskPeriod, assignee.getId(), dueDate, startDate, rqst.getExplicitDueDate(), new Date())))
                 .toList();
     }
 

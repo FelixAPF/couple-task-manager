@@ -15,8 +15,8 @@
           <!-- Assignee Image -->
           <div class="flex-shrink-0">
             <img
-              [src]="taskAssignment.assignee === 'Felix' ? 'assets/person1.jpg' : 'assets/person2.jpg'"
-              [alt]="'Photo de ' + taskAssignment.assignee"
+              [src]="taskAssignment.householdMemberDto?.imageUrl ||'assets/placeholder.jpg'"
+              [alt]="'Photo de ' + taskAssignment.householdMemberDto?.name"
               class="w-16 h-16 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm"
               onError="this.src='assets/placeholder.jpg'"
             />
@@ -29,7 +29,7 @@
                <!-- Assignee Info -->
                <div class="flex items-center gap-1">
                  <i class="pi pi-user text-primary-500 dark:text-primary-400"></i>
-                 <span>{{ taskAssignment.assignee }}</span>
+                 <span>{{ taskAssignment.householdMemberDto?.name }}</span>
                </div>
                <!-- Date Info -->
                <div class="flex items-center gap-1 mt-1 sm:mt-0">

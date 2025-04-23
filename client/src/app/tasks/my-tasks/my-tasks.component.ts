@@ -15,6 +15,8 @@ import { RoomPipe } from '../../shared/pipes/room-pipe';
 import { InputTextModule } from 'primeng/inputtext';
 import { DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
 import { QuickCompleteTaskComponent } from '../quick-complete-task/quick-complete-task.component';
+import { HouseholdService } from '../../service/household.service';
+import { HouseholdMember } from '../../model/household';
 
 export const SourceMap = {
     [Assignee.Camille]: "assets/person2.jpg",
@@ -42,26 +44,37 @@ export class MyTasksComponent implements OnInit {
   dataSource = new MatTableDataSource<TaskAssignment>();
   @Output() taskCompleteEmitter: EventEmitter<number> = new EventEmitter();
   
-  selectedAssignee: Assignee = Assignee.Camille;
   assigneeOptions: any[] = [];
   readonly SOURCE_MAP = SourceMap;
   taskAssignments: TaskAssignment[] = [];
+  householdMembers: HouseholdMember[] = [];
   today: any = new Date();
   hideCompletedTasks: boolean = false;
+  selectedAssigneeId: number = 0;
+  selectedAssignee: HouseholdMember | null = null;
   
   get displayDuration(){
     return this.formGroup.get(FormControlName.DISPLAY_DURATION);
   }
 
-  constructor(private taskService: TaskService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
+  constructor(private taskService: TaskService, private householdService: HouseholdService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
 
 
   ngOnInit(): void {
-    this.selectedAssignee = localStorage.getItem("assignee") as Assignee;
-    if(this.selectedAssignee == null){
-      this.selectedAssignee = Assignee.Camille;
-      localStorage.setItem("assignee", this.selectedAssignee);
-    }
+    this.householdService.retrieveHousehold().subscribe(household => {
+      this.householdMembers = household?.members || [];
+      this.selectedAssigneeId = Number(localStorage.getItem("assignee"));
+      if(this.selectedAssigneeId == null || this.selectedAssigneeId == 0 || isNaN(this.selectedAssigneeId)){
+        console.log("Assignee not found in local storage, defaulting to first member.", this.householdMembers[0]);
+        this.selectedAssigneeId = this.householdMembers[0].id;
+        this.selectedAssignee = this.householdMembers[0];
+        localStorage.setItem("assignee", this.selectedAssigneeId.toString());
+      }
+      this.selectedAssignee = this.householdMembers.find(member => member.id === this.selectedAssigneeId) || null;
+      this.retrieveTaskByAssignee();
+    });
+
+    
 
     const selectedFrequency = localStorage.getItem("myTasksFrequency") as Frequency;
     if(selectedFrequency != null){
@@ -71,7 +84,6 @@ export class MyTasksComponent implements OnInit {
       this.setMyTaskFrequencyStorage(Frequency.MONTHLY);
     }
 
-    this.retrieveTaskByAssignee();
 
   }
 
@@ -80,14 +92,22 @@ export class MyTasksComponent implements OnInit {
   }
 
   changeUser(){
-    this.selectedAssignee = this.selectedAssignee === Assignee.Camille ? Assignee.Felix : Assignee.Camille;
+    const selectedAssigneeIndex = this.householdMembers.findIndex(member => member.id === this.selectedAssigneeId);
+    if(selectedAssigneeIndex === -1 || selectedAssigneeIndex === this.householdMembers.length - 1){
+      localStorage.removeItem("assignee");
+      this.selectedAssignee = this.householdMembers[0];
+    } else {
+      this.selectedAssignee = this.householdMembers[selectedAssigneeIndex + 1];
+    }
+    this.selectedAssigneeId = this.selectedAssignee.id;
+    
     this.retrieveTaskByAssignee();
-    localStorage.setItem("assignee", this.selectedAssignee);
+    localStorage.setItem("assignee", this.selectedAssigneeId.toString());
   }
 
   retrieveTaskByAssignee(){
     const frequency = this.formGroup.get(FormControlName.DISPLAY_DURATION)?.value || Frequency.MONTHLY;
-    this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssignee, frequency).subscribe(taskAssignments => {
+    this.subscription.add(this.taskService.retrieveTaskByAssignee(this.selectedAssigneeId, frequency).subscribe(taskAssignments => {
       this.tasks = taskAssignments.sort((a, b) => {
         // Create Date objects for reliable comparison
         const dateA = new Date(a.dueDate).getTime();

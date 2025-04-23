@@ -1,8 +1,6 @@
 package com.couple.taskmanager.model;
 
-import com.couple.taskmanager.enums.Assignee;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -29,8 +30,16 @@ public class Task {
     private Frequency frequency;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
-    @JsonManagedReference
+    @JsonManagedReference("task-task-assignments")
     private List<TaskAssignment> taskAssignments;
+
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "task_tasklist",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name= "tasklist_id")
+    )
+    private List<TaskList> taskLists = new ArrayList<>();
 
     @NonNull
     private Room room;

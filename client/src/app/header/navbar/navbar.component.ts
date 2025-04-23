@@ -70,14 +70,7 @@ toggleMenu(): void {
 
     // Optional: Handle dialog close if needed (e.g., refresh something specific)
       joinDialogRef.onClose.subscribe((joinedSuccessfully?: boolean) => {
-        if (joinedSuccessfully) {
-            console.log('Dialog closed after successfully joining household.');
-            // The householdService should have updated the state,
-            // components observing household$ will update automatically.
-            // You might trigger an additional global refresh if necessary.
-        } else {
-            console.log('Join household dialog closed without joining.');
-        }
+        
     });
   }
 

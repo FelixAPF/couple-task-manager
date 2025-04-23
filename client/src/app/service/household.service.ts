@@ -36,7 +36,6 @@ export class HouseholdService {
       tap(joinedHousehold => {
         // Update the shared household state upon successful join
         this.setHousehold(joinedHousehold);
-        console.log('Successfully joined household:', joinedHousehold);
       })
     );;
   }
@@ -78,11 +77,8 @@ export class HouseholdService {
 
               // Emit a new household object with the updated members list
               this.householdSubject.next({ ...currentHousehold, members: updatedMembers });
-              console.log(`Member ${memberId} image updated locally. Message: ${response.message}`);
 
-            } else {
-               console.warn(`Member ${memberId} not found in current household state during image update.`);
-            }
+            }           
           }
         })
       );

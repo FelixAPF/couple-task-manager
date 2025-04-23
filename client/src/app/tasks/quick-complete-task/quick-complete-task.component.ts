@@ -62,7 +62,6 @@ export class QuickCompleteTaskComponent implements OnInit {
         value: member.id, 
         src: member.imageUrl || 'assets/placeholder.jpg' // Use the image URL from the member or fallback to SourceMap
     }));
-    console.log(this.assigneeOptions)
   }
 
   buildFormGroup(){
@@ -95,7 +94,6 @@ export class QuickCompleteTaskComponent implements OnInit {
       // Get the full task object from the form control
       const selectedTaskObject = this.formGroup.value[FormControlName.TASK_ID];
       const assignee = this.formGroup.value[FormControlName.ASSIGNEE];
-      console.log(assignee);
   
       if (selectedTaskObject && selectedTaskObject.id) { // Add a check
         const taskId = selectedTaskObject.id; // Extract the ID

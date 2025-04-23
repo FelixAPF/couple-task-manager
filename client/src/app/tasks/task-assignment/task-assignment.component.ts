@@ -63,7 +63,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
   generateHouseholdOptions(){
     this.householdMembersOptions = [...this.householdMembers.map((member) => {
       return { label: member.name, value: member.id }
-    }), { label: "Non assigné", value: null }];
+    }), { label: "Tous", value: 0 }, { label: "Non assigné", value: null }];
   }
   onChange($event: CheckboxChangeEvent) {
     this.showDescription = !this.showDescription;
@@ -132,7 +132,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
       [FormControlName.ROOM]: [taskLink?.task.room || ""],
       [FormControlName.FREQUENCY]: [taskLink?.task.frequency || ""],
       [FormControlName.TASK_ID]: [taskLink?.task.id],
-      [FormControlName.ASSIGNEE]: [taskLink?.assigneeUserId || null]
+      [FormControlName.ASSIGNEE]: [taskLink?.assigneeUserId !== 0 ? taskLink?.assigneeUserId || null : 0]
     });
   }
 

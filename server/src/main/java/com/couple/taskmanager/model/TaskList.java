@@ -20,8 +20,7 @@ public class TaskList {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @NonNull
+    @ManyToMany(mappedBy = "taskLists")
     private List<Task> tasks = new ArrayList<>();
 
     @ManyToOne

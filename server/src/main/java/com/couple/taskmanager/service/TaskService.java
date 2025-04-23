@@ -82,14 +82,13 @@ public class TaskService implements IGenericService<Task, TaskDto > {
         taskAssignmentRepository.deleteAll(taskAssignments);
 
         // Remove the Task from TaskLists
-        List<TaskList> taskLists = taskListRepository.findAll();
+        List<TaskList> taskLists = new ArrayList<>(taskToDelete.getTaskLists()); // Create a copy to avoid ConcurrentModificationException
         for (TaskList taskList : taskLists) {
-            if (taskList.getTasks().contains(taskToDelete)) {
-                taskList.getTasks().remove(taskToDelete);
-                taskListRepository.save(taskList);
-            }
+            taskToDelete.getTaskLists().remove(taskList); // Remove the task from the TaskList on this side of the relationship
+            taskList.getTasks().remove(taskToDelete);
+            taskListRepository.save(taskList); // Save the modified TaskList
         }
-
+        taskRepository.save(taskToDelete); // Update the Task
         // Finally, delete the Task
         taskRepository.delete(taskToDelete);
     }

@@ -18,7 +18,7 @@ public class TaskAssignment {
     private Long id;
 
     @ManyToOne
-    @JsonBackReference
+    @JsonBackReference("task-task-assignments")
     private Task task;
 
     @ManyToOne(fetch = FetchType.EAGER)

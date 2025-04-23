@@ -66,8 +66,10 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     }));
 
-    this.setStatusBarBackgroundColor();
-    this.setStatusBarStyle();
+    if(this.platform.ANDROID) {
+      this.setStatusBarBackgroundColor();
+      this.setStatusBarStyle();
+    }
 
     this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
       this.householdService.setHousehold(household);

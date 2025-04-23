@@ -82,9 +82,10 @@ public class HouseholdService {
         }
     }
 
-    public void setHouseholdMemberImage(Long userId, String filePath){
-        CTMUser user = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
-        user.setImageUrl(filePath);
+    public void setHouseholdMemberImage(Long userId, String imageUrl){
+        CTMUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId)); // Add specific message
+        user.setImageUrl(imageUrl); // Save the full URL
         userRepository.save(user);
     }
 

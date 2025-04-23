@@ -65,7 +65,6 @@ export class MyTasksComponent implements OnInit {
       this.householdMembers = household?.members || [];
       this.selectedAssigneeId = Number(localStorage.getItem("assignee"));
       if(this.selectedAssigneeId == null || this.selectedAssigneeId == 0 || isNaN(this.selectedAssigneeId)){
-        console.log("Assignee not found in local storage, defaulting to first member.", this.householdMembers[0]);
         this.selectedAssigneeId = this.householdMembers[0].id;
         this.selectedAssignee = this.householdMembers[0];
         localStorage.setItem("assignee", this.selectedAssigneeId.toString());

@@ -40,7 +40,6 @@ export class TaskListService {
   }
 
   retrieveWithUnassigned(): Observable<TaskList[]> {
-    console.log('retrieveWithUnassigned called');
     return this.http.get<TaskList[]>(`${this.baseUrl}/with-unassigned`);
   }
 

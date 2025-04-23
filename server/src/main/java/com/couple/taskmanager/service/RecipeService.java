@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @Service
 public class RecipeService implements IGenericService<Recipe, RecipeDto> {
@@ -36,7 +37,11 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
 
     @Override
     public void delete(Long id, Long householdId, CTMUser user) {
-        repository.deleteByRecipeIdAndHouseholdId(id, householdId);
+        Recipe recipeToDelete = repository.findById(id).orElse(null);
+        if(recipeToDelete == null || !Objects.equals(householdId, recipeToDelete.getHousehold().getId())){
+            throw new IllegalArgumentException("Household is not yours");
+        }
+        repository.delete(recipeToDelete);
     }
 
     @Override

@@ -227,7 +227,7 @@ export class MealsListComponent implements OnInit {
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas supprimé.' });
         // Find the day and remove the meal visually immediately
         const mealDate = new Date(meal.date);
-        const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'EST');
+        const mealIsoDate = this.datePipe.transform(mealDate, 'yyyy-MM-dd', 'UTC');
         const day = this.weekDays.find(d => d.isoDate === mealIsoDate);
         if (day) {
           day.meal = undefined;

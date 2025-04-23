@@ -58,7 +58,6 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    this.performImmediateUpdate();
     this.checkScreenWidth();
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
@@ -66,6 +65,9 @@ export class AppComponent implements OnInit, OnDestroy {
         this.outdatedVersion = true;
       }
     }));
+
+    this.setStatusBarBackgroundColor();
+    this.setStatusBarStyle();
 
     this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
       this.householdService.setHousehold(household);
@@ -125,7 +127,17 @@ export class AppComponent implements OnInit, OnDestroy {
     this.acknowledgeUpdate = true;
   }
 
-  public async performImmediateUpdate(): Promise<void> {
-    await AppUpdate.performImmediateUpdate();
+  async setStatusBarStyle() {
+    // You can choose between Default, Light, or Dark style for the text/icons
+    await StatusBar.setStyle({ style: Style.Default }); // Or Style.Light for dark backgrounds
+    await StatusBar.setOverlaysWebView({ overlay: false }); // Prevent overlay
+
   }
+
+  async setStatusBarBackgroundColor() {
+    // Set your desired background color here (hexadecimal or CSS color name)
+    await StatusBar.setBackgroundColor({ color: '#f0f0f0' }); // Example: Light gray
+    
+  }
+  
 }

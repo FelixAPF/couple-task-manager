@@ -1,0 +1,8 @@
+.app-container { /* Or the class of your main div in app.component.html */
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  /* Adjust further if your navbar has a specific height */
+  .main-content {
+    padding-top: calc(env(safe-area-inset-top) + 3rem); /* Assuming navbar height is 3rem */
+  }

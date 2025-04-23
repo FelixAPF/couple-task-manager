@@ -1,45 +1,61 @@
 <body>
-  <!-- Apply background colors to the main app container -->
+  <!-- 
+    Main container: 
+    - min-h-screen ensures it takes at least the full viewport height.
+    - flex flex-col sets up the main layout direction.
+    - bg/text colors are applied here.
+  -->
   <div class="flex flex-col min-h-screen bg-surface-50 dark:bg-surface-900 text-surface-700 dark:text-surface-200">
+
+    <!-- Navbar: Fixed position, takes no space in the normal flow -->
     <app-navbar></app-navbar>
 
-    <!-- Outdated Version Banner -->
-    <div *ngIf="outdatedVersion && !acknowledgeUpdate"
-         class="bg-yellow-100 dark:bg-yellow-900/60 border-l-4 border-yellow-500 dark:border-yellow-400
-                text-yellow-800 dark:text-yellow-100
-                p-3 mx-2 sm:mx-4
-                mt-[calc(3rem+env(safe-area-inset-top)+0.5rem)] sm:mt-[calc(4rem+0.5rem)] /* Position below header + small gap */
-                rounded-md shadow-lg
-                flex items-center justify-between gap-3
-                relative z-30">
+    <!-- 
+      Content Wrapper: This div will contain everything BELOW the navbar.
+      - It needs padding-top equal to the navbar's height to prevent overlap.
+      - flex-grow allows it to take up the remaining vertical space.
+      - relative is needed for potential absolute children later.
+      - overflow-y-auto makes THIS container scrollable if content exceeds height.
+    -->
+    <div class="relative flex-grow overflow-y-auto pt-16 sm:pt-20">
 
-      <span class="text-sm font-medium flex items-center" (click)="openAppStore()">
-        <i class="pi pi-exclamation-triangle mr-2 flex-shrink-0"></i>
-        <span>Une nouvelle version de l'application est disponible. Veuillez mettre à jour.</span>
-      </span>
+      <!-- Outdated Version Banner -->
+      <!-- Positioned normally within the flow, margin adjusted slightly -->
+      <div *ngIf="outdatedVersion && !acknowledgeUpdate"
+           class="bg-yellow-100 dark:bg-yellow-900/60 border-l-4 border-yellow-500 dark:border-yellow-400
+                  text-yellow-800 dark:text-yellow-100
+                  p-3 mx-2 sm:mx-4
+                  mb-4 md:mb-6 <!-- Use margin-bottom instead of complex margin-top -->
+                  rounded-md shadow-lg
+                  flex items-center justify-between gap-3
+                  relative z-30"> <!-- z-index might not be needed if positioned normally -->
 
-      <button pButton pRipple type="button" icon="pi pi-times"
-              class="p-button-rounded p-button-text p-button-sm flex-shrink-0
-                     !text-yellow-800 dark:!text-yellow-100
-                     hover:!bg-yellow-200/50 dark:hover:!bg-yellow-700/50"
-              (click)="closeUpdateDialog()"
-              aria-label="Fermer l'avertissement de mise à jour">
-      </button>
-    </div>
+        <span class="text-sm font-medium flex items-center" (click)="openAppStore()">
+          <i class="pi pi-exclamation-triangle mr-2 flex-shrink-0"></i>
+          <span>Une nouvelle version de l'application est disponible. Veuillez mettre à jour.</span>
+        </span>
 
-    <!-- This div now inherits the background from its parent -->
-    <div
-      class="flex-grow sm:pt-16 relative overflow-hidden"
-      [class.pt-[calc(3rem+env(safe-area-inset-top))]]="acknowledgeUpdate || !outdatedVersion"
-      [@routeAnimations]="prepareRoute(outlet)"
-    >
-      <div class="h-full">
+        <button pButton pRipple type="button" icon="pi pi-times"
+                class="p-button-rounded p-button-text p-button-sm flex-shrink-0
+                       !text-yellow-800 dark:!text-yellow-100
+                       hover:!bg-yellow-200/50 dark:hover:!bg-yellow-700/50"
+                (click)="closeUpdateDialog()"
+                aria-label="Fermer l'avertissement de mise à jour">
+        </button>
+      </div>
+
+      <!-- Router Outlet Container -->
+      <!-- No extra padding or height needed here. Content flows within the parent. -->
+      <div [@routeAnimations]="prepareRoute(outlet)">
          <router-outlet #outlet="outlet"></router-outlet>
       </div>
-    </div>
 
+    </div> <!-- End Content Wrapper -->
+
+    <!-- Footer Navbar (Keep as is) -->
     <div class="lg:hidden">
       <app-footer-navbar></app-footer-navbar>
     </div>
-  </div>
+
+  </div> <!-- End Main Container -->
 </body>

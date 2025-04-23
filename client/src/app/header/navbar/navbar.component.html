@@ -1,40 +1,39 @@
+<nav class="bg-white dark:bg-gray-950 shadow-md fixed top-0 left-0 right-0 z-50 h-16 sm:h-20 flex px-4 sm:px-6">
+  <div class="navbar-inner-container w-full h-full flex justify-between"> <!-- align-items added via CSS -->
 
-
-<!-- Main Navigation Bar -->
-<nav class="bg-surface-100 dark:bg-surface-800 shadow-md fixed top-0 left-0 right-0 z-50 h-12 sm:h-16 flex items-center px-4 sm:px-6">
-  <div class="container mx-auto flex justify-between items-center h-full">
-
-    <!-- Left Side: Logo/Brand (Example) -->
-    <img src="assets/Gemini_Generated_Image_fw61ocfw61ocfw61-modified.png" alt="App Icon" class="h-6 w-6 mr-2">
-    <div class="font-semibold text-lg text-surface-600 dark:text-surface-300">
-     Couple Task Manager
+    <!-- Left Section (Logo/Brand) -->
+    <div class="flex items-center flex-shrink-0"> <!-- items-center here aligns img and text -->
+        <img src="assets/Gemini_Generated_Image_fw61ocfw61ocfw61-modified.png" alt="App Icon" class="h-6 w-6 mr-2">
+        <div class="font-semibold text-lg text-surface-600 dark:text-surface-300 hidden sm:block">
+         Couple Task Manager
+        </div>
     </div>
 
-    <!-- Center/Right Side: Desktop Menu Items & Logout -->
-    <div class="hidden sm:flex items-center space-x-4">
-      <!-- Add other desktop nav links here if needed -->
-      <!-- Example: <a routerLink="/tasks" pButton pRipple class="p-button-text">Tasks</a> -->
-
+    <!-- Right Section (Desktop Buttons / Mobile Trigger) -->
+    <div class="flex items-center space-x-4"> <!-- items-center here aligns buttons -->
       <!-- Desktop Logout Button -->
-      <!-- Use *ngIf with async pipe to check login status -->
-      <button *ngIf="isLoggedIn$ | async"
-              pButton
-              pRipple
-              type="button"
-              label="Logout"
-              icon="pi pi-sign-out"
-              class="p-button-danger p-button-text"
-              (click)="logout()">
-      </button>
-    </div>
-
-    <!-- Mobile Menu Button (Hamburger) -->
-    <div class="sm:hidden">
-      <button pButton pRipple type="button" icon="pi pi-bars" class="p-button-text" (click)="toggleMenu()"></button>
+      <div class="hidden sm:block">
+        <button *ngIf="isLoggedIn$ | async"
+                pButton pRipple type="button" label="Logout" icon="pi pi-sign-out"
+                class="p-button-danger p-button-text" (click)="logout()">
+        </button>
+      </div>
+      <!-- Mobile Menu Button (Hamburger) -->
+      <div class="sm:hidden">
+        <button pButton pRipple type="button" icon="pi pi-bars" class="p-button-text" (click)="toggleMenu()"></button>
+      </div>
     </div>
 
   </div>
 </nav>
+
+<!-- Mobile Menu (Keep as is) -->
+<!-- ... -->
+
+
+<!-- Mobile Menu (Keep as is) -->
+<!-- ... -->
+
 
 <!-- Mobile Menu Overlay & Panel (Example Structure) -->
 <!-- Overlay to close menu on outside click -->
@@ -42,7 +41,7 @@
 
 <!-- Sliding Menu Panel -->
 <div *ngIf="isMenuOpen"
-     class="sm:hidden fixed top-0 right-0 h-full w-64 bg-surface-0 dark:bg-surface-900 shadow-lg z-50 p-4 transition-transform duration-300 ease-in-out transform"
+     class="mobile-menu-panel sm:hidden fixed top-0 right-0 h-full w-64 bg-surface-0 dark:bg-surface-900 shadow-lg z-50 p-4 transition-transform duration-300 ease-in-out transform flex flex-col"
      [class.translate-x-0]="isMenuOpen"
      [class.translate-x-full]="!isMenuOpen">
 
@@ -52,7 +51,7 @@
     <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text p-button-rounded" (click)="toggleMenu()"></button>
   </div>
   <!-- Optional: Add language/theme switches at the bottom -->
-  <div class="mt-auto pt-4 border-t border-surface-200 dark:border-surface-700">
+  <div class="border-t border-surface-200 dark:border-surface-700">
      <button pButton pRipple (click)="useLanguage('en')" label="EN" class="p-button-text p-button-sm"></button>
      <button pButton pRipple (click)="useLanguage('fr')" label="FR" class="p-button-text p-button-sm"></button>
      <!-- Add theme switch button if needed -->

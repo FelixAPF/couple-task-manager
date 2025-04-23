@@ -39,7 +39,7 @@ toggleMenu(): void {
 }
 
   switchStyle(){
-    StatusBar.setStyle({ style: this.nextBackgroundTheme });
+    StatusBar.setStyle({ style: this.nextBackgroundTheme, });
     this.nextBackgroundTheme = this.nextBackgroundTheme === Style.Dark ? Style.Light : Style.Dark;
   }
 

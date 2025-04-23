@@ -1,25 +1,33 @@
-.mobile-header {
-    background-color: #f0f0f0; /* Light background */
-    padding: 10px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+/* c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\header\navbar\navbar.component.css */
 
-  .logo-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.navbar-inner-container {
+  /* Apply padding ONLY to the top, using the safe area inset */
+  padding-top: env(safe-area-inset-top, 0px);
 
-  .logo {
-    height: 30px; /* Adjust size as needed */
-    width: auto;
-  }
+  /* Ensure it takes full dimensions */
+  width: 100%;
+  height: 100%;
 
-  .app-name {
-    font-weight: bold;
-    font-size: 1.2em;
-  }
+  /* Use flex to position children (left/right sections) */
+  display: flex;
+  justify-content: space-between;
+
+  /* --- ADD THIS LINE BACK --- */
+  /* Vertically center the direct children (left/right sections) */
+  align-items: center;
+
+  /* Ensure padding doesn't increase the calculated size */
+  box-sizing: border-box;
+}
+
+/* Optional: Explicitly ensure the parent nav has no top padding itself */
+:host nav {
+  padding-top: 0 !important;
+}
+
+/* Ensure the mobile menu panel also respects safe area */
+.mobile-menu-panel {
+  /* Adds to existing p-4 */
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  box-sizing: border-box;
+}

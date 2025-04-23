@@ -46,7 +46,11 @@ public class MealService implements IGenericService<Meal, MealDto> {
 
     @Override
     public void delete(Long id, Long householdId, CTMUser user) {
-        repository.deleteByMealIdAndHouseholdId(id, householdId);
+        Meal meal = repository.findById(id).orElseThrow(()-> new NoSuchElementException("Meal with id " + id + " not found."));
+        if (!meal.getHousehold().getId().equals(householdId)) {
+            throw new IllegalArgumentException("This meal is not part of your household");
+        }
+        repository.delete(meal);
     }
 
     @Override

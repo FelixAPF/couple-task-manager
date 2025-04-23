@@ -99,7 +99,8 @@ export class AddTaskComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.buildFormGroup(this.config.data.task);
+    console.log(this.config.data)
+    this.buildFormGroup(this.config.data.taskToEdit);
 
     this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
       this.householdMembers = household?.members || [];
@@ -143,11 +144,11 @@ export class AddTaskComponent implements OnInit {
         room: this.roomFormControl?.value
       }
     }
-    this.taskService.saveTask(taskCreateRqst).subscribe(() => this.close());
+    this.taskService.saveTask(taskCreateRqst).subscribe(() => this.close(true));
   }
 
-  close(){
-    this.ref.close();
+  close(saved: boolean = false){
+    this.ref.close(saved);
   }
 
 }

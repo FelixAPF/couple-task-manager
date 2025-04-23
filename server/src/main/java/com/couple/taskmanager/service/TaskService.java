@@ -159,8 +159,14 @@ public class TaskService implements IGenericService<Task, TaskDto > {
         int numberOfMonths = -3;
         Date date = DateUtils.addMonthsToDate(new Date(), numberOfMonths);
         return StreamUtils.ofNullable(taskRepository.retrieveTasksNotCompletedInLongTime(date, user.getHousehold().getId()))
-                .map(tuple -> new TaskWithCompletedDateV1(tuple.get(0, Task.class), tuple.get(1, Date.class)))
+                .map(tuple -> {
+                    Task taskEntity = tuple.get(0, Task.class);
+                    Date completedDate = tuple.get(1, Date.class);
+                    TaskDto dto =  new TaskDto(taskEntity);
+                    return new TaskWithCompletedDateV1(dto, completedDate);
+                })
                 .toList();
+
     }
 
 }

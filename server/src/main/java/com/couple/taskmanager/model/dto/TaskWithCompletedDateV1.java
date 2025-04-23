@@ -11,6 +11,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TaskWithCompletedDateV1 {
-    private Task task;
+    private TaskDto task;
     private Date completedDate;
 }

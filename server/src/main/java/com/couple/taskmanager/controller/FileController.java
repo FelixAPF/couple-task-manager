@@ -71,10 +71,19 @@ public class FileController {
 
     @PostMapping("/household/{memberId}/image")
     public ResponseEntity<?> handleHouseholdImageUpload(@RequestParam("file") MultipartFile file, @PathVariable("memberId") Long memberId){
-        String filePath = storageService.store(file);
-        householdService.setHouseholdMemberImage(memberId, filePath);
+        // 1. Store the file and get the filename
+        String fileName = storageService.store(file);
+
+        // 2. Construct the full URL
+        String imageUrl = baseUrl + "/files/" + fileName;
+
+        // 3. Pass the full URL to the service
+        householdService.setHouseholdMemberImage(memberId, imageUrl);
+
+        // 4. Return success response (optionally include the URL)
         return ResponseEntity.ok().body(Map.of(
-                "message", "Upload successful"
+                "message", "Upload successful",
+                "url", imageUrl // Good practice to return the generated URL
         ));
     }
 

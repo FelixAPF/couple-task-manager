@@ -77,7 +77,6 @@ export class TasksComponent implements OnInit, OnDestroy {
       )
       .subscribe(household => {
         if (household) {
-          console.log('Household updated *after* initial load, reloading task data.');
           this.loadTaskData();
         } else {
           this.memberTaskColumns = [];

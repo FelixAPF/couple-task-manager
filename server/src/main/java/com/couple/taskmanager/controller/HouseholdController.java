@@ -22,7 +22,12 @@ public class HouseholdController {
     @GetMapping
     public HouseholdDto getHousehold(@AuthenticationPrincipal UserDetails userDetails){
         CTMUser user = (CTMUser)userDetails;
-        return householdService.getMemberHousehold(user);
+        HouseholdDto memberHousehold = householdService.getMemberHousehold(user);
+        System.out.println("Member house hold is " + memberHousehold);
+        System.out.println("Member house hold is " + memberHousehold.getMembers());
+        System.out.println("Member house hold is " + memberHousehold.getName());
+        System.out.println("Member house hold is " + memberHousehold.getHouseholdJoinKey());
+        return memberHousehold;
     }
 
     @PostMapping("/join")

@@ -268,7 +268,6 @@ export class MealsListComponent implements OnInit {
                   date: result.date,
                   location: result.location
               };
-              console.log("ABOUT TO SAVE MEAL", mealToSave)
               this.saveAssignedMeal(mealToSave);
           }
       });
@@ -285,7 +284,6 @@ export class MealsListComponent implements OnInit {
     const dateUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
     let compareDate = date.toISOString().slice(0, 10);
     if(compareDate === this.today){
-      console.log("Match date today", date);
       return "today";
     }  // Today check
   

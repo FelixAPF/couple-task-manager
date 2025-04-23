@@ -45,28 +45,45 @@ export class HouseholdService {
     return this.householdSubject.value;
   }
 
-  updateMemberImage(memberId: number, imageFile: File): Observable<HouseholdMember> {
+  updateMemberImage(memberId: number, imageFile: File): Observable<{ url: string, message: string }> {
     const formData = new FormData();
+    // Ensure the key 'file' matches your backend expectation
     formData.append('file', imageFile, imageFile.name);
 
-    // Assuming interceptor adds Auth header
-    return this.http.post<HouseholdMember>(`${environment.apiUrl}files/household/${memberId}/image`, formData) // Adjusted endpoint based on previous code
+    // Expect ImageUploadResponse from the backend
+    return this.http.post<{ url: string, message: string }>(`${environment.apiUrl}files/household/${memberId}/image`, formData)
       .pipe(
-        tap(updatedMember => {
-          // Update local state
+        tap(response => { // response is now { url: string, message: string }
+          // Update local state optimistically
           const currentHousehold = this.householdSubject.getValue();
           if (currentHousehold && currentHousehold.members) {
             const memberIndex = currentHousehold.members.findIndex(m => m.id === memberId);
+
             if (memberIndex !== -1) {
+              // Get the original member object
+              const originalMember = currentHousehold.members[memberIndex];
+
+              // Create a *new* member object with the updated imageUrl
+              const updatedMember: HouseholdMember = {
+                ...originalMember, // Spread existing properties
+                imageUrl: response.url // Update the imageUrl from the response
+              };
+
+              // Create a new members array with the updated member
               const updatedMembers = [
                 ...currentHousehold.members.slice(0, memberIndex),
-                updatedMember,
+                updatedMember, // Insert the modified member object
                 ...currentHousehold.members.slice(memberIndex + 1)
               ];
+
+              // Emit a new household object with the updated members list
               this.householdSubject.next({ ...currentHousehold, members: updatedMembers });
+              console.log(`Member ${memberId} image updated locally. Message: ${response.message}`);
+
+            } else {
+               console.warn(`Member ${memberId} not found in current household state during image update.`);
             }
           }
-          console.log('Member image updated successfully:', updatedMember);
         })
       );
   }

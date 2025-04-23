@@ -79,7 +79,6 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
   onFileSelect(event: FileSelectEvent, memberId: number): void {
     if (event.files && event.files.length > 0) {
       this.selectedFiles[memberId] = event.files[0];
-      console.log(`File selected for member ${memberId}:`, this.selectedFiles[memberId].name);
     } else {
       // Clear if selection was cancelled or empty
       delete this.selectedFiles[memberId];
@@ -111,10 +110,10 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
         })
       )
       .subscribe({
-        next: (updatedMember) => {
+        next: (result) => {
           this.messageService.add({
             severity: 'success', summary: 'Succès',
-            detail: `Image de ${updatedMember.name} mise à jour.`, life: 3000
+            detail: `Image mise à jour.`, life: 3000
           });
           // No need to call uploader.clear() here, finalize does it
         },

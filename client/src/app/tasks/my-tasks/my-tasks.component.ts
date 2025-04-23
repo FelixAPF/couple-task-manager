@@ -17,6 +17,7 @@ import { DATE_PIPE_DEFAULT_OPTIONS } from '@angular/common';
 import { QuickCompleteTaskComponent } from '../quick-complete-task/quick-complete-task.component';
 import { HouseholdService } from '../../service/household.service';
 import { HouseholdMember } from '../../model/household';
+import { TranslateService } from '@ngx-translate/core';
 
 export const SourceMap = {
     [Assignee.Camille]: "assets/person2.jpg",
@@ -57,7 +58,7 @@ export class MyTasksComponent implements OnInit {
     return this.formGroup.get(FormControlName.DISPLAY_DURATION);
   }
 
-  constructor(private taskService: TaskService, private householdService: HouseholdService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
+  constructor(private taskService: TaskService, private translate: TranslateService, private householdService: HouseholdService, public dialog: DialogService, private taskPeriodService: TaskPeriodService, private taskListService: TaskListService){}
 
 
   ngOnInit(): void {
@@ -151,10 +152,10 @@ export class MyTasksComponent implements OnInit {
 
   get options(){
     return [
-      { label: 'Semaine', value: Frequency.WEEKLY},
-      { label: 'Deux semaines', value: Frequency.BIWEEKLY},
-      { label: 'Mois', value: Frequency.MONTHLY},
-      { label: 'Année', value: Frequency.YEARLY}
+      { label: this.translate.instant('my-tasks.duration.weekly'), value: Frequency.WEEKLY},
+      { label: this.translate.instant('my-tasks.duration.biweekly'), value: Frequency.BIWEEKLY},
+      { label: this.translate.instant('my-tasks.duration.monthly'), value: Frequency.MONTHLY},
+      { label: this.translate.instant('my-tasks.duration.yearly'), value: Frequency.YEARLY}
     ]
   }
 

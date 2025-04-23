@@ -43,7 +43,7 @@ interface MemberTaskColumn {
   ],
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.css'],
-  providers: [DialogService, ConfirmationService, MessageService] // Provide services needed
+  providers: [ConfirmationService, MessageService] // Provide services needed
 })
 export class TasksComponent implements OnInit, OnDestroy {
   // --- Injected Services ---
@@ -51,7 +51,6 @@ export class TasksComponent implements OnInit, OnDestroy {
   private taskService = inject(TaskService);
   private taskAssignmentService = inject(TaskAssignmentService);
   private householdService = inject(HouseholdService); // <-- Inject
-  private dialogService = inject(DialogService);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   private initialLoadDone = false;
@@ -63,7 +62,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>(); // For unsubscribing
   accordionsOpenByDefault: number[] = []
 
-  constructor(private taskPeriodService: TaskPeriodService){}
+  constructor(private taskPeriodService: TaskPeriodService, private dialogService: DialogService){}
 
 
   // --- Lifecycle Hooks ---

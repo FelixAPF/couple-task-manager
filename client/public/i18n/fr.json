@@ -1,65 +1,94 @@
 {
-    "STORE": {
-        "COSTCO": "Costco",
-        "SUPER_C": "Super C",
-        "MAXI": "Maxi",
-        "IGA": "IGA",
-        "METRO": "Metro",
-        "SAQ": "SAQ",
-        "CINQ_SAVEUR": "5 saveurs",
-        "TERRE_ET_OCEAN": "Terre et ocean",
-        "PROVIGO": "Provigo",
-        "MAYRAND": "Mayrand",
-        "RESTAURANT": "Restaurant",
-        "WALMART": "Walmart",
-        "DOLLARAMA": "Dollarama",
-        "AMAZON": "Amazon",
-        "MUNCHIZ": "Munchiz Exotique",
-        "AUTRE": "Autre"
+  "STORE": {
+    "COSTCO": "Costco",
+    "SUPER_C": "Super C",
+    "MAXI": "Maxi",
+    "IGA": "IGA",
+    "METRO": "Metro",
+    "SAQ": "SAQ",
+    "CINQ_SAVEUR": "5 saveurs",
+    "TERRE_ET_OCEAN": "Terre et ocean",
+    "PROVIGO": "Provigo",
+    "MAYRAND": "Mayrand",
+    "RESTAURANT": "Restaurant",
+    "WALMART": "Walmart",
+    "DOLLARAMA": "Dollarama",
+    "AMAZON": "Amazon",
+    "MUNCHIZ": "Munchiz Exotique",
+    "AUTRE": "Autre"
+  },
+  "SHOPPING_ITEM_TYPE": {
+    "GROCERY": "Épicerie",
+    "HOME": "Article ménager",
+    "OTHER": "Autre"
+  },
+  "ROOM": {
+    "": "Pièce",
+    "BATHROOM": "Salle de bain",
+    "BEDROOM": "Chambre",
+    "EVERYWHERE": "Partout",
+    "HALLWAY": "Couloir",
+    "KITCHEN": "Cuisine",
+    "LIVING_ROOM": "Salon",
+    "OFFICE": "Bureau",
+    "OUTSIDE": "Dehors",
+    "OTHER": "Autre"
+  },
+  "FREQUENCY": {
+    "LABEL": "Fréquence",
+    "DAILY": "Quotidien",
+    "WEEKLY": "Hebdomadaire",
+    "BIWEEKLY": "Bi-mensuel",
+    "MONTHLY": "Mensuel",
+    "QUARTERLY": "Trimestrel",
+    "BIYEARLY": "Bi-annuel",
+    "YEARLY": "Annuel"
+  },
+  "RECIPE_CATEGORY": {
+    "PATES": "Pâtes",
+    "VIANDE": "Viande",
+    "SANDWICH": "Sandwich",
+    "BURGER": "Burger",
+    "SANTE": "Santé",
+    "AUTRE": "Autre",
+    "POULET": "Poulet",
+    "BOEUF": "Bœuf",
+    "WRAP": "Wrap",
+    "SOUPE": "Soupe",
+    "FRUITS_DE_MER": "Fruits de mer",
+    "ENTREE": "Entrée",
+    "POISSON": "Poisson",
+    "TREMPETTE": "Trempette",
+    "SALADE": "Salade",
+    "ALL": "Tous"
+  },
+  "side-menu": {
+    "manage-household": "Gérer le foyer",
+    "join-household": "Rejoindre un foyer",
+    "tooltip": {
+      "copy-code": "Copier le code"
     },
-    "SHOPPING_ITEM_TYPE": {
-        "GROCERY": "Épicerie",
-        "HOME": "Article ménager",
-        "OTHER": "Autre"
-    },
-    "ROOM": {
-        "": "Pièce",
-        "BATHROOM": "Salle de bain",
-        "BEDROOM": "Chambre",
-        "EVERYWHERE": "Partout",
-        "HALLWAY": "Couloir",
-        "KITCHEN": "Cuisine",
-        "LIVING_ROOM": "Salon",
-        "OFFICE": "Bureau",
-        "OUTSIDE": "Dehors",
-        "OTHER": "Autre"
-    },
-    "FREQUENCY": {
-        "LABEL": "Fréquence",
-        "DAILY": "Quotidien",
-        "WEEKLY": "Hebdomadaire",
-        "BIWEEKLY": "Bi-mensuel",
-        "MONTHLY": "Mensuel",
-        "QUARTERLY": "Trimestrel",
-        "BIYEARLY": "Bi-annuel",
-        "YEARLY": "Annuel"
-    },
-    "RECIPE_CATEGORY": {
-        "PATES": "Pâtes",
-        "VIANDE": "Viande",
-        "SANDWICH": "Sandwich",
-        "BURGER": "Burger",
-        "SANTE": "Santé",
-        "AUTRE": "Autre",
-        "POULET": "Poulet",
-        "BOEUF": "Bœuf",
-        "WRAP": "Wrap",
-        "SOUPE": "Soupe",
-        "FRUITS_DE_MER": "Fruits de mer",
-        "ENTREE": "Entrée",
-        "POISSON": "Poisson",
-        "TREMPETTE": "Trempette",
-        "SALADE": "Salade",
-        "ALL": "Tous"
-      }
+    "logout": "Déconnexion",
+    "household-invitation-code": "Code d'invitation du foyer",
+    "menu": "Menu"
+  },
+  "dashboard": {
+    "no-meal-planned": "Aucun repas prévu",
+    "meal-of-the-day": "Repas du Jour",
+    "expired-tasks": "Tâches expirées",
+    "tasks-completed-today": "Tâches complétées aujourd'hui"
+  },
+  "my-tasks": {
+    "start-period": "Débuter période",
+    "quick-complete": "Compléter",
+    "display-tasks": "Afficher les tâches",
+    "my-tasks": "Mes tâches - {{ assigneeName }}",
+    "no-tasks": "Aucune tâche à afficher pour {{ assigneeName }} avec les filtres actuels.",
+    "duration": {
+      "weekly": "Semaine",
+      "biweekly": "Deux semaines",
+      "monthly": "Mois",
+      "yearly": "Année"
+    }
+  }
 }

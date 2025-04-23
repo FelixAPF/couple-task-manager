@@ -1,67 +1,94 @@
-
 {
-    "STORE": {
-        "COSTCO": "Costco",
-        "SUPER_C": "Super C",
-        "MAXI": "Maxi",
-        "IGA": "IGA",
-        "METRO": "Metro",
-        "SAQ": "SAQ",
-        "CINQ_SAVEUR": "5 saveurs",
-        "TERRE_ET_OCEAN": "Terre et ocean",
-        "PROVIGO": "Provigo",
-        "MAYRAND": "Mayrand",
-        "RESTAURANT": "Restaurant",
-        "WALMART": "Walmart",
-        "DOLLARAMA": "Dollarama",
-        "AMAZON": "Amazon",
-        "MUNCHIZ": "Munchiz",
-        "AUTRE": "Autre"
+  "STORE": {
+    "COSTCO": "Costco",
+    "SUPER_C": "Super C",
+    "MAXI": "Maxi",
+    "IGA": "IGA",
+    "METRO": "Metro",
+    "SAQ": "SAQ",
+    "CINQ_SAVEUR": "5 saveurs",
+    "TERRE_ET_OCEAN": "Terre et ocean",
+    "PROVIGO": "Provigo",
+    "MAYRAND": "Mayrand",
+    "RESTAURANT": "Restaurant",
+    "WALMART": "Walmart",
+    "DOLLARAMA": "Dollarama",
+    "AMAZON": "Amazon",
+    "MUNCHIZ": "Munchiz",
+    "AUTRE": "Autre"
+  },
+  "SHOPPING_ITEM_TYPE": {
+    "GROCERY": "Épicerie",
+    "HOME": "Article ménager",
+    "OTHER": "Autre"
+  },
+  "ROOM": {
+    "": "Pièce",
+    "BATHROOM": "Salle de bain",
+    "BEDROOM": "Chambre",
+    "EVERYWHERE": "Partout",
+    "HALLWAY": "Couloir",
+    "KITCHEN": "Cuisine",
+    "LIVING_ROOM": "Salon",
+    "OFFICE": "Bureau",
+    "OUTSIDE": "Dehors",
+    "OTHER": "Autre"
+  },
+  "FREQUENCY": {
+    "LABEL": "Frequency",
+    "DAILY": "Daily",
+    "WEEKLY": "Weekly",
+    "BIWEEKLY": "Bi-weekly",
+    "MONTHLY": "Monthly",
+    "QUARTERLY": "Quarterly",
+    "BIYEARLY": "Bi-annualy",
+    "YEARLY": "Annualy"
+  },
+  "RECIPE_CATEGORY": {
+    "PATES": "Pasta",
+    "VIANDE": "Meat",
+    "SANDWICH": "Sandwich",
+    "BURGER": "Burger",
+    "SANTE": "Healthy",
+    "AUTRE": "Other",
+    "POULET": "Chicken",
+    "BOEUF": "Beef",
+    "WRAP": "Wrap",
+    "SOUPE": "Soup",
+    "FRUITS_DE_MER": "Seafood",
+    "ENTREE": "Appetizer",
+    "POISSON": "Fish",
+    "TREMPETTE": "Dip",
+    "SALADE": "Salad",
+    "ALL": "All"
+  },
+  "side-menu": {
+    "manage-household": "Manage household",
+    "join-household": "Join Household",
+    "tooltip": {
+      "copy-code": "Copy Code"
     },
-    "SHOPPING_ITEM_TYPE": {
-        "GROCERY": "Épicerie",
-        "HOME": "Article ménager",
-        "OTHER": "Autre"
-    },
-    "ROOM": {
-        "": "Pièce",
-        "BATHROOM": "Salle de bain",
-        "BEDROOM": "Chambre",
-        "EVERYWHERE": "Partout",
-        "HALLWAY": "Couloir",
-        "KITCHEN": "Cuisine",
-        "LIVING_ROOM": "Salon",
-        "OFFICE": "Bureau",
-        "OUTSIDE": "Dehors",
-        "OTHER": "Autre"
-    },
-    "FREQUENCY": {
-        "LABEL": "Frequency",
-        "DAILY": "Daily",
-        "WEEKLY": "Weekly",
-        "BIWEEKLY": "Bi-weekly",
-        "MONTHLY": "Monthly",
-        "QUARTERLY": "Quarterly",
-        "BIYEARLY": "Bi-annualy",
-        "YEARLY": "Annualy"
-    },
-    "RECIPE_CATEGORY": {
-        "PATES": "Pasta",
-        "VIANDE": "Meat",
-        "SANDWICH": "Sandwich",
-        "BURGER": "Burger",
-        "SANTE": "Healthy",
-        "AUTRE": "Other",
-        "POULET": "Chicken",
-        "BOEUF": "Beef",
-        "WRAP": "Wrap",
-        "SOUPE": "Soup",
-        "FRUITS_DE_MER": "Seafood",
-        "ENTREE": "Appetizer",
-        "POISSON": "Fish",
-        "TREMPETTE": "Dip",
-        "SALADE": "Salad",
-        "ALL": "All"
-      }
-
+    "logout": "Logout",
+    "household-invitation-code": "Household Invitation Code",
+    "menu": "Menu"
+  },
+  "dashboard": {
+    "no-meal-planned": "No Meal Planned",
+    "meal-of-the-day": "Meal of the Day",
+    "expired-tasks": "Expired Tasks",
+    "tasks-completed-today": "Tasks Completed Today"
+  },
+  "my-tasks": {
+    "start-period": "Start Period",
+    "quick-complete": "Quick Complete",
+    "display-tasks": "Display Tasks",
+    "my-tasks": "My Tasks - {{ assigneeName }}",
+    "no-tasks": "No Tasks to display for {{ assigneeName }} with the current filters.",
+    "duration": {
+      "weekly": "Weekly",
+      "biweekly": "Two weeks",
+      "monthly": "Month",
+      "yearly": "Year"
+    }
+  }
 }

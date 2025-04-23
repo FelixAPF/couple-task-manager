@@ -14,7 +14,7 @@ import { JoinHouseholdComponent } from '../../household/join-household/join-hous
   imports: [SharedModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
-  providers: [MessageService, DialogService]
+  providers: [MessageService]
 })
 export class NavbarComponent {
   isMenuOpen = false;

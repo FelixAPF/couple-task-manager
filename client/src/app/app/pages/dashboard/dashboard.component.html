@@ -1,12 +1,12 @@
 <!-- dashboard.component.html -->
 <div class="container p-4 mx-auto flex flex-col gap-6"> <!-- Main container with padding and gap between sections -->
   <div>
-    <app-meal-card [title]="'Repas du Jour'" [noMealPlanned]="noMealPlanned" [meal]="todayMeal"></app-meal-card>
+    <app-meal-card [title]="'dashboard.meal-of-the-day'|translate" [noMealPlanned]="noMealPlanned" [meal]="todayMeal"></app-meal-card>
     <ng-template #noMealPlanned>
       <div class="flex flex-col items-center" routerLink="/meals">
         <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>
         <p class="text-xs text-surface-500 dark:text-surface-400 italic mb-3">
-          Aucun repas prévu
+          {{'dashboard.no-meal-planned'|translate}}
         </p>
       </div>
     </ng-template>
@@ -22,7 +22,7 @@
           <div class="flex items-center justify-between w-full px-1 py-1"> <!-- Adjusted padding -->
             <div class="flex items-center gap-2">
               <i class="pi pi-exclamation-triangle text-red-500 dark:text-red-400 text-xl"></i>
-              <span class="text-lg font-semibold text-red-600 dark:text-red-300">Tâches expirées</span>
+              <span class="text-lg font-semibold text-red-600 dark:text-red-300">{{'dashboard.expired-tasks'|translate}}</span>
             </div>
             <p-badge [value]="expiredTasks.length" severity="danger" styleClass="ml-auto"></p-badge>
           </div>
@@ -46,7 +46,7 @@
            <div class="flex items-center justify-between w-full px-1 py-1"> <!-- Adjusted padding -->
             <div class="flex items-center gap-2">
               <i class="pi pi-check-circle text-green-500 dark:text-green-400 text-xl"></i>
-              <span class="text-lg font-semibold text-green-600 dark:text-green-300">Tâches complétées aujourd'hui</span>
+              <span class="text-lg font-semibold text-green-600 dark:text-green-300">{{'dashboard.tasks-completed-today'|translate}}</span>
             </div>
             <p-badge [value]="taskAssignments.length" severity="success" styleClass="ml-auto"></p-badge>
           </div>

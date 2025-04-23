@@ -6,20 +6,20 @@
     <div class="flex flex-wrap justify-center sm:justify-start gap-2">
       <p-button
         (click)="startNewPeriod()"
-        label="Débuter période"
         icon="pi pi-calendar-plus"
+        [label]="'my-tasks.start-period' | translate"
         styleClass="p-button-raised p-button-info"
         pTooltip="Démarrer une nouvelle période de tâches assignées"
-        tooltipPosition="bottom">
+        tooltipPosition="bottom"> 
       </p-button>
       <p-button
         (click)="quickComplete()"
-        label="Quick Complete"
+        [label]="'my-tasks.quick-complete' | translate"
         icon="pi pi-bolt"
         styleClass="p-button-raised p-button-secondary"
         pTooltip="Accéder à la complétion rapide (si disponible)"
         tooltipPosition="bottom">
-      </p-button>
+      </p-button> 
     </div>
 
     <!-- Display Duration Select -->
@@ -28,7 +28,6 @@
         class="w-full"
         [formControlName]="DISPLAY_DURATION.DISPLAY_DURATION"
         (onChange)="onFrequencySelectChange($event)"
-        label="Afficher les tâches"
         [options]="options"
         optionValue="value"
         optionLabel="label"
@@ -40,7 +39,7 @@
   <!-- Title and User Switcher -->
   <div class="flex justify-center items-center gap-3 mb-6">
     <h2 class="text-2xl font-semibold text-center text-surface-800 dark:text-surface-100">
-      Mes tâches - {{ selectedAssignee?.name }}
+      {{'my-tasks.my-tasks'|translate : { assigneeName: selectedAssignee?.name } }}
     </h2>
     <i
       class="pi pi-users text-primary-500 dark:text-primary-400 cursor-pointer hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200"
@@ -54,7 +53,8 @@
   <!-- Empty State Message -->
   <div *ngIf="!tasks || tasks.length === 0" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border border-dashed rounded-lg bg-surface-100 dark:bg-surface-800">
     <i class="pi pi-check-square mr-2 text-xl align-middle"></i>
-    <span>Aucune tâche à afficher pour {{ selectedAssignee?.name }} avec les filtres actuels.</span>
+    <span>{{'my-tasks.no-tasks' | translate: {  assigneeName: selectedAssignee?.name } }}</span>
+    
   </div>
 
   <!-- Task List using Cards -->

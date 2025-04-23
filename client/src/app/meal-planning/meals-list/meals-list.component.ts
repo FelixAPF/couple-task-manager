@@ -113,10 +113,10 @@ export class MealsListComponent implements OnInit {
 
   swipeNavigation(event: any) {
     switch (event.direction) {
-      case 2: // Swipe left
+      case 4: 
         this.previousWeek();
         break;
-      case 4: // Swipe right
+      case 2: 
         this.nextWeek();
         break;
       default:

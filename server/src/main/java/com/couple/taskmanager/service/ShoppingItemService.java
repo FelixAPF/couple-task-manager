@@ -4,15 +4,19 @@ import com.couple.taskmanager.model.*;
 import com.couple.taskmanager.model.dto.ShoppingItemDto;
 import com.couple.taskmanager.repository.*;
 import com.couple.taskmanager.utils.StreamUtils;
+import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ShoppingItemService implements IGenericService<ShoppingItem, ShoppingItemDto> {
     @Autowired
     ShoppingItemRepository repository;
+    @Autowired
+    HouseholdRepository householdRepository;
 
     @Override
     public ShoppingItemDto get(Long id, Long householdId, CTMUser user) {
@@ -45,10 +49,16 @@ public class ShoppingItemService implements IGenericService<ShoppingItem, Shoppi
 
     @Override
     public ShoppingItemDto create(ShoppingItem shoppingItem, CTMUser user) {
+        Household household = householdRepository.findById(user.getHousehold().getId())
+                .orElseThrow(() -> new IllegalArgumentException("User's household not found"));
+        shoppingItem.setId(null);
+
         if(shoppingItem.getHousehold() == null){
-            shoppingItem.setHousehold(user.getHousehold());
+            shoppingItem.setHousehold(household);
         }
-        return new ShoppingItemDto(repository.save(shoppingItem));
+        shoppingItem.setBought(false);
+        ShoppingItem savedItem = repository.save(shoppingItem); // Line 56 (now correct)
+        return new ShoppingItemDto(savedItem);
     }
 
 }

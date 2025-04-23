@@ -9,9 +9,14 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ShoppingItemRepository extends JpaRepository<ShoppingItem, Long> {
+
+    Optional<ShoppingItem> findByIdAndHouseholdId(Long id, Long householdId);
+    List<ShoppingItem> findAllByHouseholdId(Long householdId);
+    boolean existsByIdAndHouseholdId(Long id, Long householdId);
     @Modifying
     @Transactional
     @Query(value = "UPDATE ShoppingItem s SET s.bought = true WHERE s.id = :id AND s.household.id = :householdId")

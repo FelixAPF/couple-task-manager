@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environment';
 import { TaskList, TaskListRequest } from '../model/task-list';
 import { Assignee } from '../model/task-period';
-import { ShoppingItem } from '../model/shopping-item';
+import { ShoppingItem, Store } from '../model/shopping-item';
 
 @Injectable({
   providedIn: 'root'
@@ -25,19 +25,23 @@ export class ShoppingService {
     return this.http.get<ShoppingItem[]>(`${this.baseUrl}/not-bought`);
   }
 
-  addShoppingItem(taskList: ShoppingItem): Observable<void>{
-    return this.http.post<void>(this.baseUrl, taskList);
+  addShoppingItem(taskList: ShoppingItem): Observable<ShoppingItem>{
+    return this.http.post<ShoppingItem>(this.baseUrl, taskList);
   }
 
-  deleteTaskList(shoppingItemId: number): Observable<ShoppingItem>{
+  deleteShoppingItem(shoppingItemId: number): Observable<ShoppingItem>{
     return this.http.delete<ShoppingItem>(`${this.baseUrl}/${shoppingItemId}`);
   }
 
-  updateShoppingList(shoppingItem: ShoppingItem): Observable<ShoppingItem>{
+  updateShoppingItem(shoppingItem: ShoppingItem): Observable<ShoppingItem>{
     return this.http.put<ShoppingItem>(`${this.baseUrl}/${shoppingItem.id}`, shoppingItem);
   }
 
   listNameSuggestions(): Observable<string[]> {
     return this.http.get<string[]>(`${this.baseUrl}/name/suggestions`)
+  }
+
+  getStoreEnumValues(): Store[] {
+    return Object.values(Store); // Return array of enum values
   }
 }

@@ -1,65 +1,120 @@
-<div class="container p-4 mx-auto flex flex-col flex-grow">
+<!-- Feedback Messages -->
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 
-  <!-- Header: Title + Add Button -->
-  <div class="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 gap-3">
-    <h2 class="text-2xl font-semibold text-surface-800 dark:text-surface-100">
-      Liste de courses
-    </h2>
-    <p-button
-      (click)="openNewTaskDialog()"
-      label="Ajouter Article"
-      icon="pi pi-plus"
-      styleClass="p-button-raised p-button-primary w-full sm:w-auto"
-      pTooltip="Ajouter un nouvel article à la liste"
-      tooltipPosition="bottom">
-    </p-button>
-  </div>
+<div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
 
-  <!-- Empty State Message -->
-  <div *ngIf="!shoppingItems || shoppingItems.length === 0" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border border-dashed rounded-lg bg-surface-100 dark:bg-surface-800">
-    <i class="pi pi-shopping-cart mr-2 text-xl align-middle"></i>
-    <span>Votre liste de courses est vide. Cliquez sur "Ajouter Article" pour commencer.</span>
-  </div>
+  <!-- Header -->
+  <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
+    Liste d'Épicerie
+  </h2>
 
-  <!-- Shopping List Items using p-card -->
-  <div class="flex flex-col gap-4 pb-16" *ngIf="shoppingItems && shoppingItems.length > 0"> <!-- Increased gap slightly for cards -->
-    <div *ngFor="let item of shoppingItems; trackBy: trackById">
-      <!-- Using p-card for more depth -->
-      <p-card [styleClass]="'shopping-item-card shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 border-primary-500 dark:border-primary-400'">
-        <!-- Added shadow, transition, and a consistent left border color -->
-        <div class="flex items-center gap-3"> <!-- Internal flex container -->
+  <!-- Add Item Form - Refactored Layout -->
+  <form [formGroup]="addItemForm" (ngSubmit)="handleAddItem()" class="mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+    <!-- Main Flex Container: Stacks vertically on small (<md), row on medium+ -->
+    <div class="flex flex-col md:flex-row items-end gap-3">
 
-          <!-- Item Details -->
-          <div class="flex-grow min-w-0">
-            <p class="text-base font-medium text-surface-800 dark:text-surface-100" [pTooltip]="item.name" tooltipPosition="top"> <!-- Added tooltip -->
-              {{ item.name }}
-            </p>
-            <!-- Optional: Quantity display if needed -->
-            <!--
-            <span *ngIf="item.quantity" class="text-xs text-surface-500 dark:text-surface-400 block mt-0.5">
-              Quantité: {{ item.quantity }}
-            </span>
-            -->
+      <!-- Item Name Section (Takes available space) -->
+      <div class="flex-grow w-full md:w-auto flex flex-col gap-1">
+        <label for="itemName" class="text-sm font-medium text-surface-700 dark:text-surface-200">Nom de l'article</label>
+        <p-autoComplete
+          inputId="itemName"
+          formControlName="name"
+          [suggestions]="nameSuggestions"
+          (completeMethod)="searchNameSuggestions($event)"
+          placeholder="Rechercher ou saisir..."
+          styleClass="w-full"
+          inputStyleClass="w-full"
+          [ngClass]="{'p-invalid': addItemForm.get('name')?.invalid && addItemForm.get('name')?.touched}">
+        </p-autoComplete>
+        <div *ngIf="addItemForm.get('name')?.invalid && addItemForm.get('name')?.touched" class="p-error text-xs mt-1">
+            Le nom de l'article est requis.
+        </div>
+      </div>
+
+      <!-- Store and Button Group -->
+      <!-- MODIFIED: Add flex-col sm:flex-row to stack on smallest screens -->
+      <div class="flex flex-col sm:flex-row items-end gap-2 w-full md:w-auto flex-shrink-0">
+
+          <!-- Store Dropdown Section -->
+          <!-- Keep w-full for stacking, sm:w-48 for row layout -->
+          <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-1">
+            <label for="itemStore" class="text-sm font-medium text-surface-700 dark:text-surface-200">Magasin</label>
+            <p-dropdown
+              inputId="itemStore"
+              formControlName="store"
+              [options]="storeOptions"
+              placeholder="Choisir"
+              optionLabel="label"
+              optionValue="value"
+              styleClass="w-full"
+              [ngClass]="{'p-invalid': addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched}"
+              appendTo="body">
+            </p-dropdown>
+             <div *ngIf="addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched" class="p-error text-xs mt-1">
+                Le magasin est requis.
+             </div>
           </div>
 
-          <div class="ml-auto flex-shrink-0 flex items-center gap-1">
-            <!-- Buy Button - Enhanced Visibility & Accessibility -->
-            <button pButton type="button"
-                    icon="pi pi-check"
-                    class="p-button-rounded p-button-success p-button-raised"
-                    (click)="delete(item, item.id)"
-                    pTooltip="Acheté (retirer de la liste)"
-                    tooltipPosition="left"
-                    [attr.aria-label]="'Marquer ' + item.name + ' comme acheté et retirer de la liste'">
-                  </button>
+          <!-- Add Button Section -->
+          <!-- MODIFIED: Add w-full sm:w-auto to make button full width when stacked -->
+          <div class="flex-shrink-0 w-full sm:w-auto">
+            <button pButton pRipple
+                    type="submit"
+                    icon="pi pi-plus"
+                    label="Ajouter"
+                    aria-label="Ajouter l'article"
+                    [loading]="isAdding()"
+                    [disabled]="isAdding() || addItemForm.invalid"
+                    class="p-button-primary w-full"> <!-- Ensure button takes full width of its container -->
+            </button>
           </div>
 
-        </div> <!-- End internal flex container -->
-      </p-card> <!-- End p-card -->
-    </div> <!-- End *ngFor -->
-  </div> <!-- End item list container -->
+      </div> <!-- End Store and Button Group -->
 
-  <!-- Add some padding at the bottom -->
-  <div class="pb-12"></div>
+    </div> <!-- End Main Flex Container -->
+  </form>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="flex justify-center items-center py-10">
+    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading() && shoppingItems().length === 0" class="text-center py-10 px-4 bg-surface-100 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
+    <i class="pi pi-shopping-cart text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
+    <p class="text-lg font-medium text-surface-600 dark:text-surface-300">Votre liste est vide !</p>
+    <p class="text-sm text-surface-500 dark:text-surface-400">Ajoutez des articles en utilisant le formulaire ci-dessus.</p>
+  </div>
+
+  <!-- Shopping List Items (Keep as is) -->
+  <div *ngIf="!isLoading() && shoppingItems().length > 0" class="flex flex-col gap-3">
+    <div *ngFor="let item of shoppingItems(); trackBy: trackById"
+         class="flex items-center gap-3 p-3 bg-surface-0 dark:bg-surface-700 rounded-lg shadow-sm border border-surface-200 dark:border-surface-600 transition-opacity duration-200"
+         [ngClass]="{'opacity-60': item.bought}">
+
+      <!-- Item Name -->
+      <label [for]="'item-' + item.id"
+             class="flex-grow font-medium text-surface-700 dark:text-surface-200 cursor-pointer truncate"
+             [ngClass]="{'line-through': item.bought}"
+             [pTooltip]="item.name" tooltipPosition="top">
+        {{ item.name }}
+      </label>
+
+      <!-- Store Tag -->
+      <p-tag
+        [value]="`STORE.${item.store}` | translate | titlecase"
+        [severity]="getStoreTagSeverity(item.store)"
+        class="flex-shrink-0 ml-auto mr-2">
+      </p-tag>
+
+      <!-- Delete Button -->
+      <button pButton pRipple icon="pi pi-check-circle"
+              class="p-button-rounded p-button-text p-button-danger p-button-sm flex-shrink-0"
+              (click)="confirmDelete($event, item)"
+              aria-label="Supprimer l'article">
+      </button>
+    </div>
+  </div>
 
 </div>

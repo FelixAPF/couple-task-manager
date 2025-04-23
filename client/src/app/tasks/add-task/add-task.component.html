@@ -93,12 +93,7 @@
         <div *ngIf="showAssignee">
           <p-selectButton
             id="assignee"
-            [options]="[
-              { label: 'Felix', value: ASSIGNEE.Felix, icon: 'pi pi-user' },
-              { label: 'Camille', value: ASSIGNEE.Camille, icon: 'pi pi-user' },
-              { label: 'Deux', value: ASSIGNEE.Deux, icon: 'pi pi-user' },
-              { label: 'Aucun', value: null, icon: 'pi pi-ban' }
-            ]"
+            [options]="householdMembersOptions"
             formControlName="assignee"
             optionLabel="label"
             optionValue="value"

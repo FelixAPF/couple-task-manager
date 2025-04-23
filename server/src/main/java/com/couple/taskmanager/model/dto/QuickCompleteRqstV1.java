@@ -6,5 +6,5 @@ import lombok.Data;
 @Data
 public class QuickCompleteRqstV1 {
     private Long taskId;
-    private HouseholdMemberDto assignee;
+    private Long assigneeId;
 }

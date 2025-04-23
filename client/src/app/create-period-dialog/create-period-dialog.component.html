@@ -5,24 +5,6 @@
             <p-step-panel header="Configuration Période" [hidden]="manualStepActivated">
                 <ng-template pTemplate="content" let-activateCallback="activateCallback" let-index="index">
                 <div class="p-fluid flex flex-col gap-5 p-4"> <!-- Main content area -->
-        
-                    <!-- Existing Period Selection -->
-                    <div class="field flex flex-col gap-2">
-                    <label for="taskPeriod" class="font-semibold">Période Existante (Optionnel)</label>
-                    <p-select
-                        id="taskPeriod"
-                        formControlName="taskPeriod"
-                        [options]="taskPeriods"
-                        placeholder="Utiliser une période existante ou laisser vide pour créer"
-                        optionLabel="label"
-                        optionValue="value"
-                        [showClear]="true"
-                        (onChange)="disableOtherFields($event)"
-                        appendTo="body">
-                    </p-select>
-                    <small class="text-surface-500 dark:text-surface-400">Si sélectionné, les options de durée et date de début seront ignorées.</small>
-                    </div>
-        
                     <!-- Start Date -->
                     <div class="field flex flex-col gap-2">
                     <label for="startDate" class="font-semibold">Date de début</label>

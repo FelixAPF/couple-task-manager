@@ -75,6 +75,7 @@ public class TaskService implements IGenericService<Task, TaskDto > {
         Optional<Task> taskOptional = taskRepository.findById(id);
         if (taskOptional.isEmpty()) return;
         Task taskToDelete = taskOptional.get();
+        if(!Objects.equals(taskToDelete.getHousehold().getId(), householdId)) throw new IllegalArgumentException("This is not your household");
 
         // Delete TaskAssignments associated with the Task
         List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByTaskIdAndCompletedTrueAndHouseholdId(id, user.getHousehold().getId());
@@ -90,7 +91,7 @@ public class TaskService implements IGenericService<Task, TaskDto > {
         }
 
         // Finally, delete the Task
-        taskRepository.deleteByIdAndHouseholdId(id, user.getHousehold().getId());
+        taskRepository.delete(taskToDelete);
     }
 
     @Override

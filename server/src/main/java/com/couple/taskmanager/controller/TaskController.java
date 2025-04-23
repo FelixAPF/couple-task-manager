@@ -50,7 +50,7 @@ public class TaskController extends GenericController<Task,TaskDto, TaskService>
 
     @PostMapping("quick-complete/{taskId}")
     public Long completeTask(@PathVariable("taskId") Long taskId, @RequestBody QuickCompleteRqstV1 rqst, @AuthenticationPrincipal UserDetails userDetails){
-        return service.quickCompleteTask(taskId, rqst.getAssignee().getId(), (com.couple.taskmanager.model.CTMUser) userDetails);
+        return service.quickCompleteTask(taskId, rqst.getAssigneeId(), (CTMUser) userDetails);
     }
 
     @GetMapping("{taskId}/history")

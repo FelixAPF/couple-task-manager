@@ -70,8 +70,8 @@ export class TaskService implements OnDestroy {
     return this.http.get<TaskAssignmentDto[]>(`${this.baseUrl}/by-assignee/${assigneeId}/${dueDate}`, options);
   }
 
-  quickComplete(taskId: number, assignee: Assignee): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assignee })).pipe(tap(() => {
+  quickComplete(taskId: number, assigneeId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assigneeId })).pipe(tap(() => {
       this.confettiService.fireConfetti();
     }));
   }

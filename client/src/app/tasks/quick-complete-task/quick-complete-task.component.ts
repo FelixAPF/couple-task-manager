@@ -12,6 +12,7 @@ import { App } from '@capacitor/app';
 import { AutoCompleteCompleteEvent } from 'primeng/autocomplete';
 import { SourceMap } from '../my-tasks/my-tasks.component';
 import { HouseholdService } from '../../service/household.service';
+import { HouseholdMember } from '../../model/household';
 
 enum FormControlName {
   ASSIGNEE = "assignee",
@@ -30,6 +31,7 @@ export class QuickCompleteTaskComponent implements OnInit {
   ASSIGNEE = Assignee;
   filteredTasks: Task[] = [];
   tasks: Task[] = [];
+  householdMembers: HouseholdMember[] = [];
 
   constructor(private taskService: TaskService, private ref: DynamicDialogRef, private householdService: HouseholdService){
   }
@@ -46,11 +48,21 @@ export class QuickCompleteTaskComponent implements OnInit {
     this.buildFormGroup();
     this.retrieveTasks();
 
-    this.assigneeOptions = Object.values(this.ASSIGNEE)
-      .map((assigneeValue: Assignee) => ({
-        label: assigneeValue, 
-        src: SourceMap[assigneeValue] 
+    this.householdService.retrieveHousehold().subscribe((household) => {
+      this.householdMembers = household?.members || [];
+      this.generateHouseholdOptions();
+    });
+  }
+
+  generateHouseholdOptions(){
+
+    this.assigneeOptions = Object.values(this.householdMembers)
+      .map((member: HouseholdMember) => ({
+        label: member.name,
+        value: member.id, 
+        src: member.imageUrl || 'assets/placeholder.jpg' // Use the image URL from the member or fallback to SourceMap
     }));
+    console.log(this.assigneeOptions)
   }
 
   buildFormGroup(){
@@ -83,14 +95,14 @@ export class QuickCompleteTaskComponent implements OnInit {
       // Get the full task object from the form control
       const selectedTaskObject = this.formGroup.value[FormControlName.TASK_ID];
       const assignee = this.formGroup.value[FormControlName.ASSIGNEE];
+      console.log(assignee);
   
-      // --- CHANGE HERE: Access the 'id' property from the object ---
       if (selectedTaskObject && selectedTaskObject.id) { // Add a check
         const taskId = selectedTaskObject.id; // Extract the ID
   
         this.taskService.quickComplete(taskId, assignee).subscribe({
           next: () => {
-            this.ref.close(true); // Close dialog and indicate success
+            this.ref.close(taskId); // Close dialog and indicate success
           },
           error: (err) => {
             console.error("Error during quick complete:", err);

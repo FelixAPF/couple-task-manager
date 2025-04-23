@@ -13,6 +13,8 @@ import { PluginListenerHandle } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Platform } from '@angular/cdk/platform';
 import { Assignee } from '../../model/task-period';
+import { HouseholdService } from '../../service/household.service';
+import { HouseholdMember } from '../../model/household';
 
 enum FormControlName {
   ID = 'id',
@@ -42,6 +44,8 @@ export class AddTaskComponent implements OnInit {
   subscription: Subscription = new Subscription();
   loadedTask: Task | null = null;
   showAssignee = false;
+  householdMembers: HouseholdMember[] = [];
+  householdMembersOptions: { label: string, value: number | null }[] = [];
 
   get titleFormControl(){ return this.formGroup.get(FormControlName.TITLE) }
   get idFormControl(){ return this.formGroup.get(FormControlName.ID) }
@@ -77,7 +81,7 @@ export class AddTaskComponent implements OnInit {
   }
 
 
-  constructor(private taskService: TaskService, private ref: DynamicDialogRef, private config: DynamicDialogConfig, private router: Router, private _location: Location, private route: ActivatedRoute
+  constructor(private taskService: TaskService, private ref: DynamicDialogRef, private householdService: HouseholdService, private config: DynamicDialogConfig, private router: Router, private _location: Location, private route: ActivatedRoute
     , private platform: Platform
   ){
     this.buildFormGroup();
@@ -96,6 +100,17 @@ export class AddTaskComponent implements OnInit {
 
   ngOnInit(): void {
     this.buildFormGroup(this.config.data.task);
+
+    this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
+      this.householdMembers = household?.members || [];
+      this.getHouseholdMemberOptions();
+    }));
+  }
+
+  getHouseholdMemberOptions(){
+    this.householdMembersOptions = this.householdMembers.map((member) => {
+      return { label: member.name, value: member.id };
+    });
   }
 
   backButtonListener: PluginListenerHandle;
@@ -119,7 +134,7 @@ export class AddTaskComponent implements OnInit {
   save(){
     if(this.formGroup.invalid) return;
     const taskCreateRqst: TaskCreationRqst = {
-      assignee: this.assigneeFormControl?.value,
+      assigneeUserId: this.assigneeFormControl?.value,
       task: {
         title: this.titleFormControl?.value,
         description: this.descriptionFormControl?.value,

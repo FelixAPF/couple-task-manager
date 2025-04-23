@@ -12,7 +12,7 @@ export interface Task {
 
 export interface TaskCreationRqst {
     task: Task;
-    assignee: Assignee | null;
+    assigneeUserId: number | null;
 }
 
 export interface TaskWithCompletedDate {

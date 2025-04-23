@@ -23,7 +23,6 @@ enum FormControlName {
   START_DATE = "startDate",
   CREATION_METHOD = "creationMethod",
   TASK_IDS = "taskIds",
-  TASK_PERIOD = "taskPeriod",
   DURATION_TYPE = "durationType",
   EXPLICIT_DUE_DATE = "explicitDueDate",
   ASSIGNEE = "assignee",
@@ -53,7 +52,6 @@ export class CreatePeriodDialogComponent implements OnInit {
     [FormControlName.START_DATE]: [new Date(), Validators.required],
     [FormControlName.CREATION_METHOD]: [CreationMethod.AUTOMATIC, Validators.required],
     [FormControlName.TASK_IDS]: [[]],
-    [FormControlName.TASK_PERIOD]: [null],
     [FormControlName.DURATION_TYPE]: [DurationType.PERIOD, Validators.required],
     [FormControlName.EXPLICIT_DUE_DATE]: [new Date(), []]
   })
@@ -80,18 +78,9 @@ export class CreatePeriodDialogComponent implements OnInit {
   get creationMethod(){ return this.formGroup.get(FormControlName.CREATION_METHOD) }
   get durationType(){ return this.formGroup.get(FormControlName.DURATION_TYPE) }
   get explicitDueDate(){ return this.formGroup.get(FormControlName.EXPLICIT_DUE_DATE) }
-  get taskPeriod(){ return this.formGroup.get(FormControlName.TASK_PERIOD) }
   get taskIds(){ return this.formGroup.get(FormControlName.TASK_IDS) }
   get isAutomaticCreation() { return this.creationMethod?.value === CreationMethod.AUTOMATIC };
 
-  get taskPeriods(){
-    return this.existingTaskPeriods.map(({ id, startDate, endDate }) => {
-      return ({
-        label: `Période du ${this.datePipe.transform(startDate, 'longDate')} au ${this.datePipe.transform(endDate, 'longDate')}`,
-        value: id
-      })
-    });
-  }
   ngOnInit(): void {
     this.taskPeriodService.retrieveTaskPeriodsIncomplete().subscribe(periods => {
       this.existingTaskPeriods = periods;
@@ -104,11 +93,11 @@ export class CreatePeriodDialogComponent implements OnInit {
   submit(rqst: any = null){
     if(!this.formGroup.valid) return;
     const result:PeriodCreationRequest = {
-      periodId: this.taskPeriod?.value || null,
+      periodId:  null,
       duration: this.duration?.value || Frequency.MONTHLY,
       startDate: this.startDate?.value || new Date(),
       creationMethod: this.creationMethod?.value || CreationMethod.AUTOMATIC,
-      taskAssignmentRqst: rqst?.taskWithAssignees?.map((taskWithAssignee: TaskWithAssignee) => ({ taskId: taskWithAssignee.task.id, assignee: taskWithAssignee.assigneeUserId })) || [],
+      taskAssignmentRqst: rqst?.taskWithAssignees?.map((taskWithAssignee: TaskWithAssignee) => ({ taskId: taskWithAssignee.task.id, assigneeUserId: taskWithAssignee.assigneeUserId })) || [],
       explicitDueDate: this.durationType?.value ? this.explicitDueDate?.value : null,
       createEachTaskOnce: rqst?.createEachOnce || false
     }

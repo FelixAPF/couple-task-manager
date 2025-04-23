@@ -128,10 +128,12 @@ export class MyTasksComponent implements OnInit {
   }
 
   quickComplete(){
-    this.openDialog('Ajouter une tâche complétée', QuickCompleteTaskComponent);
+    const ref = this.openDialog('Ajouter une tâche complétée', QuickCompleteTaskComponent, (value: any) => {
+      this.taskCompleteEmitter.emit(value);
+    });
   }
 
-  openDialog(title: string, component: any){
+  openDialog(title: string, component: any, onCloseFn?: (retVal: any) => void) {
     const dialogRef = this.dialog.open(component, {
       header: title,
       width: '30vw',
@@ -141,7 +143,10 @@ export class MyTasksComponent implements OnInit {
  '1199px': '75vw', '575px': '90vw'
       },
     });  
-    dialogRef.onClose.subscribe(() => {
+    dialogRef.onClose.subscribe((res) => {
+      if (onCloseFn) {
+        onCloseFn(res);
+      }
       this.retrieveTaskByAssignee();
     })
   }

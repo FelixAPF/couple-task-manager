@@ -3,8 +3,10 @@ package com.couple.taskmanager.service;
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Meal;
 import com.couple.taskmanager.model.Recipe;
+import com.couple.taskmanager.model.dto.MealDto;
 import com.couple.taskmanager.repository.MealRepository;
 import com.couple.taskmanager.repository.RecipeRepository;
+import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
-public class MealService implements IGenericService<Meal> {
+public class MealService implements IGenericService<Meal, MealDto> {
     @Autowired
     MealRepository repository;
     @Autowired
@@ -22,22 +24,22 @@ public class MealService implements IGenericService<Meal> {
 
 
     @Override
-    public Meal get(Long id, Long householdId, CTMUser user) {
-        return repository.findById(id).orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " found"));
+    public MealDto get(Long id, Long householdId, CTMUser user) {
+        return repository.findById(id).map(MealDto::new).orElseThrow(() -> new NoSuchElementException("No recipe with id " + id + " found"));
     }
 
     @Override
-    public List<Meal> list(Long householdId, CTMUser user) {
-        return repository.findAllByHouseholdId(householdId);
+    public List<MealDto> list(Long householdId, CTMUser user) {
+        return StreamUtils.ofNullable(repository.findAllByHouseholdId(householdId)).map(MealDto::new).toList();
     }
 
     @Override
-    public Meal update(Long id, Meal meal, CTMUser user) {
+    public MealDto update(Long id, Meal meal, CTMUser user) {
         if(meal.getHousehold() == null){
             meal.setHousehold(user.getHousehold());
         }
         if(repository.existsById(id)){
-            return repository.save(meal);
+            return new MealDto(repository.save(meal));
         }
         throw new NoSuchElementException();
     }
@@ -48,7 +50,7 @@ public class MealService implements IGenericService<Meal> {
     }
 
     @Override
-    public Meal create(Meal meal, CTMUser user) {
+    public MealDto create(Meal meal, CTMUser user) {
         Recipe recipe = meal.getRecipe();
         Optional<Recipe> byId = recipeRepository.findById(recipe.getId());
         if(byId.isEmpty()){
@@ -62,16 +64,16 @@ public class MealService implements IGenericService<Meal> {
         newMeal.setDate(meal.getDate());
         newMeal.setLocation(meal.getLocation());
         newMeal.setRecipe(byId.orElse(recipe));
-        return repository.save(newMeal);
+        return new MealDto(repository.save(newMeal));
     }
 
-    public List<Meal> retrieveByDateRange(long startDateMillis, long endDateMillis, CTMUser user) {
+    public List<MealDto> retrieveByDateRange(long startDateMillis, long endDateMillis, CTMUser user) {
         Date startDate = new Date(startDateMillis);
         Date endDate = new Date(endDateMillis);
-        return repository.findByDateBetweenAndHouseholdId(startDate, endDate, user.getHousehold().getId());
+        return StreamUtils.mapToList(repository.findByDateBetweenAndHouseholdId(startDate, endDate, user.getHousehold().getId()), MealDto::new);
     }
 
-    public Meal retrieveByDate(Date date, CTMUser user) {
-        return repository.findByDateAndHouseholdId(date, user.getHousehold().getId());
+    public MealDto retrieveByDate(Date date, CTMUser user) {
+        return new MealDto(repository.findByDateAndHouseholdId(date, user.getHousehold().getId()));
     }
 }

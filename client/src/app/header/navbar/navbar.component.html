@@ -94,7 +94,13 @@
     <!-- Add other mobile navigation links here -->
     <!-- Example: <a routerLink="/dashboard" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Dashboard</a> -->
     <!-- Example: <a routerLink="/tasks" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Tasks</a> -->
-
+    <a *ngIf="(isLoggedIn$ | async) && (household$ | async)"
+       routerLink="/manage-household"
+       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
+       (click)="toggleMenu()"> <!-- Close menu on click -->
+       <i class="pi pi-cog"></i>
+       <span>Gérer le foyer</span>
+    </a>
     <!-- *** ADD MOBILE LOGOUT BUTTON BACK *** -->
     <button *ngIf="isLoggedIn$ | async"
             pButton

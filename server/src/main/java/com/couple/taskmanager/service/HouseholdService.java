@@ -9,6 +9,7 @@ import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class HouseholdService {
     }
 
     private HouseholdMemberDto map(CTMUser user){
-        return new HouseholdMemberDto(user.getName(), user.getEmail(), user.getImageUrl());
+        return new HouseholdMemberDto(user.getId(), user.getName(), user.getEmail(), user.getImageUrl());
     }
 
     private HouseholdDto map(Household household){
@@ -79,6 +80,12 @@ public class HouseholdService {
             household.setUsers(users);
             repository.save(household);
         }
+    }
+
+    public void setHouseholdMemberImage(Long userId, String filePath){
+        CTMUser user = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
+        user.setImageUrl(filePath);
+        userRepository.save(user);
     }
 
 }

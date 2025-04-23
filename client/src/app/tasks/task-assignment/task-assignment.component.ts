@@ -4,10 +4,12 @@ import { Frequency, Task } from '../../model/task';
 import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TaskWithAssignee } from '../../create-period-dialog/create-period-dialog.component';
 import { Assignee } from '../../model/task-period';
-import { Observable, Subscription, timer } from 'rxjs';
+import { Observable, Subscription, take, timer } from 'rxjs';
 import { TaskAssignmentService } from '../../service/task-assignment.service';
 import { CheckboxChangeEvent } from 'primeng/checkbox';
 import { RoomPipe } from '../../shared/pipes/room-pipe';
+import { HouseholdMember } from '../../model/household';
+import { HouseholdService } from '../../service/household.service';
 
 enum FormControlName {
   TASK_ID = "taskId",
@@ -38,16 +40,30 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
   get createEachTaskOnce(){ return this.secondFormGroup.get(FormControlName.CREATE_EACH_TASK_ONCE) }
   get taskAssignments() { return this.secondFormGroup.get(FormControlName.TASK_ASSIGNMENTS) as FormArray };
   fb: FormBuilder = inject(FormBuilder);
+  householdService: HouseholdService = inject(HouseholdService);
+  householdMembers: HouseholdMember[] = [];
+  householdMembersOptions: { label: string, value: number | null }[] = [];
   @Input() showCreateEachTaskOnce: boolean = false;
   taskObs: Observable<TaskWithAssignee[] | null>;
 
   @Output() submit: EventEmitter<{ taskWithAssignees: TaskWithAssignee[], createEachOnce: boolean }> = new EventEmitter();
   @Output() cancel: EventEmitter<boolean> = new EventEmitter();
 
-  constructor(private taskAssignmentService: TaskAssignmentService, private cdr: ChangeDetectorRef) {}
+  constructor(private taskAssignmentService: TaskAssignmentService, private cdr: ChangeDetectorRef ) {}
 
   ngOnInit(): void {
     this.loadData();
+
+    this.householdService.retrieveHousehold().subscribe((household) => {
+      this.householdMembers = household?.members || [];
+      this.generateHouseholdOptions();
+    });
+  }
+
+  generateHouseholdOptions(){
+    this.householdMembersOptions = [...this.householdMembers.map((member) => {
+      return { label: member.name, value: member.id }
+    }), { label: "Non assigné", value: null }];
   }
   onChange($event: CheckboxChangeEvent) {
     this.showDescription = !this.showDescription;
@@ -116,7 +132,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
       [FormControlName.ROOM]: [taskLink?.task.room || ""],
       [FormControlName.FREQUENCY]: [taskLink?.task.frequency || ""],
       [FormControlName.TASK_ID]: [taskLink?.task.id],
-      [FormControlName.ASSIGNEE]: [taskLink?.assignee || null]
+      [FormControlName.ASSIGNEE]: [taskLink?.assigneeUserId || null]
     });
   }
 
@@ -135,8 +151,8 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
         description: taskAssignment.description,
         period: null
       },
-      assignee: taskAssignment.assignee
-    })).filter(task => task.assignee !== null);
+      assigneeUserId: taskAssignment.assignee
+    })).filter(task => task.assigneeUserId !== null);
 
     this.submit.emit({ taskWithAssignees: tasksWithAssignment, createEachOnce: this.createEachTaskOnce?.value || false });
   }

@@ -2,6 +2,7 @@ package com.couple.taskmanager.model;
 
 import com.couple.taskmanager.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,6 +36,14 @@ public class CTMUser implements UserDetails {
     @ManyToOne
     @JsonBackReference("household-users")
     private Household household;
+
+    @OneToMany(mappedBy = "assignee", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference("user-task-assignments")
+    private List<TaskAssignment> taskAssignments;
+
+    @OneToMany(mappedBy = "user")
+    @JsonManagedReference("user-task-list")
+    private List<TaskList> taskLists;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -1,25 +1,18 @@
 <div class="container p-4 mx-auto flex flex-col flex-grow">
 
-  <!-- Header Section -->
   <div class="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 gap-4">
-    <!-- Title -->
     <h2 class="text-xl sm:text-2xl font-semibold text-surface-800 dark:text-surface-100 text-center sm:text-left">
       Gestion & Répartition
     </h2>
-
-    <!-- Button Group Container -->
     <div class="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
-      <!-- Planifier Période Button (Was Assigner) -->
       <p-button
         (click)="create()"
-        label="Assigner les tâches"        
-        icon="pi pi-user-plus"      
-        styleClass="p-button-outlined p-button-secondary flex-1 sm:flex-none" 
+        label="Assigner les tâches"
+        icon="pi pi-user-plus"
+        styleClass="p-button-outlined p-button-secondary flex-1 sm:flex-none"
         pTooltip="Planifier les tâches pour une nouvelle période"
         tooltipPosition="bottom">
       </p-button>
-
-      <!-- Créer Tâche Button -->
       <p-button
         (click)="openNewTaskDialog()"
         label="Créer Tâche"
@@ -28,59 +21,47 @@
         pTooltip="Créer une nouvelle définition de tâche"
         tooltipPosition="bottom">
       </p-button>
-    </div> <!-- End Button Group Container -->
-
+    </div>
   </div>
 
-  <!-- Container for the two assignee lists -->
-  <p-accordion [value]="[0, 1, 2]" [multiple]="true" class="flex flex-col sm:flex-row gap-6 flex-grow">
-    <!-- Column for Felix's Tasks -->
-    <div class="w-full sm:w-1/3 flex flex-col">
-      <!-- Column for Camille's Tasks -->
-      <div class="w-full sm:w-1/3 flex flex-col" *ngIf="unassignedTasks?.tasks?.length">
-        <!-- The app-assignee-task-list component handles its own internal styling (header, cards) -->
+  <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-10 flex-grow">
+    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
+  </div>
+
+  <p-accordion *ngIf="!isLoading" [value]="accordionsOpenByDefault" [multiple]="true" styleClass="flex flex-col gap-4 h-full">
+    <p-accordion-panel [value]="i" *ngFor="let column of memberTaskColumns; let i = index; trackBy: trackByMemberId">
+      <p-accordion-header>
+        <div class="flex items-center gap-3">
+          <img
+            *ngIf="column.member"
+            [src]="column.member.imageUrl || 'assets/placeholder.jpg'"
+            [alt]="'Photo de ' + (column.member.name || 'Membre')"
+            class="w-10 h-10 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm"
+            onError="this.src='assets/placeholder.jpg'"
+          />
+          <i *ngIf="!column.member" class="pi pi-question-circle text-xl text-surface-500 dark:text-surface-400"></i>
+          <p class="text-xl font-semibold text-surface-800 dark:text-surface-100">{{ column.member?.name ?? 'Tâches non assignées' }}</p>
+          <p-badge *ngIf="column.tasks?.length" [value]="column.tasks.length" styleClass="ml-auto"></p-badge>
+        </div>
+      </p-accordion-header>
+      <p-accordion-content>
         <app-assignee-task-list
           (unassignEmitter)="unassign($event)"
           (editTaskEmitter)="openNewTaskDialog($event)"
           (deleteTaskEmitter)="deleteTask($event)"
-          [taskList]="unassignedTasks"
-          [index]="2"
-          title="Tâches non assignées"
-          [assignee]="ASSIGNEE.Unassigned"
-          class="flex-grow"> <!-- Allows this component to fill vertical space -->
+          [taskList]="{ tasks: column.tasks }" [index]="i"
+          [title]="column.member?.name ?? 'Tâches non assignées'"
+          [assignee]="column.member" class="flex-grow">
         </app-assignee-task-list>
+      </p-accordion-content>
+    </p-accordion-panel>
+    <div *ngIf="!isLoading && memberTaskColumns.length === 0" class="flex flex-col items-center justify-center text-center py-10 flex-grow">
+      <i class="pi pi-users text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
+      <p class="text-lg font-medium text-surface-600 dark:text-surface-300 mb-1">Aucun membre dans le foyer.</p>
+      <p class="text-sm text-surface-500 dark:text-surface-400">Invitez un membre ou créez des tâches non assignées.</p>
       </div>
-      <!-- The app-assignee-task-list component handles its own internal styling (header, cards) -->
-      <app-assignee-task-list
-        (unassignEmitter)="unassign($event)"
-        [taskList]="tasksCopain"
-        title="Tâches Copain"
-        [index]="0"
-        [assignee]="ASSIGNEE.Felix"
-        (editTaskEmitter)="openNewTaskDialog($event)"
-        (deleteTaskEmitter)="deleteTask($event)"
-        class="flex-grow"> <!-- Allows this component to fill vertical space -->
-      </app-assignee-task-list>
-    </div>
-
-    <!-- Column for Camille's Tasks -->
-    <div class="w-full sm:w-1/3 flex flex-col">
-      <!-- The app-assignee-task-list component handles its own internal styling (header, cards) -->
-      <app-assignee-task-list
-        (unassignEmitter)="unassign($event)"
-        [taskList]="tasksCopine"
-        title="Tâches Copine"
-        [index]="1"
-        (editTaskEmitter)="openNewTaskDialog($event)"
-        (deleteTaskEmitter)="deleteTask($event)"
-        [assignee]="ASSIGNEE.Camille"
-        class="flex-grow"> <!-- Allows this component to fill vertical space -->
-      </app-assignee-task-list>
-    </div>
-
   </p-accordion>
 
-  <!-- Add some padding at the bottom -->
   <div class="pb-12"></div>
   <p-confirmDialog></p-confirmDialog>
 

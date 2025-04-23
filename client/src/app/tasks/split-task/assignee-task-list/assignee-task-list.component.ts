@@ -1,37 +1,43 @@
+// c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\tasks\assignee-task-list\assignee-task-list.component.ts
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { SharedModule } from '../../../shared.module';
-import { TaskList } from '../../../model/task-list';
+import { CommonModule } from '@angular/common';
+import { SharedModule } from '../../../shared.module'; // For PrimeNG modules
 import { Task } from '../../../model/task';
-import { RoomPipe } from '../../../shared/pipes/room-pipe';
-import { Assignee } from '../../../model/task-period';
-import { SourceMap } from '../../my-tasks/my-tasks.component';
+import { HouseholdMember } from '../../../model/household'; // Import HouseholdMember
 
 @Component({
   selector: 'app-assignee-task-list',
-  imports: [SharedModule, RoomPipe],
+  standalone: true,
+  imports: [CommonModule, SharedModule],
   templateUrl: './assignee-task-list.component.html',
-  styleUrl: './assignee-task-list.component.css'
+  styleUrls: ['./assignee-task-list.component.css']
 })
 export class AssigneeTaskListComponent {
-  readonly ASSIGNEE = Assignee;
-  readonly SOURCE_MAP = SourceMap;
-  @Input() taskList: TaskList | undefined;
-  @Input() title: string = "";
-  @Input() assignee: Assignee = Assignee.Unassigned;
-  @Input() index: number;
-  @Output() unassignEmitter = new EventEmitter<any>();
-  @Output() editTaskEmitter = new EventEmitter<any>();
-  @Output() deleteTaskEmitter = new EventEmitter<any>();
+  @Input() member: HouseholdMember | null = null;
+  @Input() tasks: Task[] = [];
 
-  unassign(element: any){
-    this.unassignEmitter.emit({element, taskList: this.taskList});
+  @Input() taskList: { tasks?: Task[] } | undefined;
+  @Input() title: string = '';
+  @Input() assignee: HouseholdMember | null = null;
+  @Input() index: number = 0;
+
+  @Output() unassignEmitter = new EventEmitter<Task>();
+  @Output() editTaskEmitter = new EventEmitter<Task>();
+  @Output() deleteTaskEmitter = new EventEmitter<Task>();
+
+  unassign(task: Task) {
+    this.unassignEmitter.emit(task);
   }
 
-  editTask(element: any){
-    this.editTaskEmitter.emit(element);
+  editTask(task: Task) {
+    this.editTaskEmitter.emit(task);
   }
 
-  deleteTask(event: any, element: any){
-    this.deleteTaskEmitter.emit({event, element});
+  deleteTask(event: any, task: Task) {
+    this.deleteTaskEmitter.emit(task);
+  }
+
+  trackByTaskId(index: number, task: Task): number | string {
+    return task.id ?? index;
   }
 }

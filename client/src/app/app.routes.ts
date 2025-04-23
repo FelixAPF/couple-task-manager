@@ -10,6 +10,7 @@ import { TaskHistoryComponent } from './tasks/task-history/task-history.componen
 import { LoginComponent } from './authentication/login/login.component';
 import { RegisterComponent } from './authentication/register/register.component';
 import { authGuard } from './guard/authentication/auth.guard';
+import { ManageHouseholdComponent } from './household/manage-household/manage-household.component';
 
 export const routes: Routes = [
       // --- Public Routes ---
@@ -32,5 +33,10 @@ export const routes: Routes = [
         { path: "add-task", component: AddTaskComponent, canActivate: [authGuard] },
         { path: "history/:id", component: TaskHistoryComponent, canActivate: [authGuard]}
         ]
+    },
+    {
+        path: 'manage-household',
+        component: ManageHouseholdComponent,
+        canActivate: [authGuard] // Protect this route
     },
 ];

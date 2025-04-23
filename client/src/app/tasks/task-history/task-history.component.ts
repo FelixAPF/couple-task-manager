@@ -5,6 +5,7 @@ import { TaskService } from '../../service/task-service.service';
 import { TaskAssignmentDto } from '../../model/task-period';
 import { SharedModule } from '../../shared.module';
 import { Task } from '../../model/task';
+import { HouseholdService } from '../../service/household.service';
 
 @Component({
   selector: 'app-task-history',
@@ -16,7 +17,7 @@ export class TaskHistoryComponent implements OnInit, OnDestroy {
   taskAssignments: TaskAssignmentDto[] = [];
   task: Task = {} as Task;
 
-  constructor(private route: ActivatedRoute, private taskService: TaskService) { }
+  constructor(private route: ActivatedRoute, private taskService: TaskService, private householdService: HouseholdService) { }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {

@@ -1,15 +1,18 @@
 package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.model.CTMUser;
+import com.couple.taskmanager.model.Task;
+import com.couple.taskmanager.model.dto.TaskDto;
 
 import java.util.List;
 
-public interface IGenericService<T> {
+public interface IGenericService<T, D> {
 
-    T get(Long id, Long householdId, CTMUser user) ;
-    List<T> list(Long householdId, CTMUser user);
-    T update(Long id, T t, CTMUser user);
+    D get(Long id, Long householdId, CTMUser user) ;
+    List<D> list(Long householdId, CTMUser user);
+    D update(Long id, T t, CTMUser user);
+
     void delete(Long id, Long householdId, CTMUser user);
-    T create(T t, CTMUser user);
+    D create(T t, CTMUser user);
 
 }

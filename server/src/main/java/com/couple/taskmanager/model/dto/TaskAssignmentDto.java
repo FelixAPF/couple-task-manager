@@ -1,6 +1,5 @@
 package com.couple.taskmanager.model.dto;
 
-import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.enums.Room;
 import com.couple.taskmanager.model.TaskAssignment;
@@ -16,7 +15,7 @@ public class TaskAssignmentDto {
     private Long id;
     private String taskTitle;
     private String taskDescription;
-    private Assignee assignee;
+    private HouseholdMemberDto householdMemberDto;
     private Frequency frequency;
     private Date creationDate;
     private Date startDate;
@@ -31,9 +30,9 @@ public class TaskAssignmentDto {
         this.id = taskAssignment.getId();
         this.taskTitle = taskAssignment.getTask().getTitle();
         this.taskDescription = taskAssignment.getTask().getDescription();
-        this.assignee = taskAssignment.getAssignee();
         this.frequency = taskAssignment.getTask().getFrequency();
         this.startDate = taskAssignment.getStartDate();
+        this.householdMemberDto = new HouseholdMemberDto(taskAssignment.getAssignee());
         this.creationDate = taskAssignment.getCreationDate();
         this.dueDate = taskAssignment.getDueDate();
         this.completed = taskAssignment.getCompleted();

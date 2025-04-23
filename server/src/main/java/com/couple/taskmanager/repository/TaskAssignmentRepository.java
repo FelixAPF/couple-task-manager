@@ -1,8 +1,6 @@
 package com.couple.taskmanager.repository;
 
-import com.couple.taskmanager.enums.Assignee;
 import com.couple.taskmanager.model.TaskAssignment;
-import com.couple.taskmanager.model.TaskList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,8 +22,8 @@ public interface TaskAssignmentRepository extends JpaRepository<TaskAssignment, 
     @Transactional
     void deleteAllByTaskId(Long taskId);
 
-    @Query("SELECT ta FROM TaskAssignment ta JOIN FETCH ta.taskPeriod WHERE ta.completed = false AND ta.assignee = :assignee AND ta.dueDate <= :dueDateInMonth AND ta.task.household.id = :householdId")
-    List<TaskAssignment> findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee assignee, Date dueDateInMonth, @Param("householdId") Long householdId);
+    @Query("SELECT ta FROM TaskAssignment ta JOIN FETCH ta.taskPeriod WHERE ta.completed = false AND ta.assignee.id = :assignedUserId AND ta.dueDate <= :dueDateInMonth AND ta.task.household.id = :householdId")
+    List<TaskAssignment> findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Long assignedUserId, Date dueDateInMonth, @Param("householdId") Long householdId);
 
     @Query("SELECT ta FROM TaskAssignment ta WHERE ta.completed = true AND DATE(ta.completedDate) = DATE(:completedDate) AND ta.task.household.id = :householdId")
     List<TaskAssignment> findAllByCompletedTrueAndCompletedDateSameDayAndHouseholdId(Date completedDate, @Param("householdId") Long householdId);

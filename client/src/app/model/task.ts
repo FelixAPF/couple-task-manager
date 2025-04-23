@@ -1,4 +1,4 @@
-import { Assignee } from "./task-period";
+import { Assignee, TaskAssignment } from "./task-period";
 
 export interface Task {
     id?: number;
@@ -6,6 +6,8 @@ export interface Task {
     description?: string;
     frequency?: Frequency;
     room?: Room;
+    taskAssignments?: TaskAssignment[]; // This line must be present and correctly typed
+
 }
 
 export interface TaskCreationRqst {

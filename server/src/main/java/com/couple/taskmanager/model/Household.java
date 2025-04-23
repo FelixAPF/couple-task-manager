@@ -15,7 +15,7 @@ public class Household {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
+    @OneToMany(mappedBy = "household", fetch = FetchType.EAGER) // Changed to EAGER
     @JsonManagedReference("household-users")
     private List<CTMUser> users;
 

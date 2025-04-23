@@ -1,167 +1,202 @@
-import { Component, OnInit } from '@angular/core';
-import { SharedModule } from '../shared.module';
-import { TaskAssignmentDialogComponent } from './task-assignment-dialog/task-assignment-dialog.component';
-import { TaskPeriodService } from '../service/task-period.service';
-import { Subscription } from 'rxjs';
-import { Assignee, TaskPeriod } from '../model/task-period';
-import { DialogService } from 'primeng/dynamicdialog';
-import { TaskListService } from '../service/task-list.service';
-import { TaskList } from '../model/task-list';
-import { DialogRef } from '@angular/cdk/dialog';
-import { Task } from '../model/task';
-import { AssigneeTaskListComponent } from "../tasks/split-task/assignee-task-list/assignee-task-list.component";
-import { TaskService } from '../service/task-service.service';
+// c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\tasks\tasks.component.ts
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Router } from '@angular/router';
+import { finalize, forkJoin, skipWhile, Subject, takeUntil } from 'rxjs'; // Import forkJoin, Subject, takeUntil
+
+// PrimeNG Modules (Import via SharedModule or directly if standalone)
+import { SharedModule } from '../shared.module';
+
+// Components
 import { AddTaskComponent } from './add-task/add-task.component';
-import { MatTableDataSource } from '@angular/material/table';
+import { AssigneeTaskListComponent } from './split-task/assignee-task-list/assignee-task-list.component';
+import { TaskAssignmentDialogComponent } from './task-assignment-dialog/task-assignment-dialog.component';
+
+// Services
+import { TaskListService } from '../service/task-list.service';
+import { TaskService } from '../service/task-service.service';
+import { HouseholdService } from '../service/household.service'; // <-- Import HouseholdService
+
+// Models
+import { Task } from '../model/task';
+import { HouseholdMember } from '../model/household'; // <-- Import HouseholdMember
+import { TaskPeriodService } from '../service/task-period.service';
+import { TaskAssignmentService } from '../service/task-assignment.service';
+import { TaskList } from '../model/task-list';
+// Remove Assignee enum import if present: import { Assignee } from '../model/task-period';
+
+// Define the new interface for column data
+interface MemberTaskColumn {
+  member: HouseholdMember | null;
+  tasks: Task[];
+}
 
 @Component({
   selector: 'app-tasks',
-  imports: [SharedModule, AssigneeTaskListComponent],
+  standalone: true, // Assuming standalone based on previous context
+  imports: [
+    CommonModule,
+    SharedModule, // Imports PrimeNG modules, pipes etc.
+    AssigneeTaskListComponent, // Import child component
+    // Add other necessary imports if not in SharedModule
+  ],
   templateUrl: './tasks.component.html',
-  styleUrl: './tasks.component.css',
-  providers:[MessageService, ConfirmationService]
+  styleUrls: ['./tasks.component.css'],
+  providers: [DialogService, ConfirmationService, MessageService] // Provide services needed
 })
-export class TasksComponent implements OnInit {
-  readonly ASSIGNEE = Assignee;
-  subscription: Subscription = new Subscription();
-  taskLists: TaskList[] = [];
-  tasksCopine?: TaskList;
-  tasksCopain?: TaskList;
-  tasks?: Task[];
-  unassignedTasks?: TaskList;
-  
-  constructor(private taskPeriodService: TaskPeriodService, private taskListService: TaskListService, private taskService: TaskService, private messageService: MessageService, private router: Router, private confirmationService: ConfirmationService, private dialogService: DialogService){}
+export class TasksComponent implements OnInit, OnDestroy {
+  // --- Injected Services ---
+  private taskListService = inject(TaskListService);
+  private taskService = inject(TaskService);
+  private taskAssignmentService = inject(TaskAssignmentService);
+  private householdService = inject(HouseholdService); // <-- Inject
+  private dialogService = inject(DialogService);
+  private confirmationService = inject(ConfirmationService);
+  private messageService = inject(MessageService);
+  private initialLoadDone = false;
 
+
+  // --- State ---
+  isLoading = false; // Add loading state if needed
+  memberTaskColumns: MemberTaskColumn[] = []; // Array to drive the *ngFor
+  private destroy$ = new Subject<void>(); // For unsubscribing
+  accordionsOpenByDefault: number[] = []
+
+  constructor(private taskPeriodService: TaskPeriodService){}
+
+
+  // --- Lifecycle Hooks ---
   ngOnInit(): void {
-    this.retrieveTasks();
-  }
-
-  retrieveTasks(){
-    this.subscription.add(this.taskService.retrieveTasks()
-    .subscribe(tasks => {
-      this.tasks = tasks;
-
-      this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Felix).subscribe((taskLists) => {
-        const newTaskList: TaskList = {
-          assignee: Assignee.Felix,
-          tasks: [],
-          id: taskLists.find((taskList) => taskList.assignee === Assignee.Felix)?.id,
+    this.loadInitialData();
+  
+    this.householdService.household$
+      .pipe(
+        takeUntil(this.destroy$),
+        skipWhile(() => !this.initialLoadDone) // Ignore emissions until initial load is done
+      )
+      .subscribe(household => {
+        if (household) {
+          console.log('Household updated *after* initial load, reloading task data.');
+          this.loadTaskData();
+        } else {
+          this.memberTaskColumns = [];
         }
-        for(const taskList of taskLists){
-          newTaskList.tasks!.push(...taskList.tasks!);
+      });
+  }
+  
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // --- Data Loading ---
+  loadInitialData(): void {
+    this.isLoading = true;
+    this.householdService.retrieveHousehold()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (household) => {
+          if (household) {
+            this.loadTaskData();
+            this.initialLoadDone = true;
+            this.accordionsOpenByDefault =Array.from(Array(household.members.length + 1).keys()); // Open all accordions by default
+          } else {
+            console.warn("No household found...");
+            this.isLoading = false;
+            this.memberTaskColumns = [];
+          }
+        },
+        error: (err) => {
+          // ... error handling
+          this.isLoading = false;
         }
-        this.tasksCopain = newTaskList;
-  
-        
-  
-        this.subscription.add(this.taskListService.retrieveTaskList(Assignee.Camille).subscribe((taskLists) => {
-          const newTaskList: TaskList = {
-            assignee: Assignee.Camille,
-            tasks: [],
-            id: taskLists.find((taskList) => taskList.assignee === Assignee.Camille)?.id,
-          }
-          for(const taskList of taskLists){
-            newTaskList.tasks!.push(...taskList.tasks!);
-          }
-          this.tasksCopine = newTaskList;
-          this.generateUnassignedTasks();
-        }))
-      }))
-    }));
+      });
   }
 
-  unassign({ element, taskList }: any){
-    this.taskListService.deleteTaskList({ taskListId: taskList?.id, assignee: taskList?.assignee, taskId: element.id }).subscribe(resp => {
-      switch(taskList?.assignee){
-        case Assignee.Felix: 
-          this.tasksCopain = resp;
-          break;
-        case Assignee.Camille:
-          this.tasksCopine = resp;
-          break;
-      }
-    });
+  unassign(event: any){
+
   }
 
-  create(){
-    const dialogRef = this.dialogService.open(TaskAssignmentDialogComponent, {
-      header: 'Assigner des tâches',
-      width: '30vw',
-      dismissableMask: true,
-      modal:true,
-      breakpoints: {
- '1199px': '75vw', '575px': '90vw'
-      },
-    });  
-
-    dialogRef.onClose.subscribe((taskPeriod: TaskPeriod) => {
-      this.retrieveTasks();
-    });
-  }
-  
-  displayedColumns = [ "title", "description", "delete"]
-  dataSource = new MatTableDataSource<Task>();
-  
-
-    items(row: any) {
-      return [
-      ];
-    }
-
-    generateUnassignedTasks(){
-      const assignedTasks: Task[] = [...this.tasksCopain?.tasks!, ...this.tasksCopine?.tasks!];
-      const unassignedTasks = this.tasks?.filter((task) => !assignedTasks.some((assignedTask) => assignedTask.id === task.id));
-      this.unassignedTasks = {
-        assignee: Assignee.Unassigned,
-        tasks: unassignedTasks
-      }
-    }
-
-      openNewTaskDialog(task: any | null = null){
-        const dialogRef = this.dialogService.open(AddTaskComponent, {
-          width: '40vw',
-          dismissableMask: true,
-          modal:true,
-          breakpoints: {
-     '1199px': '75vw', '575px': '90vw'
-          },
-          data: {
-            task: task
-          }
-        });  
-        dialogRef.onClose.subscribe(() => {
-          this.retrieveTasks();
-        })
-      }
-  
-    deleteTask({event, element}: any){
-      if(!element.id) return;
-      this.confirmationService.confirm({
-        target: event.target as EventTarget,
-        message: 'Voulez-vous réellement supprimer la tâche? \n Cela supprimera toute assignation reliée à celle-ci.',
-        header: 'Supprimer une tâche',
-        closable: true,
-        closeOnEscape: true,
-        icon: 'pi pi-exclamation-triangle',
-        rejectButtonProps: {
-            label: 'Annuler',
-            severity: 'secondary',
-            outlined: true,
-        },
-        acceptButtonProps: {
-            label: 'Supprimer',
-            severity: 'danger',
-        },
-        accept: () => {
-          this.subscription.add(this.taskService.deleteTask(element.id).subscribe(() => { 
-            this.retrieveTasks() 
-            this.messageService.add({ severity: 'info', summary: 'Confirmed', detail: 'La tâche a bien été supprimée' });
+  loadTaskData(): void {
+    this.isLoading = true;
+    this.taskListService.retrieveWithUnassigned()
+      .pipe(
+        finalize(() => this.isLoading = false)
+      )
+      .subscribe({
+        next: (taskLists: TaskList[]) => {
+          this.memberTaskColumns = taskLists.map(taskList => ({
+            member: taskList.assignee,
+            tasks: taskList.tasks ?? [] // Ensure tasks is always an array
           }));
         },
-        reject: () => {
-        },
+        error: (err) => {
+          console.error("Error loading task lists", err);
+          this.messageService.add({ severity: 'error', summary: 'Erreur Tâches', detail: 'Impossible de charger les listes de tâches.' });
+        }
+      });
+  }
+
+
+  // --- Event Handlers & Dialog Openers ---
+  create(): void {
+    const ref = this.dialogService.open(TaskAssignmentDialogComponent, {
+      header: 'Assigner les tâches pour la période',
+      width: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
     });
-    }
+    ref.onClose.pipe(takeUntil(this.destroy$)).subscribe(() => this.loadTaskData()); // Reload on close
+  }
+
+  openNewTaskDialog(task?: Task): void {
+    const ref = this.dialogService.open(AddTaskComponent, {
+      header: task ? 'Modifier la Tâche' : 'Créer une Tâche',
+      width: '90%',
+      contentStyle: { overflow: 'auto' },
+      baseZIndex: 10000,
+      data: { taskToEdit: task } // Pass task data for editing
+    });
+    ref.onClose.pipe(takeUntil(this.destroy$)).subscribe((result) => {
+      if (result) { // Only reload if save was successful (component should return true)
+        this.loadTaskData();
+      }
+    });
+  }
+  
+
+  deleteTask(task: Task): void {
+    if (!task || !task.id) return;
+    this.confirmationService.confirm({
+      message: `Êtes-vous sûr de vouloir supprimer la tâche "${task.title}" ? Cette action est irréversible.`,
+      header: 'Confirmation de suppression',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Oui, supprimer',
+      rejectLabel: 'Non, annuler',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-text',
+      accept: () => {
+        this.taskService.deleteTask(task.id!) // Use non-null assertion if ID is guaranteed
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: () => {
+              this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Tâche supprimée avec succès.' });
+              this.loadTaskData(); // Refresh lists
+            },
+            error: (err) => {
+              console.error("Error deleting task", err);
+              this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer la tâche.' });
+            }
+          });
+      }
+    });
+  }
+
+  // --- trackBy Function ---
+  trackByMemberId(index: number, item: MemberTaskColumn): string | number {
+    // Use member ID or a specific string for 'unassigned'
+    return item.member?.id ?? 'unassigned';
+  }
 }

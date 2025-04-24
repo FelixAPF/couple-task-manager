@@ -14,6 +14,7 @@ export enum Store {
     DOLLARAMA = "DOLLARAMA",
     AMAZON = "AMAZON",
     MUNCHIZ = "MUNCHIZ",
+    POTAGER = "POTAGER",
     AUTRE = "AUTRE"
 }
 

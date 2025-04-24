@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ITaskPeriodRepository extends JpaRepository<TaskPeriod, Long> {
@@ -29,4 +30,7 @@ public interface ITaskPeriodRepository extends JpaRepository<TaskPeriod, Long> {
 
     @Query("SELECT tp FROM TaskPeriod tp WHERE tp.household.id = :householdId")
     List<TaskPeriod> findAllByHouseholdId(Long householdId);
+
+    @Query("SELECT tp FROM TaskPeriod tp WHERE tp.id = :periodId AND tp.household.id = :householdId")
+    Optional<TaskPeriod> findByIdAndHouseholdId(Long periodId, Long id);
 }

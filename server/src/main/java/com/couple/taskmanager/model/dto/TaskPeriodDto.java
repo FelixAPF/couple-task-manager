@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TaskPeriodDto {
     private Long id;
-    private List<TaskAssignmentDto> taskAssignments;
+    private List<TaskAssignmentDto> taskAssignments = new ArrayList<>();
     private Date startDate;
     private Date endDate;
     private Boolean completed;

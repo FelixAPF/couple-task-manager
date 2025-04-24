@@ -1,8 +1,10 @@
 package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.model.CTMUser;
+import com.couple.taskmanager.model.Household;
 import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.dto.RecipeDto;
+import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.RecipeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,8 @@ import java.util.Objects;
 public class RecipeService implements IGenericService<Recipe, RecipeDto> {
     @Autowired
     RecipeRepository repository;
+    @Autowired
+    HouseholdRepository householdRepository;
 
 
     @Override
@@ -32,6 +36,8 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
         if(!repository.existsById(id)){
             throw new NoSuchElementException("No recipe with id " + id);
         }
+        Household household = householdRepository.findById(user.getHousehold().getId()).orElseThrow(() -> new NoSuchElementException("No household with id "));
+        recipe.setHousehold(household);
         return new RecipeDto(this.repository.save(recipe));
     }
 

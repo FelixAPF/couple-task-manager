@@ -20,4 +20,9 @@ public interface TaskListRepository extends JpaRepository<TaskList, Long> {
 
     @Query("SELECT tl FROM TaskList tl WHERE tl.household.id = :householdId")
     List<TaskList> findAllByHouseholdId(@Param("householdId") Long householdId);
+
+    // *** CORRECTED QUERY ***
+    // Changed tl.assignee.id to tl.user.id to match the likely entity field name
+    @Query("SELECT tl FROM TaskList tl LEFT JOIN FETCH tl.tasks WHERE tl.user.id = :assigneeId AND tl.household.id = :householdId")
+    Optional<TaskList> findByAssigneeIdAndHouseholdId(@Param("assigneeId") Long assigneeId, @Param("householdId") Long householdId);
 }

@@ -9,6 +9,7 @@ public enum Store {
     SAQ,
     CINQ_SAVEUR,
     TERRE_ET_OCEAN,
+    POTAGER,
     PROVIGO,
     MAYRAND,
     RESTAURANT,

@@ -2,38 +2,84 @@ package com.couple.taskmanager.utils;
 
 import com.couple.taskmanager.enums.Frequency;
 import lombok.experimental.UtilityClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 @UtilityClass
 public class DateUtils {
-    public static Date stringToDate(String dateString, String pattern) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-        try {
-            return dateFormat.parse(dateString);
-        } catch (ParseException e) {
-            System.err.println("Error parsing date: " + e.getMessage());
-            return null; // Or throw an exception
+    private static final Logger log = LoggerFactory.getLogger(DateUtils.class);
+
+    public static Date calculateDueDate(Date startDate, Frequency frequency) {
+        if (startDate == null || frequency == null) {
+            log.warn("Cannot calculate next due date with null start date or frequency.");
+            throw new IllegalArgumentException("Start date and frequency cannot be null.");
         }
-    }
+        if (frequency.getDaysAmount() <= 0){
+            log.warn("Cannot calculate next due date with non positive frequency.");
+            throw new IllegalArgumentException("frequency must be above 0");
+        }
 
-    public static Date calculateDueDate(Date startDate, Frequency frequency){
-        Date date = new Date(startDate.getTime());
-        int daysAmount = frequency.getDaysAmount();
-        long time = (long) daysAmount * 24 * 60 * 60 * 1000;
-        date.setTime(date.getTime() + time);
-        return date;
-    }
-
-    public static Date addMonthsToDate(Date date, int numberOfMonths) {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MONTH, numberOfMonths);
+        calendar.setTime(startDate);
+        calendar.add(Calendar.DAY_OF_MONTH, frequency.getDaysAmount());
+
         return calendar.getTime();
     }
 
+    public static Date calculateDueDate(Date startDate, Integer duration) {
+        if (startDate == null || duration == null) {
+            log.warn("Cannot calculate due date with null start date or duration.");
+            throw new IllegalArgumentException("Start date and duration cannot be null.");
+        }
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+        calendar.add(Calendar.DAY_OF_MONTH, duration);
+
+        return calendar.getTime();
+    }
+
+    public static long calculateDaysBetween(Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException("Start date and end date cannot be null.");
+        }
+
+        LocalDate startLocalDate = startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate endLocalDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        return ChronoUnit.DAYS.between(startLocalDate, endLocalDate);
+    }
+
+    public static Date calculateEndDate(Date startDate, Date explicitDate) {
+        if (startDate == null || explicitDate == null) {
+            log.warn("Cannot calculate due date with null start date or explicitDate.");
+            throw new IllegalArgumentException("Start date and explicitDate cannot be null.");
+        }
+        if (explicitDate.before(startDate)) {
+            log.warn("Cannot calculate due date with explicit date before start date.");
+            throw new IllegalArgumentException("Explicit date cannot be before start date");
+        }
+
+        return explicitDate;
+    }
+
+    public static Date addMonthsToDate(Date date, int monthsToAdd) {
+        if (date == null) {
+            log.warn("Cannot add months to a null date.");
+            throw new IllegalArgumentException("Date cannot be null.");
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, monthsToAdd);
+        return calendar.getTime();
+    }
 }

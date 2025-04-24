@@ -122,8 +122,6 @@ public class TaskService implements IGenericService<Task, TaskDto > {
     public List<TaskAssignment> retrieveIncompleteTasksByAssignee(Long assignedUserId, Date date, Frequency frequency, CTMUser user){
         date.setTime(date.getTime() + (long) frequency.getDaysAmount() * 24 * 60 * 60 * 1000);
         List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(assignedUserId, date, user.getHousehold().getId());
-        //TODO: Find a way to integrate ALL to assignees
-        //taskAssignments.addAll(taskAssignmentRepository.findAllByCompletedFalseAndAssigneeAndDueDateLessThanEqual(Assignee.Deux, date, user.getHousehold().getId()));
         return taskAssignments;
     }
 

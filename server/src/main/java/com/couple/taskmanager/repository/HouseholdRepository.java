@@ -2,6 +2,7 @@ package com.couple.taskmanager.repository;
 
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Household;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +18,9 @@ public interface HouseholdRepository extends JpaRepository<Household, Long> {
     Optional<Household> findByToken(@PathVariable("token") String token);
 
     @Query("SELECT h FROM Household h LEFT JOIN FETCH h.users WHERE h.id = :id")
-    Optional<Household> findByIdWithUsers(@Param("id") Long id);
+    Optional<Household> findByIdWithUser(@Param("id") Long id);
 
+    @Override // Good practice to add Override if redefining a base interface method
+    @EntityGraph(attributePaths = {"users"}) // Specify the relationship to fetch
+    Optional<Household> findById(Long id);
 }

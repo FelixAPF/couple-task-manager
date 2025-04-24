@@ -77,7 +77,7 @@ public class TaskListService implements IGenericService<TaskList, TaskListDto> {
     public void moveTaskToNewAssignee(Long taskId, Long userId, CTMUser user){
         Task task = taskRepository.findById(taskId).orElseThrow(() -> new NoSuchElementException("No task with id " + taskId));
         CTMUser newUser = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("No user with id " + userId));
-        Household household = householdRepository.findByIdWithUsers(user.getHousehold().getId()).orElseThrow(()->new NoSuchElementException("No household with id " + user.getHousehold().getId()));
+        Household household = householdRepository.findByIdWithUser(user.getHousehold().getId()).orElseThrow(()->new NoSuchElementException("No household with id " + user.getHousehold().getId()));
 
         //Remove Task from old list.
         TaskList currentList = taskListRepository.findByAssignee(task.getTaskLists().stream().findFirst().orElseThrow(NoSuchElementException::new).getUser().getId(), user.getHousehold().getId()).orElseThrow(()-> new NoSuchElementException("No list for current user."));
@@ -133,7 +133,7 @@ public class TaskListService implements IGenericService<TaskList, TaskListDto> {
 
     @Transactional
     public void addTasksToExistingList(List<BasicTaskAssignmentRqstV1> taskWithIds, CTMUser user) throws SystemException {
-        Household household = householdRepository.findByIdWithUsers(user.getHousehold().getId())
+        Household household = householdRepository.findByIdWithUser(user.getHousehold().getId())
                 .orElseThrow(() -> new SystemException("Household not found for user"));
 
         // --- 1. Prepare Data Structures ---

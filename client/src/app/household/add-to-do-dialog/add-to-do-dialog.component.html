@@ -1,0 +1,73 @@
+<p-toast></p-toast> <!-- To show success/error messages -->
+
+<div class="p-fluid p-4"> <!-- Add padding -->
+  <form [formGroup]="addToDoForm" (ngSubmit)="saveToDoItem()">
+    <div class="field flex flex-col gap-2 mb-4">
+      <label for="title" class="font-semibold">Titre *</label>
+      <input
+        pInputText
+        id="title"
+        formControlName="title"
+        [ngClass]="{'ng-invalid ng-dirty': title?.invalid && (title?.dirty || title?.touched)}"
+      />
+      <small *ngIf="title?.invalid && (title?.dirty || title?.touched)" class="p-error">
+        Le titre est requis.
+      </small>
+    </div>
+
+    <div class="field flex flex-col gap-2 mb-4">
+      <label for="description" class="font-semibold">Description</label>
+      <textarea
+        pInputTextarea
+        id="description"
+        formControlName="description"
+        [rows]="3"
+        [autoResize]="true"
+      ></textarea>
+    </div>
+
+    <div class="field flex flex-col gap-2 mb-4">
+      <label for="location" class="font-semibold">Lieu</label>
+      <input
+        pInputText
+        id="location"
+        formControlName="location"
+      />
+    </div>
+
+    <div class="field flex flex-col gap-2 mb-4">
+      <label for="cost" class="font-semibold">Coût estimé ($)</label>
+      <p-inputNumber
+        inputId="cost"
+        formControlName="cost"
+        mode="currency"
+        currency="CAD"
+        locale="fr-CA"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="2"
+      ></p-inputNumber>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex justify-end gap-2 mt-5">
+      <button
+        pButton
+        pRipple
+        type="button"
+        label="Annuler"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="closeDialog()">
+      </button>
+      <button
+        pButton
+        pRipple
+        type="submit"
+        label="Sauvegarder"
+        icon="pi pi-check"
+        [loading]="isSaving"
+        [disabled]="addToDoForm.invalid || isSaving">
+      </button>
+    </div>
+  </form>
+</div>

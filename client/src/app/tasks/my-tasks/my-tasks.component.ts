@@ -64,13 +64,8 @@ export class MyTasksComponent implements OnInit {
   ngOnInit(): void {
     this.householdService.retrieveHousehold().subscribe(household => {
       this.householdMembers = household?.members || [];
-      this.selectedAssigneeId = Number(localStorage.getItem("assignee"));
-      if(this.selectedAssigneeId == null || this.selectedAssigneeId == 0 || isNaN(this.selectedAssigneeId)){
-        this.selectedAssigneeId = this.householdMembers[0].id;
-        this.selectedAssignee = this.householdMembers[0];
-        localStorage.setItem("assignee", this.selectedAssigneeId.toString());
-      }
-      this.selectedAssignee = this.householdMembers.find(member => member.id === this.selectedAssigneeId) || null;
+      this.selectedAssigneeId = household?.currentUser.id || 0;
+      this.selectedAssignee = household?.currentUser || null;
       this.retrieveTaskByAssignee();
     });
 
@@ -94,7 +89,6 @@ export class MyTasksComponent implements OnInit {
   changeUser(){
     const selectedAssigneeIndex = this.householdMembers.findIndex(member => member.id === this.selectedAssigneeId);
     if(selectedAssigneeIndex === -1 || selectedAssigneeIndex === this.householdMembers.length - 1){
-      localStorage.removeItem("assignee");
       this.selectedAssignee = this.householdMembers[0];
     } else {
       this.selectedAssignee = this.householdMembers[selectedAssigneeIndex + 1];
@@ -102,7 +96,6 @@ export class MyTasksComponent implements OnInit {
     this.selectedAssigneeId = this.selectedAssignee.id;
     
     this.retrieveTaskByAssignee();
-    localStorage.setItem("assignee", this.selectedAssigneeId.toString());
   }
 
   retrieveTaskByAssignee(){

@@ -1,0 +1,44 @@
+<!-- c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\household\add-edit-way-to-care-dialog\add-edit-way-to-care-dialog.component.html -->
+<p-toast></p-toast> <!-- Add toast for messages within the dialog -->
+
+<form [formGroup]="wayToCareForm" (ngSubmit)="saveWayToCare()" class="p-fluid p-4"> <!-- Add padding if needed -->
+  <!-- Title -->
+  <div class="field flex flex-col gap-2 mb-4">
+    <label for="title" class="font-semibold">Titre *</label>
+    <input pInputText id="title" formControlName="title" />
+    <small *ngIf="title?.invalid && title?.touched" class="p-error">
+      Le titre est requis.
+    </small>
+  </div>
+
+  <!-- Description -->
+  <div class="field flex flex-col gap-2 mb-4">
+      <label for="description" class="font-semibold">Description</label>
+      <textarea
+        pTextarea
+        id="description"
+        formControlName="description"
+        [rows]="5"
+        class="h-24 md:h-32"> <!-- Keep height class -->
+      </textarea>
+    </div>
+
+  <!-- Location -->
+  <div class="field flex flex-col gap-2 mb-4">
+    <label for="location" class="font-semibold">Lieu</label>
+    <input pInputText id="location" formControlName="location" />
+  </div>
+
+  <!-- Cost -->
+  <div class="field flex flex-col gap-2 mb-4">
+    <label for="cost" class="font-semibold">Coût estimé ($)</label>
+    <p-inputNumber inputId="cost" formControlName="cost" mode="currency" currency="CAD" locale="fr-CA" [minFractionDigits]="2" [maxFractionDigits]="2"></p-inputNumber>
+  </div>
+
+  <!-- Footer Buttons -->
+  <div class="flex justify-end gap-2 mt-5 border-t border-surface-200 dark:border-surface-700 pt-4">
+    <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" class="p-button-text" (click)="closeDialog()"></button>
+    <button pButton pRipple type="submit" label="Sauvegarder" icon="pi pi-check" [loading]="isSaving" [disabled]="wayToCareForm.invalid || isSaving"></button>
+    <!-- Note: The (click) on the submit button is removed as the form's (ngSubmit) handles it -->
+  </div>
+</form>

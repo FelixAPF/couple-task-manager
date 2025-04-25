@@ -71,7 +71,9 @@
     },
     "logout": "Déconnexion",
     "household-invitation-code": "Code d'invitation du foyer",
-    "menu": "Menu"
+    "menu": "Menu",
+    "ways-to-care": "Petites Attentions",
+    "to-do-list": "Activités à faire"
   },
   "dashboard": {
     "no-meal-planned": "Aucun repas prévu",
@@ -91,5 +93,31 @@
       "monthly": "Mois",
       "yearly": "Année"
     }
+  },
+  "manage-household": {
+    "settings": {
+      "enable-ways-to-care": "Activer les petites attentions",
+      "enable-ways-to-care-description": "Présenter aux autres membres du foyer les petites attentions qui vous font plaisir.",
+      "title": "Gestion du Foyer",
+      "choose-image": "Choisir Photo",
+      "save-image": "Sauvegarder Image",
+      "no-household": "Les informations du foyer ne sont pas disponibles. Essayez de rejoindre ou créer un foyer.\n",
+      "no-members": "Vous êtes le seul membre de ce foyer pour le moment.",
+      "enable-to-do-list": "Activer la liste d'activités",
+      "enable-to-do-list-description": "Créez une liste d'activités, restaurants et autres que vous souhaitez essayer."
+    }
+  },
+  "to-do-list": {
+    "title": "Sorties à faire",
+    "done": "Complété",
+    "no-completed": "Aucune activité terminée",
+    "to-do": "À faire",
+    "free": "Gratuit",
+    "no-completed-outings": "Aucune sortie complétée",
+    "rate-task": "Comment évaluez-vous la sortie: ",
+    "please-rate": "Veuillez sélectionner une note."
+  },
+  "ways-to-care": {
+    "title": "Petites Attentions"
   }
 }

@@ -4,9 +4,11 @@ import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Household;
 import com.couple.taskmanager.model.dto.HouseholdDto;
 import com.couple.taskmanager.model.dto.HouseholdMemberDto;
+import com.couple.taskmanager.model.dto.UpdateHouseholdSettingsDto;
 import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.utils.StreamUtils;
+import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,28 +26,10 @@ public class HouseholdService {
     CTMUserRepository userRepository;
 
     public HouseholdDto getMemberHousehold(CTMUser user){
-        HouseholdDto dto = new HouseholdDto();
-        dto.setName(user.getHousehold().getName());
-        dto.setHouseholdJoinKey(user.getHousehold().getHouseholdJoinKey());
-
         Household household = repository.findById(user.getHousehold().getId()).orElseThrow(IllegalAccessError::new);
-
-        List<HouseholdMemberDto> members = StreamUtils.mapToList(household.getUsers(), this::map);
-
-        dto.setMembers(members);
-        return dto;
-    }
-
-    private HouseholdMemberDto map(CTMUser user){
-        return new HouseholdMemberDto(user.getId(), user.getName(), user.getEmail(), user.getImageUrl());
-    }
-
-    private HouseholdDto map(Household household){
-        HouseholdDto dto = new HouseholdDto();
-        dto.setName(household.getName());
-        dto.setHouseholdJoinKey(household.getHouseholdJoinKey());
-        dto.setMembers(StreamUtils.mapToList(household.getUsers(), this::map));
-        return dto;
+        HouseholdDto householdDto = new HouseholdDto(household);
+        householdDto.setCurrentUser(new HouseholdMemberDto(user));
+        return householdDto;
     }
 
     public HouseholdDto joinHousehold(String joinKey, CTMUser user){
@@ -61,7 +45,7 @@ public class HouseholdService {
         user.setHousehold(household);
         userRepository.save(user);
 
-        return map(repository.save(household));
+        return new HouseholdDto(repository.save(household));
     }
 
     public void removeUserFromHousehold(Long userId, Long householdId) {
@@ -89,4 +73,20 @@ public class HouseholdService {
         userRepository.save(user);
     }
 
+    public HouseholdDto updateHouseholdSettings(UpdateHouseholdSettingsDto updateHouseholdSettingsDto, CTMUser user) throws SystemException {
+        Household household = repository.findById(user.getHousehold().getId()).orElseThrow(SystemException::new);
+        String newHouseholdName = updateHouseholdSettingsDto.getName();
+        if(newHouseholdName != null && !newHouseholdName.isEmpty() && !newHouseholdName.equals(household.getName())){
+            household.setName(newHouseholdName);
+        }
+        Boolean newEnableWaysToCare = updateHouseholdSettingsDto.getEnableWaysToCare();
+        if(newEnableWaysToCare != null && !newEnableWaysToCare.equals(household.getEnableWaysToCare())){
+            household.setEnableWaysToCare(newEnableWaysToCare);
+        }
+        Boolean newEnableToDoList = updateHouseholdSettingsDto.getEnableToDoList();
+        if(newEnableToDoList != null && !newEnableToDoList.equals(household.getEnableToDoList())){
+            household.setEnableToDoList(newEnableToDoList);
+        }
+        return new HouseholdDto(repository.save(household));
+    }
 }

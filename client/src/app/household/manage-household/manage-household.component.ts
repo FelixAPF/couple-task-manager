@@ -15,6 +15,8 @@ import { Household, HouseholdMember } from '../../model/household';
 import { ToastModule } from 'primeng/toast';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner'; // Import ProgressSpinnerModule
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CheckboxChangeEvent } from 'primeng/checkbox';
 
 @Component({
   selector: 'app-manage-household',
@@ -25,6 +27,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner'; // Import Progr
     CommonModule,
     SharedModule,
     FileUploadModule,
+    FormsModule,
     ProgressSpinnerModule // Add ProgressSpinnerModule
   ],
   templateUrl: './manage-household.component.html',
@@ -131,5 +134,86 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
   // --- trackBy Function ---
   trackByMemberId(index: number, member: HouseholdMember): number {
     return member.id;
+  }
+  isUpdatingSettings = signal(false); // <-- New signal for settings update
+
+  toggleWaysToCare(event: CheckboxChangeEvent, household: Household): void {
+    const newState = event.checked; // Get the new boolean state from the event
+    const householdId = household.id;
+
+    this.isUpdatingSettings.set(true);
+
+    // *** IMPORTANT: Assumes householdService has a method like this ***
+    // It should take the ID and a partial household object with the setting to update.
+    // It MUST update the household$ observable internally on success.
+    this.householdService.updateHouseholdSettings({ enableWaysToCare: newState })
+        .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => this.isUpdatingSettings.set(false))
+        )
+        .subscribe({
+            next: (updatedHousehold) => {
+                // The household$ observable should automatically update the UI
+                // because the service updated its internal state.
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Succès',
+                    detail: 'Paramètre "Petites Attentions" mis à jour.',
+                    life: 3000
+                });
+            },
+            error: (err) => {
+                console.error("Error updating household settings:", err);
+                
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erreur',
+                    detail: err?.error?.message || 'Impossible de mettre à jour le paramètre.',
+                    life: 5000
+                });
+                // NOTE: Since the update failed, the household$ observable won't change,
+                // so the checkbox should revert visually when isUpdatingSettings becomes false.
+            }
+        });
+  }  
+  
+  togglToDoList(event: CheckboxChangeEvent, household: Household): void {
+    const newState = event.checked; // Get the new boolean state from the event
+    const householdId = household.id;
+
+    this.isUpdatingSettings.set(true);
+
+    // *** IMPORTANT: Assumes householdService has a method like this ***
+    // It should take the ID and a partial household object with the setting to update.
+    // It MUST update the household$ observable internally on success.
+    this.householdService.updateHouseholdSettings({ enableToDoList: newState })
+        .pipe(
+            takeUntil(this.destroy$),
+            finalize(() => this.isUpdatingSettings.set(false))
+        )
+        .subscribe({
+            next: (updatedHousehold) => {
+                // The household$ observable should automatically update the UI
+                // because the service updated its internal state.
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Succès',
+                    detail: 'Paramètre "Petites Attentions" mis à jour.',
+                    life: 3000
+                });
+            },
+            error: (err) => {
+                console.error("Error updating household settings:", err);
+                
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Erreur',
+                    detail: err?.error?.message || 'Impossible de mettre à jour le paramètre.',
+                    life: 5000
+                });
+                // NOTE: Since the update failed, the household$ observable won't change,
+                // so the checkbox should revert visually when isUpdatingSettings becomes false.
+            }
+        });
   }
 }

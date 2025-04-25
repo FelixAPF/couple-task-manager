@@ -5,6 +5,7 @@ import Aura from '@primeng/themes/aura';
 import { BrowserAnimationsModule, provideAnimations } from '@angular/platform-browser/animations';
 import {TranslateModule, TranslateLoader} from "@ngx-translate/core";
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import localeFrCa from '@angular/common/locales/fr-CA';
 
 
 import { routes } from './app.routes';
@@ -42,6 +43,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimations(),
     DialogService,
+    { provide: LOCALE_ID, useValue: 'fr-CA' },
+
     providePrimeNG({
       theme: {
           preset: Aura,

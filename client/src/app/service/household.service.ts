@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment';
-import { Household, HouseholdMember } from '../model/household';
+import { Household, HouseholdMember, UpdateHouseholdSettings } from '../model/household';
 import { BehaviorSubject, Observable, of, tap } from 'rxjs';
 
 @Injectable({
@@ -87,5 +87,18 @@ export class HouseholdService {
   getCurrentMembers(): HouseholdMember[] | null {
     const currentHousehold = this.householdSubject.getValue();
     return currentHousehold?.members ?? null;
+  }
+
+  
+  updateHouseholdSettings(updateHouseholdSettings: UpdateHouseholdSettings): Observable<Household> {
+    return this.http.put<Household>(`${this.baseUrl}/settings`, updateHouseholdSettings).pipe(
+      tap(updatedHousehold => {
+        // Update the household state with the new settings
+        const household = this.householdSubject.value;
+        if(household === null) return;
+        this.householdSubject.next({ ...household, ...updatedHousehold });
+      })
+    );
+    
   }
 }

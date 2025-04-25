@@ -71,7 +71,9 @@
     },
     "logout": "Logout",
     "household-invitation-code": "Household Invitation Code",
-    "menu": "Menu"
+    "menu": "Menu",
+    "ways-to-care": "Ways to Care",
+    "to-do-list": "Activities To Do"
   },
   "dashboard": {
     "no-meal-planned": "No Meal Planned",
@@ -91,5 +93,31 @@
       "monthly": "Month",
       "yearly": "Year"
     }
+  },
+  "manage-household": {
+    "settings": {
+      "enable-ways-to-care": "Enable ways to care",
+      "enable-ways-to-care-description": "Show your household members the ways they can show you appreciation.",
+      "title": "Manage Household",
+      "choose-image": "Choose Image",
+      "save-image": "Save Image",
+      "no-household": "The information of the household is not available. Please try to join or create a household.",
+      "no-members": "You are the only member of the household for now.",
+      "enable-to-do-list": "Enable To Do List",
+      "enable-to-do-list-description": "Create a list of activities, restaurants and other stuff that you wish to try."
+    }
+  },
+  "to-do-list": {
+    "title": "Activities to Do",
+    "done": "Done",
+    "no-completed": "No Activities Completed",
+    "to-do": "To Do",
+    "free": "Free",
+    "no-completed-outings": "No outing completed",
+    "rate-task": "How would you rate the outing to: ",
+    "please-rate": "Select a rating."
+  },
+  "ways-to-care": {
+    "title": "Ways to Care"
   }
 }

@@ -1,0 +1,90 @@
+<!-- c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\household\ways-to-care\ways-to-care.component.html -->
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
+  <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
+    {{'ways-to-care.title' | translate}}
+  </h2>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="flex justify-center items-center py-10">
+    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
+  </div>
+
+  <!-- Content Area -->
+  <div *ngIf="!isLoading() && household()">
+
+    <!-- Grid for Member Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Loop through grouped data -->
+      <div *ngFor="let group of groupedWaysToCare(); trackBy: trackByMemberId">
+        <p-card>
+          <ng-template pTemplate="title">
+            <!-- ... (Card title content - no changes) ... -->
+             <div class="flex items-center gap-3">
+              <p-avatar
+                [image]="group.member.imageUrl || 'assets/placeholder-user.png'"
+                size="large"
+                shape="circle">
+              </p-avatar>
+              <span class="text-xl font-medium text-surface-700 dark:text-surface-200">
+                {{ group.member.name }}
+                <span *ngIf="isCurrentUser(group.member.id)" class="text-sm font-normal text-primary-500 dark:text-primary-400"> (Moi)</span>
+              </span>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="subtitle">
+             <!-- Add Button (no changes) -->
+             <button *ngIf="isCurrentUser(group.member.id)"
+                     pButton pRipple type="button" icon="pi pi-plus"
+                     label="Ajouter une attention" class="p-button-sm p-button-success mt-2"
+                     (click)="openAddDialog()">
+             </button>
+          </ng-template>
+
+          <!-- List of Items for this member (no changes) -->
+          <div *ngIf="group.items.length > 0; else noItems" class="flex flex-col gap-4 mt-4">
+            <!-- ... (Item loop and display - no changes) ... -->
+             <div *ngFor="let item of group.items; trackBy: trackByItemId"
+                 class="p-4 border rounded-lg bg-surface-50 dark:bg-surface-700 border-surface-200 dark:border-surface-600 shadow-sm">
+              <div class="flex justify-between items-start gap-2">
+                <div class="flex-grow">
+                  <h4 class="text-lg font-semibold text-surface-800 dark:text-surface-100 mb-1">{{ item.title }}</h4>
+                  <p *ngIf="item.description" class="text-sm text-surface-600 dark:text-surface-300 mb-2">{{ item.description }}</p>
+                  <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-surface-500 dark:text-surface-400">
+                    <span *ngIf="item.location"><i class="pi pi-map-marker mr-1"></i>{{ item.location }}</span>
+                    <span *ngIf="item.cost > 0"><i class="pi pi-euro mr-1"></i>{{ item.cost | number:'1.0-2':'fr-CA' }}</span>
+                  </div>
+                </div>
+                <div *ngIf="isCurrentUser(group.member.id)" class="flex flex-col sm:flex-row gap-1 flex-shrink-0">
+                  <button pButton pRipple icon="pi pi-pencil" class="p-button-secondary p-button-text p-button-sm" (click)="openEditDialog(item)" pTooltip="Modifier" tooltipPosition="top"></button>
+                  <button pButton pRipple icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" (click)="confirmDelete($event, item)" pTooltip="Supprimer" tooltipPosition="top"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty state (no changes) -->
+          <ng-template #noItems>
+            <p class="text-center text-surface-500 dark:text-surface-400 py-4 italic">
+              Aucune petite attention ajoutée pour le moment.
+            </p>
+          </ng-template>
+
+        </p-card>
+      </div>
+
+    </div><!-- End Grid -->
+
+  </div><!-- End Content Area -->
+
+  <!-- No Household Data State (no changes) -->
+  <div *ngIf="!isLoading() && !household()" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border rounded-lg bg-surface-100 dark:bg-surface-800">
+    <i class="pi pi-info-circle mr-2"></i>
+    Les informations du foyer ne sont pas disponibles.
+  </div>
+
+</div>

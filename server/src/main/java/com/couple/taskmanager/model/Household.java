@@ -25,6 +25,19 @@ public class Household {
 
     private Date createdDated;
 
+    private Boolean enableWaysToCare = false;
+
+    private Boolean enableToDoList = false;
+
+    @OneToMany
+    @JsonManagedReference("household-way-to-care")
+    private List<WayToCare> waysToCare;
+
+    @OneToMany
+    @JsonManagedReference("household-to-do-items")
+    private List<ToDoItem> toDoItems;
+
+
     @OneToMany
     @JsonManagedReference("household-recipes")
     private List<Recipe> recipes;

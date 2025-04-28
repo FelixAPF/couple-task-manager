@@ -56,7 +56,7 @@
                   <p *ngIf="item.description" class="text-sm text-surface-600 dark:text-surface-300 mb-2">{{ item.description }}</p>
                   <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-surface-500 dark:text-surface-400">
                     <span *ngIf="item.location"><i class="pi pi-map-marker mr-1"></i>{{ item.location }}</span>
-                    <span *ngIf="item.cost > 0"><i class="pi pi-euro mr-1"></i>{{ item.cost | number:'1.0-2':'fr-CA' }}</span>
+                    <span><i class="pi pi-dollar mr-1"></i>{{ (item.cost === 0 || item.cost === null) ? ('to-do-list.free' | translate ) : (item.cost | number:'1.2':'fr-CA') }}</span>
                   </div>
                 </div>
                 <div *ngIf="isCurrentUser(group.member.id)" class="flex flex-col sm:flex-row gap-1 flex-shrink-0">

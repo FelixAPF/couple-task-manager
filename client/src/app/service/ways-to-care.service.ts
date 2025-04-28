@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment';
-import { WayToCare } from '../model/household';
+import { HouseholdMember, WayToCare } from '../model/household';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -35,12 +35,12 @@ export class WaysToCareService {
    * @param item - The WayToCare item with updated data and its ID.
    * @returns Observable<WayToCare> - The updated item.
    */
-  updateWayToCare(item: WayToCare): Observable<WayToCare> {
+  updateWayToCare(item: WayToCare, assignee: HouseholdMember): Observable<WayToCare> {
     if (item.id == null) {
       throw new Error('Cannot update WayToCare without an ID.');
     }
     // Send the whole item, backend should verify ownership based on ID and logged-in user
-    return this.http.put<WayToCare>(`${this.baseUrl}/${item.id}`, item);
+    return this.http.put<WayToCare>(`${this.baseUrl}/${item.id}`, { ...item, assignee});
   }
 
   /**

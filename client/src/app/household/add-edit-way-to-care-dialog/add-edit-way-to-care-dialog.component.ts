@@ -81,7 +81,7 @@ export class AddEditWayToCareDialogComponent implements OnInit {
 
     const saveObservable = this.isEditing
       // Cast needed as ID is present and service expects full WayToCare for update
-      ? this.waysToCareService.updateWayToCare(wayToCareData as WayToCare)
+      ? this.waysToCareService.updateWayToCare(wayToCareData as WayToCare, this.config.data.item.assignee)
       // Pass data without ID/Assignee for creation
       : this.waysToCareService.createWayToCare(wayToCareData);
 

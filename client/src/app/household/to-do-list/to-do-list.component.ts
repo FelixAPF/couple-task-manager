@@ -124,8 +124,6 @@ export class ToDoListComponent {
   handleStatusChange(item: ToDoItem, event: CheckboxChangeEvent): void {
     const isCompleting = event.checked;
 
-    console.log("Handling status change for item:", item, "Completing:", isCompleting);
-
     if ((this.isUpdating() !== null && this.isUpdating() === item.id) || !item.id) {
         console.warn(`Update prevented for item ${item.id}. Currently updating: ${this.isUpdating()}`);
         return;

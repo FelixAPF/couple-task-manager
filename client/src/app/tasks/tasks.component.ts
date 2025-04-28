@@ -149,13 +149,13 @@ export class TasksComponent implements OnInit, OnDestroy {
     ref.onClose.pipe(takeUntil(this.destroy$)).subscribe(() => this.loadTaskData()); // Reload on close
   }
 
-  openNewTaskDialog(task?: Task): void {
+  openNewTaskDialog(task?: Task, assignee?: HouseholdMember | null): void {
     const ref = this.dialogService.open(AddTaskComponent, {
       header: task ? 'Modifier la Tâche' : 'Créer une Tâche',
       width: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
-      data: { taskToEdit: task } // Pass task data for editing
+      data: { taskToEdit: task, assignee  } // Pass task data for editing
     });
     ref.onClose.pipe(takeUntil(this.destroy$)).subscribe((result) => {
       if (result) { // Only reload if save was successful (component should return true)

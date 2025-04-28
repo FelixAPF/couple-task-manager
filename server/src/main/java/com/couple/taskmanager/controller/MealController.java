@@ -2,11 +2,9 @@ package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Meal;
-import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.dto.MealDateRangeDto;
 import com.couple.taskmanager.model.dto.MealDto;
 import com.couple.taskmanager.service.MealService;
-import com.couple.taskmanager.service.RecipeService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +23,15 @@ public class MealController extends GenericController<Meal, MealDto, MealService
 
     @GetMapping("/by-date/{date}")
     public MealDto retrieveMealByDate(@PathVariable("date") Date date, @AuthenticationPrincipal UserDetails userDetails){
-        return this.service.retrieveByDate(date, (CTMUser) userDetails);
+        return this.service.retrieveDtoByDate(date, (CTMUser) userDetails);
+    }
+
+    @PutMapping("/{id}/move")
+    public MealDto moveMealToNewDate(@PathVariable("id") Long id, @RequestBody Date newDate, @AuthenticationPrincipal UserDetails userDetails){
+        return this.service.moveMealToNewDate(id, newDate, (CTMUser) userDetails);
+    }
+    @PutMapping("/{id}/swap")
+    public MealDto swapMealToNewDate(@PathVariable("id") Long id, @RequestBody Date newDate, @AuthenticationPrincipal UserDetails userDetails){
+        return this.service.swapMealToNewDate(id, newDate, (CTMUser) userDetails);
     }
 }

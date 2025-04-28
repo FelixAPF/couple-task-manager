@@ -53,11 +53,16 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-6">
       <!-- Day Card Loop -->
       <div *ngFor="let day of weekDays" class="day-card-wrapper">
-        <app-meal-card [customTemplate]="customTemplate" [noMealPlanned]="noMealPlanned"
-          [title]="day.formattedDate" [borderHighlightClass]="day.borderClass" [meal]="day.meal"></app-meal-card>
+        <app-meal-card [customTemplate]="customTemplate" [noMealPlanned]="noMealPlanned" (click)="selectDay(day)"
+          [title]="day.formattedDate" [borderHighlightClass]="selectedDay?.id === day.id ? 'selected' :  day.borderClass" [meal]="day.meal"></app-meal-card>
           <ng-template #customTemplate>
                           <!-- Action Buttons -->
-              <div class="flex justify-center gap-2 mt-auto">
+              <div class="flex justify-center gap-2 mt-auto" *ngIf="enableCardModification">
+                <button pButton pRipple type="button" icon="pi pi-arrow-right"
+                        class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
+                        (click)="moveMeal(day.date, day.meal)" aria-label="Déplacer le repas"
+                        pTooltip="Déplacer" tooltipPosition="top">
+                </button>
                 <button pButton pRipple type="button" icon="pi pi-pencil"
                         class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
                         (click)="assignMeal(day.date, day.meal)" aria-label="Modifier le repas"

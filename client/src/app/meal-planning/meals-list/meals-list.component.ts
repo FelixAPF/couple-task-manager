@@ -1,5 +1,5 @@
 // c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\meal-planning\meals-list\meals-list.component.ts
-import { Component, OnInit, LOCALE_ID, Inject } from '@angular/core';
+import { Component, OnInit, LOCALE_ID, Inject, EventEmitter } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { SharedModule } from '../../shared.module';
 import { Meal } from '../../model/meals';
@@ -14,9 +14,12 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { AssignMealComponent } from '../assign-meal/assign-meal.component';
 import { Recipe } from '../../model/recipes';
 import { MealCardComponent } from '../meal-card/meal-card.component';
+import { MoveMealComponent } from '../move-meal/move-meal.component';
 import { HammerModule } from '@angular/platform-browser';
+import { Input, Output } from '@angular/core';
 
-interface WeekDay {
+export interface WeekDay {
+  id: number;
   date: Date;
   formattedDate: string;
   borderClass: string;
@@ -47,6 +50,12 @@ interface WeekDay {
 })
 export class MealsListComponent implements OnInit {
 
+  @Output() weekDaySelect: EventEmitter<WeekDay | null> = new EventEmitter(); // For date selection in the parent component
+  @Input() enableDateSelection: boolean = false; // For enabling date selection in the parent component
+  @Input() enableCardModification: boolean = true; // For enabling card modification in the parent component
+  selectedDay: WeekDay | null = null; // For storing the selected day
+
+
   weekDays: WeekDay[] = [];
   isLoading: boolean = true;
   errorLoading: boolean = false;
@@ -62,7 +71,7 @@ export class MealsListComponent implements OnInit {
     private messageService: MessageService,
     private datePipe: DatePipe,
     private router: Router,
-    private dialogService: DialogService,
+    private dialogService: DialogService, 
     @Inject(LOCALE_ID) private locale: string
   ) {
 
@@ -94,6 +103,7 @@ export class MealsListComponent implements OnInit {
       const iso = this.datePipe.transform(dayDate, 'yyyy-MM-dd') || '';
 
       this.weekDays.push({
+        id: i,
         date: dayDate,
         formattedDate: formatted.charAt(0).toUpperCase() + formatted.slice(1),
         borderClass: this.getPositionInCycle(dayDate) || '',
@@ -125,6 +135,7 @@ export class MealsListComponent implements OnInit {
   }
 
   loadMealsForWeek(): void {
+    this.selectedDay = null; // Reset selected day when loading new meals
     if (this.weekDays.length === 0) {
        console.error("Cannot load meals, week days not generated.");
        this.isLoading = false;
@@ -321,6 +332,37 @@ export class MealsListComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `Impossible de ${action} le repas.` });
       }
     });
+  }
+
+  selectDay(day: WeekDay): void {
+    if (this.enableDateSelection) {
+      this.selectedDay = day;
+      this.weekDaySelect.emit(day); // Emit the selected date to the parent component
+      console.log("Selected date:", day.date);
+    } else {
+      this.selectedDay = null; // Reset if not enabled
+    }
+  }
+
+  moveMeal(date: Date, meal?: Meal): void {
+    //Display date picker to select a new date
+    const ref = this.dialogService.open(MoveMealComponent, {
+      header: 'Déplacer le repas',
+      width: '90%',
+      modal: true,
+      dismissableMask: true,
+      data: {
+        date: date,
+        meal: meal
+      }
+    });
+    ref.onClose.subscribe((result: Meal | null) => {
+      if (result) {
+        this.loadMealsForWeek(); // Reload the week view
+      }
+    }); 
+
+    
   }
 
 }

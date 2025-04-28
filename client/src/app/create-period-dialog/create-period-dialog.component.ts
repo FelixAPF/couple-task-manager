@@ -243,17 +243,12 @@ export class CreatePeriodDialogComponent implements OnInit {
         // If needed: delete (result as any).duration; or result.duration = someDefault;
     }
 
-
-    console.log("Submitting Period Creation Request:", result);
     this.taskPeriodService.initiateCreatePeriod(result).subscribe({
         next: () => {
-            console.log("Period creation successful");
-            this.close(true); // Close dialog and indicate success
+            this.close(true); 
         },
         error: (err) => {
-            console.error("Error creating period:", err);
-            // Optionally show a user-facing error message
-            this.close(false); // Close dialog and indicate failure (optional)
+            this.close(false); 
         }
     });
   }

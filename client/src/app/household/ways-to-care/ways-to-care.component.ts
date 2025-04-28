@@ -43,8 +43,8 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
   // --- State Signals ---
   isLoading = signal(true);
   household: WritableSignal<Household | null> = signal(null);
-  currentUserId: WritableSignal<number | null> = signal(null);
   allWaysToCare = signal<WayToCare[]>([]);
+  currentUser: HouseholdMember | null = null;
 
   // --- REMOVED Dialog/Form State ---
   // displayDialog = signal(false);
@@ -96,7 +96,7 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
       .subscribe({
         next: (hh) => {
           this.household.set(hh);
-          this.currentUserId.set(this.findCurrentUserId(hh));
+          this.currentUser = hh?.currentUser ?? null; // Set current user ID
           if (hh) {
             this.loadWaysToCare();
           } else {
@@ -109,13 +109,7 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
           this.isLoading.set(false);
         }
       });
-  }
-
-  // findCurrentUserId (keep existing logic)
-  findCurrentUserId(household: Household | null): number | null {
-     console.warn("Placeholder: Need actual logic to determine currentUserId");
-     return household?.members?.[0]?.id ?? null;
-  }
+  } 
 
   loadWaysToCare(): void {
     this.waysToCareService.retrieveWaysToCare()
@@ -218,7 +212,7 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
 
   // --- Helpers (no changes needed) ---
   isCurrentUser(memberId: number): boolean {
-    return this.currentUserId() === memberId;
+    return this.currentUser?.id === memberId;
   }
 
   // --- trackBy Functions (no changes needed) ---

@@ -87,19 +87,23 @@ export class AddTaskComponent implements OnInit {
     this.buildFormGroup();
   }
 
-  buildFormGroup(task: Task | null = null){
+  buildFormGroup(task: Task | null = null, assignee: HouseholdMember | undefined = undefined){
+    if(assignee){
+      this.showAssignee = true;
+    }
     this.formGroup = this.fb.group({
       [FormControlName.ID]: [task?.id || null],
       [FormControlName.TITLE]: [task?.title || "", [Validators.required]],
       [FormControlName.DESCRIPTION]: [task?.description || "", [Validators.required]],
       [FormControlName.FREQUENCY]: [task?.frequency || "", [Validators.required]],
       [FormControlName.ROOM]: [task?.room || "", [Validators.required]],
-      [FormControlName.ASSIGNEE]: [null, []],
+      [FormControlName.ASSIGNEE]: [assignee?.id || null, []],
     })
   }
 
   ngOnInit(): void {
-    this.buildFormGroup(this.config.data.taskToEdit);
+    console.log(this.config.data);
+    this.buildFormGroup(this.config.data.taskToEdit, this.config.data.assignee);
 
     this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
       this.householdMembers = household?.members || [];

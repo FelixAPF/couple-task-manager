@@ -47,7 +47,7 @@
       <p-accordion-content>
         <app-assignee-task-list
           (unassignEmitter)="unassign($event)"
-          (editTaskEmitter)="openNewTaskDialog($event)"
+          (editTaskEmitter)="openNewTaskDialog($event, column.member)"
           (deleteTaskEmitter)="deleteTask($event)"
           [taskList]="{ tasks: column.tasks }" [index]="i"
           [title]="column.member?.name ?? 'Tâches non assignées'"

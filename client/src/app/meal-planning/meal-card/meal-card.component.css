@@ -51,3 +51,10 @@
     box-shadow: 0 0 8px rgba(128, 128, 128, 0.5);
     border-radius: 0.5rem;
   }
+
+  .selected .p-card {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
+    background-color:  #b6dcdd !important;
+    border-radius: 0.5rem;
+  }

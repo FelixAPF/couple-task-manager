@@ -41,8 +41,6 @@ import {  DropdownModule } from 'primeng/dropdown';
 import {  RatingModule } from 'primeng/rating';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {ClipboardModule} from '@angular/cdk/clipboard';
-import localeFrCA from '@angular/common/locales/fr-CA';
-registerLocaleData(localeFrCA);
 
 @NgModule({
   declarations: [],

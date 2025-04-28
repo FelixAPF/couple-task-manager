@@ -33,4 +33,13 @@ export class MealService {
   getMealByDate(date: Date){
     return this.http.get<Meal>(`${this.baseUrl}/by-date/${date}`);
   }
+
+  moveMeal(meal: Meal, date: Date) {
+    return this.http.put<Meal>(`${this.baseUrl}/${meal.id}/move`, date );
+  }
+
+  swapMeal(meal: Meal, date: Date) {
+    return this.http.put<Meal>(`${this.baseUrl}/${meal.id}/swap`, date );
+  }
+
 }

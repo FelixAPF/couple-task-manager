@@ -15,6 +15,11 @@ import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromD
 import { HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule } from '@angular/platform-browser';
 import { DialogService } from 'primeng/dynamicdialog';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { registerLocaleData } from '@angular/common';
+import localeFrCA from '@angular/common/locales/fr-CA'; // <-- Import locale data
+
+registerLocaleData(localeFrCA, 'fr-CA'); // <-- Register with the correct ID 'fr-CA'
+
 
 const httpLoaderFactory: (http: HttpClient) => TranslateHttpLoader = (http: HttpClient) =>
   new TranslateHttpLoader(http, './i18n/', '.json');

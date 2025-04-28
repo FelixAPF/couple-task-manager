@@ -1,0 +1,56 @@
+<div class="p-dialog-content"> <!-- Add structure -->
+    <p *ngIf="providedMeal">
+      Déplacer le repas : <strong>{{ providedMeal.recipe?.name || 'Repas inconnu' }}</strong>
+    </p>
+    <p *ngIf="providedMeal">
+      Date actuelle : <strong>{{ providedMeal.date | date:'EEEE d MMMM yyyy':'':'fr-CA' }}</strong>
+    </p>
+    <p class="mt-3 mb-2">Sélectionnez la nouvelle date ci-dessous :</p>
+  
+    <!-- Container where MealsListComponent will be dynamically loaded -->
+    <ng-container #mealListContainer></ng-container>
+  
+  </div>
+  
+  <!-- Apply flexbox directly to the footer for button layout -->
+  <!-- justify-end pushes buttons to the right -->
+  <!-- items-center vertically aligns buttons if heights differ -->
+  <!-- gap-2 adds space between buttons -->
+  <div class="p-dialog-footer flex justify-end items-center gap-2">
+
+    <!-- Cancel Button (Always present) -->
+    <p-button
+      label="Annuler"
+      icon="pi pi-times"
+      (click)="cancelMove()"
+      styleClass="p-button-text">
+    </p-button>
+
+    <div *ngIf="selectedMeal === null else mealExistBlock"> <!-- Renamed else reference for clarity -->
+      <p-button
+        label="Déplacer"
+        icon="pi pi-check"
+        (click)="submitMove()"
+        [disabled]="!selectedDate || !providedMeal">
+      </p-button>
+    </div>
+
+    <ng-template #mealExistBlock>
+      <div class="flex items-center gap-2">
+        <p-button
+          label="Échanger"
+          icon="pi pi-arrow-right-arrow-left"
+          (click)="swapMeal()"
+          [disabled]="!selectedDate || !providedMeal">
+        </p-button>
+        <p-button
+          label="Remplacer"
+          icon="pi pi-chevron-down" 
+          (click)="submitMove()"
+          [disabled]="!selectedDate || !providedMeal">
+        </p-button>
+      </div>
+    </ng-template>
+
+</div> <!-- End p-dialog-footer -->
+  

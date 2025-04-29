@@ -64,8 +64,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     private cdRef: ChangeDetectorRef // Inject ChangeDetectorRef for preview updates if needed
   ) {}
   recipeForm!: FormGroup;
-  isEditMode = false;
-  isLoading = false;
+  isEditMode = false; 
   recipeToEdit?: Recipe;
   recipeTypes: RecipeTypeOption[];
 
@@ -219,9 +218,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
       if (this.recipeForm.invalid) {
         this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Veuillez remplir tous les champs requis.' });
         return;
-      }
-  
-      this.isLoading = true;
+      } 
   
       // Determine if an upload is needed
       const uploadNeeded = !!this.selectedFile;
@@ -267,8 +264,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
       // Execute the operation (rest of the method remains the same)
       this.subscriptions.add(
         operation$.pipe(
-          finalize(() => {
-            this.isLoading = false; // Stop loading indicator regardless of success/error
+          finalize(() => { 
             this.cdRef.detectChanges(); // Ensure UI updates
           })
         ).subscribe({

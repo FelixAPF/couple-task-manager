@@ -1,27 +1,31 @@
-<div class="p-4 md:p-6">
+<!-- Root Div: Change h-full to flex flex-col flex-grow -->
+<div class="p-4 md:p-6 flex flex-col flex-grow">
 
-    <!-- Navigation using PrimeNG SelectButton -->
-    <div class="flex justify-center mb-4 md:mb-6">
-      <p-selectButton
-        [options]="viewOptions"
-        [(ngModel)]="selectedView"
-        optionLabel="label"
-        optionValue="value"
-        (onChange)="onViewChange($event)"
-        aria-labelledby="meal-recipe-view-label">
-          <!-- Optional: Template for custom button appearance -->
-          <ng-template let-item pTemplate>
-              <div class="flex align-items-center gap-2 px-2">
-                   <i [class]="item.icon"></i>
-                  <span>{{ item.label }}</span>
-              </div>
-          </ng-template>
-      </p-selectButton>
-      <!-- Hidden label for accessibility -->
-      <span id="meal-recipe-view-label" class="sr-only">Select view: Meals Plan or Recipes</span>
-    </div>
-  
+  <!-- Navigation using PrimeNG SelectButton (Keep as is) -->
+  <div class="flex justify-center mb-4 md:mb-6 flex-shrink-0">
+    <p-selectButton
+      [options]="viewOptions"
+      [ngModel]="selectedView"
+      optionLabel="label"
+      optionValue="value"
+      (onChange)="onViewChange($event)"
+      aria-labelledby="meal-recipe-view-label">
+        <!-- Optional: Template for custom button appearance -->
+        <ng-template let-item pTemplate>
+            <div class="flex align-items-center gap-2 px-2">
+                 <i [class]="item.icon"></i>
+                <span>{{ item.label }}</span>
+            </div>
+        </ng-template>
+    </p-selectButton>
+    <!-- Hidden label for accessibility -->
+    <span id="meal-recipe-view-label" class="sr-only">Select view: Meals Plan or Recipes</span>
+  </div>
+
+  <!-- Wrapper for the secondary outlet: ADD flex-grow -->
+  <div class="flex-grow">
     <!-- The secondary outlet where MealsListComponent or RecipesListComponent will be loaded -->
     <router-outlet name="meals"></router-outlet>
+  </div>
 
 </div>

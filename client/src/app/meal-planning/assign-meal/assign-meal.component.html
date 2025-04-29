@@ -2,13 +2,11 @@
 <p-toast></p-toast>
 
 <div class="assign-meal-container p-4">
-  <h3 class="text-lg font-semibold mb-3">Assigner un repas pour le {{ formattedTargetDate }}</h3>
-
-  <p-progressSpinner *ngIf="isLoading" styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
+  <h3 class="text-lg font-semibold mb-3">Assigner un repas pour le {{ formattedTargetDate }}</h3> 
 
   <p-message *ngIf="errorLoading" severity="error" text="Erreur lors du chargement des recettes."></p-message>
 
-  <div *ngIf="!isLoading && !errorLoading">
+  <div *ngIf="!errorLoading">
 
     <!-- Search Bar -->
     <div class="mb-4">
@@ -37,12 +35,12 @@
        </div>
 
        <!-- Message when no recipes exist at all -->
-       <div *ngIf="recipes.length === 0 && !isLoading" class="p-3 text-center text-surface-500 dark:text-surface-400">
+       <div *ngIf="recipes.length === 0" class="p-3 text-center text-surface-500 dark:text-surface-400">
          Aucune recette trouvée. Cliquez sur "Créer Recette" pour en ajouter.
        </div>
 
        <!-- Message when filter yields no results but recipes exist -->
-       <div *ngIf="recipes.length > 0 && filteredRecipes.length === 0 && !isLoading" class="p-3 text-center text-surface-500 dark:text-surface-400">
+       <div *ngIf="recipes.length > 0 && filteredRecipes.length === 0" class="p-3 text-center text-surface-500 dark:text-surface-400">
          Aucune recette ne correspond à votre recherche "{{ searchTerm }}".
        </div>
     </div>

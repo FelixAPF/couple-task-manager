@@ -33,31 +33,26 @@
           </span>
       </div>
   </div>
-
-
-  <!-- Loading State -->
-  <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-10">
-    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4" animationDuration=".5s"></p-progressSpinner>
-  </div>
+ 
 
   <!-- Error State -->
-  <div *ngIf="!isLoading && errorLoading" class="flex justify-content-center py-10">
+  <div *ngIf="errorLoading" class="flex justify-content-center py-10">
      <p-message severity="error" text="Une erreur est survenue lors du chargement des recettes."></p-message>
   </div>
 
   <!-- Empty State (No recipes at all) -->
-  <div *ngIf="!isLoading && !errorLoading && allRecipes.length === 0" class="flex justify-content-center py-10">
+  <div *ngIf="!errorLoading && allRecipes.length === 0" class="flex justify-content-center py-10">
      <p-message severity="info" text="Aucune recette trouvée. Commencez par en ajouter une !"></p-message>
   </div>
 
   <!-- Empty State (No search results) -->
-  <div *ngIf="!isLoading && !errorLoading && allRecipes.length > 0 && filteredRecipes.length === 0" class="flex justify-content-center py-10">
+  <div *ngIf="!errorLoading && allRecipes.length > 0 && filteredRecipes.length === 0" class="flex justify-content-center py-10">
      <p-message *ngIf="!displayRecipeTypeSuggestion" severity="info" [text]="'Aucune recette ne correspond à votre recherche \'' + searchTerm + '\''"></p-message>
   </div>
 
   <!-- Recipes Grid -->
   <!-- Iterate over filteredRecipes instead of recipes -->
-  <div *ngIf="!isLoading && !errorLoading && filteredRecipes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+  <div *ngIf="!errorLoading && filteredRecipes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
     <!-- Use filteredRecipes here -->
     <div *ngFor="let recipe of filteredRecipes; trackBy: trackById" class="recipe-card-wrapper">
       <!-- Pass the recipe object to the card component -->

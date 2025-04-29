@@ -17,9 +17,7 @@ export class JoinHouseholdComponent {
   private fb = inject(FormBuilder);
   private householdService = inject(HouseholdService);
   private messageService = inject(MessageService);
-  private ref = inject(DynamicDialogRef);
-
-  isLoading = signal(false);
+  private ref = inject(DynamicDialogRef); 
 
   // --- Form ---
   joinForm = this.fb.group({
@@ -38,19 +36,12 @@ export class JoinHouseholdComponent {
       });
       return;
     }
-
-    this.isLoading.set(true);
+ 
     const key = this.joinKey?.value;
 
-    if (!key) { // Should be caught by validation, but good practice
-        this.isLoading.set(false);
-        return;
-    }
+    if (!key) return; 
 
-    this.householdService.joinHousehold(key)
-      .pipe(
-        finalize(() => this.isLoading.set(false))
-      )
+    this.householdService.joinHousehold(key) 
       .subscribe({
         next: (household) => {
           this.messageService.add({

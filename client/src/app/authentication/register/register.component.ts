@@ -42,9 +42,6 @@ export class RegisterComponent implements OnInit {
   private router = inject(Router);
   private messageService = inject(MessageService);
 
-  // --- State ---
-  isLoading = signal(false);
-
   // --- Form Definition ---
   registerForm = this.fb.group({
     name: ['', [Validators.required]],
@@ -135,7 +132,6 @@ export class RegisterComponent implements OnInit {
     return;
   }
 
-  this.isLoading.set(true);
 
     // Exclude confirmPassword before sending to backend
     const { confirmPassword, ...registrationData } = this.registerForm.getRawValue();
@@ -150,9 +146,6 @@ export class RegisterComponent implements OnInit {
     }
 
     this.authService.register(registerRequest)
-      .pipe(
-        finalize(() => this.isLoading.set(false))
-      )
       .subscribe({
         next: (user) => {
           this.messageService.add({

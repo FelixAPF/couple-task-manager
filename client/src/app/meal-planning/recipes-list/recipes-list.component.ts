@@ -39,7 +39,6 @@ export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' |
 export class RecipesListComponent implements OnInit {
   allRecipes: Recipe[] = [];
   filteredRecipes: Recipe[] = [];
-  isLoading: boolean = true;
   errorLoading: boolean = false;
   ref: DynamicDialogRef | undefined; // To hold dialog reference
   searchTerm: string = "";
@@ -61,19 +60,16 @@ export class RecipesListComponent implements OnInit {
   }
 
   loadRecipes(): void {
-    this.isLoading = true;
     this.errorLoading = false; // Reset error state
     this.recipeService.getAllRecipes().subscribe({
       next: (recipes) => {
         this.allRecipes = recipes; // Store the full list
         this.filterRecipes(); // Apply initial filter (shows all if searchTerm is empty)
-        this.isLoading = false;
         this.cdRef.detectChanges(); // Trigger change detection
       },
       error: (err) => {
         console.error('Error loading recipes:', err);
         this.errorLoading = true;
-        this.isLoading = false;
         this.allRecipes = []; // Clear lists on error
         this.filteredRecipes = [];
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les recettes.' });
@@ -136,19 +132,16 @@ export class RecipesListComponent implements OnInit {
   }
 
   private deleteRecipe(id: number): void {
-    this.isLoading = true; // Optional: show loading indicator during delete
     this.recipeService.deleteRecipe(id).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Recette supprimée avec succès.' });
         // Remove recipe from the local list
         this.allRecipes = this.allRecipes.filter(r => (r.id) !== id);
         this.filterRecipes();
-        this.isLoading = false;
       },
       error: (err) => {
         console.error("Error deleting recipe:", err);
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer la recette.' });
-        this.isLoading = false;
       }
     });
   }

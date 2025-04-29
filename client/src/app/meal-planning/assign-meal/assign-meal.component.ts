@@ -46,8 +46,7 @@ export class AssignMealComponent implements OnInit {
   @ViewChild('locationInput') locationInputRef: ElementRef<HTMLInputElement>;
 
   recipes: Recipe[] = [];
-  filteredRecipes: Recipe[] = []; // <-- Array for filtered results
-  isLoading: boolean = true;
+  filteredRecipes: Recipe[] = []; // <-- Array for filtered results 
   errorLoading: boolean = false;
   selectedRecipe: Recipe | null = null;
   targetDate!: Date;
@@ -78,21 +77,17 @@ export class AssignMealComponent implements OnInit {
       this.loadRecipes();
     } else {
       console.error("Target date not provided to AssignMealComponent dialog.");
-      this.errorLoading = true;
-      this.isLoading = false;
+      this.errorLoading = true; 
       this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Date cible manquante.' });
     }
   }
 
-  loadRecipes(): void {
-    this.isLoading = true;
+  loadRecipes(): void { 
     this.errorLoading = false;
     this.recipeService.getAllRecipes().subscribe({
       next: (data) => {
-        this.recipes = data;
-        // Initially, filtered recipes are all recipes
-        this.filterRecipes(); // <-- Filter recipes initially
-        this.isLoading = false;
+        this.recipes = data; 
+        this.filterRecipes(); 
 
         const existingMealRecipeId = this.dialogConfig.data?.meal?.recipe?.id;
         if (existingMealRecipeId) {
@@ -104,8 +99,7 @@ export class AssignMealComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error("Error loading recipes:", err);
-        this.isLoading = false;
+        console.error("Error loading recipes:", err); 
         this.errorLoading = true;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les recettes.' });
       }

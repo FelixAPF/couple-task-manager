@@ -20,10 +20,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private messageService = inject(MessageService); // Inject MessageService
-  private route = inject(ActivatedRoute); // Inject ActivatedRoute
-
-  // --- State ---
-  isLoading = signal(false); // Signal for loading state
+  private route = inject(ActivatedRoute); // Inject ActivatedRoute 
 
   // --- Form Definition ---
   loginForm = this.fb.group({
@@ -47,9 +44,7 @@ export class LoginComponent {
         life: 3000
       });
       return;
-    }
-
-    this.isLoading.set(true); // Start loading indicator
+    } 
 
     const credentials = this.loginForm.getRawValue();
     if(credentials.email === null || credentials.password === null) return;
@@ -59,7 +54,6 @@ export class LoginComponent {
     }
 
     this.authService.login(authRequest)
-      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: (user) => {
           this.messageService.add({ /* ... success message ... */ });

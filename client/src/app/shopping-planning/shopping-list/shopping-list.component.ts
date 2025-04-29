@@ -26,7 +26,6 @@ export class ShoppingListComponent implements OnInit {
 
   // --- State ---
   shoppingItems = signal<ShoppingItem[]>([]);
-  isLoading = signal(true);
   isAdding = signal(false);
   storeOptions: SelectItem[] = [];
   nameSuggestions: string[] = [];
@@ -49,9 +48,7 @@ export class ShoppingListComponent implements OnInit {
 
   // --- Data Loading ---
   loadItems(): void {
-    this.isLoading.set(true);
     this.shoppingService.retrieveShoppingListNotBought()
-      .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: (items) => {
           // --- SORTING LOGIC UPDATED HERE ---

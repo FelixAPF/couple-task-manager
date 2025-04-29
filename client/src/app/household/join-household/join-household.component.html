@@ -47,17 +47,15 @@
         label="Annuler"
         icon="pi pi-times"
         class="p-button-secondary"
-        (click)="closeDialog()"
-        [disabled]="isLoading()">
+        (click)="closeDialog()" >
       </button>
       <button
         pButton
         pRipple
         type="submit"
         label="Rejoindre"
-        icon="pi pi-check"
-        [loading]="isLoading()"
-        [disabled]="isLoading() || joinForm.invalid">
+        icon="pi pi-check" 
+        [disabled]="joinForm.invalid">
       </button>
     </div>
   </form>

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, ActivatedRoute, NavigationEnd, RouterLink } from '@angular/router';
 // Import the correct event type
@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 import { SharedModule } from '../../shared.module';
+import { TranslateService } from '@ngx-translate/core';
 
 interface ViewOption {
   label: string;
@@ -27,34 +28,28 @@ interface ViewOption {
 })
 // Add OnInit, OnDestroy implementation
 export class MealsSectionComponent implements OnInit, OnDestroy {
+  translate = inject(TranslateService);
+
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {}
+  
   viewOptions: ViewOption[] = [
-    { label: 'Plan Repas', value: null, icon: 'pi pi-calendar' }, // Default view (empty path in outlet)
-    { label: 'Recettes', value: 'recipes', icon: 'pi pi-book' }   // Recipes view
+    { label: this.translate.instant('meals.plan'), value: null, icon: 'pi pi-calendar' }, // Default view (empty path in outlet)
+    { label: this.translate.instant('meals.recipes'), value: 'recipes', icon: 'pi pi-book' }   // Recipes view
   ];
+
+  ngOnInit(): void {
+    const initialChildSnapshot = this.route.snapshot.children.find(child => child.outlet === 'meals');
+    const initialPath = initialChildSnapshot?.routeConfig?.path ?? null;
+    this.selectedView = initialPath === '' ? null : initialPath;
+  }
+
 
   selectedView: string | null = null; // Initialize based on default route
   private routerSubscription: Subscription | undefined; // Removed initial assignment
 
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute // Inject ActivatedRoute
-  ) {}
-
-  ngOnInit(): void {
-    // Subscribe to router events to set the correct initial state
-    // and update if the user navigates via browser back/forward
-    this.routerSubscription = this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      // Check the active child route within the 'meals' outlet immediately and on navigation
-      startWith(null), // Emit immediately to check current state on init
-      map(() => this.route.snapshot.children.find(child => child.outlet === 'meals')),
-      map(childSnapshot => childSnapshot?.routeConfig?.path ?? null), // Get path ('recipes' or '')
-    ).subscribe(path => {
-      // The default route has path '', map it to our null value
-      this.selectedView = path === '' ? null : path;
-    });
-  }
 
   ngOnDestroy(): void {
     this.routerSubscription?.unsubscribe();

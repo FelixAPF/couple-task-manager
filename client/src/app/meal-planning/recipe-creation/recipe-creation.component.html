@@ -150,9 +150,8 @@
                 (click)="closeDialog()">
         </button>
         <button pButton pRipple type="submit" [label]="isEditMode ? 'Mettre à jour' : 'Créer'"
-                class="p-button-primary"
-                [loading]="isLoading"
-                [disabled]="recipeForm.invalid || isLoading">
+                class="p-button-primary" 
+                [disabled]="recipeForm.invalid">
         </button>
       </div>
   

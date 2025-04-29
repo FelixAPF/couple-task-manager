@@ -39,9 +39,7 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
   private confirmationService = inject(ConfirmationService);
   private dialogService = inject(DialogService); // Inject DialogService
   // Removed FormBuilder
-
-  // --- State Signals ---
-  isLoading = signal(true);
+ 
   household: WritableSignal<Household | null> = signal(null);
   allWaysToCare = signal<WayToCare[]>([]);
   currentUser: HouseholdMember | null = null;
@@ -89,8 +87,7 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
 
   // Removed initializeForm() method
 
-  loadInitialData(): void {
-    this.isLoading.set(true);
+  loadInitialData(): void { 
     this.householdService.retrieveHousehold()
       .pipe(takeUntil(this.destroy$)) // Unsubscribe on destroy
       .subscribe({
@@ -99,14 +96,11 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
           this.currentUser = hh?.currentUser ?? null; // Set current user ID
           if (hh) {
             this.loadWaysToCare();
-          } else {
-            this.isLoading.set(false);
-          }
+          } 
         },
         error: (err) => {
           console.error("Error loading household data:", err);
           this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les informations du foyer.' });
-          this.isLoading.set(false);
         }
       });
   } 
@@ -116,13 +110,11 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
       .pipe(takeUntil(this.destroy$)) // Unsubscribe on destroy
       .subscribe({
         next: (items) => {
-          this.allWaysToCare.set(items);
-          this.isLoading.set(false);
+          this.allWaysToCare.set(items); 
         },
         error: (err) => {
           console.error("Error retrieving Ways to Care:", err);
           this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les petites attentions.' });
-          this.isLoading.set(false);
         }
       });
   }

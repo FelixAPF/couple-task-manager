@@ -119,5 +119,24 @@
   },
   "ways-to-care": {
     "title": "Petites Attentions"
+  },
+  "tasks": {
+    "no-tasks-assigned": "Aucune tâche assignée à {{ title }}.",
+    "tasks-unassigned": "Tâches non assignées",
+    "manage-and-assign": "Gestion & Répartition",
+    "create-task": "Créer Tâche",
+    "assign-tasks": "Assigner les tâches"
+  },
+  "meals": {
+    "plan": "Plan Repas",
+    "recipes": "Recettes",
+    "previous-week": "Semaine précédente",
+    "current-week": "Aujourd'hui",
+    "next-week": "Semaine suivante",
+    "no-meal-planned": "Aucun repas prévu",
+    "assign-meal": "Assigner",
+    "modify": "Modifier",
+    "delete": "Supprimer",
+    "move": "Déplacer le repas"
   }
 }

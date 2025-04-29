@@ -32,10 +32,7 @@ export class ToDoListComponent {
   private toDoListService = inject(ToDoListService);
   private dialogService = inject(DialogService);
   private messageService = inject(MessageService);
-  private confirmationService = inject(ConfirmationService);
-
-  // --- State Signals ---
-  isLoading = signal(true);
+  private confirmationService = inject(ConfirmationService); 
   isUpdating = signal<number | null>(null);
   allItems = signal<ToDoItem[]>([]);
   dialogRef: DynamicDialogRef | undefined;
@@ -79,10 +76,8 @@ export class ToDoListComponent {
     this.loadItems();
   }
 
-  loadItems(): void {
-    this.isLoading.set(true);
-    this.toDoListService.retrieveToDoItems()
-      .pipe(finalize(() => this.isLoading.set(false)))
+  loadItems(): void { 
+    this.toDoListService.retrieveToDoItems() 
       .subscribe({
         next: (toDoItems) => {
           const validItems = toDoItems.filter(item => {

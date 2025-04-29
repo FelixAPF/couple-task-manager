@@ -101,7 +101,6 @@ export class MoveMealComponent implements OnInit, AfterViewInit, OnDestroy { // 
     }
     this.mealService.moveMeal(this.providedMeal, this.selectedDate).subscribe({
       next: (response) => {
-        console.log('Meal moved successfully:', response);
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas déplacé avec succès.' });
         this.ref.close(response); // Close the dialog and indicate success
       },

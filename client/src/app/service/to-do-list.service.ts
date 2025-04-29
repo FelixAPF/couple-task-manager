@@ -26,7 +26,6 @@ export class ToDoListService {
     return this.http.delete(`${this.baseUrl}/${toDoItemId}`);
   }
   updateToDoItemStatus(toDoItemId: number, status: ToDoStatus) {
-    console.log("Handling status change", status)
     return this.http.put(`${this.baseUrl}/${toDoItemId}/status/${status}`, null);
   }
 

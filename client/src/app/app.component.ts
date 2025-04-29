@@ -1,6 +1,6 @@
 import { Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { TaskService } from './service/task-service.service';
+import { LoadingService } from './service/loading/loading.service';
 import { SharedModule } from "../app/shared.module"
 import { NavbarComponent } from './header/navbar/navbar.component';
 import { TranslateService } from '@ngx-translate/core';
@@ -15,7 +15,7 @@ import { PluginListenerHandle } from '@capacitor/core';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { routeAnimations } from './animations';
 import { VersionControlService } from './service/version-control.service';
-import { Subscription } from 'rxjs';
+import { asyncScheduler, delay, observeOn, Subscription } from 'rxjs';
 import * as BackEndVersion from "../../version.json";
 import { HouseholdService } from './service/household.service';
 
@@ -34,12 +34,13 @@ export class AppComponent implements OnInit, OnDestroy {
   swipeTransform = 'translateX(0)';
 
   isMobile = false;
+  isLoading = true;
   subscription: Subscription = new Subscription();
   outdatedVersion: boolean = false;
   acknowledgeUpdate: boolean = false;
   
 
-  constructor(private translate: TranslateService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
+  constructor(private translate: TranslateService, private loadingService: LoadingService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
   private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private householdService: HouseholdService) {
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
@@ -57,7 +58,7 @@ export class AppComponent implements OnInit, OnDestroy {
     await AppUpdate.openAppStore();
   }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.checkScreenWidth();
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
@@ -74,6 +75,23 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
       this.householdService.setHousehold(household);
     }));
+
+    this.subscription.add(this.loadingService.loadingSub
+      .pipe(
+        observeOn(asyncScheduler) // <--- Add this pipe with observeOn
+      )
+      .subscribe((state) => {
+        this.isLoading = state; // Assign the state after async scheduling
+      })
+    );
+
+    const language = localStorage.getItem('language');
+    if (language) {
+      this.translate.use(language);
+    } else {
+      localStorage.setItem('language', 'fr');
+      this.translate.use('fr');
+    }
   }
 
   async setupBackButtonListener(): Promise<void> {

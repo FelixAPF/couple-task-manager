@@ -17,6 +17,7 @@ import { MealCardComponent } from '../meal-card/meal-card.component';
 import { MoveMealComponent } from '../move-meal/move-meal.component';
 import { HammerModule } from '@angular/platform-browser';
 import { Input, Output } from '@angular/core';
+import { LoadingService } from '../../service/loading/loading.service';
 
 export interface WeekDay {
   id: number;
@@ -57,7 +58,6 @@ export class MealsListComponent implements OnInit {
 
 
   weekDays: WeekDay[] = [];
-  isLoading: boolean = true;
   errorLoading: boolean = false;
   private mealsMap = new Map<string, Meal>();
   swipeTransform = 'translateX(0)';
@@ -71,13 +71,14 @@ export class MealsListComponent implements OnInit {
     private messageService: MessageService,
     private datePipe: DatePipe,
     private router: Router,
-    private dialogService: DialogService, 
+    private dialogService: DialogService,
+    private loadingService: LoadingService,
     @Inject(LOCALE_ID) private locale: string
   ) {
 
   }
 
-  
+
 
   ngOnInit(): void {
     this.goToCurrentWeek();
@@ -123,10 +124,10 @@ export class MealsListComponent implements OnInit {
 
   swipeNavigation(event: any) {
     switch (event.direction) {
-      case 4: 
+      case 4:
         this.previousWeek();
         break;
-      case 2: 
+      case 2:
         this.nextWeek();
         break;
       default:
@@ -138,11 +139,9 @@ export class MealsListComponent implements OnInit {
     this.selectedDay = null; // Reset selected day when loading new meals
     if (this.weekDays.length === 0) {
        console.error("Cannot load meals, week days not generated.");
-       this.isLoading = false;
        return;
     }
 
-    this.isLoading = true;
     this.errorLoading = false;
     this.mealsMap.clear(); // Clear previous week's data
 
@@ -169,12 +168,8 @@ export class MealsListComponent implements OnInit {
           // Use the same ISO format for lookup
           day.meal = this.mealsMap.get(day.isoDate);
         });
-
-        this.isLoading = false;
       },
       error: (err) => {
-        this.isLoading = false;
-        this.errorLoading = true;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger le plan de repas.' });
         console.error("Error loading meals:", err);
       }
@@ -231,8 +226,6 @@ export class MealsListComponent implements OnInit {
 
   private removeMeal(meal: Meal): void {
     if (!meal.id) return;
-    // Optional: Show loading state on the specific card
-    this.isLoading = true; // Or a more specific indicator
     this.mealService.deleteMeal(meal.id).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas supprimé.' });
@@ -244,10 +237,8 @@ export class MealsListComponent implements OnInit {
           day.meal = undefined;
         }
         this.mealsMap.delete(mealIsoDate!); // Also remove from map
-        this.isLoading = false;
       },
       error: (err) => {
-        this.isLoading = false;
         console.error("Error deleting meal:", err);
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer le repas.' });
       }
@@ -288,7 +279,7 @@ export class MealsListComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: "Impossible d'ouvrir la fenêtre d'assignation." });
     }
   }
-  
+
   today: string = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
   getPositionInCycle(date: Date): "first" | "today" | "last" | null {
     const cycleStartUTC = Date.UTC(2024, 0, 1); // 1er janvier 2024 à minuit UTC
@@ -297,23 +288,22 @@ export class MealsListComponent implements OnInit {
     if(compareDate === this.today){
       return "today";
     }  // Today check
-  
+
     const msInDay = 24 * 60 * 60 * 1000;
     const daysSinceStart = Math.floor((dateUTC - cycleStartUTC) / msInDay);
-  
+
     if (daysSinceStart < 0) return null;
-  
+
     const cycleLength = 14;
     const position = daysSinceStart % cycleLength;
-  
+
     if (position === 0) return "first";
     if (position === cycleLength - 1) return "last";
     return null;
   }
-  
+
   // Updated to accept a Meal object (can be partial for creation, needs ID for update)
   private saveAssignedMeal(meal: Meal): void {
-    this.isLoading = true; // Or a more specific loading indicator
 
     const saveObservable = meal.id
         ? this.mealService.updateMeal(meal) // Use update if ID exists
@@ -326,7 +316,6 @@ export class MealsListComponent implements OnInit {
         this.loadMealsForWeek(); // Reload the week view
       },
       error: (err) => {
-        this.isLoading = false;
         const action = meal.id ? 'mettre à jour' : 'assigner';
         console.error(`Error ${action} meal:`, err);
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `Impossible de ${action} le repas.` });
@@ -360,9 +349,9 @@ export class MealsListComponent implements OnInit {
       if (result) {
         this.loadMealsForWeek(); // Reload the week view
       }
-    }); 
+    });
 
-    
+
   }
 
 }

@@ -3,7 +3,7 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { finalize, forkJoin, skipWhile, Subject, takeUntil } from 'rxjs'; // Import forkJoin, Subject, takeUntil
+import { finalize, forkJoin, skipWhile, Subject, take, takeUntil } from 'rxjs'; // Import forkJoin, Subject, takeUntil
 
 // PrimeNG Modules (Import via SharedModule or directly if standalone)
 import { SharedModule } from '../shared.module';
@@ -24,6 +24,7 @@ import { HouseholdMember } from '../model/household'; // <-- Import HouseholdMem
 import { TaskPeriodService } from '../service/task-period.service';
 import { TaskAssignmentService } from '../service/task-assignment.service';
 import { TaskList } from '../model/task-list';
+import { LoadingService } from '../service/loading/loading.service';
 // Remove Assignee enum import if present: import { Assignee } from '../model/task-period';
 
 // Define the new interface for column data
@@ -55,32 +56,17 @@ export class TasksComponent implements OnInit, OnDestroy {
   private messageService = inject(MessageService);
   private initialLoadDone = false;
 
-
-  // --- State ---
-  isLoading = false; // Add loading state if needed
+  
   memberTaskColumns: MemberTaskColumn[] = []; // Array to drive the *ngFor
   private destroy$ = new Subject<void>(); // For unsubscribing
   accordionsOpenByDefault: number[] = []
 
-  constructor(private taskPeriodService: TaskPeriodService, private dialogService: DialogService){}
+  constructor(private taskPeriodService: TaskPeriodService, private dialogService: DialogService, private loadingService: LoadingService){}
 
 
   // --- Lifecycle Hooks ---
   ngOnInit(): void {
     this.loadInitialData();
-  
-    this.householdService.household$
-      .pipe(
-        takeUntil(this.destroy$),
-        skipWhile(() => !this.initialLoadDone) // Ignore emissions until initial load is done
-      )
-      .subscribe(household => {
-        if (household) {
-          this.loadTaskData();
-        } else {
-          this.memberTaskColumns = [];
-        }
-      });
   }
   
 
@@ -91,9 +77,8 @@ export class TasksComponent implements OnInit, OnDestroy {
 
   // --- Data Loading ---
   loadInitialData(): void {
-    this.isLoading = true;
     this.householdService.retrieveHousehold()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(takeUntil(this.destroy$), take(1))
       .subscribe({
         next: (household) => {
           if (household) {
@@ -101,14 +86,10 @@ export class TasksComponent implements OnInit, OnDestroy {
             this.initialLoadDone = true;
             this.accordionsOpenByDefault =Array.from(Array(household.members.length + 1).keys()); // Open all accordions by default
           } else {
-            console.warn("No household found...");
-            this.isLoading = false;
             this.memberTaskColumns = [];
           }
         },
         error: (err) => {
-          // ... error handling
-          this.isLoading = false;
         }
       });
   }
@@ -118,11 +99,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   }
 
   loadTaskData(): void {
-    this.isLoading = true;
     this.taskListService.retrieveWithUnassigned()
-      .pipe(
-        finalize(() => this.isLoading = false)
-      )
       .subscribe({
         next: (taskLists: TaskList[]) => {
           this.memberTaskColumns = taskLists.map(taskList => ({

@@ -11,12 +11,14 @@ import localeFrCa from '@angular/common/locales/fr-CA';
 import { routes } from './app.routes';
 import * as Hammer from 'hammerjs';
 
+
 import { HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule } from '@angular/platform-browser';
 import { DialogService } from 'primeng/dynamicdialog';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { registerLocaleData } from '@angular/common';
 import localeFrCA from '@angular/common/locales/fr-CA'; // <-- Import locale data
+import { LoadingInterceptor } from './interceptor/loading.interceptor';
 
 registerLocaleData(localeFrCA, 'fr-CA'); // <-- Register with the correct ID 'fr-CA'
 
@@ -71,6 +73,11 @@ export const appConfig: ApplicationConfig = {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
+      multi: true, // Required because multiple interceptors can exist
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: LoadingInterceptor,
       multi: true, // Required because multiple interceptors can exist
     }
   ]

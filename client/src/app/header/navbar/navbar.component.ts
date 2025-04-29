@@ -32,6 +32,7 @@ export class NavbarComponent {
 
   useLanguage(language: string): void {
     this.translate.use(language);
+    localStorage.setItem('language', language);
   }
 
 toggleMenu(): void {

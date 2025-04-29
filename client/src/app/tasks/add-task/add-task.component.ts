@@ -102,7 +102,6 @@ export class AddTaskComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.config.data);
     this.buildFormGroup(this.config.data.taskToEdit, this.config.data.assignee);
 
     this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {

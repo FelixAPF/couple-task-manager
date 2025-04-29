@@ -13,13 +13,9 @@
             (click)="openAddDialog()"
             class="p-button-success">
     </button>
-  </div>
+  </div> 
 
-  <div *ngIf="isLoading()" class="flex justify-center items-center py-10">
-    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
-  </div>
-
-  <div *ngIf="!isLoading()">
+  <div >
 
     <p-card styleClass="mb-6">
       <ng-template pTemplate="title">

@@ -5,15 +5,9 @@
 <div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
   <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
     {{'ways-to-care.title' | translate}}
-  </h2>
-
-  <!-- Loading State -->
-  <div *ngIf="isLoading()" class="flex justify-center items-center py-10">
-    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
-  </div>
-
+  </h2> 
   <!-- Content Area -->
-  <div *ngIf="!isLoading() && household()">
+  <div *ngIf="household()">
 
     <!-- Grid for Member Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -82,7 +76,7 @@
   </div><!-- End Content Area -->
 
   <!-- No Household Data State (no changes) -->
-  <div *ngIf="!isLoading() && !household()" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border rounded-lg bg-surface-100 dark:bg-surface-800">
+  <div *ngIf="!household()" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border rounded-lg bg-surface-100 dark:bg-surface-800">
     <i class="pi pi-info-circle mr-2"></i>
     Les informations du foyer ne sont pas disponibles.
   </div>

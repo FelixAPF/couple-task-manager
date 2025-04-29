@@ -16,24 +16,24 @@
     "AMAZON": "Amazon",
     "MUNCHIZ": "Munchiz",
     "POTAGER": "Potager",
-    "AUTRE": "Autre"
+    "AUTRE": "Other"
   },
   "SHOPPING_ITEM_TYPE": {
-    "GROCERY": "Épicerie",
-    "HOME": "Article ménager",
-    "OTHER": "Autre"
+    "GROCERY": "Grocery",
+    "HOME": "Home supply",
+    "OTHER": "Other"
   },
   "ROOM": {
     "": "Pièce",
-    "BATHROOM": "Salle de bain",
-    "BEDROOM": "Chambre",
-    "EVERYWHERE": "Partout",
-    "HALLWAY": "Couloir",
-    "KITCHEN": "Cuisine",
-    "LIVING_ROOM": "Salon",
-    "OFFICE": "Bureau",
-    "OUTSIDE": "Dehors",
-    "OTHER": "Autre"
+    "BATHROOM": "Bathroom",
+    "BEDROOM": "Bedroom",
+    "EVERYWHERE": "Everywhere",
+    "HALLWAY": "Hallway",
+    "KITCHEN": "Kitchen",
+    "LIVING_ROOM": "Living Room",
+    "OFFICE": "Office",
+    "OUTSIDE": "Outside",
+    "OTHER": "Other"
   },
   "FREQUENCY": {
     "LABEL": "Frequency",
@@ -119,5 +119,24 @@
   },
   "ways-to-care": {
     "title": "Ways to Care"
+  },
+  "tasks": {
+    "no-tasks-assigned": "No task assigned to {{ title }}.",
+    "tasks-unassigned": "Tasks unassigned",
+    "manage-and-assign": "Manage & Assign",
+    "create-task": "Create Task",
+    "assign-tasks": "Assign Tasks"
+  },
+  "meals": {
+    "plan": "Meals Plan",
+    "recipes": "Recipes",
+    "previous-week": "Previous Week",
+    "current-week": "Today",
+    "next-week": "Next Week",
+    "no-meal-planned": "No meal planned",
+    "assign-meal": "Assign",
+    "modify": "Modify",
+    "delete": "Delete",
+    "move": "Move meal"
   }
 }

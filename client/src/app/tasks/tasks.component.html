@@ -2,12 +2,12 @@
 
   <div class="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 gap-4">
     <h2 class="text-xl sm:text-2xl font-semibold text-surface-800 dark:text-surface-100 text-center sm:text-left">
-      Gestion & Répartition
+      {{'tasks.manage-and-assign' | translate}}
     </h2>
     <div class="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
       <p-button
         (click)="create()"
-        label="Assigner les tâches"
+        [label]="'tasks.assign-tasks'|translate"
         icon="pi pi-user-plus"
         styleClass="p-button-outlined p-button-secondary flex-1 sm:flex-none"
         pTooltip="Planifier les tâches pour une nouvelle période"
@@ -15,20 +15,16 @@
       </p-button>
       <p-button
         (click)="openNewTaskDialog()"
-        label="Créer Tâche"
+        [label]="'tasks.create-task'|translate"
         icon="pi pi-plus"
         styleClass="p-button-raised p-button-primary flex-1 sm:flex-none"
         pTooltip="Créer une nouvelle définition de tâche"
         tooltipPosition="bottom">
       </p-button>
     </div>
-  </div>
+  </div> 
 
-  <div *ngIf="isLoading" class="flex justify-content-center align-items-center py-10 flex-grow">
-    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
-  </div>
-
-  <p-accordion *ngIf="!isLoading" [value]="accordionsOpenByDefault" [multiple]="true" styleClass="flex flex-col gap-4 h-full">
+  <p-accordion [value]="accordionsOpenByDefault" [multiple]="true" styleClass="flex flex-col gap-4 h-full">
     <p-accordion-panel [value]="i" *ngFor="let column of memberTaskColumns; let i = index; trackBy: trackByMemberId">
       <p-accordion-header>
         <div class="flex items-center gap-3">
@@ -40,7 +36,7 @@
             onError="this.src='assets/placeholder.jpg'"
           />
           <i *ngIf="!column.member" class="pi pi-question-circle text-xl text-surface-500 dark:text-surface-400"></i>
-          <p class="text-xl font-semibold text-surface-800 dark:text-surface-100">{{ column.member?.name ?? 'Tâches non assignées' }}</p>
+          <p class="text-xl font-semibold text-surface-800 dark:text-surface-100">{{ column.member?.name ?? ('tasks.tasks-unassigned' | translate) }}</p>
           <p-badge *ngIf="column.tasks?.length" [value]="column.tasks.length" styleClass="ml-auto"></p-badge>
         </div>
       </p-accordion-header>
@@ -55,7 +51,7 @@
         </app-assignee-task-list>
       </p-accordion-content>
     </p-accordion-panel>
-    <div *ngIf="!isLoading && memberTaskColumns.length === 0" class="flex flex-col items-center justify-center text-center py-10 flex-grow">
+    <div *ngIf="memberTaskColumns.length === 0" class="flex flex-col items-center justify-center text-center py-10 flex-grow">
       <i class="pi pi-users text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
       <p class="text-lg font-medium text-surface-600 dark:text-surface-300 mb-1">Aucun membre dans le foyer.</p>
       <p class="text-sm text-surface-500 dark:text-surface-400">Invitez un membre ou créez des tâches non assignées.</p>

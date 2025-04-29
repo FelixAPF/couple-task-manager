@@ -40,8 +40,7 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
   private messageService = inject(MessageService);
 
   // --- State ---
-  household$: Observable<Household | null>;
-  isLoading = signal(false);
+  household$: Observable<Household | null>; 
   uploadingMemberId = signal<number | null>(null);
   // Store selected files temporarily, mapped by member ID
   selectedFiles: { [memberId: number]: File } = {};
@@ -51,12 +50,10 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.household$ = this.householdService.household$; // Use correct observable name
     // Ensure household data is loaded if not already present
-    if (!this.householdService.getCurrentHousehold()) { // Use correct method name
-      this.isLoading.set(true);
+    if (!this.householdService.getCurrentHousehold()) { // Use correct method name 
       this.householdService.retrieveHousehold() // Use correct method name
         .pipe(
-            takeUntil(this.destroy$),
-            finalize(() => this.isLoading.set(false))
+            takeUntil(this.destroy$) 
         )
         .subscribe({
             error: (err) => {

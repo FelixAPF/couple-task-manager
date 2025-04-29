@@ -86,10 +86,12 @@ public class MealService implements IGenericService<Meal, MealDto> {
     }
 
     public MealDto moveMealToNewDate(Long id, Date newDate, CTMUser user) {
+        Meal currentMeal = repository.findByDateAndHouseholdId(newDate, user.getHousehold().getId());
         Meal meal = repository.findById(id).orElseThrow(()-> new NoSuchElementException("Meal with id " + id + " not found."));
-        if (!meal.getHousehold().getId().equals(user.getHousehold().getId())) {
+        if (!meal.getHousehold().getId().equals(user.getHousehold().getId()) || !currentMeal.getHousehold().getId().equals(user.getHousehold().getId())) {
             throw new IllegalArgumentException("This meal is not part of your household");
         }
+        repository.delete(currentMeal);
         meal.setDate(newDate);
         return new MealDto(repository.save(meal));
     }

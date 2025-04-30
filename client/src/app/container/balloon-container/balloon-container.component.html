@@ -1,0 +1,11 @@
+<div class="balloon-wrapper">
+    <div class="content-projection">
+      <ng-content></ng-content>
+    </div>
+    <div *ngFor="let balloon of balloons"
+         class="balloon"
+         [style]="balloon.style">
+      <div class="balloon-body" [style.background-color]="balloon.color"></div>
+      <div class="balloon-string"></div>
+    </div>
+  </div>

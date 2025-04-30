@@ -82,10 +82,7 @@ export class MoveMealComponent implements OnInit, AfterViewInit, OnDestroy { // 
   // Renamed to avoid conflict with potential template event handlers
   onDateSelectedFromList(day: WeekDay | null) {
     this.selectedDate = day?.date || null;
-    this.selectedMeal = day?.meal || null; // Assuming you want to capture the selected meal as well
-    console.log('Selected date from dynamic MealsListComponent:', this.selectedDate);
-    // Optional: Trigger change detection if needed for UI updates based on selection
-    // this.cdr.detectChanges();
+    this.selectedMeal = day?.meal || null; // Assuming you want to capture the selected meal as well 
   }
 
   submitMove() {

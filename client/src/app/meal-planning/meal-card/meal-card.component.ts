@@ -3,10 +3,11 @@ import { Meal } from '../../model/meals';
 import { SharedModule } from '../../shared.module';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { RecipeDialogComponent } from '../recipe-dialog/recipe-dialog.component';
+import { BalloonContainerComponent } from '../../container/balloon-container/balloon-container.component';
 
 @Component({
   selector: 'app-meal-card',
-  imports: [SharedModule],
+  imports: [SharedModule, BalloonContainerComponent],
   templateUrl: './meal-card.component.html',
   styleUrl: './meal-card.component.css',
   encapsulation: ViewEncapsulation.None // <-- this is critical
@@ -17,8 +18,11 @@ export class MealCardComponent {
   @Input() meal: Meal | undefined;
   @Input() public customTemplate!: TemplateRef<HTMLElement>;
   @Input() public noMealPlanned!: TemplateRef<HTMLElement>;
+  @Input() public isBirthday: boolean | undefined = false;
   recipeDialogRef: DynamicDialogRef | undefined;
   @Input() borderHighlightClass: string = ''; // Input to receive the border class
+
+  isHouseholdMemberBirthday: boolean = false;
 
 
   get recipeName(){

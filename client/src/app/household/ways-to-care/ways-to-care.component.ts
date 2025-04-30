@@ -134,8 +134,7 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
     this.dialogRef.onClose
       .pipe(takeUntil(this.destroy$)) // Unsubscribe on destroy
       .subscribe((newItem?: WayToCare) => {
-        if (newItem) {
-            console.log('Adding new item received from dialog:', newItem);
+        if (newItem) { 
             // Add the new item (backend should have added assignee info)
             this.allWaysToCare.update(items =>
                 [...items, newItem].sort((a, b) => a.title.localeCompare(b.title)) // Optional sort
@@ -161,8 +160,7 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
     this.dialogRef.onClose
       .pipe(takeUntil(this.destroy$)) // Unsubscribe on destroy
       .subscribe((updatedItem?: WayToCare) => {
-        if (updatedItem) {
-            console.log('Updating item received from dialog:', updatedItem);
+        if (updatedItem) { 
             // Update the item in the list
             this.allWaysToCare.update(items =>
                 items.map(i => i.id === updatedItem.id ? updatedItem : i)

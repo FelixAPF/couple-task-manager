@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment';
 import { Household, HouseholdMember, UpdateHouseholdSettings } from '../model/household';
-import { BehaviorSubject, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -87,6 +87,15 @@ export class HouseholdService {
   getCurrentMembers(): HouseholdMember[] | null {
     const currentHousehold = this.householdSubject.getValue();
     return currentHousehold?.members ?? null;
+  }
+
+  getHouseholdMembersBirthdays(): Observable<(Date | null)[]> {
+    return this.householdSubject.pipe(map(household => {
+      if (!household) return [];
+      return household.members.map(member => {
+        return member.birthDay ? new Date(member.birthDay) : null;
+      });
+    } ) );
   }
 
   

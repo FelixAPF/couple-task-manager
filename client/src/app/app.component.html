@@ -16,7 +16,7 @@
     </p-progressSpinner>
   
     <div class="relative flex flex-col flex-grow overflow-y-auto pt-16" [hidden]="isLoading"
-         [@routeAnimations]="prepareRoute(outlet)"> <div *ngIf="outdatedVersion && !acknowledgeUpdate" ...>
+         [@routeAnimations]="prepareRoute(outlet)"> <div *ngIf="outdatedVersion && !acknowledgeUpdate">
           <div *ngIf="outdatedVersion && !acknowledgeUpdate"
           class="bg-yellow-100 dark:bg-yellow-900/60 border-l-4 border-yellow-500 dark:border-yellow-400
                  text-yellow-800 dark:text-yellow-100

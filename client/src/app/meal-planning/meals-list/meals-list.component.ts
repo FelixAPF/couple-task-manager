@@ -18,6 +18,8 @@ import { MoveMealComponent } from '../move-meal/move-meal.component';
 import { HammerModule } from '@angular/platform-browser';
 import { Input, Output } from '@angular/core';
 import { LoadingService } from '../../service/loading/loading.service';
+import { HouseholdService } from '../../service/household.service';
+import { HouseholdMember } from '../../model/household';
 
 export interface WeekDay {
   id: number;
@@ -26,6 +28,7 @@ export interface WeekDay {
   borderClass: string;
   isoDate: string;
   meal?: Meal;
+  isBirthday?: boolean;
 }
 
 @Component({
@@ -61,6 +64,7 @@ export class MealsListComponent implements OnInit {
   errorLoading: boolean = false;
   private mealsMap = new Map<string, Meal>();
   swipeTransform = 'translateX(0)';
+  householdMembersBirthdays: undefined | Date[] = undefined; // Store household members' birthdays
 
   currentWeekStartDate!: Date;
   formattedWeekRange: string = '';
@@ -73,6 +77,7 @@ export class MealsListComponent implements OnInit {
     private router: Router,
     private dialogService: DialogService,
     private loadingService: LoadingService,
+    private householdService: HouseholdService,
     @Inject(LOCALE_ID) private locale: string
   ) {
 
@@ -81,7 +86,36 @@ export class MealsListComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.goToCurrentWeek();
+    this.householdService.retrieveHousehold().subscribe(household => {
+      if (household?.members) {
+        this.householdMembersBirthdays = household.members
+          .map((member: HouseholdMember) => {
+            if (!member.birthDay) {
+              return null; // Or handle as needed
+            }
+            try {
+              const birthday = new Date(member.birthDay); // Original method
+              
+              if (isNaN(birthday.getTime())) { // Check if Date is invalid
+                console.error("Invalid Date parsed for member:", member, "Raw value:", member.birthDay);
+                return null;
+              }
+              birthday.setFullYear(new Date().getFullYear()); 
+              birthday.setHours(0, 0, 0, 0); 
+              return birthday;
+    
+            } catch (error) {
+                return null;
+            }
+          })
+          .filter((date): date is Date => date !== null); // Filter out any nulls from mapping/errors 
+    
+        this.goToCurrentWeek();
+        
+      } else { 
+        this.householdMembersBirthdays = []; // Ensure it's an empty array
+      }
+    });
   }
 
   displayWeek(): void {
@@ -99,26 +133,42 @@ export class MealsListComponent implements OnInit {
     for (let i = 0; i < 7; i++) {
       const dayDate = new Date(monday);
       dayDate.setDate(monday.getDate() + i);
+      dayDate.setHours(0, 0, 0, 0); // Ensure dayDate is also normalized
 
       const formatted = this.datePipe.transform(dayDate, 'EEEE d MMMM', this.locale) || '';
       const iso = this.datePipe.transform(dayDate, 'yyyy-MM-dd') || '';
+
+      // --- Birthday Check Logic ---
+      let isBirthday = false; // Start assuming it's not a birthday
+      if (this.householdMembersBirthdays) {
+        const currentMonth = dayDate.getMonth(); // 0-11
+        const currentDayOfMonth = dayDate.getDate(); // 1-31
+
+        // Check if any birthday in the array matches the current month and day
+        isBirthday = this.householdMembersBirthdays.some(birthday => 
+            birthday.getMonth() === currentMonth && birthday.getDate() === currentDayOfMonth
+        );
+      }
+      // --- End Birthday Check ---
 
       this.weekDays.push({
         id: i,
         date: dayDate,
         formattedDate: formatted.charAt(0).toUpperCase() + formatted.slice(1),
-        borderClass: this.getPositionInCycle(dayDate) || '',
+        borderClass: this.enableCardModification ? this.getPositionInCycle(dayDate) || '' : '',
         isoDate: iso,
-        meal: undefined
-      });
+        meal: undefined,
+        isBirthday 
+      }); 
 
       if (i === 6) {
         weekEndDate = dayDate;
       }
-    }
+    } 
+
 
     const startFormatted = this.datePipe.transform(this.currentWeekStartDate, 'd MMM', this.locale);
-    const endFormatted = this.datePipe.transform(weekEndDate, 'd MMM yyyy', this.locale);
+    const endFormatted = this.datePipe.transform(weekEndDate, 'd MMM', this.locale); // Removed extra 'yyyy'
     this.formattedWeekRange = `Semaine du ${startFormatted} au ${endFormatted}`;
   }
 
@@ -133,6 +183,17 @@ export class MealsListComponent implements OnInit {
       default:
         break;
     }
+  }
+
+  getBorderClass(day: WeekDay): string {
+    if(!this.enableCardModification){
+      if(day.id === this.selectedDay?.id){
+        return "selected";
+      }
+      return "";
+    } 
+    
+    return day.borderClass; // Default
   }
 
   loadMealsForWeek(): void {
@@ -327,7 +388,6 @@ export class MealsListComponent implements OnInit {
     if (this.enableDateSelection) {
       this.selectedDay = day;
       this.weekDaySelect.emit(day); // Emit the selected date to the parent component
-      console.log("Selected date:", day.date);
     } else {
       this.selectedDay = null; // Reset if not enabled
     }

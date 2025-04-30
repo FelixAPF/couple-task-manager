@@ -1,0 +1,99 @@
+:host {
+    display: block; /* Ensure the host takes up space */
+    position: relative; /* Context for absolutely positioned balloons */
+    /* REMOVED width/height/min-height - size will come from content */
+    /* overflow: hidden; */ /* Allow balloons to float outside bounds */
+  }
+
+  .balloon-wrapper {
+    /* Let wrapper take size of content */
+    position: relative; 
+    width: 100%; /* Take width of host */
+    /* REMOVED absolute positioning and height */
+    overflow: visible; 
+  }
+
+  .content-projection {
+    /* Content takes its natural size */
+    position: relative; 
+    z-index: 1; 
+    /* REMOVED width/height */
+  }
+
+  .balloon {
+    position: absolute;
+    /* Removed fixed bottom positioning */
+    width: 50px;  /* Base width */
+    height: 65px; /* Base height */
+    transform-origin: bottom center;
+    /* Apply TWO animations: floatAway (delayed) and gentleBob (also delayed randomly) */
+    animation:
+      floatAway var(--duration, 10s) ease-in-out var(--delay, 0s) infinite,
+      gentleBob 3s ease-in-out var(--bob-delay, 0s) infinite; /* Apply random delay to bobbing */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2; /* Ensure balloons float above projected content */
+    pointer-events: none; /* Prevent balloons from interfering with clicks */
+  }
+
+  .balloon-body {
+    width: 100%;
+    height: 100%;
+    /* background-color: red; */ /* REMOVED Default color, will be set by style binding */
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; /* Balloon shape */
+    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2); /* Simple shading */
+    transform: rotateZ(-5deg); /* Slight initial tilt */
+    position: relative; /* Needed for the ::after pseudo-element (knot) */
+  }
+
+  /* Small "knot" at the bottom of the balloon */
+  .balloon-body::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; /* Position slightly below the body */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: inherit; /* Inherit balloon color */
+    border-radius: 50%;
+    filter: brightness(85%); /* Make knot slightly darker */
+  }
+
+  .balloon-string {
+    width: 1px; /* Keep it thin */
+    height: 40px; /* String length */
+    background-color: #bdbdbd; /* Lighter grey color for string */
+    margin-top: 1px; /* Adjust slightly to connect visually below the knot */
+  }
+
+  /* Animation Keyframes - Main floating away animation */
+  @keyframes floatAway {
+    /* 0% state is now implicitly handled by the element's base styles and the gentleBob animation */
+    25% {
+      transform: translateY(-25vh) translateX(calc(var(--sway, 0px) * 0.5)) rotateZ(5deg) scale(1.05);
+    }
+    50% {
+      transform: translateY(-50vh) translateX(calc(var(--sway, 0px) * -0.3)) rotateZ(-8deg) scale(1);
+    }
+    75% {
+      transform: translateY(-75vh) translateX(calc(var(--sway, 0px) * 0.7)) rotateZ(10deg) scale(0.95);
+    }
+    100% {
+      transform: translateY(calc(-100vh - 100px)) translateX(var(--sway, 0px)) rotateZ(-10deg) scale(0.9);
+      opacity: 0; /* Fade out completely */
+    }
+  }
+
+  /* Animation: Subtle continuous movement */
+  @keyframes gentleBob {
+    0%, 100% {
+      /* Match initial slight tilt */
+      transform: rotateZ(-5deg) translateY(0);
+    }
+    50% {
+      /* Bob up slightly and rotate the other way */
+      transform: rotateZ(3deg) translateY(-5px);
+    }
+  }

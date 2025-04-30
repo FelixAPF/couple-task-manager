@@ -15,6 +15,7 @@ export interface HouseholdMember {
     name: string;
     email: string;
     imageUrl?: string;
+    birthDay?: Date;
 }
 
 export interface WayToCare {

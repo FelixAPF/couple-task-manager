@@ -12,6 +12,20 @@ import { MealService } from '../../../service/meal.service';
 import { Subscription } from 'rxjs';
 import { MealCardComponent } from '../../../meal-planning/meal-card/meal-card.component';
 import { DatePipe } from '@angular/common';
+import { BalloonContainerComponent } from '../../../container/balloon-container/balloon-container.component';
+import { HouseholdService } from '../../../service/household.service';
+
+export function areTwoFullDatesEqual(date1: Date, date2: Date): boolean {
+  return date1.getFullYear() === date2.getFullYear() && 
+         date1.getMonth() === date2.getMonth() && 
+         date1.getDate() === date2.getDate();
+}
+
+export function areTwoDatesEqual(date1: Date, date2: Date): boolean {
+  return date1.getMonth() === date2.getMonth() && 
+         date1.getDate() === date2.getDate();
+}
+
 
 @Component({
   selector: 'app-dashboard',
@@ -30,6 +44,7 @@ export class DashboardComponent {
   todayDate: Date = new Date();
   todayNormalizedDate: Date = new Date();
   formattedTodayDate: string = '';
+  isTodayBirthday: boolean = false;
 
   hideCompletedTasks: boolean = false;
   collapseCompletedTasks: string = '0';
@@ -37,7 +52,7 @@ export class DashboardComponent {
   subscription: Subscription = new Subscription();
   
 
-  constructor(private taskService: TaskService, private mealService: MealService, private datePipe: DatePipe, @Inject(LOCALE_ID) private locale: string){}
+  constructor(private taskService: TaskService, private householdService: HouseholdService, private mealService: MealService, private datePipe: DatePipe, @Inject(LOCALE_ID) private locale: string){}
 
   initializeStoredDescription(property: any, propertyName: string){
     const storedValue = localStorage.getItem(propertyName);
@@ -68,6 +83,15 @@ export class DashboardComponent {
 
     this.retrieveExpiredTasks();
     this.retrieveTodayMeal();
+
+    this.subscription.add(this.householdService.getHouseholdMembersBirthdays().subscribe((birthdays) => {
+      this.isTodayBirthday = birthdays.some(birthday => { 
+        if(!birthday) return false; // Skip if date is not definedc
+        const birthdayDate = new Date(birthday);
+        return areTwoDatesEqual(birthdayDate, this.todayDate);
+      });
+      
+    }));
   }
 
   retrieveTodayMeal(): void {

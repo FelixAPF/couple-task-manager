@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -32,6 +33,8 @@ public class CTMUser implements UserDetails {
     private UserRole role;
 
     private String imageUrl;
+
+    private Date birthDay;
 
     @ManyToOne
     @JsonBackReference("household-users")

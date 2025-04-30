@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest # Use a Linux runner
 
     steps:
+    # --- Initial Setup ---
     - name: Checkout Repository Code
       uses: actions/checkout@v4
 
@@ -23,7 +24,21 @@ jobs:
         distribution: 'temurin' # Or another distribution
         java-version: '21' # For Android build and Java build
 
-    # --- Docker Setup ---
+    # --- Client Build ---
+    - name: Install Client Project Dependencies
+      run: npm install
+      working-directory: ./client
+
+    - name: Build Angular Web App
+      run: npx ng build --configuration=production
+      working-directory: ./client
+      
+          # --- Add Debug Step Here ---
+    - name: List Angular Build Output
+      run: ls -lR client/dist/
+      continue-on-error: true # Don't fail workflow if 'dist'
+      
+    # --- Docker Setup & Build/Push ---
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -33,19 +48,10 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }} # Use the Access Token secret
 
-    # --- Build Java Backend BEFORE Docker build ---
     - name: Build Java Backend with Maven
       run: mvn package -DskipTests # Build the JAR, skip tests for speed
       working-directory: ./server # Run Maven inside the 'server' directory
-# --- Add this Step to check output ---
-    - name: Build Angular Web App
-      run: npx ng build --configuration=production
-      working-directory: ./client
-      
-    - name: List Angular Build Output
-      run: ls -lR client/dist/
-      continue-on-error: true # Don't fail workflow if 'dist' doesn't exist yet
-    # --- Build and Push Backend Docker Image ---
+
     - name: Build and push Backend image
       uses: docker/build-push-action@v6
       with:
@@ -53,7 +59,6 @@ jobs:
         push: true
         tags: felixapelletierr/couple-task-manager:latest # Your backend image tag
 
-    # --- Build and Push Frontend Docker Image ---
     - name: Build and push Frontend image
       uses: docker/build-push-action@v6
       with:
@@ -61,26 +66,16 @@ jobs:
         push: true
         tags: felixapelletierr/couple-task-manager-front-end:latest # Your frontend image tag
 
-    # --- Start Client/Android Build Steps ---
-    - name: Install Client Project Dependencies
-      run: npm install
-      working-directory: ./client
-
-    - name: Build Angular Web App
-      run: npx ng build --configuration=production
-      working-directory: ./client
-      
+    # --- Start Android Build Steps ---
     - name: Sync Capacitor Android Assets
       run: npx cap sync android
       working-directory: ./client
 
-    # --- Android Signing Setup ---
     - name: Decode Keystore
       run: |
         mkdir -p client/android/app
         echo "${{ secrets.ANDROID_SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > client/android/app/release.jks
 
-    # --- Build Android ---
     - name: Set execute permissions for gradlew
       run: chmod +x gradlew
       working-directory: ./client/android

@@ -29,9 +29,11 @@ jobs:
 
     - name: Build Angular Web App
       run: npx ng build --configuration=production # Use your production build command
-
+      working-directory: ./client
+      
     - name: Sync Capacitor Android Assets
       run: npx cap sync android
+      working-directory: ./client
 
     # --- Signing Setup ---
     - name: Decode Keystore

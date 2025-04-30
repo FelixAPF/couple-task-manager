@@ -1,6 +1,6 @@
 <div class="p-dialog-content"> <!-- Add structure -->
     <p *ngIf="providedMeal">
-      Déplacer le repas : <strong>{{ providedMeal.recipe?.name || 'Repas inconnu' }}</strong>
+      Déplacer le repas : <strong>{{ providedMeal.recipe.name || 'Repas inconnu' }}</strong>
     </p>
     <p *ngIf="providedMeal">
       Date actuelle : <strong>{{ providedMeal.date | date:'EEEE d MMMM yyyy':'':'fr-CA' }}</strong>

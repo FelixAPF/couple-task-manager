@@ -53,7 +53,7 @@
                <small *ngIf="item.description" class="text-surface-500 dark:text-surface-400">{{ item.description }}</small>
                <div class="flex gap-2 text-xs text-surface-500 dark:text-surface-400 mt-1" *ngIf="item.location || item.cost != null">
                   <span *ngIf="item.location"><i class="pi pi-map-marker mr-1"></i>{{item.location}}</span>
-                   <span *ngIf="item.cost != null"> <i class="pi pi-dollar mr-1"></i>{{ (item.cost ?? 0) === 0 ? ('to-do-list.free' | translate) : (item.cost | currency:'CAD':'symbol':'1.2-2':'fr-CA') }} </span>
+                   <span *ngIf="item.cost != null"> <i class="pi pi-dollar mr-1"></i>{{ item.cost === 0 ? ('to-do-list.free' | translate) : (item.cost | currency:'CAD':'symbol':'1.2-2':'fr-CA') }} </span>
                </div>
             </div>
           </div>

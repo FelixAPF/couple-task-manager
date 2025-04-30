@@ -43,5 +43,6 @@ export const routes: Routes = [
             { path: 'to-do', component: ToDoListComponent, canActivate: [authGuard] },
         ]
     },
-    
+    { path: '**', redirectTo: '/heroes', pathMatch: 'full' },
+
 ];

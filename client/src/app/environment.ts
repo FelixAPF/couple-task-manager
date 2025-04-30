@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiUrl: "https://couple-task-manager-1.onrender.com/"
+    apiUrl: "https://server.coupletaskmanager.com/"
 }

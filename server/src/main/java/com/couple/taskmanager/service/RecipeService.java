@@ -6,12 +6,11 @@ import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.dto.RecipeDto;
 import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.RecipeRepository;
+import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class RecipeService implements IGenericService<Recipe, RecipeDto> {
@@ -19,6 +18,8 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
     RecipeRepository repository;
     @Autowired
     HouseholdRepository householdRepository;
+
+    Map<Long, List<RecipeDto>> recipeDtoMap = new HashMap<>();
 
 
     @Override
@@ -28,7 +29,14 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
 
     @Override
     public List<RecipeDto> list(Long householdId, CTMUser user) {
-        return repository.findAllByHouseholdId(user.getHousehold().getId()).stream().map(RecipeDto::new).toList();
+        List<RecipeDto> recipeDtos;
+        if(recipeDtoMap.containsKey(householdId)){
+            recipeDtos = recipeDtoMap.get(householdId);
+        } else {
+            recipeDtos = repository.findAllByHouseholdId(user.getHousehold().getId()).stream().map(RecipeDto::new).toList();
+            recipeDtoMap.put(householdId, recipeDtos);
+        }
+        return recipeDtos;
     }
 
     @Override
@@ -38,7 +46,10 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
         }
         Household household = householdRepository.findById(user.getHousehold().getId()).orElseThrow(() -> new NoSuchElementException("No household with id "));
         recipe.setHousehold(household);
-        return new RecipeDto(this.repository.save(recipe));
+
+        RecipeDto recipeDto = new RecipeDto(repository.save(recipe));
+        synchronizeHouseholdMapData(household.getId());
+        return recipeDto;
     }
 
     @Override
@@ -48,6 +59,7 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
             throw new IllegalArgumentException("Household is not yours");
         }
         repository.delete(recipeToDelete);
+        synchronizeHouseholdMapData(householdId);
     }
 
     @Override
@@ -55,20 +67,30 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
         if(recipe.getHousehold() == null){
             recipe.setHousehold(user.getHousehold());
         }
-        return new RecipeDto(repository.save(recipe));
+        RecipeDto recipeDto = new RecipeDto(repository.save(recipe));
+        synchronizeHouseholdMapData(user.getHousehold().getId());
+        return recipeDto;
     }
 
 
     public List<RecipeDto> create(List<Recipe> recipes, CTMUser user) {
+        Household household = householdRepository.findById(user.getHousehold().getId()).orElseThrow(NoSuchElementException::new);
         recipes.forEach(recipe -> {
             if(recipe.getHousehold() == null){
-                recipe.setHousehold(user.getHousehold());
+                recipe.setHousehold(household);
             }
         });
-        return repository.saveAll(recipes).stream().map(RecipeDto::new).toList();
+        List<RecipeDto> list = repository.saveAll(recipes).stream().map(RecipeDto::new).toList();
+        synchronizeHouseholdMapData(user.getHousehold().getId());
+        return list;
     }
 
     public List<RecipeDto> findByRecipeType(String recipeType, CTMUser user) {
         return repository.findByRecipeTypeAndHouseholdId(recipeType, user.getHousehold().getId()).stream().map(RecipeDto::new).toList();
+    }
+
+    private void synchronizeHouseholdMapData(Long householdId){
+        List<Recipe> allByHouseholdId = repository.findAllByHouseholdId(householdId);
+        recipeDtoMap.put(householdId, StreamUtils.mapToList(allByHouseholdId, RecipeDto::new));
     }
 }

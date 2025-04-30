@@ -69,6 +69,6 @@ jobs:
         packageName: com.couple.taskmanager # !!! REPLACE with your actual package name !!!
         releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
         track: internal # Target the Internal Testing track
-        status: completed # Optional: Set rollout status immediately
+        status: draft # Optional: Set rollout status immediately
         # Optional: Add release notes, version code handling etc.
         # releaseName: ${{ github.run_number }} # Example release name

@@ -38,9 +38,8 @@ jobs:
     # --- Signing Setup ---
     - name: Decode Keystore
       run: |
-        echo "${{ secrets.ANDROID_SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > android/app/release.jks
-      # This uses the Base64 secret and decodes it into the keystore file
-      # The build.gradle expects it at android/app/release.jks
+        mkdir -p client/android/app # <<< Add this line to ensure directory exists
+        echo "${{ secrets.ANDROID_SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > client/android/app/release.jks
 
     # --- Build Android ---
     - name: Set execute permissions for gradlew

@@ -67,7 +67,7 @@ jobs:
       with:
         serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         packageName: com.coupletaskmanager.app # !!! REPLACE with your actual package name !!!
-        releaseFiles: android/app/build/outputs/bundle/release/*.aab
+        releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
         track: internal # Target the Internal Testing track
         status: completed # Optional: Set rollout status immediately
         # Optional: Add release notes, version code handling etc.

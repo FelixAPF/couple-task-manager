@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin' # Or another distribution
-        java-version: '21' # For Android build and potentially Java build
+        java-version: '21' # For Android build and Java build
 
     # --- Docker Setup ---
     - name: Set up Docker Buildx
@@ -32,6 +32,11 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }} # Use the Access Token secret
+
+    # --- Build Java Backend BEFORE Docker build ---
+    - name: Build Java Backend with Maven
+      run: mvn package -DskipTests # Build the JAR, skip tests for speed
+      working-directory: ./server # Run Maven inside the 'server' directory
 
     # --- Build and Push Backend Docker Image ---
     - name: Build and push Backend image
@@ -86,7 +91,7 @@ jobs:
       uses: r0adkll/upload-google-play@v1
       with:
         serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-        packageName: com.couple.taskmanager
+        packageName: com.couple.taskmanager # !!! REPLACE with your actual package name !!!
         releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
         track: internal
         status: draft

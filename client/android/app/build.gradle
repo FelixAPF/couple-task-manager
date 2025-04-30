@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
-def incrementVersionCode = {
-  def buildGradle = file('build.gradle')
+// Function to increment versionCode
+def incrementVersionCode = { buildGradle ->
   def content = buildGradle.getText()
   def versionCodeRegex = "(versionCode\\s+)(\\d+)"
   def matcher = content =~ versionCodeRegex
@@ -11,12 +11,58 @@ def incrementVersionCode = {
     content = content.replaceFirst(versionCodeRegex, "\$1${newVersionCode}")
     buildGradle.write(content)
     println "Incremented versionCode to: $newVersionCode"
+    return newVersionCode // Return the new code
   } else {
     println "Warning: versionCode not found in build.gradle"
+    return -1 // Indicate failure or not found
   }
 }
 
-incrementVersionCode()
+// Function to increment versionName (e.g., 1.97 -> 1.98)
+def incrementVersionName = { buildGradle ->
+  def content = buildGradle.getText()
+  // Regex to find versionName "X.Y" or "X.Y.Z" etc.
+  def versionNameRegex = /(versionName\s+")([^"]+)(")/
+  def matcher = content =~ versionNameRegex
+  if (matcher.find()) {
+    def fullMatch = matcher[0][0] // e.g., versionName "1.97"
+    def prefix = matcher[0][1]    // e.g., versionName "
+    def oldVersionName = matcher[0][2] // e.g., 1.97
+    def suffix = matcher[0][3]    // e.g., "
+
+    def parts = oldVersionName.tokenize('.') // Split by dot -> ['1', '97']
+    if (parts.size() > 0) {
+      try {
+        def lastPartIndex = parts.size() - 1
+        def lastPartInt = parts[lastPartIndex].toInteger()
+        parts[lastPartIndex] = (lastPartInt + 1).toString() // Increment last part
+        def newVersionName = parts.join('.') // Join back -> 1.98
+        content = content.replaceFirst(Pattern.quote(fullMatch), "${prefix}${newVersionName}${suffix}")
+        buildGradle.write(content)
+        println "Incremented versionName to: $newVersionName"
+        return newVersionName // Return the new name
+      } catch (NumberFormatException e) {
+        println "Warning: Could not parse the last part of versionName '$oldVersionName' as an integer."
+        return oldVersionName // Return original on failure
+      }
+    } else {
+      println "Warning: versionName '$oldVersionName' could not be split into parts."
+      return oldVersionName // Return original on failure
+    }
+  } else {
+    println "Warning: versionName not found or in unexpected format in build.gradle"
+    return null // Indicate failure or not found
+  }
+}
+
+// --- Call the increment functions ---
+// Note: These modify the build.gradle file in place during the build process.
+// The changes are NOT automatically committed back to your repository.
+def buildGradleFile = file('build.gradle')
+incrementVersionCode(buildGradleFile)
+incrementVersionName(buildGradleFile)
+// --- End of increment functions call ---
+
 
 android {
   namespace "com.couple.taskmanager"
@@ -37,11 +83,13 @@ android {
     applicationId "com.couple.taskmanager"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode 168
-    versionName "1.97"
+    // Values below are the 'base' values before the script runs.
+    // The script will read this file, increment, and write back.
+    versionCode 168 // Base code, script will increment from whatever is read
+    versionName "1.98" // Base name, script will increment from whatever is read
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')
-    setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate)
+    setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate) // Note: Uses the base versionName for filename
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     aaptOptions {
       ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
@@ -83,5 +131,4 @@ try {
     apply plugin: 'com.google.gms.google-services'
   }
 } catch(Exception e) {
-  logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
-}
+  logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work"

@@ -25,6 +25,7 @@ jobs:
 
     - name: Install Project Dependencies
       run: npm install
+      working-directory: ./client
 
     - name: Build Angular Web App
       run: ng build --configuration=production # Use your production build command

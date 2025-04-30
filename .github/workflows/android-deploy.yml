@@ -17,11 +17,11 @@ jobs:
       with:
         node-version: '20' # Use your project's Node.js version
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin' # Or another distribution
-        java-version: '17' # Android builds often require JDK 17 now
+        java-version: '21' # Android builds often require JDK 17 now
 
     - name: Install Project Dependencies
       run: npm install

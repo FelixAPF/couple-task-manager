@@ -16,19 +16,29 @@ def incrementVersionCode = {
   }
 }
 
-// Call the incrementVersionCode function during the configuration phase
 incrementVersionCode()
 
 android {
   namespace "com.couple.taskmanager"
   compileSdk rootProject.ext.compileSdkVersion
+
+  signingConfigs {
+    release {
+      if (System.getenv("SIGNING_STORE_PASSWORD") != null) {
+        storeFile file("release.jks")
+        storePassword System.getenv("SIGNING_STORE_PASSWORD")
+        keyAlias System.getenv("SIGNING_KEY_ALIAS")
+        keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+      }
+    }
+  }
+
   defaultConfig {
     applicationId "com.couple.taskmanager"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    // versionCode will be read from the modified file
-    versionCode 164
-    versionName "1.96"
+    versionCode 167
+    versionName "1.97"
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')
     setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate)
@@ -37,8 +47,10 @@ android {
       ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
   }
+
   buildTypes {
     release {
+      signingConfig signingConfigs.release
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
@@ -73,32 +85,3 @@ try {
 } catch(Exception e) {
   logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

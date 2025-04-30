@@ -85,8 +85,7 @@ android {
     targetSdkVersion rootProject.ext.targetSdkVersion
     // Values below are the 'base' values before the script runs.
     // The script will read this file, increment, and write back.
-    versionCode 168 // Base code, script will increment from whatever is read
-    versionName "1.98" // Base name, script will increment from whatever is read
+    versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1    versionName "1.98" // Base name, script will increment from whatever is read
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')
     setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate) // Note: Uses the base versionName for filename

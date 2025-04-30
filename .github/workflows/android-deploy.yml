@@ -76,7 +76,8 @@ jobs:
       working-directory: ./client/android
 
     - name: Build Android Release App Bundle
-      run: ./gradlew bundleRelease
+      # Pass the GitHub run number as the versionCode property
+      run: ./gradlew bundleRelease -PversionCode=${{ github.run_number }}
       working-directory: ./client/android
       env:
         SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}

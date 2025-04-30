@@ -115,11 +115,8 @@ jobs:
         # Use the output from the 'extract_version' step
         APP_VERSION="${{ steps.extract_version.outputs.app_version }}"
         echo "Posting version $APP_VERSION to endpoint..."
-        # Make the POST request with the version as plain text data
-        # Adjust URL if needed (e.g., to server.coupletaskmanager.com)
-        curl -X POST \
-             -H "Content-Type: text/plain" \
-             --data "$APP_VERSION" \
-             https://coupletaskmanager.com/version # <<< Verify this URL is correct
+        # Make the POST request with the version appended to the URL path
+        # Ensure your endpoint https://server.coupletaskmanager.com/version/ expects this format
+        curl -X POST https://server.coupletaskmanager.com/version/"$APP_VERSION"
       # Optional: Add 'continue-on-error: true' if this step failing shouldn't stop the workflow
       # continue-on-error: true

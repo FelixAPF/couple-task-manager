@@ -42,9 +42,16 @@ jobs:
         echo "${{ secrets.ANDROID_SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > client/android/app/release.jks
 
     # --- Build Android ---
-    - name: Set execute permissions for gradlew
-      run: chmod +x android/gradlew
-      working-directory: . # Run from root
+    - name: Debug Before Chmod Gradlew
+      run: |
+        pwd
+        echo "--- Listing client/android/ ---"
+        ls -la client/android/
+      working-directory: . # Run from root first
+
+    - name: Set execute permissions for gradlew # Your existing step
+      run: chmod +x gradlew
+      working-directory: ./client/android
 
     - name: Build Android Release App Bundle
       run: ./gradlew bundleRelease

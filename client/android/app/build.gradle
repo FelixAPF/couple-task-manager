@@ -1,80 +1,20 @@
 apply plugin: 'com.android.application'
 
-// Function to increment versionCode
-def incrementVersionCode = { buildGradle ->
-  def content = buildGradle.getText()
-  def versionCodeRegex = "(versionCode\\s+)(\\d+)"
-  def matcher = content =~ versionCodeRegex
-  if (matcher.find()) {
-    def oldVersionCode = matcher[0][2].toInteger()
-    def newVersionCode = oldVersionCode + 1
-    content = content.replaceFirst(versionCodeRegex, "\$1${newVersionCode}")
-    buildGradle.write(content)
-    println "Incremented versionCode to: $newVersionCode"
-    return newVersionCode // Return the new code
-  } else {
-    println "Warning: versionCode not found in build.gradle"
-    return -1 // Indicate failure or not found
-  }
-}
-
-// Function to increment versionName (e.g., 1.97 -> 1.98)
-def incrementVersionName = { buildGradle ->
-  def content = buildGradle.getText()
-  // Regex to find versionName "X.Y" or "X.Y.Z" etc.
-  def versionNameRegex = /(versionName\s+")([^"]+)(")/
-  def matcher = content =~ versionNameRegex
-  if (matcher.find()) {
-    def fullMatch = matcher[0][0] // e.g., versionName "1.97"
-    def prefix = matcher[0][1]    // e.g., versionName "
-    def oldVersionName = matcher[0][2] // e.g., 1.97
-    def suffix = matcher[0][3]    // e.g., "
-
-    def parts = oldVersionName.tokenize('.') // Split by dot -> ['1', '97']
-    if (parts.size() > 0) {
-      try {
-        def lastPartIndex = parts.size() - 1
-        def lastPartInt = parts[lastPartIndex].toInteger()
-        parts[lastPartIndex] = (lastPartInt + 1).toString() // Increment last part
-        def newVersionName = parts.join('.') // Join back -> 1.98
-        content = content.replaceFirst(Pattern.quote(fullMatch), "${prefix}${newVersionName}${suffix}")
-        buildGradle.write(content)
-        println "Incremented versionName to: $newVersionName"
-        return newVersionName // Return the new name
-      } catch (NumberFormatException e) {
-        println "Warning: Could not parse the last part of versionName '$oldVersionName' as an integer."
-        return oldVersionName // Return original on failure
-      }
-    } else {
-      println "Warning: versionName '$oldVersionName' could not be split into parts."
-      return oldVersionName // Return original on failure
-    }
-  } else {
-    println "Warning: versionName not found or in unexpected format in build.gradle"
-    return null // Indicate failure or not found
-  }
-}
-
-// --- Call the increment functions ---
-// Note: These modify the build.gradle file in place during the build process.
-// The changes are NOT automatically committed back to your repository.
-def buildGradleFile = file('build.gradle')
-incrementVersionCode(buildGradleFile)
-incrementVersionName(buildGradleFile)
-// --- End of increment functions call ---
-
-
 android {
   namespace "com.couple.taskmanager"
   compileSdk rootProject.ext.compileSdkVersion
 
   signingConfigs {
     release {
+      // Read signing configuration from environment variables (set by GitHub Actions secrets)
       if (System.getenv("SIGNING_STORE_PASSWORD") != null) {
-        storeFile file("release.jks")
+        storeFile file("release.jks") // Assumes keystore is placed here by the workflow
         storePassword System.getenv("SIGNING_STORE_PASSWORD")
         keyAlias System.getenv("SIGNING_KEY_ALIAS")
         keyPassword System.getenv("SIGNING_KEY_PASSWORD")
+      } else {
+        // Optional: Add configuration for local builds if needed, or simply omit
+        // logger.warn("Release signing configuration not found in environment variables.")
       }
     }
   }
@@ -83,12 +23,19 @@ android {
     applicationId "com.couple.taskmanager"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    // Values below are the 'base' values before the script runs.
-    // The script will read this file, increment, and write back.
-    versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1    versionName "1.98" // Base name, script will increment from whatever is read
-    def date = new Date();
+
+    // Read versionCode from the project property passed by GitHub Actions (-PversionCode=...).
+    // Default to 1 if the property is not provided (e.g., for local builds).
+    versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
+
+    // Set versionName manually here. Update this string when you release a new user-facing version.
+    versionName "1.98"
+
+    // Use the defined versionName to set the archive base name
+    def date = new Date()
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')
-    setProperty("archivesBaseName", "CoupleTaskManager" + "_" + versionName + "_"+formattedDate) // Note: Uses the base versionName for filename
+    archivesBaseName = "CoupleTaskManager_${versionName}_${formattedDate}" // Simplified assignment
+
     testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     aaptOptions {
       ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
@@ -97,17 +44,32 @@ android {
 
   buildTypes {
     release {
+      // Ensure the release build type uses the signing config defined above
       signingConfig signingConfigs.release
-      minifyEnabled false
+      minifyEnabled false // Keep as is, or enable if desired
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
   }
-}
+
+  // Ensure compileOptions are set if needed, especially if targeting specific Java features
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17 // Match the JDK used for compilation if needed
+    targetCompatibility JavaVersion.VERSION_17 // Match the JDK used for compilation if needed
+  }
+  // If using Kotlin
+  // kotlinOptions {
+  //    jvmTarget = '17'
+  // }
+
+} // End of android block
 
 repositories {
   flatDir{
     dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
   }
+  // Ensure google() and mavenCentral() are also present if not inherited
+  // google()
+  // mavenCentral()
 }
 
 dependencies {
@@ -130,5 +92,7 @@ try {
     apply plugin: 'com.google.gms.google-services'
   }
 } catch(Exception e) {
-  logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+  // Use logger.warn or logger.info for Gradle logging
+  logger.warn("google-services.json not found, google-services plugin not applied. Push Notifications might not work.")
 }
+

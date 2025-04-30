@@ -87,6 +87,15 @@ jobs:
         SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
         SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
+        
+    - name: Extract App Version Name
+      id: extract_version # Give the step an ID to reference its output
+      run: |
+        # Extract versionName value from build.gradle using grep and sed
+        VERSION_NAME=$(grep "versionName \"" client/android/app/build.gradle | sed -n 's/.*versionName "\(.*\)".*/\1/p')
+        echo "Extracted Version Name: $VERSION_NAME"
+        # Set the version name as an output variable for this step
+        echo "app_version=$VERSION_NAME" >> $GITHUB_OUTPUT
 
     # --- Upload to Google Play ---
     - name: Upload Android App Bundle to Internal Testing
@@ -97,3 +106,15 @@ jobs:
         releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
         track: internal
         status: draft
+
+    - name: Post Version to Endpoint
+      run: |
+        # Use the output from the 'extract_version' step
+        APP_VERSION="${{ steps.extract_version.outputs.app_version }}"
+        echo "Posting version $APP_VERSION to endpoint..."
+        # Make the POST request with the version as plain text data
+        # Adjust URL if needed (e.g., to server.coupletaskmanager.com)
+        curl -X POST \
+             -H "Content-Type: text/plain" \
+             --data "$APP_VERSION" \
+             https://coupletaskmanager.com/version

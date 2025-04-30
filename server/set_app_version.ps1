@@ -1,3 +1,5 @@
+#Requires -Version 5.1 # Specify minimum PowerShell version if needed
+
 # --- Configuration ---
 $gradleFilePath = "C:\Users\Felix\Documents\Projects\couple-task-manager\client\android\app\build.gradle"
 $jsonFilePath = "C:\Users\Felix\Documents\Projects\couple-task-manager\client\version.json"
@@ -27,7 +29,7 @@ Write-Host "Making POST request to: $apiUrl" -ForegroundColor Cyan
 try {
     # Using Invoke-RestMethod for simplicity, assuming no complex headers/body needed beyond the URL path
     # Use -Method POST. If the endpoint expects data, add -Body or adjust ContentType
-    Invoke-RestMethod -Uri $apiUrl -Method Post -ErrorAction Stop 
+    Invoke-RestMethod -Uri $apiUrl -Method Post -ErrorAction Stop
     Write-Host "POST request successful." -ForegroundColor Green
 } catch {
     Write-Warning "Failed to make POST request to $apiUrl."
@@ -56,9 +58,12 @@ try {
         # Replace the captured version part (group 2) with the new version
         $newGradleContent = $gradleContent -replace $pattern, ('${1}' + $newVersion + '${3}') # Use captured groups $1 and $3
 
-        # Write the modified content back to the file
-        Set-Content -Path $gradleFilePath -Value $newGradleContent -Force -Encoding UTF8
-        Write-Host "build.gradle updated successfully." -ForegroundColor Green
+        # --- MODIFIED LINE: Specify UTF8 encoding WITHOUT BOM ---
+        # Get UTF8 encoding object without BOM signature
+        $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($false) 
+        # Write the modified content back to the file using the specified encoding
+        Set-Content -Path $gradleFilePath -Value $newGradleContent -Force -Encoding $utf8NoBomEncoding
+        Write-Host "build.gradle updated successfully (UTF8 without BOM)." -ForegroundColor Green
     } else {
         Write-Warning "Pattern 'versionName ""...""' not found in $gradleFilePath. File not updated."
     }
@@ -88,9 +93,12 @@ try {
     # Convert back to JSON format (with indentation)
     $newJsonContent = $jsonObject | ConvertTo-Json -Depth 5 # Adjust depth if needed
 
-    # Write the modified JSON back to the file
-    Set-Content -Path $jsonFilePath -Value $newJsonContent -Force -Encoding UTF8
-    Write-Host "version.json updated successfully." -ForegroundColor Green
+    # --- MODIFIED LINE: Specify UTF8 encoding WITHOUT BOM ---
+    # Get UTF8 encoding object without BOM signature
+    $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($false)
+    # Write the modified JSON back to the file using the specified encoding
+    Set-Content -Path $jsonFilePath -Value $newJsonContent -Force -Encoding $utf8NoBomEncoding
+    Write-Host "version.json updated successfully (UTF8 without BOM)." -ForegroundColor Green
 
 } catch {
     Write-Error "Failed to update $jsonFilePath."

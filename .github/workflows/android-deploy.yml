@@ -55,7 +55,7 @@ jobs:
 
     - name: Build Android Release App Bundle
       run: ./gradlew bundleRelease
-      working-directory: ./android # Run gradle from the android directory
+      working-directory: ./client/android # Run gradle from the android directory
       env: # Make secrets available as environment variables for build.gradle
         SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
         SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}

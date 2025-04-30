@@ -1,4 +1,4 @@
-apply plugin: 'com.android.application'
+﻿apply plugin: 'com.android.application'
 
 android {
   namespace "com.couple.taskmanager"
@@ -95,4 +95,6 @@ try {
   // Use logger.warn or logger.info for Gradle logging
   logger.warn("google-services.json not found, google-services plugin not applied. Push Notifications might not work.")
 }
+
+
 

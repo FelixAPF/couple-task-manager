@@ -1,7 +1,7 @@
 <!-- dashboard.component.html -->
 <div class="container p-4 mx-auto flex flex-col gap-6"> <!-- Main container with padding and gap between sections -->
   <div>
-    <app-meal-card [title]="'dashboard.meal-of-the-day'|translate" [isBirthday]="true" [noMealPlanned]="noMealPlanned" [meal]="todayMeal"></app-meal-card>
+    <app-meal-card [title]="'dashboard.meal-of-the-day'|translate" [isBirthday]="isTodayBirthday" [noMealPlanned]="noMealPlanned" [meal]="todayMeal"></app-meal-card>
     <ng-template #noMealPlanned>
       <div class="flex flex-col items-center" routerLink="/meals">
         <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>

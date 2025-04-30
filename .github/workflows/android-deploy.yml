@@ -38,6 +38,10 @@ jobs:
       run: mvn package -DskipTests # Build the JAR, skip tests for speed
       working-directory: ./server # Run Maven inside the 'server' directory
 # --- Add this Step to check output ---
+    - name: Build Angular Web App
+      run: npx ng build --configuration=production
+      working-directory: ./client
+      
     - name: List Angular Build Output
       run: ls -lR client/dist/
       continue-on-error: true # Don't fail workflow if 'dist' doesn't exist yet

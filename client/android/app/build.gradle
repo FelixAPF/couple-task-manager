@@ -37,7 +37,7 @@ android {
     applicationId "com.couple.taskmanager"
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode 167
+    versionCode 168
     versionName "1.97"
     def date = new Date();
     def formattedDate = date.format('yyyy-MM-dd-HHmmss')

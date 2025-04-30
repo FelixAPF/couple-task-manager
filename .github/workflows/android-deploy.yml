@@ -1,4 +1,4 @@
-name: Build and Deploy Android to Internal Testing
+name: Build Docker Images & Deploy Android
 
 on:
   push:
@@ -21,54 +21,72 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin' # Or another distribution
-        java-version: '21' # Android builds often require JDK 17 now
+        java-version: '21' # For Android build and potentially Java build
 
-    - name: Install Project Dependencies
+    # --- Docker Setup ---
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }} # Use the Access Token secret
+
+    # --- Build and Push Backend Docker Image ---
+    - name: Build and push Backend image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./server # Assumes Dockerfile is in the 'server' directory
+        push: true
+        tags: felixapelletierr/couple-task-manager:latest # Your backend image tag
+
+    # --- Build and Push Frontend Docker Image ---
+    - name: Build and push Frontend image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./client # Assumes Dockerfile is in the 'client' directory
+        push: true
+        tags: felixapelletierr/couple-task-manager-front-end:latest # Your frontend image tag
+
+    # --- Start Client/Android Build Steps ---
+    - name: Install Client Project Dependencies
       run: npm install
       working-directory: ./client
 
     - name: Build Angular Web App
-      run: npx ng build --configuration=production # Use your production build command
+      run: npx ng build --configuration=production
       working-directory: ./client
       
     - name: Sync Capacitor Android Assets
       run: npx cap sync android
       working-directory: ./client
 
-    # --- Signing Setup ---
+    # --- Android Signing Setup ---
     - name: Decode Keystore
       run: |
-        mkdir -p client/android/app # <<< Add this line to ensure directory exists
+        mkdir -p client/android/app
         echo "${{ secrets.ANDROID_SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > client/android/app/release.jks
 
     # --- Build Android ---
-    - name: Debug Before Chmod Gradlew
-      run: |
-        pwd
-        echo "--- Listing client/android/ ---"
-        ls -la client/android/
-      working-directory: . # Run from root first
-
-    - name: Set execute permissions for gradlew # Your existing step
+    - name: Set execute permissions for gradlew
       run: chmod +x gradlew
       working-directory: ./client/android
 
     - name: Build Android Release App Bundle
       run: ./gradlew bundleRelease
-      working-directory: ./client/android # Run gradle from the android directory
-      env: # Make secrets available as environment variables for build.gradle
+      working-directory: ./client/android
+      env:
         SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
         SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
 
     # --- Upload to Google Play ---
     - name: Upload Android App Bundle to Internal Testing
-      uses: r0adkll/upload-google-play@v1 # Or use actions/upload-google-play@v1
+      uses: r0adkll/upload-google-play@v1
       with:
         serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-        packageName: com.couple.taskmanager # !!! REPLACE with your actual package name !!!
+        packageName: com.couple.taskmanager
         releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
-        track: internal # Target the Internal Testing track
-        status: draft # Optional: Set rollout status immediately
-        # Optional: Add release notes, version code handling etc.
-        # releaseName: ${{ github.run_number }} # Example release name
+        track: internal
+        status: draft

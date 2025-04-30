@@ -37,7 +37,10 @@ jobs:
     - name: Build Java Backend with Maven
       run: mvn package -DskipTests # Build the JAR, skip tests for speed
       working-directory: ./server # Run Maven inside the 'server' directory
-
+# --- Add this Step to check output ---
+    - name: List Angular Build Output
+      run: ls -lR client/dist/
+      continue-on-error: true # Don't fail workflow if 'dist' doesn't exist yet
     # --- Build and Push Backend Docker Image ---
     - name: Build and push Backend image
       uses: docker/build-push-action@v6

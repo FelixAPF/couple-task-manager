@@ -28,7 +28,7 @@ jobs:
       working-directory: ./client
 
     - name: Build Angular Web App
-      run: ng build --configuration=production # Use your production build command
+      run: npx ng build --configuration=production # Use your production build command
 
     - name: Sync Capacitor Android Assets
       run: npx cap sync android

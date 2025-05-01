@@ -1,15 +1,16 @@
 package com.couple.taskmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
@@ -33,4 +34,28 @@ public class TaskList {
     @JsonBackReference("household-task-lists")
     private Household household;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TaskList taskList = (TaskList) o;
+        return id != null && id.equals(taskList.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : Objects.hash(super.hashCode());
+        // Alternative for transient: return 31;
+    }
+
+    // Optional: Add toString manually if needed, excluding collections
+    @Override
+    public String toString() {
+        return "TaskList{" +
+                "id=" + id +
+                ", userId=" + (user != null ? user.getId() : "null") +
+                ", householdId=" + (household != null ? household.getId() : "null") +
+                // Avoid printing collections or complex objects here
+                '}';
+    }
 }

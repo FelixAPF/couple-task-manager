@@ -9,9 +9,11 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Task {
@@ -47,5 +49,38 @@ public class Task {
     @ManyToOne
     @JsonBackReference("household-tasks")
     private Household household;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        // Use ID for equality check, but handle null IDs (transient entities)
+        // If both IDs are null, they are not equal unless they are the same instance (checked above)
+        // If one ID is null, they are not equal.
+        // If both IDs are non-null, compare them.
+        return id != null && id.equals(task.id);
+    }
+
+    @Override
+    public int hashCode() {
+        // Use ID for hash code. If ID is null (transient entity), use Object's default hash code.
+        // Using a constant like 31 for transient entities is also common.
+        return id != null ? id.hashCode() : Objects.hash(super.hashCode());
+        // Alternative for transient: return 31;
+    }
+
+    // Optional: Add toString manually if needed, excluding collections
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", frequency=" + frequency +
+                ", room=" + room +
+                // Avoid printing collections or complex objects here to prevent SOE
+                '}';
+    }
 
 }

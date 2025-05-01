@@ -39,9 +39,10 @@
   <!-- Title and User Switcher -->
   <div class="flex justify-center items-center gap-3 mb-6">
     <h2 class="text-2xl font-semibold text-center text-surface-800 dark:text-surface-100">
-      {{'my-tasks.my-tasks'|translate : { assigneeName: selectedAssignee?.name } }}
+      {{'my-tasks.my-tasks'|translate : { assigneeName: selectedAssignee?.name || "" } }}
     </h2>
     <i
+    *ngIf="householdMembers && householdMembers.length > 1"
       class="pi pi-users text-primary-500 dark:text-primary-400 cursor-pointer hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200"
       (click)="changeUser()"
       style="font-size: 2rem"

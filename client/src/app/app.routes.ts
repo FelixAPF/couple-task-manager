@@ -13,6 +13,7 @@ import { authGuard } from './guard/authentication/auth.guard';
 import { ManageHouseholdComponent } from './household/manage-household/manage-household.component';
 import { WaysToCareComponent } from './household/ways-to-care/ways-to-care.component';
 import { ToDoListComponent } from './household/to-do-list/to-do-list.component';
+import { WishListComponent } from './household/wish-list/wish-list.component';
 
 export const routes: Routes = [
       // --- Public Routes ---
@@ -41,8 +42,9 @@ export const routes: Routes = [
             { path: 'manage', component: ManageHouseholdComponent, canActivate: [authGuard] },
             { path: 'ways-to-care', component: WaysToCareComponent, canActivate: [authGuard] },
             { path: 'to-do', component: ToDoListComponent, canActivate: [authGuard] },
+            { path: 'wish-list', component: WishListComponent, canActivate: [authGuard] },
         ]
     },
-    { path: '**', redirectTo: '/heroes', pathMatch: 'full' },
+    { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },
 
 ];

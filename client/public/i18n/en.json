@@ -77,7 +77,8 @@
     "dashboard": "Dashboard",
     "tasks": "Tasks",
     "meals": "Meals",
-    "shopping-list": "Shopping List"
+    "shopping-list": "Shopping List",
+    "wish-list": "Wish List"
   },
   "dashboard": {
     "no-meal-planned": "No Meal Planned",
@@ -108,7 +109,8 @@
       "no-household": "The information of the household is not available. Please try to join or create a household.",
       "no-members": "You are the only member of the household for now.",
       "enable-to-do-list": "Enable To Do List",
-      "enable-to-do-list-description": "Create a list of activities, restaurants and other stuff that you wish to try."
+      "enable-to-do-list-description": "Create a list of activities, restaurants and other stuff that you wish to try.",
+      "enable-wish-list": "Enable Wish List"
     }
   },
   "to-do-list": {
@@ -145,5 +147,8 @@
   },
   "general": {
     "update-available": "A new version of the application is available, please update."
+  },
+  "wish-list": {
+    "title": "Wish List"
   }
 }

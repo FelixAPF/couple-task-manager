@@ -63,7 +63,6 @@ export class MyTasksComponent implements OnInit {
 
   ngOnInit(): void {
     this.householdService.retrieveHousehold().subscribe(household => {
-      console.log("Household retrieved:", household);
       this.householdMembers = household?.members || [];
       this.selectedAssigneeId = household?.currentUser.id || 0;
       this.selectedAssignee = household?.currentUser || null;

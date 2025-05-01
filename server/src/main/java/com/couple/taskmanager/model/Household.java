@@ -29,9 +29,14 @@ public class Household {
 
     private Boolean enableToDoList = false;
 
+    private Boolean enableWishList = false;
+
     @OneToMany
     @JsonManagedReference("household-way-to-care")
     private List<WayToCare> waysToCare;
+    @OneToMany
+    @JsonManagedReference("household-wish-list")
+    private List<Item> items;
 
     @OneToMany
     @JsonManagedReference("household-to-do-items")

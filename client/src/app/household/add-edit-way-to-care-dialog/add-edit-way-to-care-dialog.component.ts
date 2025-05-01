@@ -1,5 +1,5 @@
 // c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\household\add-edit-way-to-care-dialog\add-edit-way-to-care-dialog.component.ts
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, EventEmitter, inject, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
@@ -32,11 +32,13 @@ export class AddEditWayToCareDialogComponent implements OnInit {
   isEditing = false;
   isSaving = false;
   currentItemId: number | undefined;
+  labelThirdField: string;
 
   ngOnInit(): void {
     this.isEditing = this.config.data?.isEditing ?? false;
     const itemToEdit: WayToCare | null = this.config.data?.item;
     this.currentItemId = itemToEdit?.id;
+    this.labelThirdField = this.config.data?.labelThirdField ?? 'Location';
 
     this.initializeForm();
 
@@ -78,35 +80,10 @@ export class AddEditWayToCareDialogComponent implements OnInit {
       cost: formValue.cost ?? 0,
       location: formValue.location?.trim() || ''
     };
-
-    const saveObservable = this.isEditing
-      // Cast needed as ID is present and service expects full WayToCare for update
-      ? this.waysToCareService.updateWayToCare(wayToCareData as WayToCare, this.config.data.item.assignee)
-      // Pass data without ID/Assignee for creation
-      : this.waysToCareService.createWayToCare(wayToCareData);
-
-    saveObservable
-      .pipe(finalize(() => this.isSaving = false))
-      .subscribe({
-        next: (savedItem) => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: `Petite attention ${this.isEditing ? 'mise à jour' : 'ajoutée'}.`
-          });
-          // Close the dialog and pass back the saved item
-          this.ref.close(savedItem);
-        },
-        error: (err) => {
-          console.error("Error saving Way to Care:", err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: `Impossible de ${this.isEditing ? 'mettre à jour' : 'sauvegarder'} la petite attention.`
-          });
-          // Keep dialog open on error
-        }
-      });
+    
+    this.isSaving = false;
+    this.ref.close(wayToCareData);
+    
   }
 
   closeDialog(): void {

@@ -31,10 +31,7 @@ export class AddToDoDialogComponent {
       cost: [null],      // Optional, default to null or 0
       location: ['']     // Optional
     });
-
-    this.addToDoForm.get('cost')?.valueChanges.subscribe(value => {
-      console.log('Cost control value changed:', value, typeof value);
-    });
+    
   }
 
   get title() { return this.addToDoForm.get('title'); }

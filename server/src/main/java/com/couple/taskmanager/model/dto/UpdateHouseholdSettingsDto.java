@@ -7,5 +7,6 @@ public class UpdateHouseholdSettingsDto {
     private String name;
     private Boolean enableWaysToCare;
     private Boolean enableToDoList;
+    private Boolean enableWishList;
 
 }

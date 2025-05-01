@@ -7,6 +7,9 @@ export interface Household {
     enableWaysToCare: boolean;
     waysToCare: WayToCare[];
     enableToDoList: boolean;
+    enableWishList: boolean;
+    wishList: Item[];
+    toDoList: ToDoItem[];
     toDoItems: WayToCare[];
 }
 
@@ -25,6 +28,15 @@ export interface WayToCare {
     cost: number;
     location: string;
     assignee: HouseholdMember;
+}
+export interface Item {
+    id?: number;
+    title: string;
+    description: string;
+    cost: number;
+    link: string;
+    bought?: boolean;
+    householdMember: HouseholdMember;
 }
 export interface ToDoItem {
     id?: number;

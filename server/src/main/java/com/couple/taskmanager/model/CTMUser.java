@@ -52,6 +52,10 @@ public class CTMUser implements UserDetails {
     @JsonManagedReference("user-ways-to-care")
     private List<WayToCare> waysToCare;
 
+    @OneToMany
+    @JsonManagedReference("user-wish-list")
+    private List<Item> wishList;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

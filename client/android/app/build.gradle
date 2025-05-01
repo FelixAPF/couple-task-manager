@@ -29,7 +29,7 @@ android {
     versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
 
     // Set versionName manually here. Update this string when you release a new user-facing version.
-    versionName "1.98"
+    versionName "1.99"
 
     // Use the defined versionName to set the archive base name
     def date = new Date()

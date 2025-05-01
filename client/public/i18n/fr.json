@@ -77,7 +77,8 @@
     "dashboard": "Dashboard",
     "tasks": "Tâches",
     "meals": "Repas",
-    "shopping-list": "Liste d'épicerie"
+    "shopping-list": "Liste d'épicerie",
+    "wish-list": "Liste de souhaits"
   },
   "dashboard": {
     "no-meal-planned": "Aucun repas prévu",
@@ -108,7 +109,8 @@
       "no-household": "Les informations du foyer ne sont pas disponibles. Essayez de rejoindre ou créer un foyer.\n",
       "no-members": "Vous êtes le seul membre de ce foyer pour le moment.",
       "enable-to-do-list": "Activer la liste d'activités",
-      "enable-to-do-list-description": "Créez une liste d'activités, restaurants et autres que vous souhaitez essayer."
+      "enable-to-do-list-description": "Créez une liste d'activités, restaurants et autres que vous souhaitez essayer.",
+      "enable-wish-list": "Activer liste de souhaits"
     }
   },
   "to-do-list": {
@@ -145,5 +147,8 @@
   },
   "general": {
     "update-available": "Une nouvelle version de l'application est disponible. Veuillez mettre à jour."
+  },
+  "wish-list": {
+    "title": "Liste de souhait"
   }
 }

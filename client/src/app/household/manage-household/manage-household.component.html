@@ -6,11 +6,6 @@
     {{'manage-household.settings.title' | translate}}
   </h2>
 
-  <!-- Loading State -->
-  <div  class="flex justify-center items-center py-10">
-    <p-progressSpinner styleClass="w-8 h-8" strokeWidth="4"></p-progressSpinner>
-  </div>
-
   <div *ngIf="(household$ | async) as household; else noHousehold">
 
     <!-- Settings Card -->
@@ -26,11 +21,6 @@
             <label for="enableWaysToCare" class="text-surface-700 dark:text-surface-200 cursor-pointer">
                 {{ 'manage-household.settings.enable-ways-to-care' | translate }}
             </label>
-            <!-- Spinner shown during settings update -->
-            <p-progressSpinner *ngIf="isUpdatingSettings()"
-                               styleClass="w-5 h-5 absolute right-0"
-                               strokeWidth="6">
-            </p-progressSpinner>
         </div>
         <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
             {{ 'manage-household.settings.enable-ways-to-care-description' | translate }}
@@ -45,6 +35,21 @@
             </p-checkbox>
             <label for="enableWaysToCare" class="text-surface-700 dark:text-surface-200 cursor-pointer">
                 {{ 'manage-household.settings.enable-to-do-list' | translate }}
+            </label>
+        </div>
+        <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
+            {{ 'manage-household.settings.enable-to-do-list-description' | translate }}
+        </small>
+        <div class="pt-2 flex items-center gap-3 relative">
+            <p-checkbox
+                [binary]="true"
+                inputId="enableWishList"
+                [ngModel]="household.enableWishList"
+                (onChange)="toggleNewSetting($event, household, SETTING_NAMES.WISH_LIST)"
+                [disabled]="isUpdatingSettings()">
+            </p-checkbox>
+            <label for="enableWishList" class="text-surface-700 dark:text-surface-200 cursor-pointer">
+                {{ 'manage-household.settings.enable-wish-list' | translate }}
             </label>
             <!-- Spinner shown during settings update -->
             <p-progressSpinner *ngIf="isUpdatingSettings()"

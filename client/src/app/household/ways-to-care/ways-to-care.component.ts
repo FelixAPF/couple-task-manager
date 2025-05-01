@@ -143,31 +143,30 @@ export class WaysToCareComponent implements OnInit, OnDestroy { // Implement OnD
     });
   }
 
-  openEditDialog(item: WayToCare): void {
-    if (!this.isCurrentUser(item.assignee.id)) return;
-
+  openAddEditDialog(item: WayToCare | null = null): void {
+    
     this.dialogRef = this.dialogService.open(AddEditWayToCareDialogComponent, {
-        header: 'Modifier l\'Attention',
+        header: item?.id ? 'Modifier l\'attention' : 'Ajouter une attention',
         width: '90%',
         modal: true,
         contentStyle: {"overflow": "auto"},
         data: { // Pass data to the dialog
-            isEditing: true,
-            item: item // Pass the item being edited
+            isEditing: item?.id ? true : false,
+            item: item
         }
     });
-
-    this.dialogRef.onClose
-      .pipe(takeUntil(this.destroy$)) // Unsubscribe on destroy
-      .subscribe((updatedItem?: WayToCare) => {
-        if (updatedItem) { 
-            // Update the item in the list
-            this.allWaysToCare.update(items =>
-                items.map(i => i.id === updatedItem.id ? updatedItem : i)
-                     .sort((a, b) => a.title.localeCompare(b.title)) // Optional sort
-            );
-        }
-    });
+    this.dialogRef.onClose.pipe(takeUntil(this.destroy$)).subscribe((newItem?: WayToCare) => {  
+      if(!newItem) return;
+      const saveObservable = (newItem.id !== undefined && newItem.id)
+      // Cast needed as ID is present and service expects full WayToCare for update
+      ? this.waysToCareService.updateWayToCare(newItem as WayToCare, newItem.assignee)
+      : this.waysToCareService.createWayToCare(newItem);
+      saveObservable.subscribe({
+        next: (savedItem) => {
+          this.messageService.add({ severity: 'success', summary: 'Succès', detail: `Attention ${newItem.id ? 'mise à jour' : 'ajoutée'}.` });
+          this.loadWaysToCare();
+      }});
+    })
   }
 
   // --- REMOVED Methods (moved to dialog component) ---

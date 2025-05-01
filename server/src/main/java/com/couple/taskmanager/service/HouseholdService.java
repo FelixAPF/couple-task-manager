@@ -87,6 +87,10 @@ public class HouseholdService {
         if(newEnableToDoList != null && !newEnableToDoList.equals(household.getEnableToDoList())){
             household.setEnableToDoList(newEnableToDoList);
         }
+        Boolean newEnableWishList = updateHouseholdSettingsDto.getEnableWishList();
+        if(newEnableWishList != null && !newEnableWishList.equals(household.getEnableWishList())){
+            household.setEnableWishList(newEnableWishList);
+        }
         return new HouseholdDto(repository.save(household));
     }
 }

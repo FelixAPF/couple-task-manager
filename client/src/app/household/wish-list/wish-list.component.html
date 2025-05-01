@@ -4,7 +4,7 @@
 
 <div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
   <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
-    {{'ways-to-care.title' | translate}}<i class="pi pi-heart-fill ml-2" style="font-size: 1.25rem"></i>
+    {{'wish-list.title' | translate}}<i class="pi pi-shopping-bag ml-2" style="font-size: 1.25rem"></i>
   </h2> 
   <!-- Content Area -->
   <div *ngIf="household()">
@@ -13,7 +13,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
       <!-- Loop through grouped data -->
-      <div *ngFor="let group of groupedWaysToCare(); trackBy: trackByMemberId">
+      <div *ngFor="let group of groupedWishes(); trackBy: trackByMemberId">
         <p-card>
           <ng-template pTemplate="title">
             <!-- ... (Card title content - no changes) ... -->
@@ -49,7 +49,7 @@
                   <h4 class="text-lg font-semibold text-surface-800 dark:text-surface-100 mb-1">{{ item.title }}</h4>
                   <p *ngIf="item.description" class="text-sm text-surface-600 dark:text-surface-300 mb-2">{{ item.description }}</p>
                   <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-surface-500 dark:text-surface-400">
-                    <span *ngIf="item.location"><i class="pi pi-map-marker mr-1"></i>{{ item.location }}</span>
+                    <a href="{{ item.link }}" target="_blank" *ngIf="item.link"><i class="pi pi-link mr-1"></i>{{ item.link }}</a>
                     <span><i class="pi pi-dollar mr-1"></i>{{ (item.cost === 0 || item.cost === null) ? ('to-do-list.free' | translate ) : (item.cost | number:'1.2':'fr-CA') }}</span>
                   </div>
                 </div>

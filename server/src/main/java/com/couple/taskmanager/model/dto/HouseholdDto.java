@@ -22,6 +22,9 @@ public class HouseholdDto {
     private Boolean enableToDoList;
     private List<ToDoItemDto> toDoItems;
 
+    private Boolean enableWishList;
+    private List<ItemDto> wishList;
+
     private HouseholdMemberDto currentUser;
 
     public HouseholdDto(Household household) {
@@ -32,5 +35,7 @@ public class HouseholdDto {
         this.waysToCare = StreamUtils.mapToList(household.getWaysToCare(), WayToCareDto::new);
         this.enableToDoList = household.getEnableToDoList();
         this.toDoItems = StreamUtils.mapToList(household.getToDoItems(), ToDoItemDto::new);
+        this.enableWishList = household.getEnableWishList();
+        this.wishList = StreamUtils.mapToList(household.getItems(), ItemDto::new);
     }
 }

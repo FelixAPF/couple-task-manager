@@ -48,6 +48,7 @@ export class RegisterComponent implements OnInit {
     email: ['', [Validators.required, Validators.email]],
     householdToken: ['', []], 
     createNewHousehold: [false],
+    birthDay: [null, [Validators.required]], 
     newHouseholdName: ['', []], // Add householdName, not required by default
     password: ['', [Validators.required, Validators.minLength(6)]], // Add minLength or other password rules
     confirmPassword: ['', [Validators.required]]
@@ -60,6 +61,7 @@ export class RegisterComponent implements OnInit {
   get createNewHousehold() { return this.registerForm.get('createNewHousehold'); } // Added getter
   get newHouseholdName() { return this.registerForm.get('newHouseholdName'); } // Added getter
   get password() { return this.registerForm.get('password'); }
+  get birthDay() { return this.registerForm.get('birthDay'); } // Added getter for birthDay
   get confirmPassword() { return this.registerForm.get('confirmPassword'); }
 
 
@@ -135,11 +137,12 @@ export class RegisterComponent implements OnInit {
 
     // Exclude confirmPassword before sending to backend
     const { confirmPassword, ...registrationData } = this.registerForm.getRawValue();
-    if(registrationData.email === null || registrationData.password === null || registrationData.name === null) return;
+    if(registrationData.email === null || registrationData.password === null || registrationData.name === null || registrationData.birthDay === null) return;
     const registerRequest: RegisterRequest = {
       name: registrationData.name,
       email: registrationData.email,
       password: registrationData.password,
+      birthDay: registrationData.birthDay, // Include birthDay in the request
       newHouseholdName: registrationData.createNewHousehold ? registrationData.newHouseholdName : null, // Only include if creating a new household
       createNewHousehold: registrationData.createNewHousehold || false,
       householdToken: registrationData.createNewHousehold ? null : registrationData.householdToken // Only include if not creating a new household

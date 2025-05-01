@@ -78,15 +78,17 @@ public class MealService implements IGenericService<Meal, MealDto> {
     }
 
     public MealDto retrieveDtoByDate(Date date, CTMUser user) {
-        return new MealDto(retrieveByDate(date, user));
+        Meal meal = retrieveByDate(date, user);
+        if(meal == null) return null;
+        return new MealDto(meal);
     }
 
     private Meal retrieveByDate(Date date, CTMUser user) {
-        return repository.findByDateAndHouseholdId(date, user.getHousehold().getId());
+        return repository.findByDateAndHouseholdId(date, user.getHousehold().getId()).orElse(null);
     }
 
     public MealDto moveMealToNewDate(Long id, Date newDate, CTMUser user) {
-        Meal currentMeal = repository.findByDateAndHouseholdId(newDate, user.getHousehold().getId());
+        Meal currentMeal = retrieveByDate(newDate, user);
         Meal meal = repository.findById(id).orElseThrow(()-> new NoSuchElementException("Meal with id " + id + " not found."));
         if(meal == null) throw new NoSuchElementException();
         if(currentMeal != null){
@@ -102,7 +104,7 @@ public class MealService implements IGenericService<Meal, MealDto> {
 
     public MealDto swapMealToNewDate(Long id, Date newDate, CTMUser user) {
         Meal meal1 = repository.findById(id).orElseThrow(()-> new NoSuchElementException("Meal with id " + id + " not found."));
-        Meal meal2 = retrieveByDate(newDate, user);
+        Meal meal2 = repository.findByDateAndHouseholdId(newDate, user.getHousehold().getId()).orElseThrow(NoSuchElementException::new);
         if (!meal1.getHousehold().getId().equals(user.getHousehold().getId()) || !meal2.getHousehold().getId().equals(user.getHousehold().getId()) ) {
             throw new IllegalArgumentException("This meal is not part of your household");
         }

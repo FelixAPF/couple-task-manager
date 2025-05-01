@@ -97,6 +97,18 @@
         </small>
       </div>
 
+      <div>
+        <label for="startDate" class="font-semibold">Date de naissance</label>
+        <p-datePicker
+            id="birthDay"
+            formControlName="birthDay"
+            dateFormat="dd/mm/yy"
+            icon="fa-solid fa-cake-candles"
+            [showIcon]="true"
+            appendTo="body">
+        </p-datePicker>
+      </div>
+      
       <!-- Create New Household Checkbox -->
       <div class="flex items-center gap-2">
         <p-checkbox

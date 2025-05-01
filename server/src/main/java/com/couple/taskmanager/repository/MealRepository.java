@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MealRepository extends JpaRepository<Meal, Long> {
@@ -20,7 +21,7 @@ public interface MealRepository extends JpaRepository<Meal, Long> {
     List<Meal> findAllByHouseholdId(Long householdId);
 
     @Query("SELECT m FROM Meal m WHERE m.date = :date AND m.household.id = :householdId")
-    Meal findByDateAndHouseholdId(@Param("date") Date date, @Param("householdId") Long householdId);
+    Optional<Meal> findByDateAndHouseholdId(@Param("date") Date date, @Param("householdId") Long householdId);
 
     @Query("DELETE FROM Meal m WHERE m.id = :mealId AND m.household.id = :householdId")
     void deleteByMealIdAndHouseholdId(Long mealId, Long householdId);

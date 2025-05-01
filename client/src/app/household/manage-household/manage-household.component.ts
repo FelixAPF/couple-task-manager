@@ -195,7 +195,7 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Succès',
-                    detail: 'Paramètre "Petites Attentions" mis à jour.',
+                    detail: 'Paramètre "Liste activités" mis à jour.',
                     life: 3000
                 });
             },

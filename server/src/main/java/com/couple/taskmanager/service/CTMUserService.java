@@ -83,6 +83,7 @@ public class CTMUserService implements UserDetailsService {
         ctmUser.setPassword(passwordEncoder.encode(user.getPassword()));
         ctmUser.setName(user.getName());
         ctmUser.setRole(UserRole.USER);
+        ctmUser.setBirthDay(user.getBirthDay());
 
         Household household = householdRepository.findByToken(user.getHouseholdToken()).orElse(null);
         if(household == null){

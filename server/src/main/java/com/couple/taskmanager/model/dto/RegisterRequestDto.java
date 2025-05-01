@@ -2,6 +2,8 @@ package com.couple.taskmanager.model.dto;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class RegisterRequestDto {
     private String email;
@@ -10,5 +12,6 @@ public class RegisterRequestDto {
     private String householdToken;
     private String newHouseholdName;
     private String name;
+    private Date birthDay;
 
 }

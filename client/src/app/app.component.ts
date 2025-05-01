@@ -62,6 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.checkScreenWidth();
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
+      if(!this.platform.ANDROID) return;
       if(parseFloat(BackEndVersion.version).toFixed(4) !== parseFloat(version).toFixed(4)) {
         this.outdatedVersion = true;
       }

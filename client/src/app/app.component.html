@@ -1,11 +1,4 @@
 <body>
-  <!-- 
-    Main container: 
-    - min-h-screen ensures it takes at least the full viewport height.
-    - flex flex-col sets up the main layout direction.
-    - bg/text colors are applied here.
-  -->
-
   <div class="flex flex-col min-h-screen bg-surface-50 dark:bg-surface-900 text-surface-700 dark:text-surface-200">
 
     <app-navbar></app-navbar>
@@ -17,28 +10,28 @@
   
     <div class="relative flex flex-col flex-grow overflow-y-auto pt-16" [hidden]="isLoading"
          [@routeAnimations]="prepareRoute(outlet)"> <div *ngIf="outdatedVersion && !acknowledgeUpdate">
-          <div *ngIf="outdatedVersion && !acknowledgeUpdate"
-          class="bg-yellow-100 dark:bg-yellow-900/60 border-l-4 border-yellow-500 dark:border-yellow-400
-                 text-yellow-800 dark:text-yellow-100
-                 p-3 mx-2 sm:mx-4
-                 mb-4 md:mb-6
-                 rounded-md shadow-lg
-                 flex items-center justify-between gap-3
-                 relative z-30"> <!-- z-index might not be needed if positioned normally -->
+      <div *ngIf="outdatedVersion && !acknowledgeUpdate"
+         class="bg-yellow-100 dark:bg-yellow-900/60 border-l-4 border-yellow-500 dark:border-yellow-400
+              text-yellow-800 dark:text-yellow-100
+              p-3 mx-2 sm:mx-4
+              mb-4 md:mb-6
+              rounded-md shadow-lg
+              flex items-center justify-between gap-3
+              relative z-30"> <!-- z-index might not be needed if positioned normally -->
 
-       <span class="text-sm font-medium flex items-center" (click)="openAppStore()">
-         <i class="pi pi-exclamation-triangle mr-2 flex-shrink-0"></i>
-         <span>Une nouvelle version de l'application est disponible. Veuillez mettre à jour.</span>
-       </span>
+          <span class="text-sm font-medium flex items-center" (click)="openAppStore()">
+            <i class="pi pi-exclamation-triangle mr-2 flex-shrink-0"></i>
+            <span>{{'general.update-available'|translate}}</span>
+          </span>
 
-       <button pButton pRipple type="button" icon="pi pi-times"
-               class="p-button-rounded p-button-text p-button-sm flex-shrink-0
-                      !text-yellow-800 dark:!text-yellow-100
-                      hover:!bg-yellow-200/50 dark:hover:!bg-yellow-700/50"
-               (click)="closeUpdateDialog()"
-               aria-label="Fermer l'avertissement de mise à jour">
-       </button>
-     </div>
+          <button pButton pRipple type="button" icon="pi pi-times"
+                  class="p-button-rounded p-button-text p-button-sm flex-shrink-0
+                          !text-yellow-800 dark:!text-yellow-100
+                          hover:!bg-yellow-200/50 dark:hover:!bg-yellow-700/50"
+                  (click)="closeUpdateDialog()"
+                  aria-label="Fermer l'avertissement de mise à jour">
+          </button>
+        </div>
       </div>
   
       <router-outlet #outlet="outlet"></router-outlet>

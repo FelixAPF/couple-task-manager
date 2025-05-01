@@ -73,7 +73,11 @@
     "household-invitation-code": "Code d'invitation du foyer",
     "menu": "Menu",
     "ways-to-care": "Petites Attentions",
-    "to-do-list": "Activités à faire"
+    "to-do-list": "Activités à faire",
+    "dashboard": "Dashboard",
+    "tasks": "Tâches",
+    "meals": "Repas",
+    "shopping-list": "Liste d'épicerie"
   },
   "dashboard": {
     "no-meal-planned": "Aucun repas prévu",
@@ -138,5 +142,8 @@
     "modify": "Modifier",
     "delete": "Supprimer",
     "move": "Déplacer le repas"
+  },
+  "general": {
+    "update-available": "Une nouvelle version de l'application est disponible. Veuillez mettre à jour."
   }
 }

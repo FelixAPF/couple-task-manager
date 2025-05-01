@@ -1,26 +1,70 @@
 <nav class="bg-white dark:bg-gray-950 shadow-md fixed top-0 left-0 right-0 z-50 h-16 sm:h-20 flex px-4 sm:px-6">
-  <div class="navbar-inner-container w-full h-full flex justify-between"> <!-- align-items added via CSS -->
+  <!-- Use items-center on the outer container to vertically align all sections -->
+  <div class="navbar-inner-container w-full h-full flex justify-between items-center">
 
     <!-- Left Section (Logo/Brand) -->
     <div class="flex items-center flex-shrink-0"> <!-- items-center here aligns img and text -->
-        <img src="assets/app.png" alt="App Icon" class="h-12 w-12 mr-2">
+        <img src="assets/app.png" alt="App Icon" class="h-6 w-6 sm:h-6 sm:w-6 lg:w-12 lg:h-12 mr-2">
         <div class="font-semibold text-lg text-surface-600 dark:text-surface-300 hidden sm:block">
          Couple Task Manager
         </div>
     </div>
 
+    <!-- Center Section (Desktop Navigation Links) -->
+    <!-- Hidden on mobile (default), flex row on sm and up -->
+    <div class="hidden sm:flex items-center space-x-4 lg:space-x-6">
+      <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
+
+        <!-- Dashboard Link -->
+        <!-- Assuming Dashboard is always available when in a household -->
+        <a routerLink="/dashboard"
+           routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
+           class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
+           [routerLinkActiveOptions]="{exact: true}">
+           <i class="pi pi-th-large text-sm"></i> <!-- Icon: pi-th-large or pi-home -->
+           <span>{{ 'side-menu.dashboard' | translate}}</span> <!-- Ensure translation key exists -->
+        </a>
+
+        <!-- Tasks Link -->
+        <!-- Assuming an 'enableTasks' flag on household object -->
+        <a
+           routerLink="/tasks"
+           routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
+           class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
+           [routerLinkActiveOptions]="{exact: true}">
+           <i class="pi pi-list text-sm"></i> <!-- Icon: pi-list or pi-check-circle -->
+           <span>{{ 'side-menu.tasks' | translate}}</span> <!-- Ensure translation key exists -->
+        </a>
+        <!-- Meals Link -->
+        <!-- Assuming an 'enableMeals' flag on household object -->
+        <a
+           routerLink="/meals"
+           routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
+           class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
+           [routerLinkActiveOptions]="{exact: true}">
+           <i class="pi pi-utensils text-sm"></i> <!-- Icon: pi-utensils or pi-book -->
+           <span>{{ 'side-menu.meals' | translate}}</span> <!-- Ensure translation key exists -->
+        </a>
+
+        <!-- Shopping List Link -->
+        <!-- Assuming an 'enableShoppingList' flag on household object -->
+        <a
+           routerLink="/shopping-list" 
+           routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
+           class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
+           [routerLinkActiveOptions]="{exact: true}">
+           <i class="pi pi-shopping-cart text-sm"></i> <!-- Icon: pi-shopping-cart or pi-tag -->
+           <span>{{ 'side-menu.shopping-list' | translate}}</span> <!-- Ensure translation key exists -->
+        </a>
+
+
+      </ng-container>
+    </div>
+
     <!-- Right Section (Desktop Buttons / Mobile Trigger) -->
-    <div class="flex items-center space-x-4"> <!-- items-center here aligns buttons -->
-      <!-- Desktop Logout Button -->
-      <div class="hidden sm:block">
-        <button *ngIf="isLoggedIn$ | async"
-                pButton pRipple type="button"  icon="pi pi-sign-out"
-                class="p-button-danger p-button-text" (click)="logout()">
-                {{'side-menu.logout' | translate}}
-        </button>
-      </div>
+    <div class="flex items-center space-x-4 flex-shrink-0"> <!-- Added flex-shrink-0 here -->
       <!-- Mobile Menu Button (Hamburger) -->
-      <div class="sm:hidden">
+      <div class="">
         <button pButton pRipple type="button" icon="pi pi-bars" class="p-button-text" (click)="toggleMenu()"></button>
       </div>
     </div>
@@ -28,21 +72,14 @@
   </div>
 </nav>
 
-<!-- Mobile Menu (Keep as is) -->
-<!-- ... -->
-
-
-<!-- Mobile Menu (Keep as is) -->
-<!-- ... -->
-
 
 <!-- Mobile Menu Overlay & Panel (Example Structure) -->
 <!-- Overlay to close menu on outside click -->
-<div *ngIf="isMenuOpen" class="sm:hidden fixed inset-0 z-40" (click)="toggleMenu()"></div>
+<div *ngIf="isMenuOpen" class=" fixed inset-0 z-40" (click)="toggleMenu()"></div>
 
 <!-- Sliding Menu Panel -->
 <div *ngIf="isMenuOpen"
-     class="mobile-menu-panel sm:hidden fixed top-0 right-0 h-full w-64 bg-surface-0 dark:bg-surface-900 shadow-lg z-50 p-4 transition-transform duration-300 ease-in-out transform flex flex-col"
+     class="mobile-menu-panel fixed top-0 right-0 h-full w-64 lg:w-128 sm:w-64 bg-surface-0 dark:bg-surface-900 shadow-lg z-50 p-4 transition-transform duration-300 ease-in-out transform flex flex-col"
      [class.translate-x-0]="isMenuOpen"
      [class.translate-x-full]="!isMenuOpen">
 
@@ -110,7 +147,7 @@
             {{'side-menu.join-household' | translate}}
     </button>
 
-    
+
   <!-- Menu Items -->
   <div class="flex flex-col space-y-2 flex-grow overflow-y-auto">
     <!-- Add other mobile navigation links here -->
@@ -136,6 +173,6 @@
     <!-- *** END MOBILE LOGOUT BUTTON *** -->
 
   </div> <!-- End Menu Items -->
-  
+
   </div>
 </div>

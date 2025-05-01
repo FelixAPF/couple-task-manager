@@ -73,7 +73,11 @@
     "household-invitation-code": "Household Invitation Code",
     "menu": "Menu",
     "ways-to-care": "Ways to Care",
-    "to-do-list": "Activities To Do"
+    "to-do-list": "Activities To Do",
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "meals": "Meals",
+    "shopping-list": "Shopping List"
   },
   "dashboard": {
     "no-meal-planned": "No Meal Planned",
@@ -138,5 +142,8 @@
     "modify": "Modify",
     "delete": "Delete",
     "move": "Move meal"
+  },
+  "general": {
+    "update-available": "A new version of the application is available, please update."
   }
 }

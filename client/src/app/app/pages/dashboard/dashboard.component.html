@@ -1,5 +1,5 @@
 <!-- dashboard.component.html -->
-<div class="container p-4 mx-auto flex flex-col gap-6"> <!-- Main container with padding and gap between sections -->
+<div class="container p-4 mt-2 mx-auto flex flex-col gap-6"> <!-- Main container with padding and gap between sections -->
   <div>
     <app-meal-card [title]="'dashboard.meal-of-the-day'|translate" [isBirthday]="isTodayBirthday" [noMealPlanned]="noMealPlanned" [meal]="todayMeal"></app-meal-card>
     <ng-template #noMealPlanned>

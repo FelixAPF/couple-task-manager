@@ -1,159 +1,154 @@
-<div class="p-fluid p-4">
-    <p-toast></p-toast>
-  
-    <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()">
-  
-      <!-- Dialog Title -->
-      <h3 class="text-xl font-semibold mb-5 text-surface-800 dark:text-surface-100">
-        {{ isEditMode ? 'Modifier la recette' : 'Créer une recette' }}
+<div class="p-4 md:p-6 bg-surface-0 dark:bg-surface-900"> <p-toast></p-toast>
+
+  <form [formGroup]="recipeForm" (ngSubmit)="onSubmit()">
+
+      <h3 class="text-xl lg:text-2xl font-semibold mb-6 text-surface-800 dark:text-surface-100 border-b border-surface-200 dark:border-surface-700 pb-3">
+          {{ isEditMode ? 'Modifier la recette' : 'Créer une recette' }}
       </h3>
-  
-      <!-- Basic Recipe Info Section -->
-      <div class="formgrid grid mb-4 gap-y-3">
-        <div class="field col-12">
-          <label for="name" class="block text-sm font-medium mb-1 text-surface-600 dark:text-surface-300">
-            Nom de la recette <span class="text-red-500">*</span>
-          </label>
-          <input id="name" type="text" pInputText formControlName="name" class="w-full"
-                 [ngClass]="{'ng-invalid ng-dirty': name.invalid && (name.dirty || name.touched)}" />
-          <small *ngIf="name.invalid && (name.dirty || name.touched)" class="p-error block mt-1">
-            Le nom est requis.
-          </small>
-        </div>
-  
-        <div class="field col-12 md:col-6">
-          <label for="category" class="block text-sm font-medium mb-1 text-surface-600 dark:text-surface-300">
-            Catégorie
-          </label>
-          <p-dropdown id="category" [options]="recipeTypes" formControlName="category"
-                      optionLabel="label" optionValue="value" placeholder="Sélectionner une catégorie"
-                      class="w-full" styleClass="w-full"
-                      [ngClass]="{'ng-invalid ng-dirty': category.invalid && (category.dirty || category.touched)}">
-          </p-dropdown>
-          <small *ngIf="category.invalid && (category.dirty || category.touched)" class="p-error block mt-1">
-            La catégorie est requise.
-          </small>
-        </div>
-  
-        <div class="field col-12 md:col-6">
-          <label class="block text-sm font-medium mb-1 text-surface-600 dark:text-surface-300">
-            Image de la recette
-          </label>
-          <!-- Image Preview -->
-          <!-- Show preview if a new file is selected OR if there's an existing imageUrl and no new file -->
-          <div *ngIf="imagePreviewUrl || (imageUrl.value && !imagePreviewUrl)" class="mb-2 relative w-full aspect-video bg-surface-100 dark:bg-surface-700 rounded overflow-hidden flex items-center justify-center border border-surface-200 dark:border-surface-600">
-             <img [src]="imagePreviewUrl || imageUrl.value" alt="Aperçu de la recette" class="object-cover w-full h-full">
-             <!-- Remove Button Overlay -->
-             <button pButton pRipple type="button" icon="pi pi-times"
-                     class="p-button-rounded p-button-danger absolute top-1 right-1 p-button-sm opacity-80 hover:opacity-100"
-                     (click)="removeImage()"
-                     pTooltip="Supprimer l'image" tooltipPosition="left">
-             </button>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-6">
+
+          <div class="md:col-span-2">
+              <label for="name" class="block text-sm font-medium mb-1.5 text-surface-700 dark:text-surface-300">
+                  Nom de la recette <span class="text-red-500">*</span>
+              </label>
+              <input id="name" type="text" pInputText formControlName="name" class="w-full"
+                     [ngClass]="{'ng-invalid ng-dirty': name.invalid && (name.dirty || name.touched)}"
+                     placeholder="Ex: Poulet rôti au citron et herbes" />
+              <small *ngIf="name.invalid && (name.dirty || name.touched)" class="p-error block mt-1.5 text-xs">
+                  Le nom est requis.
+              </small>
           </div>
 
-          <!-- File Upload Component -->
-          <!-- We use customUpload=true because FileService handles the actual upload logic -->
-          <p-fileUpload mode="basic" name="recipeImage" #fileUploader
-                        accept="image/*" maxFileSize="2000000" 
-                        chooseLabel="Choisir une image" chooseIcon="pi pi-upload"
-                        class="p-button-sm w-full md:w-auto"
-                        [auto]="true" 
-                        customUpload="true"
-                        (uploadHandler)="onFileSelect($event)">
-                        <!-- Note: The (uploadHandler) is triggered when the user selects a file in basic mode with customUpload=true -->
-          </p-fileUpload>
+          <div>
+              <label for="category" class="block text-sm font-medium mb-1.5 text-surface-700 dark:text-surface-300">
+                  Catégorie <span class="text-red-500">*</span>
+              </label>
+              <p-dropdown id="category" [options]="recipeTypes" formControlName="category"
+                          optionLabel="label" optionValue="value" placeholder="Sélectionner une catégorie"
+                          styleClass="w-full" [ngClass]="{'ng-invalid ng-dirty': category.invalid && (category.dirty || category.touched)}">
+              </p-dropdown>
+              <small *ngIf="category.invalid && (category.dirty || category.touched)" class="p-error block mt-1.5 text-xs">
+                  La catégorie est requise.
+              </small>
+          </div>
 
-          <!-- Display selected file name -->
-          <small *ngIf="selectedFile" class="block mt-1 text-surface-500 dark:text-surface-400">
-            Fichier sélectionné : {{ selectedFile.name }}
-          </small>
-          <!-- Hidden form control to store the final image URL -->
-          <input type="hidden" formControlName="imageUrl">
-          <!-- Add validation message for image if needed, e.g., file type or size -->
-          <!-- <small *ngIf="imageControlHasError" class="p-error block mt-1"> Error message for image </small> -->
-        </div>
-  
-        <div class="field col-12">
-          <label for="description" class="block text-sm font-medium mb-1 text-surface-600 dark:text-surface-300">
-            Description
-          </label>
-          <textarea id="description" pInputTextarea formControlName="description" rows="3" class="w-full" [autoResize]="true"></textarea>
-        </div>
-      </div>
-  
-      <div class="border-t border-surface-200 dark:border-surface-700 pt-4 mb-3">
-        <h4 class="text-md font-semibold mb-3 text-surface-700 dark:text-surface-200">Ingrédients</h4>
-        <div formArrayName="ingredients">
-          <!-- Loop through ingredient FormGroups -->
-          <div *ngFor="let ingredientGroup of ingredients.controls; let i = index" [formGroupName]="i"
-               class="formgrid grid items-start mb-3 gap-x-2 gap-y-3 p-2 rounded-md border border-surface-100 dark:border-surface-700 bg-surface-50 dark:bg-surface-800">
+          <div>
+              <label for="basePortionRatio" class="block text-sm font-medium mb-1.5 text-surface-700 dark:text-surface-300">
+                  Portions de base <span class="text-red-500">*</span>
+              </label>
+               <p-inputNumber inputId="basePortionRatio" formControlName="basePortionRatio" mode="decimal" [showButtons]="true" [min]="1" class="w-full" styleClass="w-full" inputStyleClass="w-full" placeholder="Ex: 4" [ngClass]="{'ng-invalid ng-dirty': basePortionRatio?.invalid && (basePortionRatio?.dirty || basePortionRatio?.touched)}"></p-inputNumber>
+              <small *ngIf="basePortionRatio?.invalid && (basePortionRatio?.dirty || basePortionRatio?.touched)" class="p-error block mt-1.5 text-xs">
+                  Le nombre de portions est requis (minimum 1).
+              </small>
+          </div>
 
-            <!-- Combined Quantity & Unit Section -->
-            <!-- This div now holds both Qty and Unit -->
-            <div class="field col-12 sm:col"> <!-- Takes remaining horizontal space on sm+ screens -->
-                <label [for]="'name' + i" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
-                  Nom <span class="text-red-500">*</span>
-                </label>
-                <input [id]="'name' + i" type="text" pInputText formControlName="name" placeholder="Ex: Farine" class="w-full p-inputtext-sm" />
-                 <!-- Add validation message if needed -->
-              </div>
-          
-              <!-- Combined Quantity & Unit Section (Moved Second) -->
-              <div class="field col-12 sm:col-5 md:col-4">
-                  <div class="flex gap-2 items-start"> <!-- Use flexbox for side-by-side layout -->
-                      <!-- Quantity Field -->
-                      <div class="flex-1 min-w-0"> <!-- flex-1 allows fields to share space -->
-                          <label [for]="'quantity' + i" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
-                              Qté
-                          </label>
-                          <input [id]="'quantity' + i" type="text" pInputText formControlName="quantity" placeholder="100" class="w-full p-inputtext-sm" />
-                          <!-- Add validation message if needed -->
-                      </div>
-                      <!-- Unit Field -->
-                      <div class="flex-1 min-w-0">
-                          <label [for]="'unit' + i" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
-                              Unité
-                          </label>
-                          <input [id]="'unit' + i" type="text" pInputText formControlName="unit" placeholder="g" class="w-full p-inputtext-sm" />
+
+          <div class="md:col-span-2">
+              <label for="description" class="block text-sm font-medium mb-1.5 text-surface-700 dark:text-surface-300">
+                  Description
+              </label>
+              <textarea id="description" pInputTextarea formControlName="description" rows="4" class="w-full" [autoResize]="true" placeholder="Ajoutez une brève description ou des notes sur la recette..."></textarea>
+          </div>
+
+          <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-1.5 text-surface-700 dark:text-surface-300">
+                  Image de la recette
+              </label>
+              <div class="flex flex-col sm:flex-row sm:items-start gap-4 mt-1">
+                  <div *ngIf="imagePreviewUrl || (imageUrl.value && !imagePreviewUrl)" class="w-full sm:w-48 md:w-56 lg:w-64 flex-shrink-0">
+                      <div class="relative aspect-video bg-surface-100 dark:bg-surface-700 rounded-lg overflow-hidden border border-surface-200 dark:border-surface-600 shadow-sm">
+                          <img [src]="imagePreviewUrl || imageUrl.value" alt="Aperçu de la recette" class="object-cover w-full h-full">
+                          <button pButton pRipple type="button" icon="pi pi-times"
+                                  class="p-button-rounded p-button-danger p-button-sm !w-7 !h-7 absolute top-1.5 right-1.5 shadow-md"
+                                  (click)="removeImage()"
+                                  pTooltip="Supprimer l'image" tooltipPosition="left">
+                          </button>
                       </div>
                   </div>
+
+                  <div class="flex-grow mt-2 sm:mt-0">
+                       <p-fileUpload mode="basic" name="recipeImage" #fileUploader
+                                      accept="image/*" maxFileSize="2000000"
+                                      chooseLabel="Choisir ou changer l'image" chooseIcon="pi pi-upload"
+                                      class="p-button-sm w-full sm:w-auto"
+                                      [auto]="true"
+                                      customUpload="true"
+                                      (uploadHandler)="onFileSelect($event)">
+                       </p-fileUpload>
+                       <small *ngIf="selectedFile" class="block mt-2 text-sm text-surface-600 dark:text-surface-400">
+                          Fichier prêt : <span class="font-medium text-surface-800 dark:text-surface-200">{{ selectedFile.name }}</span>
+                       </small>
+                       <small *ngIf="!selectedFile && !imageUrl.value" class="block mt-2 text-sm text-surface-500 dark:text-surface-400">
+                           Aucune image sélectionnée. (Max 2Mo, format JPG, PNG, WEBP recommandé)
+                       </small>
+                       <input type="hidden" formControlName="imageUrl">
+                        </div>
               </div>
-
-            <!-- Delete Button -->
-            <!-- Adjusted alignment slightly for consistency -->
-            <div class="field col-fixed flex items-center pt-4 sm:pt-0 sm:items-end pb-1">
-               <button pButton pRipple type="button" icon="pi pi-trash"
-                      class="p-button-danger p-button-text p-button-sm p-button-rounded"
-                      (click)="removeIngredient(i)"
-                      [disabled]="ingredients.length <= 1"
-                      aria-label="Supprimer l'ingrédient"
-                      pTooltip="Supprimer" tooltipPosition="left">
-              </button>
-            </div>
-
           </div>
-        </div>
 
-        <!-- Add Ingredient Button -->
-        <div class="flex justify-start mt-3">
-          <button pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un ingrédient"
-                  class="p-button-sm p-button-outlined"
-                  (click)="addIngredient()">
-          </button>
+      </div>             <div class="border-t border-surface-200 dark:border-surface-700 pt-5 mt-5">
+        <h4 class="text-lg font-semibold mb-4 text-surface-700 dark:text-surface-200">Ingrédients</h4>
+        <div formArrayName="ingredients" class="space-y-4">
+            <div *ngFor="let ingredientGroup of ingredients.controls; let i = index" [formGroupName]="i"
+                 #ingredientRow
+                 class="grid grid-cols-[1fr_auto] sm:grid-cols-[minmax(0,_1fr)_max-content_auto] gap-x-3 gap-y-2 items-end p-3 rounded-lg border border-surface-100 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 shadow-sm hover:border-surface-200 dark:hover:border-surface-600 transition-colors duration-150 ease-in-out">
+
+                 <div class="col-span-full sm:col-span-1">
+                    <label [for]="'name' + i" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
+                        Nom <span class="text-red-500">*</span>
+                    </label>
+                    <input [id]="'name' + i" type="text" pInputText formControlName="name" placeholder="Ex: Farine de blé" class="w-full p-inputtext-sm" />
+                 </div>
+
+                 <div class="col-span-1 sm:col-span-1 flex gap-2">
+                     <div class="flex-1 min-w-[60px] sm:w-24"> <label [for]="'quantity' + i" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
+                            Qté
+                        </label>
+                        <p-inputNumber [inputId]="'quantity' + i"
+                                       formControlName="quantity"
+                                       mode="decimal"
+                                       [minFractionDigits]="0"
+                                       [maxFractionDigits]="2"
+                                       [showButtons]="true"
+                                       buttonLayout="stacked" decrementButtonClass="p-button-secondary p-button-outlined !p-0 !w-6" incrementButtonClass="p-button-secondary p-button-outlined !p-0 !w-6" incrementButtonIcon="pi pi-angle-up !text-xs"
+                                       decrementButtonIcon="pi pi-angle-down !text-xs"
+                                       placeholder="Ex: 100"
+                                       inputStyleClass="p-inputtext-sm text-center w-full" styleClass="p-inputnumber-sm w-full"> </p-inputNumber>
+                     </div>
+                     <div class="flex-1 min-w-[60px] sm:w-24"> <label [for]="'unit' + i" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
+                            Unité
+                        </label>
+                        <input [id]="'unit' + i" type="text" pInputText formControlName="unit" placeholder="Ex: g" class="w-full p-inputtext-sm" />
+                     </div>
+                 </div>
+
+                 <div class="col-span-1 sm:col-span-1 flex justify-end items-end pb-[1px]">
+                    <button pButton pRipple type="button" icon="pi pi-trash"
+                            class="p-button-danger p-button-text p-button-sm p-button-rounded !w-8 !h-8 hover:bg-danger-50 dark:hover:bg-danger-900/50"
+                            (click)="removeIngredient(i)"
+                            [disabled]="ingredients.length <= 1"
+                            aria-label="Supprimer cet ingrédient"
+                            pTooltip="Supprimer" tooltipPosition="top">
+                    </button>
+                 </div>
+
+            </div> </div> <div class="flex justify-start mt-4">
+            <button pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un ingrédient"
+                    class="p-button-sm p-button-outlined"
+                    (click)="addIngredient()">
+            </button>
         </div>
+    </div> <div class="flex justify-end gap-3 border-t border-surface-200 dark:border-surface-700 pt-5 mt-6">
+          <button pButton pRipple type="button" label="Annuler"
+                  class="p-button-secondary"
+                  (click)="closeDialog()">
+          </button>
+          <button pButton pRipple type="submit" [label]="isEditMode ? 'Mettre à jour' : 'Créer'"
+                  class="p-button-primary"
+                  [disabled]="recipeForm.invalid || recipeForm.pending">
+          </button>
       </div>
-  
-      <!-- Dialog Actions -->
-      <div class="flex justify-end gap-2 border-t border-surface-200 dark:border-surface-700 pt-4 mt-5">
-        <button pButton pRipple type="button" label="Annuler"
-                class="p-button-secondary"
-                (click)="closeDialog()">
-        </button>
-        <button pButton pRipple type="submit" [label]="isEditMode ? 'Mettre à jour' : 'Créer'"
-                class="p-button-primary" 
-                [disabled]="recipeForm.invalid">
-        </button>
-      </div>
-  
-    </form>
-  </div>
+
+  </form>
+</div>

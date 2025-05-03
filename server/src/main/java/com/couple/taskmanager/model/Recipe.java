@@ -36,4 +36,6 @@ public class Recipe {
     @JsonBackReference("household-recipes")
     private Household household;
 
+    private Integer basePortionRatio = 0;
+
 }

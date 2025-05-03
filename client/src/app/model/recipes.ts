@@ -30,4 +30,5 @@ export interface Recipe {
     category: RecipeType;
     imageUrl: string;
     ingredients: Ingredient[];
+    basePortionRatio: number;   
 }

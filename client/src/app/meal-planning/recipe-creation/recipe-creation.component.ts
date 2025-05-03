@@ -20,6 +20,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { DropdownModule } from 'primeng/dropdown';
 import { TranslateService } from '@ngx-translate/core';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 
 // --- Define Recipe Type options (example) ---
@@ -42,6 +43,7 @@ interface FileUploadResponse {
     ToastModule,
     // Explicit imports for clarity or if not fully covered by SharedModule
     InputTextModule,
+    InputNumberModule,
     TextareaModule,
     DropdownModule,
     ButtonModule,],
@@ -101,6 +103,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
       name: ['', Validators.required],
       category: [null, Validators.required],
       description: [''],
+      basePortionRatio: [null as number | null], // Added, not required, initialized to null
       imageUrl: [null],
       ingredients: this.fb.array([])
     });
@@ -112,6 +115,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
       name: recipe.name,
       category: recipe.category,
       description: recipe.description,
+      basePortionRatio: recipe.basePortionRatio,
       imageUrl: recipe.imageUrl
     });
   
@@ -325,6 +329,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     // --- Getters for easy template access --- (remains the same)
     get name(): AbstractControl { return this.recipeForm.get('name')!; }
     get category(): AbstractControl { return this.recipeForm.get('category')!; }
+    get basePortionRatio() { return this.recipeForm.get('basePortionRatio'); }
     get imageUrl(): AbstractControl { return this.recipeForm.get('imageUrl')!; }
   
 }

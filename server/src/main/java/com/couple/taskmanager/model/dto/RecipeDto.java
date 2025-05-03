@@ -21,6 +21,7 @@ public class RecipeDto {
     private RecipeType category;
     private String imageUrl;
     private List<IngredientDto> ingredients;
+    private Integer basePortionRatio;
 
     public RecipeDto(Recipe recipe){
         this.id = recipe.getId();
@@ -29,5 +30,6 @@ public class RecipeDto {
         this.category = recipe.getCategory();
         this.imageUrl = recipe.getImageUrl();
         this.ingredients = recipe.getIngredients().stream().map(IngredientDto::new).toList();
+        this.basePortionRatio = recipe.getBasePortionRatio();
     }
 }

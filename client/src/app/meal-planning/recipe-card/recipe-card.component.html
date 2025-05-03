@@ -39,29 +39,46 @@
           {{ overrideDescriptionClamp ? 'Voir moins' : 'Voir plus' }}
         </span>
 
-        <!-- Accordion for Ingredients -->
         <p-accordion [value]="openIngredients ? 'ingredients' : ''" *ngIf="recipe.ingredients && recipe.ingredients.length > 0"
-                     styleClass="recipe-details-accordion">
-            <p-accordion-panel value="ingredients"> <!-- Panel value -->
-                <p-accordion-header>
-                    Ingrédients ({{ recipe.ingredients.length }})
-                </p-accordion-header>
-                <p-accordion-content>
-                    <ul class="list-disc pl-5 space-y-1 text-xs text-surface-700 dark:text-surface-300">
-                        <li *ngFor="let ingredient of recipe.ingredients">
-                            {{ formatIngredient(ingredient) }}
-                        </li>
-                    </ul>
-                </p-accordion-content>
-            </p-accordion-panel>
-        </p-accordion>
-        <!-- End of changes -->
+          styleClass="recipe-details-accordion">
+        <p-accordion-panel value="ingredients"> <p-accordion-header>
+                Ingrédients ({{ recipe.ingredients.length }})
+            </p-accordion-header>
+            <p-accordion-content>
+                <div *ngIf="recipe.basePortionRatio && recipe.basePortionRatio > 0" class="mb-4 p-2 rounded-md bg-surface-50 dark:bg-surface-700 border border-surface-200 dark:border-surface-600">
+                    <label for="portionInput-{{recipe.id || 0}}" class="block text-sm font-medium text-surface-700 dark:text-surface-200 mb-1.5">
+                        Nombre de portions:
+                    </label>
+                    <div class="flex items-center gap-2"> <p-inputNumber
+                            inputId="portionInput-{{recipe.id || 0}}"
+                            [(ngModel)]="displayPortionRatio"
+                            (ngModelChange)="onPortionChange()"
+                            mode="decimal"
+                            [showButtons]="true"
+                            [min]="1"
+                            [step]="1"
+                            #portionInputRef
+                            inputStyleClass="w-16 sm:w-20 px-3 py-1.5 text-sm border border-surface-300 dark:border-surface-600 bg-surface-0 dark:bg-surface-800 text-surface-800 dark:text-surface-100 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 focus:border-primary-500 dark:focus:border-primary-400 transition duration-150 ease-in-out"
+                            styleClass="p-inputnumber-sm" aria-label="Nombre de portions">
+                        </p-inputNumber>
+                        <small class="text-xs text-surface-600 dark:text-surface-400">
+                              (Base: {{ recipe.basePortionRatio }} portion{{ recipe.basePortionRatio > 1 ? 's' : '' }})
+                        </small>
+                    </div>
 
-        <p *ngIf="!recipe.ingredients || recipe.ingredients.length === 0" class="text-xs text-surface-500 dark:text-surface-400 italic mt-2">
-          Aucun ingrédient listé.
-        </p>
-      </div>
-    </ng-template>
+                </div>
+                <ul class="list-disc pl-5 space-y-1 text-sm text-surface-700 dark:text-surface-300 mt-3"> <li *ngFor="let ingredient of scaledIngredients">
+                        {{ formatIngredient(ingredient) }}
+                    </li>
+                </ul>
+            </p-accordion-content>
+        </p-accordion-panel>
+        </p-accordion>
+      <p *ngIf="!recipe.ingredients || recipe.ingredients.length === 0" class="text-xs text-surface-500 dark:text-surface-400 italic mt-2">
+        Aucun ingrédient listé.
+      </p>
+    </div>
+  </ng-template>
 
     <ng-template pTemplate="footer" *ngIf="buttonsTemplate">
         <div class="flex justify-end gap-2 pt-2 border-t border-surface-100 dark:border-surface-700 mt-auto">

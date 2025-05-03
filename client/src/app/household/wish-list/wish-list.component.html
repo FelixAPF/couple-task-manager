@@ -34,7 +34,7 @@
              <!-- Add Button (no changes) -->
              <button *ngIf="isCurrentUser(group.member.id)"
                      pButton pRipple type="button" icon="pi pi-plus"
-                     label="Ajouter une attention" class="p-button-sm p-button-success mt-2"
+                     label="Ajouter un souhait" class="p-button-sm p-button-success mt-2"
                      (click)="openAddEditDialog()">
              </button>
           </ng-template>
@@ -64,7 +64,7 @@
           <!-- Empty state (no changes) -->
           <ng-template #noItems>
             <p class="text-center text-surface-500 dark:text-surface-400 py-4 italic">
-              Aucune petite attention ajoutée pour le moment.
+              Aucun souhait ajouté pour le moment
             </p>
           </ng-template>
 

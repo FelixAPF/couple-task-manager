@@ -101,7 +101,7 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit { // Added 
       // Create a new object to avoid modifying the originalIngredients array
       const scaledIngredient: Ingredient = { ...ingredient };
       // Scale the quantity, handle potential floating point issues by rounding (e.g., to 1 decimal)
-      scaledIngredient.quantity = parseFloat((ingredient.quantity * factor).toFixed(1));
+      scaledIngredient.quantity = parseFloat((ingredient.quantity * factor).toFixed(2));
       return scaledIngredient;
     });
      this.cdRef.markForCheck(); // Notify Angular to update the view

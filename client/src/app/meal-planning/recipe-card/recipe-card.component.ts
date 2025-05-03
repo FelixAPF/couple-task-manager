@@ -126,7 +126,7 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit { // Added 
             quantityStr = ingredient.quantity.toString();
         } else {
             // Keep one decimal place if it's not whole
-            quantityStr = ingredient.quantity.toFixed(1);
+            quantityStr = ingredient.quantity.toFixed(2);
         }
     }
 

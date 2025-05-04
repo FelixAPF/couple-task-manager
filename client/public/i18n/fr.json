@@ -131,7 +131,8 @@
     "tasks-unassigned": "Tâches non assignées",
     "manage-and-assign": "Gestion & Répartition",
     "create-task": "Créer Tâche",
-    "assign-tasks": "Assigner les tâches"
+    "assign-tasks": "Assigner les tâches",
+    "search-placeholder": "Rechercher par titre ou description..."
   },
   "meals": {
     "plan": "Plan Repas",

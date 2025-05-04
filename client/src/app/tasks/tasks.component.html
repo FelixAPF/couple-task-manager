@@ -1,6 +1,6 @@
 <div class="container p-4 mx-auto flex flex-col flex-grow">
 
-  <div class="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 gap-4">
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 gap-4">
     <h2 class="text-xl sm:text-2xl font-semibold text-surface-800 dark:text-surface-100 text-center sm:text-left">
       {{'tasks.manage-and-assign' | translate}}
     </h2>
@@ -22,21 +22,35 @@
         tooltipPosition="bottom">
       </p-button>
     </div>
-  </div> 
+  </div>
+
+  <div class="mb-6 px-4"> <p-inputGroup>
+        <span class="p-inputGroup-addon">
+            <i class="pi pi-search"></i>
+        </span>
+        <input
+            type="text"
+            pInputText
+            [(ngModel)]="searchTerm"
+            (input)="applyFilter()"
+            [placeholder]="('tasks.search-placeholder' | translate) || 'Rechercher par titre ou description...'"
+            class="w-full"
+        />
+         <button *ngIf="searchTerm" pButton type="button" icon="pi pi-times" class="p-button-secondary p-button-text" (click)="searchTerm = ''; applyFilter()" pTooltip="Clear Search" tooltipPosition="bottom"></button>
+    </p-inputGroup>
+  </div>
 
   <p-accordion [value]="accordionsOpenByDefault" [multiple]="true" styleClass="flex flex-col gap-4 h-full">
-    <p-accordion-panel [value]="i" *ngFor="let column of memberTaskColumns; let i = index; trackBy: trackByMemberId">
+    <p-accordion-panel [value]="i" *ngFor="let column of filteredMemberTaskColumns; let i = index; trackBy: trackByMemberId">
       <p-accordion-header>
-        <div class="flex items-center gap-3">
-          <img
+        <div class="flex items-center gap-3 w-full"> <img
             *ngIf="column.member"
             [src]="column.member.imageUrl || 'assets/placeholder.jpg'"
             [alt]="'Photo de ' + (column.member.name || 'Membre')"
-            class="w-10 h-10 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm"
-            onError="this.src='assets/placeholder.jpg'"
+            class="w-10 h-10 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm flex-shrink-0" onError="this.src='assets/placeholder.jpg'"
           />
-          <i *ngIf="!column.member" class="pi pi-question-circle text-xl text-surface-500 dark:text-surface-400"></i>
-          <p class="text-xl font-semibold text-surface-800 dark:text-surface-100">{{ column.member?.name ?? ('tasks.tasks-unassigned' | translate) }}</p>
+          <i *ngIf="!column.member" class="pi pi-question-circle text-xl text-surface-500 dark:text-surface-400 flex-shrink-0"></i> <p class="text-lg sm:text-xl font-semibold text-surface-800 dark:text-surface-100 truncate mr-2"> {{ column.member?.name ?? ('tasks.tasks-unassigned' | translate) }}
+          </p>
           <p-badge *ngIf="column.tasks?.length" [value]="column.tasks.length" styleClass="ml-auto"></p-badge>
         </div>
       </p-accordion-header>
@@ -49,12 +63,22 @@
           [title]="column.member?.name ?? 'Tâches non assignées'"
           [assignee]="column.member" class="flex-grow">
         </app-assignee-task-list>
+        <div *ngIf="column.tasks.length === 0 && searchTerm" class="text-center py-4 text-surface-500 dark:text-surface-400">
+             Aucune tâche ne correspond à votre recherche pour {{ column.member?.name ?? 'les tâches non assignées' }}.
+         </div>
       </p-accordion-content>
     </p-accordion-panel>
+
+    <div *ngIf="filteredMemberTaskColumns.length === 0 && memberTaskColumns.length > 0 && searchTerm" class="flex flex-col items-center justify-center text-center py-10 flex-grow">
+        <i class="pi pi-search-minus text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
+        <p class="text-lg font-medium text-surface-600 dark:text-surface-300 mb-1">Aucune tâche trouvée</p>
+        <p class="text-sm text-surface-500 dark:text-surface-400">Essayez d'affiner vos termes de recherche.</p>
+    </div>
+
     <div *ngIf="memberTaskColumns.length === 0" class="flex flex-col items-center justify-center text-center py-10 flex-grow">
       <i class="pi pi-users text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
-      <p class="text-lg font-medium text-surface-600 dark:text-surface-300 mb-1">Aucun membre dans le foyer.</p>
-      <p class="text-sm text-surface-500 dark:text-surface-400">Invitez un membre ou créez des tâches non assignées.</p>
+      <p class="text-lg font-medium text-surface-600 dark:text-surface-300 mb-1">Aucun membre ou tâche dans le foyer.</p>
+      <p class="text-sm text-surface-500 dark:text-surface-400">Invitez un membre ou créez des tâches.</p>
       </div>
   </p-accordion>
 

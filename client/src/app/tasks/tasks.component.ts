@@ -1,9 +1,10 @@
 // c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\tasks\tasks.component.ts
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // <-- Import FormsModule
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { finalize, forkJoin, skipWhile, Subject, take, takeUntil } from 'rxjs'; // Import forkJoin, Subject, takeUntil
+import { finalize, forkJoin, skipWhile, Subject, take, takeUntil } from 'rxjs';
 
 // PrimeNG Modules (Import via SharedModule or directly if standalone)
 import { SharedModule } from '../shared.module';
@@ -16,16 +17,15 @@ import { TaskAssignmentDialogComponent } from './task-assignment-dialog/task-ass
 // Services
 import { TaskListService } from '../service/task-list.service';
 import { TaskService } from '../service/task-service.service';
-import { HouseholdService } from '../service/household.service'; // <-- Import HouseholdService
+import { HouseholdService } from '../service/household.service';
+import { TaskPeriodService } from '../service/task-period.service';
+import { TaskAssignmentService } from '../service/task-assignment.service';
+import { LoadingService } from '../service/loading/loading.service';
 
 // Models
 import { Task } from '../model/task';
-import { HouseholdMember } from '../model/household'; // <-- Import HouseholdMember
-import { TaskPeriodService } from '../service/task-period.service';
-import { TaskAssignmentService } from '../service/task-assignment.service';
+import { HouseholdMember } from '../model/household';
 import { TaskList } from '../model/task-list';
-import { LoadingService } from '../service/loading/loading.service';
-// Remove Assignee enum import if present: import { Assignee } from '../model/task-period';
 
 // Define the new interface for column data
 interface MemberTaskColumn {
@@ -35,30 +35,32 @@ interface MemberTaskColumn {
 
 @Component({
   selector: 'app-tasks',
-  standalone: true, // Assuming standalone based on previous context
+  standalone: true,
   imports: [
     CommonModule,
-    SharedModule, // Imports PrimeNG modules, pipes etc.
-    AssigneeTaskListComponent, // Import child component
-    // Add other necessary imports if not in SharedModule
+    SharedModule,
+    FormsModule, // <-- Add FormsModule here
+    AssigneeTaskListComponent,
   ],
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.css'],
-  providers: [ConfirmationService, MessageService] // Provide services needed
+  providers: [ConfirmationService, MessageService]
 })
 export class TasksComponent implements OnInit, OnDestroy {
   // --- Injected Services ---
   private taskListService = inject(TaskListService);
   private taskService = inject(TaskService);
   private taskAssignmentService = inject(TaskAssignmentService);
-  private householdService = inject(HouseholdService); // <-- Inject
+  private householdService = inject(HouseholdService);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   private initialLoadDone = false;
 
-  
-  memberTaskColumns: MemberTaskColumn[] = []; // Array to drive the *ngFor
-  private destroy$ = new Subject<void>(); // For unsubscribing
+
+  memberTaskColumns: MemberTaskColumn[] = []; // Original data from service
+  filteredMemberTaskColumns: MemberTaskColumn[] = []; // Data displayed in the template
+  searchTerm: string = ''; // <-- Add property for search term
+  private destroy$ = new Subject<void>();
   accordionsOpenByDefault: number[] = []
 
   constructor(private taskPeriodService: TaskPeriodService, private dialogService: DialogService, private loadingService: LoadingService){}
@@ -68,7 +70,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadInitialData();
   }
-  
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
@@ -82,20 +84,29 @@ export class TasksComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (household) => {
           if (household) {
-            this.loadTaskData();
+            this.loadTaskData(); // Load tasks if household exists
             this.initialLoadDone = true;
-            this.accordionsOpenByDefault =Array.from(Array(household.members.length + 1).keys()); // Open all accordions by default
+            // Open all accordions initially (or based on filtered results later if needed)
+            this.accordionsOpenByDefault = Array.from(Array(household.members.length + 1).keys());
           } else {
             this.memberTaskColumns = [];
+            this.filteredMemberTaskColumns = []; // Clear filtered data too
           }
         },
         error: (err) => {
+          console.error("Error loading household", err);
+          this.messageService.add({ severity: 'error', summary: 'Erreur Foyer', detail: 'Impossible de charger les informations du foyer.' });
+          this.memberTaskColumns = [];
+          this.filteredMemberTaskColumns = []; // Clear filtered data on error
         }
       });
   }
 
   unassign(event: any){
-
+    // Implement unassignment logic if needed, then reload/refilter
+    console.log("Unassign event received:", event);
+    // Example: Call service to unassign, then this.loadTaskData();
+    this.messageService.add({ severity: 'info', summary: 'Action Requise', detail: 'La fonctionnalité de désassignation n\'est pas encore implémentée.' });
   }
 
   loadTaskData(): void {
@@ -104,14 +115,45 @@ export class TasksComponent implements OnInit, OnDestroy {
         next: (taskLists: TaskList[]) => {
           this.memberTaskColumns = taskLists.map(taskList => ({
             member: taskList.assignee,
-            tasks: taskList.tasks ?? [] // Ensure tasks is always an array
+            tasks: taskList.tasks ?? []
           }));
+          this.applyFilter(); // <-- Apply filter after loading data
         },
         error: (err) => {
           console.error("Error loading task lists", err);
           this.messageService.add({ severity: 'error', summary: 'Erreur Tâches', detail: 'Impossible de charger les listes de tâches.' });
+          this.memberTaskColumns = []; // Clear original data on error
+          this.filteredMemberTaskColumns = []; // Clear filtered data on error
         }
       });
+  }
+
+  // --- Filtering Logic ---
+  applyFilter(): void {
+    const searchTermLower = this.searchTerm.toLowerCase().trim();
+
+    if (!searchTermLower) {
+      // If search is empty, show all original tasks
+      this.filteredMemberTaskColumns = this.memberTaskColumns.map(col => ({ ...col })); // Create shallow copies
+      return;
+    }
+
+    this.filteredMemberTaskColumns = this.memberTaskColumns.map(column => {
+      // Filter tasks within each column based on search term
+      const filteredTasks = column.tasks.filter(task =>
+        task.title?.toLowerCase().includes(searchTermLower) ||
+        task.description?.toLowerCase().includes(searchTermLower)
+        // Add more fields to search if needed
+      );
+      // Return a new column object with potentially filtered tasks
+      return {
+        ...column,
+        tasks: filteredTasks
+      };
+    })
+    // **** THIS IS THE CORRECTED LINE ****
+    // Only keep columns (assigned OR unassigned) that have tasks remaining AFTER filtering
+    .filter(column => column.tasks.length > 0);
   }
 
 
@@ -123,7 +165,7 @@ export class TasksComponent implements OnInit, OnDestroy {
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
     });
-    ref.onClose.pipe(takeUntil(this.destroy$)).subscribe(() => this.loadTaskData()); // Reload on close
+    ref.onClose.pipe(takeUntil(this.destroy$)).subscribe(() => this.loadTaskData());
   }
 
   openNewTaskDialog(task?: Task, assignee?: HouseholdMember | null): void {
@@ -132,15 +174,15 @@ export class TasksComponent implements OnInit, OnDestroy {
       width: '90%',
       contentStyle: { overflow: 'auto' },
       baseZIndex: 10000,
-      data: { taskToEdit: task, assignee  } // Pass task data for editing
+      data: { taskToEdit: task, assignee }
     });
     ref.onClose.pipe(takeUntil(this.destroy$)).subscribe((result) => {
-      if (result) { // Only reload if save was successful (component should return true)
-        this.loadTaskData();
+      if (result) {
+        this.loadTaskData(); // Reload and refilter
       }
     });
   }
-  
+
 
   deleteTask(task: Task): void {
     if (!task || !task.id) return;
@@ -153,12 +195,12 @@ export class TasksComponent implements OnInit, OnDestroy {
       acceptButtonStyleClass: 'p-button-danger',
       rejectButtonStyleClass: 'p-button-text',
       accept: () => {
-        this.taskService.deleteTask(task.id!) // Use non-null assertion if ID is guaranteed
+        this.taskService.deleteTask(task.id!)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: () => {
               this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Tâche supprimée avec succès.' });
-              this.loadTaskData(); // Refresh lists
+              this.loadTaskData(); // Reload and refilter
             },
             error: (err) => {
               console.error("Error deleting task", err);
@@ -171,7 +213,6 @@ export class TasksComponent implements OnInit, OnDestroy {
 
   // --- trackBy Function ---
   trackByMemberId(index: number, item: MemberTaskColumn): string | number {
-    // Use member ID or a specific string for 'unassigned'
     return item.member?.id ?? 'unassigned';
   }
 }

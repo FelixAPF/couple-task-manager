@@ -96,7 +96,7 @@
               <!-- Deadline (Directly on TaskAssignmentDto) -->
               <span class="flex items-center gap-1" pTooltip="Date limite" tooltipPosition="bottom">
                 <i class="pi pi-calendar text-primary-500 dark:text-primary-400"></i>
-                <span>{{ task.dueDate | date:'dd/MM/yyyy' }}</span>
+                <span>{{ task.dueDate | date:'EEEE, dd MMMM yyyy' | titlecase }}</span>
               </span>
               <!-- Room (Via task.task.room) -->
               <span class="flex items-center gap-1" pTooltip="Pièce" tooltipPosition="bottom">

@@ -8,6 +8,8 @@ import { HouseholdService } from '../../service/household.service';
 import { MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { JoinHouseholdComponent } from '../../household/join-household/join-household.component';
+import { Observable } from 'rxjs';
+import { HouseholdMember, UserRole } from '../../model/household';
 
 @Component({
   selector: 'app-navbar',
@@ -22,11 +24,13 @@ export class NavbarComponent {
   private authService = inject(AuthService);
   private householdService = inject(HouseholdService);
   private dialogService = inject(DialogService); // <-- Inject DialogService
+  USER_ROLE = UserRole;
 
 
 
   isLoggedIn$ = this.authService.isLoggedIn$; // Make public for template access
   household$ = this.householdService.household$; // <-- Expose household observable
+  currentUser$: Observable<HouseholdMember | null> = this.householdService.currentUser$;
 
   constructor(private router: Router, private translate: TranslateService, private messageService: MessageService){}
 
@@ -73,6 +77,10 @@ toggleMenu(): void {
       joinDialogRef.onClose.subscribe((joinedSuccessfully?: boolean) => {
         
     });
+  }
+
+  toggleAdminMode(event: any){
+
   }
 
 }

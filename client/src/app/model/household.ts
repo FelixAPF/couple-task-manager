@@ -19,6 +19,7 @@ export interface HouseholdMember {
     email: string;
     imageUrl?: string;
     birthDay?: Date;
+    roles: UserRole[];
 }
 
 export interface WayToCare {
@@ -57,5 +58,11 @@ export interface UpdateHouseholdSettings {
 export enum ToDoStatus {
     TO_DO = "TO_DO",
     COMPLETED = "COMPLETED"
+}
+
+
+export enum UserRole {
+    ADMIN = "ADMIN",
+    USER = "USER"
 }
 

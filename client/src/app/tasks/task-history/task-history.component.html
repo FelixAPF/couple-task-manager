@@ -35,7 +35,7 @@
                <div class="flex items-center gap-1 mt-1 sm:mt-0">
                  <i class="pi pi-calendar text-primary-500 dark:text-primary-400"></i>
                  <!-- Corrected date pipe format: 'YYYY' should be 'yyyy' for year -->
-                 <span>{{ taskAssignment.completedDate | date:'EEEE - dd MMMM yyyy @ HH:mm' }}</span>
+                 <span>{{ taskAssignment.completedDate | date:'EEEE - dd MMMM yyyy @ HH:mm' | titlecase }}</span>
                </div>
             </div>
           </div>

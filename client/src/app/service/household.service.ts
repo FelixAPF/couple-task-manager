@@ -13,6 +13,7 @@ export class HouseholdService {
   private householdSubject = new BehaviorSubject<Household | null>(null);
   // Expose the login state as an observable
   public household$: Observable<Household | null> = this.householdSubject.asObservable();
+  public currentUser$: Observable<HouseholdMember | null> = this.household$.pipe(map(household => household?.currentUser ?? null));
 
   constructor(private http: HttpClient) { }
 

@@ -23,7 +23,7 @@ import { TaskAssignmentService } from '../service/task-assignment.service';
 import { LoadingService } from '../service/loading/loading.service';
 
 // Models
-import { Task } from '../model/task';
+import { Frequency, Task } from '../model/task';
 import { HouseholdMember } from '../model/household';
 import { TaskList } from '../model/task-list';
 
@@ -31,6 +31,46 @@ import { TaskList } from '../model/task-list';
 interface MemberTaskColumn {
   member: HouseholdMember | null;
   tasks: Task[];
+}
+
+
+const frequencyOrder: { [key in Frequency]: number } = {
+  [Frequency.DAILY]: 1,
+  [Frequency.WEEKLY]: 2,
+  [Frequency.BIWEEKLY]: 3, // Every two weeks
+  [Frequency.MONTHLY]: 4,
+  [Frequency.QUARTERLY]: 5, // Every three months
+  [Frequency.BIYEARLY]: 6, // Every six months / Twice a year
+  [Frequency.YEARLY]: 7,
+};
+const UNKNOWN_FREQUENCY_ORDER = Number.MAX_SAFE_INTEGER;
+
+export function sortArrayByFrequency<T>(
+  items: T[],
+  frequencyExtractor: (item: T) => Frequency | string | undefined | null
+): T[] {
+  // Create a shallow copy to avoid modifying the original array
+  const sortedItems = [...items];
+
+  sortedItems.sort((a, b) => {
+    const freqA = frequencyExtractor(a);
+    const freqB = frequencyExtractor(b);
+
+    // Get the sort order number for frequency A, defaulting for unknown/null values
+    const orderA = (freqA && frequencyOrder[freqA as Frequency] !== undefined)
+                   ? frequencyOrder[freqA as Frequency]
+                   : UNKNOWN_FREQUENCY_ORDER;
+
+    // Get the sort order number for frequency B, defaulting for unknown/null values
+    const orderB = (freqB && frequencyOrder[freqB as Frequency] !== undefined)
+                   ? frequencyOrder[freqB as Frequency]
+                   : UNKNOWN_FREQUENCY_ORDER;
+
+    // Compare the order numbers
+    return orderA - orderB;
+  });
+
+  return sortedItems;
 }
 
 @Component({
@@ -135,16 +175,22 @@ export class TasksComponent implements OnInit, OnDestroy {
     if (!searchTermLower) {
       // If search is empty, show all original tasks
       this.filteredMemberTaskColumns = this.memberTaskColumns.map(col => ({ ...col })); // Create shallow copies
+      this.filteredMemberTaskColumns.forEach(column => {
+        // Use sortArrayByFrequency to sort the copied task array *in place* for this column
+        column.tasks = sortArrayByFrequency(column.tasks, task => task.frequency);
+    });
       return;
     }
 
     this.filteredMemberTaskColumns = this.memberTaskColumns.map(column => {
       // Filter tasks within each column based on search term
-      const filteredTasks = column.tasks.filter(task =>
+      let filteredTasks = column.tasks.filter(task =>
         task.title?.toLowerCase().includes(searchTermLower) ||
         task.description?.toLowerCase().includes(searchTermLower)
         // Add more fields to search if needed
       );
+      filteredTasks = sortArrayByFrequency(filteredTasks, task => task.frequency);
+
       // Return a new column object with potentially filtered tasks
       return {
         ...column,

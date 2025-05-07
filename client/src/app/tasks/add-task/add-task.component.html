@@ -1,128 +1,113 @@
 <form [formGroup]="formGroup" (ngSubmit)="save()">
-    <div class="flex flex-col"> <!-- Main container for content + footer -->
-  
-      <!-- Dialog Content Area -->
-      <div class="p-fluid flex flex-col gap-5 p-4">
-  
-        <!-- Dialog Title -->
-        <h3 class="text-xl font-semibold text-center mb-1 text-surface-800 dark:text-surface-100">
-          Ajouter une tâche
-        </h3>
-  
-        <!-- Title Input -->
-        <div class="field flex flex-col gap-2">
-          <label for="title" class="font-semibold">Titre</label>
-          <p-iconField iconPosition="left" class="w-full"> <!-- Added w-full -->
-            <p-inputIcon class="pi pi-tag"></p-inputIcon>
-            <input id="title" type="text" pInputText formControlName="title" placeholder="Nom de la tâche" />
-          </p-iconField>
-          <small *ngIf="formGroup.get('title')?.invalid && formGroup.get('title')?.touched" class="p-error block">
-            Le titre est requis.
-          </small>
+  <div class="flex flex-col h-full">
 
+      <div class="p-fluid flex flex-col gap-4 p-4 flex-grow"> <h3 class="text-xl font-semibold text-center mb-4 text-surface-800 dark:text-surface-100">
+              Ajouter une tâche
+          </h3>
 
-        </div>
-  
-        <!-- Description Input -->
-        <div class="field flex flex-col gap-2">
-          <label for="description" class="font-semibold">Description (Optionnel)</label>
-          <!-- Add w-full to p-iconField -->
-          <p-iconField iconPosition="left" class="w-full">
-             <p-inputIcon class="pi pi-align-left"></p-inputIcon>
-             <textarea
-               id="description"
-               pTextarea 
-               formControlName="description"
-               placeholder="Détails supplémentaires..."
-               rows="5"
-               cols="35"
-               [autoResize]="true">
-               <!-- Removed w-full from textarea itself, let p-fluid handle it -->
-             </textarea>
-          </p-iconField>
-          <!-- No validation needed for optional field -->
-        </div>
-  
-        <!-- Room Selection -->
-        <div class="field flex flex-col gap-2">
-          <label for="room" class="font-semibold">Pièce</label>
-          <p-select
-            id="room"
-            [options]="rooms"
-            optionValue="value"
-            optionLabel="label"
-            formControlName="room"
-            placeholder="Choisir une pièce"
-            appendTo="body">
-          </p-select>
-          <small *ngIf="formGroup.get('room')?.invalid && formGroup.get('room')?.touched" class="p-error block">
-            La sélection d'une pièce est requise.
-          </small>
-        </div>
-  
-        <!-- Frequency Selection -->
-        <div class="field flex flex-col gap-2">
-          <label class="font-semibold">Fréquence</label>
-          <div class="grid grid-cols-2 gap-x-4 gap-y-3 p-3 border rounded-md bg-surface-50 dark:bg-surface-700/50 border-surface-200 dark:border-surface-700">
-            <div *ngFor="let freq of frequencies" class="flex items-center">
-              <p-radiobutton
-                [name]="FORM_CONTROL_NAME.FREQUENCY"
-                [value]="freq.value"
-                [formControlName]="FORM_CONTROL_NAME.FREQUENCY"
-                [inputId]="freq.value">
-              </p-radiobutton>
-              <label [for]="freq.value" class="ml-2 cursor-pointer text-sm">{{ freq.label }}</label>
-            </div>
+          <div class="field flex flex-col gap-1">
+              <label for="title" class="font-semibold text-sm">Titre</label>
+              <p-iconField iconPosition="left" class="w-full">
+                  <p-inputIcon class="pi pi-tag"></p-inputIcon>
+                  <input id="title" class="w-full" type="text" pInputText formControlName="title" placeholder="Nom de la tâche" />
+              </p-iconField>
+              <small *ngIf="formGroup.get('title')?.invalid && formGroup.get('title')?.touched" class="p-error block mt-1">
+                  Le titre est requis.
+              </small>
           </div>
-           <small *ngIf="formGroup.get('frequency')?.invalid && formGroup.get('frequency')?.touched" class="p-error block">
-            La sélection d'une fréquence est requise.
-          </small>
-        </div>
-        
-        <div class="flex items-center gap-2">
-          <p-checkbox
-            [(ngModel)]="showAssignee"
-            [ngModelOptions]="{standalone: true}"
-            [binary]="true"
-            inputId="showAssigneeCheck">
-          </p-checkbox>
-          <label for="showAssigneeCheck" class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">
-            Assigner à la création
-          </label>
-        </div>
-        <div *ngIf="showAssignee">
-          <p-selectButton
-            id="assignee"
-            [options]="householdMembersOptions"
-            formControlName="assignee"
-            optionLabel="label"
-            optionValue="value"
-            [allowEmpty]="true"
-            styleClass="assignee-select-button">
-          </p-selectButton>
 
-        </div>
+          <div class="field flex flex-col gap-1">
+              <label for="description" class="font-semibold text-sm">Description</label>
+              <p-iconField iconPosition="left" class="w-full">
+                  <textarea
+                      id="description"
+                      pTextarea
+                      class="w-full"
+                      formControlName="description"
+                      placeholder="Détails supplémentaires..."
+                      rows="3" [autoResize]="true">
+                  </textarea>
+              </p-iconField>
+          </div>
+
+          <div class="field flex flex-col gap-1">
+              <label for="room" class="font-semibold text-sm">Pièce</label>
+              <p-dropdown
+                  id="room"
+                  [options]="rooms"
+                  optionValue="value"
+                  optionLabel="label"
+                  formControlName="room"
+                  placeholder="Choisir une pièce"
+                  appendTo="body"
+                  styleClass="w-full">
+              </p-dropdown>
+              <small *ngIf="formGroup.get('room')?.invalid && formGroup.get('room')?.touched" class="p-error block mt-1">
+                  La sélection d'une pièce est requise.
+              </small>
+          </div>
+
+          <div class="field flex flex-col gap-2">
+              <label class="font-semibold text-sm">Fréquence</label>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-2 p-3 border rounded-md bg-surface-50 dark:bg-surface-700/50 border-surface-200 dark:border-surface-700">
+                  <div *ngFor="let freq of frequencies" class="flex items-center">
+                      <p-radiobutton
+                          name="frequency"
+                          [value]="freq.value"
+                          formControlName="frequency"
+                          [inputId]="'freq-' + freq.value">
+                      </p-radiobutton>
+                      <label [for]="'freq-' + freq.value" class="ml-2 cursor-pointer text-sm">{{ freq.label }}</label>
+                  </div>
+              </div>
+              <small *ngIf="formGroup.get('frequency')?.invalid && formGroup.get('frequency')?.touched" class="p-error block mt-1">
+                  La sélection d'une fréquence est requise.
+              </small>
+          </div>
+
+          <div class="field flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                  <p-checkbox
+                      [(ngModel)]="showAssignee"
+                      [ngModelOptions]="{standalone: true}"
+                      [binary]="true"
+                      inputId="showAssigneeCheck">
+                  </p-checkbox>
+                  <label for="showAssigneeCheck" class="text-sm font-medium text-surface-700 dark:text-surface-200 cursor-pointer">
+                      Assigner à
+                  </label>
+              </div>
+              <div *ngIf="showAssignee" class="mt-1">
+                  <p-selectButton
+                      id="assignee"
+                      [options]="householdMembersOptions"
+                      formControlName="assignee"
+                      optionLabel="label"
+                      optionValue="value"
+                      [allowEmpty]="true"
+                      styleClass="w-full assignee-select-button">
+                  </p-selectButton>
+                  <small *ngIf="formGroup.get('assignee')?.hasError('required') && formGroup.get('assignee')?.touched && showAssignee" class="p-error block mt-1">
+                      Veuillez sélectionner un assigné.
+                  </small>
+              </div>
+          </div>
       </div>
 
-      
-  
-
-  
-      <!-- Footer Actions -->
-      <div class="flex justify-end gap-2 p-4 border-t border-surface-200 dark:border-surface-700 mt-auto">
-        <p-button
-          type="button"
-          label="Annuler"
-          severity="secondary"
-          (click)="close()">
-        </p-button>
-        <p-button
-          type="submit"
-          label="Sauvegarder"
-          icon="pi pi-check"
-          [disabled]="formGroup.invalid">
-        </p-button>
+      <div class="flex justify-end gap-2 p-4 border-t border-surface-200 dark:border-surface-700">
+          <p-button
+              type="button"
+              label="Annuler"
+              severity="secondary"
+              (click)="close()">
+          </p-button>
+          <p-button
+              type="submit"
+              label="Sauvegarder"
+              icon="pi pi-check"
+              severity="success"
+              [disabled]="formGroup.invalid || formGroup.pristine">
+          </p-button>
       </div>
-  
-    </div>
-  </form>
+  </div>
+</form>

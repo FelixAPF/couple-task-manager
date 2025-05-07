@@ -1,24 +1,10 @@
-.submit-button{
-    background: green !important;
-}
-
-.container {
-    padding:2%;
-}
-
-.form-container > * {
-    margin: 10px;
-}
-
-
-.d-block {
-    display: block;
-}
-
-.input-width {
-    width: 100%;
-}
-
-.button-space {
-    padding-top: 10px;
+/* Specifically target the #title input to increase its height */
+:host ::ng-deep #title.p-inputtext {
+    /* PrimeNG themes typically have vertical padding like 0.5rem or 0.75rem.
+       Increase these values to make the input taller.
+       Experiment with these values to get the desired height. */
+    padding-top: 0.8rem;  /* Example: Adjust up from default */
+    padding-bottom: 0.8rem; /* Example: Adjust up from default */
+    /* You can also ensure a comfortable font size if it's not globally set for inputs */
+    font-size: 0.95rem; /* e.g., 15px if 1rem=16px. Default might be smaller. */
 }

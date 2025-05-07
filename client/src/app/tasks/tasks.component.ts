@@ -1,12 +1,13 @@
 // c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\tasks\tasks.component.ts
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // <-- Import FormsModule
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { FormsModule } from '@angular/forms';
+import { DialogService } from 'primeng/dynamicdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { finalize, forkJoin, skipWhile, Subject, take, takeUntil } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil, take } from 'rxjs/operators';
 
-// PrimeNG Modules (Import via SharedModule or directly if standalone)
+// PrimeNG Modules
 import { SharedModule } from '../shared.module';
 
 // Components
@@ -18,29 +19,26 @@ import { TaskAssignmentDialogComponent } from './task-assignment-dialog/task-ass
 import { TaskListService } from '../service/task-list.service';
 import { TaskService } from '../service/task-service.service';
 import { HouseholdService } from '../service/household.service';
-import { TaskPeriodService } from '../service/task-period.service';
-import { TaskAssignmentService } from '../service/task-assignment.service';
-import { LoadingService } from '../service/loading/loading.service';
+// Assuming TaskPeriodService, TaskAssignmentService, LoadingService are used/injected if needed
+// For this fix, focusing on what's directly in the provided code for sorting.
 
 // Models
 import { Frequency, Task } from '../model/task';
-import { HouseholdMember } from '../model/household';
+import { HouseholdMember } from '../model/household'; // Ensure this path and interface are correct
 import { TaskList } from '../model/task-list';
 
-// Define the new interface for column data
 interface MemberTaskColumn {
   member: HouseholdMember | null;
   tasks: Task[];
 }
 
-
 const frequencyOrder: { [key in Frequency]: number } = {
   [Frequency.DAILY]: 1,
   [Frequency.WEEKLY]: 2,
-  [Frequency.BIWEEKLY]: 3, // Every two weeks
+  [Frequency.BIWEEKLY]: 3,
   [Frequency.MONTHLY]: 4,
-  [Frequency.QUARTERLY]: 5, // Every three months
-  [Frequency.BIYEARLY]: 6, // Every six months / Twice a year
+  [Frequency.QUARTERLY]: 5,
+  [Frequency.BIYEARLY]: 6,
   [Frequency.YEARLY]: 7,
 };
 const UNKNOWN_FREQUENCY_ORDER = Number.MAX_SAFE_INTEGER;
@@ -49,27 +47,18 @@ export function sortArrayByFrequency<T>(
   items: T[],
   frequencyExtractor: (item: T) => Frequency | string | undefined | null
 ): T[] {
-  // Create a shallow copy to avoid modifying the original array
   const sortedItems = [...items];
-
   sortedItems.sort((a, b) => {
     const freqA = frequencyExtractor(a);
     const freqB = frequencyExtractor(b);
-
-    // Get the sort order number for frequency A, defaulting for unknown/null values
     const orderA = (freqA && frequencyOrder[freqA as Frequency] !== undefined)
-                   ? frequencyOrder[freqA as Frequency]
-                   : UNKNOWN_FREQUENCY_ORDER;
-
-    // Get the sort order number for frequency B, defaulting for unknown/null values
+                    ? frequencyOrder[freqA as Frequency]
+                    : UNKNOWN_FREQUENCY_ORDER;
     const orderB = (freqB && frequencyOrder[freqB as Frequency] !== undefined)
-                   ? frequencyOrder[freqB as Frequency]
-                   : UNKNOWN_FREQUENCY_ORDER;
-
-    // Compare the order numbers
+                    ? frequencyOrder[freqB as Frequency]
+                    : UNKNOWN_FREQUENCY_ORDER;
     return orderA - orderB;
   });
-
   return sortedItems;
 }
 
@@ -79,136 +68,182 @@ export function sortArrayByFrequency<T>(
   imports: [
     CommonModule,
     SharedModule,
-    FormsModule, // <-- Add FormsModule here
+    FormsModule,
     AssigneeTaskListComponent,
   ],
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.css'],
-  providers: [ConfirmationService, MessageService]
+  providers: [ConfirmationService, MessageService, DialogService] // Added DialogService
 })
 export class TasksComponent implements OnInit, OnDestroy {
-  // --- Injected Services ---
   private taskListService = inject(TaskListService);
   private taskService = inject(TaskService);
-  private taskAssignmentService = inject(TaskAssignmentService);
+  // private taskAssignmentService = inject(TaskAssignmentService); // Uncomment if used
   private householdService = inject(HouseholdService);
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
+  private dialogService = inject(DialogService);
+  // private loadingService = inject(LoadingService); // Uncomment if used
+  // private taskPeriodService = inject(TaskPeriodService); // Uncomment if used
+
   private initialLoadDone = false;
 
-
-  memberTaskColumns: MemberTaskColumn[] = []; // Original data from service
-  filteredMemberTaskColumns: MemberTaskColumn[] = []; // Data displayed in the template
-  searchTerm: string = ''; // <-- Add property for search term
+  memberTaskColumns: MemberTaskColumn[] = [];
+  filteredMemberTaskColumns: MemberTaskColumn[] = [];
+  searchTerm: string = '';
   private destroy$ = new Subject<void>();
-  accordionsOpenByDefault: number[] = []
+  accordionsOpenByDefault: number[] = [];
+  currentMember: HouseholdMember | null = null;
 
-  constructor(private taskPeriodService: TaskPeriodService, private dialogService: DialogService, private loadingService: LoadingService){}
+  // Constructor can be kept if other services were injected there, or removed if all use inject()
+  // constructor(private taskPeriodService: TaskPeriodService, private dialogService: DialogService, private loadingService: LoadingService){}
 
 
-  // --- Lifecycle Hooks ---
   ngOnInit(): void {
     this.loadInitialData();
   }
-
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  // --- Data Loading ---
   loadInitialData(): void {
     this.householdService.retrieveHousehold()
       .pipe(takeUntil(this.destroy$), take(1))
       .subscribe({
         next: (household) => {
           if (household) {
-            this.loadTaskData(); // Load tasks if household exists
+            this.currentMember = household.currentUser; // CRITICAL: Set currentMember BEFORE loading tasks
+            this.loadTaskData();
             this.initialLoadDone = true;
-            // Open all accordions initially (or based on filtered results later if needed)
-            this.accordionsOpenByDefault = Array.from(Array(household.members.length + 1).keys());
           } else {
             this.memberTaskColumns = [];
-            this.filteredMemberTaskColumns = []; // Clear filtered data too
+            this.filteredMemberTaskColumns = [];
+            this.currentMember = null;
+            this.updateOpenAccordionsState(); // Update accordion if list becomes empty
           }
         },
         error: (err) => {
           console.error("Error loading household", err);
           this.messageService.add({ severity: 'error', summary: 'Erreur Foyer', detail: 'Impossible de charger les informations du foyer.' });
           this.memberTaskColumns = [];
-          this.filteredMemberTaskColumns = []; // Clear filtered data on error
+          this.filteredMemberTaskColumns = [];
+          this.currentMember = null;
+          this.updateOpenAccordionsState();
         }
       });
   }
 
   unassign(event: any){
-    // Implement unassignment logic if needed, then reload/refilter
     console.log("Unassign event received:", event);
-    // Example: Call service to unassign, then this.loadTaskData();
     this.messageService.add({ severity: 'info', summary: 'Action Requise', detail: 'La fonctionnalité de désassignation n\'est pas encore implémentée.' });
+    // Potentially: this.loadTaskData(); after unassignment logic
   }
 
   loadTaskData(): void {
     this.taskListService.retrieveWithUnassigned()
+      .pipe(takeUntil(this.destroy$)) // Continue to listen for changes if service provides an ongoing observable
       .subscribe({
         next: (taskLists: TaskList[]) => {
           this.memberTaskColumns = taskLists.map(taskList => ({
             member: taskList.assignee,
             tasks: taskList.tasks ?? []
           }));
-          this.applyFilter(); // <-- Apply filter after loading data
+          this.applyFilter(); // This will filter, sort tasks within columns, and sort columns
         },
         error: (err) => {
           console.error("Error loading task lists", err);
           this.messageService.add({ severity: 'error', summary: 'Erreur Tâches', detail: 'Impossible de charger les listes de tâches.' });
-          this.memberTaskColumns = []; // Clear original data on error
-          this.filteredMemberTaskColumns = []; // Clear filtered data on error
+          this.memberTaskColumns = [];
+          this.filteredMemberTaskColumns = [];
+          this.updateOpenAccordionsState();
         }
       });
   }
 
-  // --- Filtering Logic ---
+  private sortColumnsPuttingCurrentUserFirst(): void {
+    if (!this.filteredMemberTaskColumns || this.filteredMemberTaskColumns.length === 0) {
+      return;
+    }
+
+    this.filteredMemberTaskColumns.sort((colA, colB) => {
+      const memberA = colA.member;
+      const memberB = colB.member;
+
+      // Rule 1: Current user first
+      if (this.currentMember) {
+        const isACurrent = memberA?.id === this.currentMember.id;
+        const isBCurrent = memberB?.id === this.currentMember.id;
+        if (isACurrent && !isBCurrent) return -1;
+        if (!isACurrent && isBCurrent) return 1;
+      }
+
+      // Rule 2: Unassigned tasks column last
+      const isAUnassigned = memberA === null;
+      const isBUnassigned = memberB === null;
+      if (isAUnassigned && !isBUnassigned) return 1;
+      if (!isAUnassigned && isBUnassigned) return -1;
+      if (isAUnassigned && isBUnassigned) return 0;
+
+      // Rule 3: Other assigned members (sort alphabetically by name)
+      const nameA = memberA?.name?.toLowerCase() || '';
+      const nameB = memberB?.name?.toLowerCase() || '';
+      return nameA.localeCompare(nameB);
+    });
+    // DO NOT CALL this.sortColumnsPuttingCurrentUserFirst(); recursively here.
+  }
+
   applyFilter(): void {
     const searchTermLower = this.searchTerm.toLowerCase().trim();
 
     if (!searchTermLower) {
-      // If search is empty, show all original tasks
-      this.filteredMemberTaskColumns = this.memberTaskColumns.map(col => ({ ...col })); // Create shallow copies
-      this.filteredMemberTaskColumns.forEach(column => {
-        // Use sortArrayByFrequency to sort the copied task array *in place* for this column
-        column.tasks = sortArrayByFrequency(column.tasks, task => task.frequency);
-    });
-      return;
+      this.filteredMemberTaskColumns = this.memberTaskColumns.map(col => ({
+        member: col.member,
+        tasks: sortArrayByFrequency([...col.tasks], task => task.frequency)
+      }));
+    } else {
+      this.filteredMemberTaskColumns = this.memberTaskColumns.map(column => {
+        const filteredTasks = column.tasks.filter(task =>
+          task.title?.toLowerCase().includes(searchTermLower) ||
+          task.description?.toLowerCase().includes(searchTermLower)
+        );
+        const sortedFilteredTasks = sortArrayByFrequency(filteredTasks, task => task.frequency);
+        return {
+          member: column.member,
+          tasks: sortedFilteredTasks
+        };
+      }).filter(column => column.tasks.length > 0);
     }
 
-    this.filteredMemberTaskColumns = this.memberTaskColumns.map(column => {
-      // Filter tasks within each column based on search term
-      let filteredTasks = column.tasks.filter(task =>
-        task.title?.toLowerCase().includes(searchTermLower) ||
-        task.description?.toLowerCase().includes(searchTermLower)
-        // Add more fields to search if needed
-      );
-      filteredTasks = sortArrayByFrequency(filteredTasks, task => task.frequency);
-
-      // Return a new column object with potentially filtered tasks
-      return {
-        ...column,
-        tasks: filteredTasks
-      };
-    })
-    // **** THIS IS THE CORRECTED LINE ****
-    // Only keep columns (assigned OR unassigned) that have tasks remaining AFTER filtering
-    .filter(column => column.tasks.length > 0);
+    this.sortColumnsPuttingCurrentUserFirst(); // Sort columns after they are filtered/prepared
+    this.updateOpenAccordionsState(); // Update accordion state based on the final list
   }
 
+  private updateOpenAccordionsState(): void {
+    // Example: Open all currently displayed panels
+    this.accordionsOpenByDefault = Array.from(Array(this.filteredMemberTaskColumns.length).keys());
+    // You might want more sophisticated logic, e.g., to keep the current user's panel open
+    // if (this.currentMember) {
+    //   const currentUserIndex = this.filteredMemberTaskColumns.findIndex(col => col.member?.id === this.currentMember?.id);
+    //   if (currentUserIndex !== -1) {
+    //     this.accordionsOpenByDefault = [currentUserIndex];
+    //   } else {
+    //     this.accordionsOpenByDefault = this.filteredMemberTaskColumns.length > 0 ? [0] : []; // Fallback: open first or none
+    //   }
+    // } else {
+    //    this.accordionsOpenByDefault = this.filteredMemberTaskColumns.length > 0 ? [0] : []; // Fallback
+    // }
+  }
 
-  // --- Event Handlers & Dialog Openers ---
   create(): void {
-    const ref = this.dialogService.open(TaskAssignmentDialogComponent, {
-      header: 'Assigner les tâches pour la période',
-      width: '90%',
-      contentStyle: { overflow: 'auto' },
+    const ref = this.dialogService.open(AddTaskComponent, {
+      header: 'Créer une Tâche',
+      style: {
+        'width': '90vw',         // Use 90% of viewport width on smaller screens
+        'max-width': '650px'     // But cap it at 650px (or your preferred max) on larger screens
+      },
+      contentStyle: { overflow: 'auto' }, // Good for content that might exceed dialog height
       baseZIndex: 10000,
     });
     ref.onClose.pipe(takeUntil(this.destroy$)).subscribe(() => this.loadTaskData());
@@ -217,18 +252,20 @@ export class TasksComponent implements OnInit, OnDestroy {
   openNewTaskDialog(task?: Task, assignee?: HouseholdMember | null): void {
     const ref = this.dialogService.open(AddTaskComponent, {
       header: task ? 'Modifier la Tâche' : 'Créer une Tâche',
-      width: '90%',
-      contentStyle: { overflow: 'auto' },
+      style: {
+        'width': '90vw',         // Use 90% of viewport width on smaller screens
+        'max-width': '650px'     // But cap it at 650px (or your preferred max) on larger screens
+      },
+      contentStyle: { overflow: 'auto' }, // Good for content that might exceed dialog height
       baseZIndex: 10000,
       data: { taskToEdit: task, assignee }
     });
     ref.onClose.pipe(takeUntil(this.destroy$)).subscribe((result) => {
       if (result) {
-        this.loadTaskData(); // Reload and refilter
+        this.loadTaskData();
       }
     });
   }
-
 
   deleteTask(task: Task): void {
     if (!task || !task.id) return;
@@ -246,7 +283,7 @@ export class TasksComponent implements OnInit, OnDestroy {
           .subscribe({
             next: () => {
               this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Tâche supprimée avec succès.' });
-              this.loadTaskData(); // Reload and refilter
+              this.loadTaskData();
             },
             error: (err) => {
               console.error("Error deleting task", err);
@@ -257,7 +294,6 @@ export class TasksComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- trackBy Function ---
   trackByMemberId(index: number, item: MemberTaskColumn): string | number {
     return item.member?.id ?? 'unassigned';
   }

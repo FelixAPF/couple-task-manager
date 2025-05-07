@@ -80,9 +80,12 @@ public class TaskListService implements IGenericService<TaskList, TaskListDto> {
         Household household = householdRepository.findByIdWithUser(user.getHousehold().getId()).orElseThrow(()->new NoSuchElementException("No household with id " + user.getHousehold().getId()));
 
         //Remove Task from old list.
-        TaskList currentList = taskListRepository.findByAssignee(task.getTaskLists().stream().findFirst().orElseThrow(NoSuchElementException::new).getUser().getId(), user.getHousehold().getId()).orElseThrow(()-> new NoSuchElementException("No list for current user."));
-        currentList.getTasks().remove(task);
-        taskListRepository.save(currentList);
+        TaskList currentList = null;
+        if(!task.getTaskLists().isEmpty()){
+            currentList = taskListRepository.findByAssignee(task.getTaskLists().stream().findFirst().orElseThrow(NoSuchElementException::new).getUser().getId(), user.getHousehold().getId()).orElseThrow(()-> new NoSuchElementException("No list for current user."));
+            currentList.getTasks().remove(task);
+            taskListRepository.save(currentList);
+        }
 
         //Add Task to new list
         TaskList newList = taskListRepository.findByAssignee(newUser.getId(), user.getHousehold().getId()).orElseGet(()->{

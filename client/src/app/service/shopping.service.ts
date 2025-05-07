@@ -41,6 +41,10 @@ export class ShoppingService {
     return this.http.get<string[]>(`${this.baseUrl}/name/suggestions`)
   }
 
+  static shoppingListSuggestionsEndPoint(){
+    return `${environment.apiUrl}shopping-list/name/suggestions`;
+  }
+
   getStoreEnumValues(): Store[] {
     return Object.values(Store); // Return array of enum values
   }

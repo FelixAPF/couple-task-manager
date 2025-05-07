@@ -18,14 +18,13 @@
       <div class="flex-grow w-full md:w-auto flex flex-col gap-1">
         <label for="itemName" class="text-sm font-medium text-surface-700 dark:text-surface-200">Nom de l'article</label>
         <p-autoComplete
-          inputId="itemName"
-          formControlName="name"
-          [suggestions]="nameSuggestions"
-          (completeMethod)="searchNameSuggestions($event)"
-          placeholder="Rechercher ou saisir..."
-          styleClass="w-full"
-          inputStyleClass="w-full"
-          [ngClass]="{'p-invalid': addItemForm.get('name')?.invalid && addItemForm.get('name')?.touched}">
+        inputId="itemName"
+        formControlName="name"
+        [suggestions]="nameSuggestions"
+        (completeMethod)="searchNameSuggestions($event)"
+        placeholder="Rechercher ou saisir..."
+        styleClass="w-full"
+        inputStyleClass="w-full">
         </p-autoComplete>
         <div *ngIf="addItemForm.get('name')?.invalid && addItemForm.get('name')?.touched" class="p-error text-xs mt-1">
             Le nom de l'article est requis.

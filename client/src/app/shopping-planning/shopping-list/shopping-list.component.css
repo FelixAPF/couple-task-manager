@@ -1,0 +1,8 @@
+:host ::ng-deep p-autoComplete.ng-invalid.ng-touched .p-inputtext {
+    border-color: var(--p-red-500); /* Standard PrimeNG invalid color variable, or your specific color */
+  }
+  
+  /* Or if the p-autoComplete itself doesn't get these but the internal input does */
+  :host ::ng-deep p-autoComplete .p-inputtext.ng-invalid.ng-touched {
+      border-color: var(--p-red-500);
+  }

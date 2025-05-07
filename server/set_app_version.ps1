@@ -58,11 +58,11 @@ try {
         # Replace the captured version part (group 2) with the new version
         $newGradleContent = $gradleContent -replace $pattern, ('${1}' + $newVersion + '${3}') # Use captured groups $1 and $3
 
-        # --- MODIFIED LINE: Specify UTF8 encoding WITHOUT BOM ---
+        # --- MODIFIED SECTION for build.gradle ---
         # Get UTF8 encoding object without BOM signature
-        $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($false) 
+        $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($false)
         # Write the modified content back to the file using the specified encoding
-        Set-Content -Path $gradleFilePath -Value $newGradleContent -Force -Encoding $utf8NoBomEncoding
+        [System.IO.File]::WriteAllText($gradleFilePath, $newGradleContent, $utf8NoBomEncoding)
         Write-Host "build.gradle updated successfully (UTF8 without BOM)." -ForegroundColor Green
     } else {
         Write-Warning "Pattern 'versionName ""...""' not found in $gradleFilePath. File not updated."
@@ -93,11 +93,11 @@ try {
     # Convert back to JSON format (with indentation)
     $newJsonContent = $jsonObject | ConvertTo-Json -Depth 5 # Adjust depth if needed
 
-    # --- MODIFIED LINE: Specify UTF8 encoding WITHOUT BOM ---
+    # --- MODIFIED SECTION for version.json ---
     # Get UTF8 encoding object without BOM signature
     $utf8NoBomEncoding = New-Object System.Text.UTF8Encoding($false)
     # Write the modified JSON back to the file using the specified encoding
-    Set-Content -Path $jsonFilePath -Value $newJsonContent -Force -Encoding $utf8NoBomEncoding
+    [System.IO.File]::WriteAllText($jsonFilePath, $newJsonContent, $utf8NoBomEncoding)
     Write-Host "version.json updated successfully (UTF8 without BOM)." -ForegroundColor Green
 
 } catch {

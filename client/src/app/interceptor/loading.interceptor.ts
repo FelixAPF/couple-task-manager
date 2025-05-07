@@ -10,14 +10,20 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError, finalize, map } from 'rxjs/operators';
 import { LoadingService } from '../service/loading/loading.service'; // Adjust path if needed
+import { ShoppingService } from '../service/shopping.service';
 
 @Injectable()
 export class LoadingInterceptor implements HttpInterceptor {
 
   private activeRequests = 0;
   private loadingService = inject(LoadingService);
+  excludedLoadEndpoints: string[] =  [ ShoppingService.shoppingListSuggestionsEndPoint() ]
 
   intercept(request: HttpRequest<any>, next: any): Observable<HttpEvent<any>> {
+    if(this.excludedLoadEndpoints.includes(request.url)){
+      return next.handle(request);
+    }
+
     this.loadingService.setLoading(true, request.url);
     return next.handle(request)
       .pipe(catchError((err) => {

@@ -1,5 +1,5 @@
 // c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\tasks\tasks.component.ts
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogService } from 'primeng/dynamicdialog';
@@ -26,6 +26,7 @@ import { HouseholdService } from '../service/household.service';
 import { Frequency, Task } from '../model/task';
 import { HouseholdMember } from '../model/household'; // Ensure this path and interface are correct
 import { TaskList } from '../model/task-list';
+import { LoadingService } from '../service/loading/loading.service';
 
 interface MemberTaskColumn {
   member: HouseholdMember | null;
@@ -75,7 +76,7 @@ export function sortArrayByFrequency<T>(
   styleUrls: ['./tasks.component.css'],
   providers: [ConfirmationService, MessageService, DialogService] // Added DialogService
 })
-export class TasksComponent implements OnInit, OnDestroy {
+export class TasksComponent implements OnInit, OnDestroy, AfterViewInit {
   private taskListService = inject(TaskListService);
   private taskService = inject(TaskService);
   // private taskAssignmentService = inject(TaskAssignmentService); // Uncomment if used
@@ -83,6 +84,7 @@ export class TasksComponent implements OnInit, OnDestroy {
   private confirmationService = inject(ConfirmationService);
   private messageService = inject(MessageService);
   private dialogService = inject(DialogService);
+  private loadingService = inject(LoadingService);
   // private loadingService = inject(LoadingService); // Uncomment if used
   // private taskPeriodService = inject(TaskPeriodService); // Uncomment if used
 
@@ -101,6 +103,7 @@ export class TasksComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadInitialData();
+    
   }
 
   ngOnDestroy(): void {
@@ -117,6 +120,8 @@ export class TasksComponent implements OnInit, OnDestroy {
             this.currentMember = household.currentUser; // CRITICAL: Set currentMember BEFORE loading tasks
             this.loadTaskData();
             this.initialLoadDone = true;
+
+          
           } else {
             this.memberTaskColumns = [];
             this.filteredMemberTaskColumns = [];
@@ -133,6 +138,9 @@ export class TasksComponent implements OnInit, OnDestroy {
           this.updateOpenAccordionsState();
         }
       });
+  }
+
+  ngAfterViewInit(): void {
   }
 
   unassign(event: any){
@@ -236,9 +244,10 @@ export class TasksComponent implements OnInit, OnDestroy {
     // }
   }
 
+
   create(): void {
-    const ref = this.dialogService.open(AddTaskComponent, {
-      header: 'Créer une Tâche',
+    const ref = this.dialogService.open(TaskAssignmentDialogComponent, {
+      header: 'Assigner les tâches',
       style: {
         'width': '90vw',         // Use 90% of viewport width on smaller screens
         'max-width': '650px'     // But cap it at 650px (or your preferred max) on larger screens

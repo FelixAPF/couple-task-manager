@@ -196,6 +196,12 @@ export class MealsListComponent implements OnInit {
     return day.borderClass; // Default
   }
 
+  scroll(){
+            const el = document.getElementById("today");
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+  }
   loadMealsForWeek(): void {
     this.selectedDay = null; // Reset selected day when loading new meals
     if (this.weekDays.length === 0) {
@@ -229,6 +235,13 @@ export class MealsListComponent implements OnInit {
           // Use the same ISO format for lookup
           day.meal = this.mealsMap.get(day.isoDate);
         });
+
+        setTimeout(() => {
+          const el = document.getElementById("today");
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 400)
       },
       error: (err) => {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger le plan de repas.' });

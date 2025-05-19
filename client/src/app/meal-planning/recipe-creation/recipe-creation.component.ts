@@ -53,7 +53,9 @@ interface FileUploadResponse {
 })
 export class RecipeCreationComponent implements OnInit, OnDestroy {
 
-  @ViewChild('fileUploader') fileUploader?: FileUpload; // Reference to the p-fileUpload component
+  @ViewChild('fileUploader') fileUploader?: FileUpload; // Reference to the p-fileUpload component  
+  readonly maxFileSizeInMb = 100;
+
 
   constructor(
     private fb: FormBuilder,
@@ -176,8 +178,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
         this.clearFileUploader();
         return;
     }
-    const maxSizeInMb = 100;
-    const maxSize = maxSizeInMb * 1024 * 1024; // 2MB example
+    const maxSize = this.maxFileSizeInMb * 1024 * 1024; // 2MB example
     if (file.size > maxSize) {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `La taille du fichier ne doit pas dépasser ${maxSizeInMb / 1024 / 1024} Mo.` });
         this.clearFileUploader();

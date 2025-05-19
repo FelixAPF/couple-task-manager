@@ -80,7 +80,7 @@
                           Fichier prêt : <span class="font-medium text-surface-800 dark:text-surface-200">{{ selectedFile.name }}</span>
                        </small>
                        <small *ngIf="!selectedFile && !imageUrl.value" class="block mt-2 text-sm text-surface-500 dark:text-surface-400">
-                           Aucune image sélectionnée. (Max 2Mo, format JPG, PNG, WEBP recommandé)
+                           Aucune image sélectionnée. (Max {{maxFileSizeInMb}}Mo, format JPG, PNG, WEBP recommandé)
                        </small>
                        <input type="hidden" formControlName="imageUrl">
                         </div>

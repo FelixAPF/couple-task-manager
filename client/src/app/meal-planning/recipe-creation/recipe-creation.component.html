@@ -69,7 +69,7 @@
 
                   <div class="flex-grow mt-2 sm:mt-0">
                        <p-fileUpload mode="basic" name="recipeImage" #fileUploader
-                                      accept="image/*" maxFileSize="2000000"
+                                      accept="image/*" [maxFileSize]="maxFileSizeInMb * 1024 * 1024"
                                       chooseLabel="Choisir ou changer l'image" chooseIcon="pi pi-upload"
                                       class="p-button-sm w-full sm:w-auto"
                                       [auto]="true"

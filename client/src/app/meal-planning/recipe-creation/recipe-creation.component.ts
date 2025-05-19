@@ -180,7 +180,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     }
     const maxSize = this.maxFileSizeInMb * 1024 * 1024; // 2MB example
     if (file.size > maxSize) {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `La taille du fichier ne doit pas dépasser ${maxSizeInMb / 1024 / 1024} Mo.` });
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `La taille du fichier ne doit pas dépasser ${this.maxFileSizeInMb / 1024 / 1024} Mo.` });
         this.clearFileUploader();
         return;
     }

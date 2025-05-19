@@ -68,7 +68,7 @@
 
                 </div>
                 <ul class="list-disc pl-5 space-y-1 text-sm text-surface-700 dark:text-surface-300 mt-3"> <li *ngFor="let ingredient of scaledIngredients">
-                        {{ formatIngredient(ingredient) }}
+                        {{ formatIngredient(ingredient) }} <i class="pi pi-plus-circle hover" (click)="addIngredientToShopList(ingredient)" style="font-size:0.9rem"></i>
                     </li>
                 </ul>
             </p-accordion-content>

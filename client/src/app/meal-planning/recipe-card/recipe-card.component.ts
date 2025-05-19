@@ -1,9 +1,14 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, OnChanges, SimpleChanges, TemplateRef, ViewChild, AfterViewInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnChanges, SimpleChanges, TemplateRef, ViewChild, AfterViewInit, inject, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Import FormsModule for ngModel
 import { InputNumberModule } from 'primeng/inputnumber'; // Import InputNumberModule
 import { Ingredient, Recipe, RecipeType } from '../../model/recipes';
 import { SharedModule } from '../../shared.module';
 import { TagSeverity } from '../recipes-list/recipes-list.component';
+import { ShoppingService } from '../../service/shopping.service';
+import { ItemType, ShoppingItem, Store } from '../../model/shopping-item';
+import { Subscription } from 'rxjs';
+import { DialogService } from 'primeng/dynamicdialog';
+import { SelectStoreComponent } from '../../shopping-planning/select-store/select-store.component';
 
 @Component({
   selector: 'app-recipe-card',
@@ -12,7 +17,7 @@ import { TagSeverity } from '../recipes-list/recipes-list.component';
   templateUrl: './recipe-card.component.html',
   styleUrls: ['./recipe-card.component.css'] // Corrected property name
 })
-export class RecipeCardComponent implements OnChanges, AfterViewInit { // Added OnChanges, AfterViewInit
+export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{ // Added OnChanges, AfterViewInit
   @Input() recipe!: Recipe;
   @Input() buttonsTemplate!: TemplateRef<any>;
   @Input() openIngredients: boolean = false;
@@ -21,11 +26,15 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit { // Added 
   isDescriptionOverflowing = false;
   @ViewChild('descriptionParagraph') descriptionParagraphRef!: ElementRef<HTMLParagraphElement>;
 
+  shoppingService = inject(ShoppingService);
+  dialogService = inject(DialogService);
+
   // --- Ingredient Scaling ---
   originalIngredients: Ingredient[] = []; // Store base ingredients
   scaledIngredients: Ingredient[] = [];   // Store ingredients for display
   displayPortionRatio: number | null = null; // User-editable portion ratio
   // --- End Ingredient Scaling ---
+  subscription: Subscription = new Subscription();
 
   constructor(private cdRef: ChangeDetectorRef) {}
 
@@ -46,8 +55,37 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit { // Added 
     }
   }
 
+  addIngredientToShopList(ingredient: Ingredient){
+    console.log(ingredient);
+    //Open modal to select Store and quantity
+    this.dialogService.open(SelectStoreComponent, {
+        header: 'Choisir un commerce',
+        width: '90%', // Responsive width
+        modal: true,
+        dismissableMask: true,
+        contentStyle: {"overflow": "auto"}, // Basic overflow
+        baseZIndex: 10000
+    }).onClose.subscribe((resp) => {
+      if(!resp) return;
+      const shoppingItem: ShoppingItem = {
+        bought: false,
+        name: `${ingredient.name} ${ingredient.quantity >= 1 ? `x${ingredient.quantity}` : ''}`,
+        store: resp as Store,
+        id: 0,
+        type: ItemType.GROCERY
+      }
+      //Post ingredient to Shopping List
+      this.subscription.add(this.shoppingService.addShoppingItem(shoppingItem).subscribe());
+    })
+
+  }
+
   ngAfterViewInit(): void {
     this.checkDescriptionOverflow();
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   initializeIngredients(): void {

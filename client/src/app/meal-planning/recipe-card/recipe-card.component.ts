@@ -60,7 +60,9 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{
     //Open modal to select Store and quantity
     this.dialogService.open(SelectStoreComponent, {
         header: 'Choisir un commerce',
-        width: '90%', // Responsive width
+        style: {
+            width: '50vw'
+        },
         modal: true,
         dismissableMask: true,
         contentStyle: {"overflow": "auto"}, // Basic overflow

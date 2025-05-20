@@ -13,7 +13,24 @@
               appendTo="body">
             </p-dropdown>
           </div>
+          
 
+    </div>
+    <div>
+            <div class="flex-1 min-w-[60px] sm:w-24"> <label [for]="'quantity'" class="block text-xs font-medium mb-1 text-surface-600 dark:text-surface-300">
+                  Qté
+              </label>
+              <p-inputNumber
+                              [(ngModel)]="quantity"
+                              mode="decimal"
+                              [minFractionDigits]="0"
+                              [maxFractionDigits]="2"
+                              [showButtons]="true"
+                              buttonLayout="stacked" decrementButtonClass="p-button-secondary p-button-outlined !p-0 !w-6" incrementButtonClass="p-button-secondary p-button-outlined !p-0 !w-6" incrementButtonIcon="pi pi-angle-up !text-xs"
+                              decrementButtonIcon="pi pi-angle-down !text-xs"
+                              placeholder="Ex: 100"
+                              inputStyleClass="p-inputtext-sm text-center w-full" styleClass="p-inputnumber-sm w-full"> </p-inputNumber>
+            </div>
     </div>
     <div>
         <button pButton pRipple type="button" label="Annuler"

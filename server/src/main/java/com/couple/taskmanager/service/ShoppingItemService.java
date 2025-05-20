@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -57,8 +58,17 @@ public class ShoppingItemService implements IGenericService<ShoppingItem, Shoppi
             shoppingItem.setHousehold(household);
         }
         shoppingItem.setBought(false);
-        ShoppingItem savedItem = repository.save(shoppingItem); // Line 56 (now correct)
+        ShoppingItem savedItem = repository.save(shoppingItem);
         return new ShoppingItemDto(savedItem);
     }
 
+    public void updateQuantity(Long id, Double newQuantity, CTMUser user) {
+        ShoppingItem shoppingItem = repository.findById(id).orElseThrow(NoSuchElementException::new);
+        Household household = householdRepository.findById(shoppingItem.getHousehold().getId())
+                .orElseThrow(() -> new IllegalArgumentException("User's household not found"));
+
+        shoppingItem.setQuantity(newQuantity);
+        shoppingItem.setHousehold(household);
+        repository.save(shoppingItem);
+    }
 }

@@ -14,11 +14,13 @@ public class ShoppingItemDto {
     private String name;
     private Boolean bought;
     private Store store;
+    private Double quantity;
 
     public ShoppingItemDto(ShoppingItem shoppingItem){
         this.id = shoppingItem.getId();
         this.name = shoppingItem.getName();
         this.bought = shoppingItem.getBought();
         this.store = shoppingItem.getStore();
+        this.quantity = shoppingItem.getQuantity();
     }
 }

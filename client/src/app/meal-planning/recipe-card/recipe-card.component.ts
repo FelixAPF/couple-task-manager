@@ -72,9 +72,10 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{
       const shoppingItem: ShoppingItem = {
         bought: false,
         name: `${ingredient.name} ${ingredient.quantity >= 1 ? `x${ingredient.quantity}` : ''}`,
-        store: resp as Store,
+        store: resp.store as Store,
         id: 0,
-        type: ItemType.GROCERY
+        type: ItemType.GROCERY,
+        quantity: resp.quantity
       }
       //Post ingredient to Shopping List
       this.subscription.add(this.shoppingService.addShoppingItem(shoppingItem).subscribe());

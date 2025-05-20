@@ -17,10 +17,10 @@ export class LoadingInterceptor implements HttpInterceptor {
 
   private activeRequests = 0;
   private loadingService = inject(LoadingService);
-  excludedLoadEndpoints: string[] =  [ ShoppingService.shoppingListSuggestionsEndPoint() ]
+  excludedLoadEndpoints: string[] =  [ ShoppingService.shoppingListSuggestionsEndPoint(), ShoppingService.shoppingListUpdateQuantityEndpoint() ]
 
   intercept(request: HttpRequest<any>, next: any): Observable<HttpEvent<any>> {
-    if(this.excludedLoadEndpoints.includes(request.url)){
+    if(this.excludedLoadEndpoints.includes(request.url) || this.excludedLoadEndpoints.some((endpoint) => request.url.startsWith(endpoint))){
       return next.handle(request);
     }
 

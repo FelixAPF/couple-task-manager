@@ -28,6 +28,8 @@ public class ShoppingItem {
 
     private ItemType type;
 
+    private Double quantity;
+
     @ManyToOne
     @JsonBackReference("household-shopping-items")
     private Household household;

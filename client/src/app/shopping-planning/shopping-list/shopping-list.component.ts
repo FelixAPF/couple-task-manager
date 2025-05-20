@@ -36,7 +36,9 @@ export class ShoppingListComponent implements OnInit {
   constructor() {
     this.addItemForm = this.fb.group({
       name: ['', Validators.required],
-      store: [Store.AUTRE, Validators.required]
+      store: [Store.AUTRE, Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]] 
+
     });
   }
 
@@ -48,25 +50,26 @@ export class ShoppingListComponent implements OnInit {
 
   // --- Data Loading ---
   loadItems(): void {
-    this.shoppingService.retrieveShoppingListNotBought()
-      .subscribe({
-        next: (items) => {
-          // --- SORTING LOGIC UPDATED HERE ---
-          this.shoppingItems.set(items.sort((a, b) => {
-            const storeComparison = a.store.localeCompare(b.store); // Compare stores first
-            if (storeComparison !== 0) {
-              return storeComparison; // Return if stores are different
-            }
-            return a.name.localeCompare(b.name); // Otherwise, compare by name
-          }));
-          // --- END SORTING LOGIC ---
-        },
-        error: (err) => {
-          console.error("Error loading shopping list:", err);
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger la liste d\'épicerie.' });
-        }
-      });
-  }
+      this.shoppingService.retrieveShoppingListNotBought()
+        .subscribe({
+          next: (items) => {
+            this.shoppingItems.set(items.map(item => ({
+              ...item,
+              quantity: item.quantity === undefined || item.quantity === null || item.quantity < 1 ? 1 : item.quantity // Default to 1
+            })).sort((a, b) => {
+              const storeComparison = a.store.localeCompare(b.store);
+              if (storeComparison !== 0) {
+                return storeComparison;
+              }
+              return a.name.localeCompare(b.name);
+            }));
+          },
+          error: (err) => {
+            console.error("Error loading shopping list:", err);
+            this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger la liste d\'épicerie.' });
+          }
+        });
+    }
 
   loadStoreOptions(): void {
     this.storeOptions = this.shoppingService.getStoreEnumValues().map(store => ({
@@ -93,6 +96,7 @@ export class ShoppingListComponent implements OnInit {
       id: 0,
       name: this.addItemForm.value.name.trim(),
       store: this.addItemForm.value.store,
+      quantity: this.addItemForm.value.quantity, // <-- ADD quantity from form
       bought: false,
       type: ItemType.GROCERY
     };
@@ -101,9 +105,12 @@ export class ShoppingListComponent implements OnInit {
       .pipe(finalize(() => this.isAdding.set(false)))
       .subscribe({
         next: (addedItem) => {
-          // --- SORTING LOGIC ADDED HERE ---
+          const newShoppingItem = {
+            ...addedItem,
+            quantity: addedItem.quantity === undefined || addedItem.quantity === null || addedItem.quantity < 1 ? 1 : addedItem.quantity
+          };
           this.shoppingItems.update(items =>
-            [...items, addedItem].sort((a, b) => { // Add the new item and re-sort
+            [...items, newShoppingItem].sort((a, b) => {
               const storeComparison = a.store.localeCompare(b.store);
               if (storeComparison !== 0) {
                 return storeComparison;
@@ -111,9 +118,8 @@ export class ShoppingListComponent implements OnInit {
               return a.name.localeCompare(b.name);
             })
           );
-          // --- END SORTING LOGIC ---
-          this.messageService.add({ severity: 'success', summary: 'Ajouté', detail: `"${addedItem.name}" ajouté à la liste.` });
-          this.addItemForm.reset({ store: Store.AUTRE, name: '' });
+          this.messageService.add({ severity: 'success', summary: 'Ajouté', detail: `"${newShoppingItem.name}" ajouté à la liste.` });
+          this.addItemForm.reset({ store: Store.AUTRE, name: '', quantity: 1 }); // <-- RESET quantity
         },
         error: (err) => {
           console.error("Error adding shopping item:", err);
@@ -137,6 +143,42 @@ export class ShoppingListComponent implements OnInit {
         error: (err) => {
           console.error("Error deleting item:", err);
           this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer l\'article.' });
+        }
+      });
+  }
+
+  onQuantityChange(item: ShoppingItem, newQuantity: number | null): void {
+    if (newQuantity === null || newQuantity < 1) {
+      // If input is cleared or invalid, reset to 1 or previous valid quantity.
+      // For simplicity, let's enforce 1 and update the backend.
+      // The p-inputNumber's [min]="1" should prevent values below 1 if typed.
+      // This handles programmatic changes or cleared input.
+      newQuantity = 1; 
+    }
+
+    // Optimistically update the UI for responsiveness
+    const originalQuantity = item.quantity;
+    item.quantity = newQuantity; // ngModel would have updated this already
+    
+    this.shoppingItems.update(items => 
+        items.map(i => i.id === item.id ? {...i, quantity: newQuantity!} : i)
+    );
+
+    this.shoppingService.updateQuantity(item.id, newQuantity)
+      .subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Quantité mise à jour', detail: `"${item.name}" quantité: ${newQuantity}.` });
+        },
+        error: (err) => {
+          console.error("Error updating quantity:", err);
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `Impossible de mettre à jour la quantité pour "${item.name}".` });
+          // Revert optimistic update on error
+          item.quantity = originalQuantity;
+           this.shoppingItems.update(items => 
+            items.map(i => i.id === item.id ? {...i, quantity: originalQuantity!} : i)
+          );
+          // Optionally, reload the specific item or the whole list to ensure data integrity
+          // this.loadItems(); 
         }
       });
   }

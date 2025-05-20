@@ -20,7 +20,8 @@ export class SelectStoreComponent implements OnInit {
   titleCasePipe = inject(TitleCasePipe);
   storeOptions: SelectItem[] = [];
 
-  store = ''
+  store = '';
+  quantity = null;
 
   ngOnInit(){
     this.loadStoreOptions();
@@ -40,6 +41,6 @@ export class SelectStoreComponent implements OnInit {
   }
 
   submitStore(){
-    this.dialogRef.close(this.store);
+    this.dialogRef.close({store: this.store, quantity: this.quantity});
   }
 }

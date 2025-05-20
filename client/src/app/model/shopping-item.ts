@@ -31,4 +31,5 @@ export class ShoppingItem {
     bought: boolean;
     store: Store;
     type: ItemType;
+    quantity?: number;
 }

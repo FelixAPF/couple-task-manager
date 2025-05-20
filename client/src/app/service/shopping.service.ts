@@ -41,8 +41,16 @@ export class ShoppingService {
     return this.http.get<string[]>(`${this.baseUrl}/name/suggestions`)
   }
 
+  updateQuantity(id: number, quantity: number): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}/quantity`, quantity);
+  }
+
   static shoppingListSuggestionsEndPoint(){
     return `${environment.apiUrl}shopping-list/name/suggestions`;
+  }
+
+  static shoppingListUpdateQuantityEndpoint(){
+    return `${environment.apiUrl}shopping-list`
   }
 
   getStoreEnumValues(): Store[] {

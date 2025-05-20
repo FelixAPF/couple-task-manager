@@ -1,112 +1,131 @@
-<!-- Feedback Messages -->
 <p-toast></p-toast>
 <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 
 <div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
 
-  <!-- Header -->
   <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
     {{'side-menu.shopping-list'|translate}}<i class="pi pi-shopping-cart ml-2" style="font-size: 1.25rem"></i>
   </h2>
 
-  <!-- Add Item Form - Refactored Layout -->
   <form [formGroup]="addItemForm" (ngSubmit)="handleAddItem()" class="mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-    <!-- Main Flex Container: Stacks vertically on small (<md), row on medium+ -->
     <div class="flex flex-col md:flex-row items-end gap-3">
 
-      <!-- Item Name Section (Takes available space) -->
       <div class="flex-grow w-full md:w-auto flex flex-col gap-1">
         <label for="itemName" class="text-sm font-medium text-surface-700 dark:text-surface-200">Nom de l'article</label>
         <p-autoComplete
-        inputId="itemName"
-        formControlName="name"
-        [suggestions]="nameSuggestions"
-        (completeMethod)="searchNameSuggestions($event)"
-        placeholder="Rechercher ou saisir..."
-        styleClass="w-full"
-        inputStyleClass="w-full">
+          inputId="itemName"
+          formControlName="name"
+          [suggestions]="nameSuggestions"
+          (completeMethod)="searchNameSuggestions($event)"
+          placeholder="Rechercher ou saisir..."
+          styleClass="w-full"
+          inputStyleClass="w-full">
         </p-autoComplete>
         <div *ngIf="addItemForm.get('name')?.invalid && addItemForm.get('name')?.touched" class="p-error text-xs mt-1">
             Le nom de l'article est requis.
         </div>
       </div>
 
-      <!-- Store and Button Group -->
-      <!-- MODIFIED: Add flex-col sm:flex-row to stack on smallest screens -->
       <div class="flex flex-col sm:flex-row items-end gap-2 w-full md:w-auto flex-shrink-0">
 
-          <!-- Store Dropdown Section -->
-          <!-- Keep w-full for stacking, sm:w-48 for row layout -->
-          <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-1">
-            <label for="itemStore" class="text-sm font-medium text-surface-700 dark:text-surface-200">Magasin</label>
-            <p-dropdown
-              inputId="itemStore"
-              formControlName="store"
-              [options]="storeOptions"
-              placeholder="Choisir"
-              optionLabel="label"
-              optionValue="value"
-              styleClass="w-full"
-              [ngClass]="{'p-invalid': addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched}"
-              appendTo="body">
-            </p-dropdown>
-             <div *ngIf="addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched" class="p-error text-xs mt-1">
+        <div class="w-full sm:w-24 flex-shrink-0 flex flex-col gap-1">
+            <label for="itemQuantityAdd" class="text-sm font-medium text-surface-700 dark:text-surface-200">Quantité</label>
+            <p-inputNumber inputId="itemQuantityAdd"
+                           formControlName="quantity"
+                           [showButtons]="true"
+                           buttonLayout="horizontal"
+                           spinnerMode="horizontal"
+                           [min]="1"
+                           decrementButtonClass="p-button-secondary p-button-outlined p-button-sm"
+                           incrementButtonClass="p-button-secondary p-button-outlined p-button-sm"
+                           incrementButtonIcon="pi pi-plus"
+                           decrementButtonIcon="pi pi-minus"
+                           styleClass="w-full"
+                           inputStyleClass="w-full p-inputtext-sm text-center"
+                           [ngClass]="{'p-invalid': addItemForm.get('quantity')?.invalid && addItemForm.get('quantity')?.touched}">
+            </p-inputNumber>
+            <div *ngIf="addItemForm.get('quantity')?.invalid && addItemForm.get('quantity')?.touched" class="p-error text-xs mt-1">
+                Quantité min. 1.
+            </div>
+        </div>
+
+        <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-1">
+          <label for="itemStore" class="text-sm font-medium text-surface-700 dark:text-surface-200">Magasin</label>
+          <p-dropdown
+            inputId="itemStore"
+            formControlName="store"
+            [options]="storeOptions"
+            placeholder="Choisir"
+            optionLabel="label"
+            optionValue="value"
+            styleClass="w-full"
+            [ngClass]="{'p-invalid': addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched}"
+            appendTo="body">
+          </p-dropdown>
+            <div *ngIf="addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched" class="p-error text-xs mt-1">
                 Le magasin est requis.
-             </div>
-          </div>
+            </div>
+        </div>
 
-          <!-- Add Button Section -->
-          <!-- MODIFIED: Add w-full sm:w-auto to make button full width when stacked -->
-          <div class="flex-shrink-0 w-full sm:w-auto">
-            <button pButton pRipple
-                    type="submit"
-                    icon="pi pi-plus"
-                    label="Ajouter"
-                    aria-label="Ajouter l'article"
-                    [loading]="isAdding()"
-                    [disabled]="isAdding() || addItemForm.invalid"
-                    class="p-button-primary w-full"> <!-- Ensure button takes full width of its container -->
-            </button>
-          </div>
+        <div class="flex-shrink-0 w-full sm:w-auto">
+          <button pButton pRipple
+                  type="submit"
+                  icon="pi pi-plus"
+                  label="Ajouter"
+                  aria-label="Ajouter l'article"
+                  [loading]="isAdding()"
+                  [disabled]="isAdding() || addItemForm.invalid"
+                  class="p-button-primary w-full">
+          </button>
+        </div>
 
-      </div> <!-- End Store and Button Group -->
+      </div> </div> </form>
 
-    </div> <!-- End Main Flex Container -->
-  </form>
-
-  <!-- Empty State -->
   <div *ngIf="shoppingItems().length === 0" class="text-center py-10 px-4 bg-surface-100 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
     <i class="pi pi-shopping-cart text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
     <p class="text-lg font-medium text-surface-600 dark:text-surface-300">Votre liste est vide !</p>
     <p class="text-sm text-surface-500 dark:text-surface-400">Ajoutez des articles en utilisant le formulaire ci-dessus.</p>
   </div>
 
-  <!-- Shopping List Items (Keep as is) -->
   <div *ngIf="shoppingItems().length > 0" class="flex flex-col gap-3">
     <div *ngFor="let item of shoppingItems(); trackBy: trackById"
          class="flex items-center gap-3 p-3 bg-surface-0 dark:bg-surface-700 rounded-lg shadow-sm border border-surface-200 dark:border-surface-600 transition-opacity duration-200"
          [ngClass]="{'opacity-60': item.bought}">
 
-      <!-- Item Name -->
-      <label [for]="'item-' + item.id"
-             class="flex-grow font-medium text-surface-700 dark:text-surface-200 cursor-pointer truncate"
+      <label [for]="'itemName-' + item.id"  class="flex-grow font-medium text-surface-700 dark:text-surface-200 cursor-pointer truncate"
              [ngClass]="{'line-through': item.bought}"
              [pTooltip]="item.name" tooltipPosition="top">
         {{ item.name }}
       </label>
 
-      <!-- Store Tag -->
+      <div class="flex-shrink-0">
+        <p-inputNumber
+            [inputId]="'itemQuantity-' + item.id"
+            [(ngModel)]="item.quantity"
+            (ngModelChange)="onQuantityChange(item, $event)"
+            [showButtons]="true"
+            buttonLayout="horizontal"
+            spinnerMode="horizontal"
+            [min]="1"
+            decrementButtonClass="p-button-secondary p-button-outlined p-button-sm"
+            incrementButtonClass="p-button-secondary p-button-outlined p-button-sm"
+            incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus"
+            [inputStyleClass]="'w-10 p-inputtext-sm text-center'"
+            styleClass="p-inputnumber-sm" [disabled]="item.bought">
+        </p-inputNumber>
+      </div>
+
       <p-tag
         [value]="`STORE.${item.store}` | translate | titlecase"
         [severity]="getStoreTagSeverity(item.store)"
-        class="flex-shrink-0 ml-auto mr-2">
-      </p-tag>
+        class="flex-shrink-0 mr-2"> </p-tag>
 
-      <!-- Delete Button -->
       <button pButton pRipple icon="pi pi-check-circle"
               class="p-button-rounded p-button-text p-button-danger p-button-sm flex-shrink-0"
               (click)="confirmDelete($event, item)"
-              aria-label="Supprimer l'article">
+              [pTooltip]="item.bought ? 'Marqué comme acheté' : 'Marquer comme acheté/Supprimer'" tooltipPosition="top"
+              aria-label="Supprimer ou marquer l'article comme acheté">
       </button>
     </div>
   </div>

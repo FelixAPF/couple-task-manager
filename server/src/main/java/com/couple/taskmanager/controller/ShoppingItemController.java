@@ -22,5 +22,10 @@ public class ShoppingItemController extends GenericController<ShoppingItem, Shop
         return service.listByNotBought((CTMUser) userDetails);
     }
 
+    @PutMapping("/{id}/quantity")
+    public void updateQuantity(@PathVariable("id") Long id, @RequestBody Double newQuantity, @AuthenticationPrincipal UserDetails userDetails){
+        service.updateQuantity(id, newQuantity, (CTMUser) userDetails);
+    }
+
 
 }

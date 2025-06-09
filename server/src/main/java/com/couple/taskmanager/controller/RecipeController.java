@@ -6,6 +6,7 @@ import com.couple.taskmanager.model.ShoppingItem;
 import com.couple.taskmanager.model.dto.RecipeDto;
 import com.couple.taskmanager.service.RecipeService;
 import com.couple.taskmanager.service.ShoppingItemService;
+import jakarta.transaction.SystemException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -24,5 +25,10 @@ public class RecipeController extends GenericController<Recipe, RecipeDto, Recip
     @GetMapping("/type/{recipeType}")
     public List<RecipeDto> findByRecipeType(@PathVariable String recipeType, @AuthenticationPrincipal UserDetails userDetails) {
         return this.service.findByRecipeType(recipeType, (CTMUser) userDetails);
+    }
+
+    @GetMapping("/random")
+    public RecipeDto randomRecipe(@AuthenticationPrincipal UserDetails userDetails) throws SystemException {
+        return this.service.findRandomRecipe((CTMUser) userDetails);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
@@ -22,4 +23,7 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
 
     @Query("DELETE FROM Recipe r WHERE r.id = :recipeId AND r.household.id = :householdId")
     void deleteByRecipeIdAndHouseholdId(Long recipeId, Long householdId);
+
+    @Query(value = "SELECT * FROM recipe WHERE household_id = :householdId ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
+    Optional<Recipe> findRandomRecipeByHouseholdId_Random(@Param("householdId") Long householdId);
 }

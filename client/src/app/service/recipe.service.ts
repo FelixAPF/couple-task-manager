@@ -26,4 +26,12 @@ export class RecipeService {
   deleteRecipe(id: number) {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  randomRecipe(){
+    return this.http.get<Recipe>(RecipeService.randomRecipeEndpoint());
+  }
+
+  static randomRecipeEndpoint(){
+    return `${environment.apiUrl}recipes/random`;
+  }
 }

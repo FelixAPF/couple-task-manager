@@ -7,7 +7,9 @@ import com.couple.taskmanager.model.dto.RecipeDto;
 import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.RecipeRepository;
 import com.couple.taskmanager.utils.StreamUtils;
+import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -92,5 +94,13 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
     private void synchronizeHouseholdMapData(Long householdId){
         List<Recipe> allByHouseholdId = repository.findAllByHouseholdId(householdId);
         recipeDtoMap.put(householdId, StreamUtils.mapToList(allByHouseholdId, RecipeDto::new));
+    }
+
+    public RecipeDto findRandomRecipe(CTMUser user) throws SystemException {
+        Long householdId = user.getHousehold().getId();
+        if(householdId == null) throw new SystemException("Household id is null");
+        return repository.findRandomRecipeByHouseholdId_Random(householdId)
+                .map(RecipeDto::new)
+                .orElse(new RecipeDto());
     }
 }

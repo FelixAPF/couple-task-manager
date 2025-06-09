@@ -17,6 +17,7 @@ import { ToastModule } from 'primeng/toast'; // For feedback messages
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { RecipeCreationComponent } from '../recipe-creation/recipe-creation.component';
 import { RecipeCardComponent } from '../recipe-card/recipe-card.component';
+import { RecipeRandomDialogComponent } from '../recipe-random-dialog/recipe-random-dialog.component';
 import { FormsModule } from '@angular/forms';
 export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
 
@@ -30,7 +31,8 @@ export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' |
     FormsModule,
     ToastModule,
     AccordionModule,
-    RecipeCardComponent
+    RecipeCardComponent,
+    RecipeRandomDialogComponent
   ],
   templateUrl: './recipes-list.component.html',
   styleUrls: ['./recipes-list.component.css'], // Use styleUrls
@@ -110,6 +112,15 @@ export class RecipesListComponent implements OnInit {
       );
     }
     // No need for cdRef.detectChanges() here usually, as ngModelChange triggers it.
+  }
+
+  openRandomRecipeCard(){
+    this.dialogService.open(RecipeRandomDialogComponent, {
+      header: 'Recette aléatoire',
+      dismissableMask: true,
+      modal: true,
+      width: '52vw'
+    })
   }
 
   confirmDelete(event: Event, recipe: Recipe): void {

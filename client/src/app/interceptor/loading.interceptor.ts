@@ -11,13 +11,14 @@ import { Observable, throwError } from 'rxjs';
 import { catchError, finalize, map } from 'rxjs/operators';
 import { LoadingService } from '../service/loading/loading.service'; // Adjust path if needed
 import { ShoppingService } from '../service/shopping.service';
+import { RecipeService } from '../service/recipe.service';
 
 @Injectable()
 export class LoadingInterceptor implements HttpInterceptor {
 
   private activeRequests = 0;
   private loadingService = inject(LoadingService);
-  excludedLoadEndpoints: string[] =  [ ShoppingService.shoppingListSuggestionsEndPoint(), ShoppingService.shoppingListUpdateQuantityEndpoint() ]
+  excludedLoadEndpoints: string[] =  [ ShoppingService.shoppingListSuggestionsEndPoint(), ShoppingService.shoppingListUpdateQuantityEndpoint(), RecipeService.randomRecipeEndpoint() ]
 
   intercept(request: HttpRequest<any>, next: any): Observable<HttpEvent<any>> {
     if(this.excludedLoadEndpoints.includes(request.url) || this.excludedLoadEndpoints.some((endpoint) => request.url.startsWith(endpoint))){

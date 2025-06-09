@@ -1,0 +1,16 @@
+<div>
+    <div class="w-full  flex justify-center pb-2">
+    <button pButton pRipple
+            type="button"
+            icon="pi pi-question-circle"
+            label="Recette aléatoire"
+            class="p-button-raised w-full sm:w-auto flex-shrink-0"
+            (click)="randomCard()">
+    </button>
+
+    </div>
+    <app-recipe-card [recipe]="recipe" [openIngredients]="true" [clampDescription]="false"></app-recipe-card>
+    
+</div>
+
+    

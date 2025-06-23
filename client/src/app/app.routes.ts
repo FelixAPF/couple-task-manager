@@ -14,11 +14,13 @@ import { ManageHouseholdComponent } from './household/manage-household/manage-ho
 import { WaysToCareComponent } from './household/ways-to-care/ways-to-care.component';
 import { ToDoListComponent } from './household/to-do-list/to-do-list.component';
 import { WishListComponent } from './household/wish-list/wish-list.component';
+import { ServerErrorComponent } from './server-error/server-error.component';
 
 export const routes: Routes = [
       // --- Public Routes ---
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
+    { path: 'server-error', component: ServerErrorComponent }, // Add this route
     { path: '', pathMatch: 'full', redirectTo: 'dashboard'
     },
     { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },

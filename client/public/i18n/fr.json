@@ -151,5 +151,12 @@
   },
   "wish-list": {
     "title": "Liste de souhait"
+  },
+  "server-error": {
+    "message": "Nous subissons actuellement des problèmes techniques, nous allons réparer le système le plus rapidement possible.\n",
+    "try-again": "Réessayer",
+    "maintenance": "Le problème peut être dû à une maintenance. Veuillez réessayer bientôt.",
+    "thanks": "Nous vous remercions de votre patience.",
+    "title": "Service Indisponible"
   }
 }

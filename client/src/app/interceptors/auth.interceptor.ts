@@ -3,15 +3,19 @@ import { inject, Injectable } from '@angular/core';
 import { catchError, EMPTY, Observable, throwError } from 'rxjs';
 import { environment } from '../environment';
 import { AuthService } from '../service/auth.service';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  private authService = inject(AuthService);
+  private authService = inject(AuthService);  
+  private router = inject(Router);
+
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
     const authToken = this.authService.getToken();
+    
     let authReq = req; // Start with original request
 
     // Clone request to add token if applicable
@@ -49,9 +53,13 @@ export class AuthInterceptor implements HttpInterceptor {
 
            // If 403 means lack of permission, re-throw the error for component handling
            return throwError(() => error);
+        }  else if(error.status >= 500) {
+            return throwError(() => error);
+
         } else {
           // For all other errors (404, 500, etc.), re-throw them
           // so they can be handled by the component's error callback.
+          this.router.navigate(['/server-error']); // Navigate to your new component
           return throwError(() => error);
         }
       })

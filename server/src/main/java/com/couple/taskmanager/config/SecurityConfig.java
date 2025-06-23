@@ -1,5 +1,6 @@
 package com.couple.taskmanager.config;
 
+import com.couple.taskmanager.filter.JwtAuthenticationEntryPoint;
 import com.couple.taskmanager.filter.JwtAuthenticationFilter;
 import com.couple.taskmanager.service.CTMUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,10 +39,14 @@ public class SecurityConfig {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint; // NEW INJECTION
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // *** ADD THIS LINE ***
                 .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)) // THIS IS THE KEY ADDITION!
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**").permitAll() // Allow auth endpoints
                         .requestMatchers("/version/**").permitAll() // Allow auth endpoints

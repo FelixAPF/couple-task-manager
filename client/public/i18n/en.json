@@ -150,5 +150,12 @@
   },
   "wish-list": {
     "title": "Wish List"
+  },
+  "server-error": {
+    "message": "We're currently experiencing technical difficulties on our end, we will get the system back up in a timely matter!",
+    "try-again": "Try again",
+    "maintenance": "The issue might be linked to a scheduled maintenance. Please try again shortly.",
+    "thanks": "We thank you for your patience.",
+    "title": "Service Temporarily Unavailable"
   }
 }

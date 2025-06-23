@@ -4,18 +4,19 @@ import { catchError, EMPTY, Observable, throwError } from 'rxjs';
 import { environment } from '../environment';
 import { AuthService } from '../service/auth.service';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  private authService = inject(AuthService);  
+  private authService = inject(AuthService);
   private router = inject(Router);
 
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
     const authToken = this.authService.getToken();
-    
+
     let authReq = req; // Start with original request
 
     // Clone request to add token if applicable
@@ -37,7 +38,7 @@ export class AuthInterceptor implements HttpInterceptor {
         if (error.status === 401) {
           console.warn('AuthInterceptor: Received 401 Unauthorized. Logging out.');
           // Perform logout actions via AuthService
-          this.authService.logout();
+          this.authService.logout(true);
 
           // Prevent the error from propagating to the component's error handler
           // because we've handled it by logging out. Return EMPTY observable.

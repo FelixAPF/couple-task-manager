@@ -61,10 +61,10 @@ export class AuthService {
     return this.http.post<RegisterRequest>(`${this.baseUrl}/register`, registerRequest);
   }
 
-  logout(): void {
+  logout(expiredToken: boolean = false): void {
     localStorage.removeItem(this.TOKEN_KEY);
     this.isLoggedInSubject.next(false);
     this.householdService.setHousehold(null); // Clear household data on logout
-    this.router.navigate(['/login']);
+    this.router.navigate(['/login'], { queryParams: { sessionExpired: expiredToken } });
   }
 }

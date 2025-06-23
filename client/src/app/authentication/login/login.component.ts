@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
@@ -14,7 +14,7 @@ import { SharedModule } from '../../shared.module';
   styleUrl: './login.component.css',
   providers: [MessageService] // Provide MessageService for this component
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   // --- Dependencies ---
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -32,6 +32,20 @@ export class LoginComponent {
   get email() { return this.loginForm.get('email'); }
   get password() { return this.loginForm.get('password'); }
 
+  ngOnInit(): void {
+
+    this.route.queryParams.subscribe((params) => {
+      if (params['sessionExpired']) {
+        this.messageService.add({
+        severity: 'warn',
+        summary: 'Déconnexion',
+        detail: 'La session est expirée, veuillez vous reconnecter.',
+        life: 3000,
+        key: 'tc'
+      })
+      }
+    })
+  }
   // --- Methods ---
   onSubmit(): void {
     this.loginForm.markAllAsTouched(); // Show validation errors on submit attempt

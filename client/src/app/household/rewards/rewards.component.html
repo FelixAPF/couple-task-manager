@@ -1,0 +1,101 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
+  <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
+    {{'rewards.title' | translate}} <i class="pi pi-star-fill ml-2" style="font-size: 1.25rem"></i>
+  </h2>
+
+  <div class="flex justify-end mb-4">
+    <button pButton pRipple type="button" label="Soumettre" class="p-button-primary" (click)="openRewardSubmitModal()"></button>
+  </div>
+
+  <div *ngIf="household()">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div *ngFor="let member of household()!.members; trackBy: trackByMemberId">
+        <p-card>
+          <ng-template pTemplate="title">
+            <div class="flex items-center justify-between gap-3 flex-wrap">
+              <div class="flex items-center gap-3">
+                <p-avatar
+                  [image]="member.imageUrl || 'assets/placeholder-user.png'"
+                  size="large"
+                  shape="circle">
+                </p-avatar>
+                <span class="text-xl font-medium text-surface-700 dark:text-surface-200">
+                  {{ member.name }}
+                  <span *ngIf="isCurrentUser(member.id!)" class="text-sm font-normal text-primary-500 dark:text-primary-400"> (Moi)</span>
+                </span>
+              </div>
+
+              <div class="ml-auto">
+                <p-colorPicker
+                  [(ngModel)]="member.rewardColor"
+                  (onHide)="submitChangeColor(member.id, member.rewardColor)"
+                  [inline]="false"
+                  [disabled]="!isCurrentUser(member.id!) && !isAdmin(member)"
+                  [appendTo]="'body'"
+                  class="p-button-sm">
+                </p-colorPicker>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="subtitle">
+            <p class="text-surface-600 dark:text-surface-300">Points de récompense</p>
+          </ng-template>
+
+          <div class="flex flex-col justify-center items-center py-4">
+            <p-knob
+              [(ngModel)]="member.rewardPoints"
+              [min]="0"
+              [max]="10"
+              [step]="1"
+              valueTemplate="{value}"
+              [size]="150"
+              stroke="#BDBDBD"
+              [readonly]="true"
+              [valueColor]="member.rewardColor"
+              rangeColor="#E0E0E0">
+            </p-knob>
+
+            <ng-container >
+              <button
+                *ngIf="isAdmin(member); else claimRewardButton"
+                pButton
+                pRipple
+                icon="pi pi-plus"
+                label="{{ 'rewards.addPoint' | translate }}"
+                class="p-button-sm p-button-success mt-4"
+                (click)="addPointToMember(member)"
+                [disabled]="member.rewardPoints! >= 10">
+              </button>
+
+              <ng-template #claimRewardButton>
+                <button
+                 *ngIf="isCurrentUser(member.id!) && member.rewardPoints! === 10"
+                  pButton
+                  pRipple
+                  icon="pi pi-gift"
+                  label="{{ 'rewards.claimReward' | translate }}"
+                  class="p-button-sm p-button-warning mt-4"
+                  (click)="openRewardSelectionModal(member)">
+                </button>
+              </ng-template>
+            </ng-container>
+            <span *ngIf="!(isCurrentUser(member.id!) || isAdmin(member))" class="text-sm text-surface-500 dark:text-surface-400 mt-4 italic">
+              Seul l'utilisateur ou l'administrateur peut interagir.
+            </span>
+          </div>
+        </p-card>
+      </div>
+
+    </div>
+  </div>
+
+  <div *ngIf="!household()" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border rounded-lg bg-surface-100 dark:bg-surface-800">
+    <i class="pi pi-info-circle mr-2"></i>
+    Les informations du foyer ne sont pas disponibles.
+  </div>
+</div>

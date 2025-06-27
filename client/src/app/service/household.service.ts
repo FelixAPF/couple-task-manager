@@ -111,4 +111,16 @@ export class HouseholdService {
     );
     
   }
+
+  changeMemberRewardColor(memberId: number, color: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/members/${memberId}/reward-color`, color);
+  }
+
+  increaseMemberRewardPoint(memberId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/members/${memberId}/reward-point`, {});
+  }
+
+  resetMemberPoints(memberId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/members/${memberId}/reward-point/reset`, {});
+  }
 }

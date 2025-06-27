@@ -93,4 +93,25 @@ public class HouseholdService {
         }
         return new HouseholdDto(repository.save(household));
     }
+
+    public void increaseRewardPoints(Long memberId, CTMUser user) throws SystemException {
+        CTMUser member = userRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + memberId)); // Add specific message
+        member.setRewardPoints(member.getRewardPoints()+1); // Save the full URL
+        userRepository.save(member);
+    }
+
+    public void setHouseholdMemberRewardColor(Long userId, String color, CTMUser user) {
+        CTMUser member = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId)); // Add specific message
+        member.setRewardColor(color); // Save the full URL
+        userRepository.save(member);
+    }
+
+    public void setRewardPoints(Long memberId, int points, CTMUser user) {
+        CTMUser member = userRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + memberId)); // Add specific message
+        member.setRewardPoints(points); // Save the full URL
+        userRepository.save(member);
+    }
 }

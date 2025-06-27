@@ -36,6 +36,9 @@ public class CTMUser implements UserDetails {
 
     private Date birthDay;
 
+    private String rewardColor = "#000000";
+    private Integer  rewardPoints = 0;
+
     @ManyToOne
     @JsonBackReference("household-users")
     private Household household;

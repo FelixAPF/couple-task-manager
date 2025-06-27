@@ -19,6 +19,8 @@ public class HouseholdMemberDto {
     private String imageUrl;
     private Date birthDay;
     private List<String> roles;
+    private String rewardColor = "#000000";
+    private Integer rewardPoints = 0;
 
     public HouseholdMemberDto(CTMUser user){
         this.id = user.getId();
@@ -27,5 +29,7 @@ public class HouseholdMemberDto {
         this.email = user.getEmail();
         this.imageUrl = user.getImageUrl();
         this.roles = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        this.rewardColor = user.getRewardColor();
+        this.rewardPoints = user.getRewardPoints();
     }
 }

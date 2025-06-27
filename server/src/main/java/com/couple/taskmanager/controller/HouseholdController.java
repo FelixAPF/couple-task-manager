@@ -4,6 +4,7 @@ import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Household;
 import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.dto.HouseholdDto;
+import com.couple.taskmanager.model.dto.HouseholdMemberDto;
 import com.couple.taskmanager.model.dto.UpdateHouseholdSettingsDto;
 import com.couple.taskmanager.service.HouseholdService;
 import com.couple.taskmanager.service.RecipeService;
@@ -38,6 +39,24 @@ public class HouseholdController {
     public HouseholdDto updateHouseholdSettings(@RequestBody UpdateHouseholdSettingsDto updateHouseholdSettingsDto, @AuthenticationPrincipal UserDetails userDetails) throws SystemException {
         CTMUser user = (CTMUser) userDetails;
         return householdService.updateHouseholdSettings(updateHouseholdSettingsDto, user);
+    }
+
+    @PostMapping("/members/{memberId}/reward-point")
+    public void increaseRewardPoints(@PathVariable Long memberId, @AuthenticationPrincipal UserDetails userDetails) throws SystemException {
+        CTMUser user = (CTMUser) userDetails;
+        householdService.increaseRewardPoints(memberId, user);
+    }
+
+    @PostMapping("/members/{memberId}/reward-point/reset")
+    public void resetRewardPoints(@PathVariable Long memberId, @AuthenticationPrincipal UserDetails userDetails) throws SystemException {
+        CTMUser user = (CTMUser) userDetails;
+        householdService.setRewardPoints(memberId, 0, user);
+    }
+
+    @PostMapping("/members/{memberId}/reward-color")
+    public void changeRewardColor(@PathVariable Long memberId, @RequestBody String color, @AuthenticationPrincipal UserDetails userDetails){
+        CTMUser user = (CTMUser) userDetails;
+        householdService.setHouseholdMemberRewardColor(memberId, color, user);
     }
 
 }

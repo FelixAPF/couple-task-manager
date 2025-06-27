@@ -12,6 +12,7 @@ import { RegisterComponent } from './authentication/register/register.component'
 import { authGuard } from './guard/authentication/auth.guard';
 import { ManageHouseholdComponent } from './household/manage-household/manage-household.component';
 import { WaysToCareComponent } from './household/ways-to-care/ways-to-care.component';
+import { RewardsComponent } from './household/rewards/rewards.component';
 import { ToDoListComponent } from './household/to-do-list/to-do-list.component';
 import { WishListComponent } from './household/wish-list/wish-list.component';
 import { ServerErrorComponent } from './server-error/server-error.component';
@@ -43,6 +44,7 @@ export const routes: Routes = [
         path: 'household', children: [
             { path: 'manage', component: ManageHouseholdComponent, canActivate: [authGuard] },
             { path: 'ways-to-care', component: WaysToCareComponent, canActivate: [authGuard] },
+            { path: 'rewards', component: RewardsComponent, canActivate: [authGuard] },
             { path: 'to-do', component: ToDoListComponent, canActivate: [authGuard] },
             { path: 'wish-list', component: WishListComponent, canActivate: [authGuard] },
         ]

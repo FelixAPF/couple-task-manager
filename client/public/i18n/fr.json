@@ -78,7 +78,8 @@
     "tasks": "Tâches",
     "meals": "Repas",
     "shopping-list": "Liste d'épicerie",
-    "wish-list": "Liste de souhaits"
+    "wish-list": "Liste de souhaits",
+    "rewards": "Récompenses"
   },
   "dashboard": {
     "no-meal-planned": "Aucun repas prévu",
@@ -158,5 +159,14 @@
     "maintenance": "Le problème peut être dû à une maintenance. Veuillez réessayer bientôt.",
     "thanks": "Nous vous remercions de votre patience.",
     "title": "Service Indisponible"
-  }
+  },
+  "rewards.title": "Système de Récompenses",
+  "rewards.claimReward": "Réclamer Récompense",
+  "rewards.addPoint": "Ajouter un point",
+  "rewards.selectReward": "Sélectionner une Récompense",
+  "rewards.availableRewards": "Récompenses disponibles à réclamer :",
+  "rewards.claim": "Réclamer",
+  "rewards.coffee.name": "Café",
+  "rewards.coffee.description": "Un délicieux café.",
+  "common.cancel": "Annuler"
 }

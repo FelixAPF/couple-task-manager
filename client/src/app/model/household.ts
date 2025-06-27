@@ -20,6 +20,8 @@ export interface HouseholdMember {
     imageUrl?: string;
     birthDay?: Date;
     roles: UserRole[];
+    rewardColor: string;
+    rewardPoints: number;
 }
 
 export interface WayToCare {

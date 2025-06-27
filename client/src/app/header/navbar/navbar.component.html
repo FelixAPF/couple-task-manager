@@ -107,6 +107,17 @@
  </div>
   <div class="border-t border-b border-surface-200 dark:border-surface-700">
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
+      <a *ngIf="household"
+      routerLink="/household/rewards"
+      class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
+      (click)="toggleMenu()"> <!-- Close menu on click -->
+      <i class="pi pi-star-fill "></i>
+      <span>{{ 'side-menu.rewards' | translate}}</span>
+     </a>
+    </ng-container>
+ </div>
+  <div class="border-t border-b border-surface-200 dark:border-surface-700">
+    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
       <a *ngIf="household && household.enableToDoList"
       routerLink="/household/to-do"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"

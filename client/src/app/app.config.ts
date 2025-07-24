@@ -19,6 +19,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { registerLocaleData } from '@angular/common';
 import localeFrCA from '@angular/common/locales/fr-CA'; // <-- Import locale data
 import { LoadingInterceptor } from './interceptor/loading.interceptor';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 registerLocaleData(localeFrCA, 'fr-CA'); // <-- Register with the correct ID 'fr-CA'
 
@@ -49,6 +50,8 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, inMemoryScrollingFeature),
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimations(),
+    ConfirmationService,
+    MessageService,
     DialogService,
     { provide: LOCALE_ID, useValue: 'fr-CA' },
 

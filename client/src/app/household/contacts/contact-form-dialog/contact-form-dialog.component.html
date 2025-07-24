@@ -1,0 +1,26 @@
+<form [formGroup]="contactForm" (ngSubmit)="saveContact()" class="p-4">
+  <div class="flex flex-col gap-4 p-fluid">
+    <div class="flex flex-col gap-2">
+      <label for="name">Name</label>
+      <input pInputText id="name" formControlName="name" />
+      <small *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched" class="p-error">Name is required.</small>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="email">Email</label>
+      <input pInputText id="email" formControlName="email" type="email" />
+      <small *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched" class="p-error">A valid email is required.</small>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="phoneNumber">Phone Number</label>
+      <p-inputMask id="phoneNumber" mask="(999) 999-9999" formControlName="phoneNumber"></p-inputMask>
+      <small *ngIf="contactForm.get('phoneNumber')?.invalid && contactForm.get('phoneNumber')?.touched" class="p-error">Phone number is required.</small>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-2 pt-6">
+    <button pButton pRipple type="button" label="Cancel" icon="pi pi-times" class="p-button-text" (click)="closeDialog()"></button>
+    <button pButton pRipple type="submit" label="Save" icon="pi pi-check" [disabled]="contactForm.invalid"></button>
+  </div>
+</form>

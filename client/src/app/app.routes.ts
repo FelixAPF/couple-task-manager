@@ -16,6 +16,7 @@ import { RewardsComponent } from './household/rewards/rewards.component';
 import { ToDoListComponent } from './household/to-do-list/to-do-list.component';
 import { WishListComponent } from './household/wish-list/wish-list.component';
 import { ServerErrorComponent } from './server-error/server-error.component';
+import { ContactsComponent } from './household/contacts/contacts.component';
 
 export const routes: Routes = [
       // --- Public Routes ---
@@ -47,6 +48,7 @@ export const routes: Routes = [
             { path: 'rewards', component: RewardsComponent, canActivate: [authGuard] },
             { path: 'to-do', component: ToDoListComponent, canActivate: [authGuard] },
             { path: 'wish-list', component: WishListComponent, canActivate: [authGuard] },
+            { path: 'contacts', component: ContactsComponent, canActivate: [authGuard] },
         ]
     },
     { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },

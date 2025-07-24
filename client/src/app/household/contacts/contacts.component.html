@@ -1,0 +1,58 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-semibold text-surface-800 dark:text-surface-100">
+      Contacts <i class="pi pi-users ml-2" style="font-size: 1.25rem"></i>
+    </h2>
+    <button pButton pRipple type="button" icon="pi pi-plus" label="Add Contact" class="p-button-success" (click)="openAddEditDialog()"></button>
+  </div>
+
+  <div *ngIf="isLoading()" class="text-center p-8">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem"></i>
+  </div>
+
+  <div *ngIf="!isLoading()">
+    <div *ngIf="contacts().length > 0; else noContacts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div *ngFor="let contact of contacts(); trackBy: trackByContactId" @inOut>
+        <p-card (click)="showContactDetails(contact)" class="h-full flex flex-col cursor-pointer transition-shadow duration-300 hover:shadow-xl">
+          <ng-template pTemplate="header">
+            <div class="flex items-center gap-4 p-4">
+              <p-avatar [label]="contact.name.charAt(0).toUpperCase()" size="large" shape="circle" styleClass="bg-primary-500 text-white dark:bg-primary-400"></p-avatar>
+              <div>
+                <h3 class="text-xl font-bold text-surface-800 dark:text-surface-100">{{ contact.name }}</h3>
+                <p class="text-sm text-surface-500 dark:text-surface-400">{{ contact.email }}</p>
+              </div>
+            </div>
+          </ng-template>
+          
+          <div class="px-4 pb-2">
+            <div class="flex items-center text-surface-600 dark:text-surface-300 mb-2">
+              <i class="pi pi-phone mr-2"></i>
+              <a [href]="'tel:' + contact.phoneNumber" (click)="$event.stopPropagation()" class="hover:underline">{{ contact.phoneNumber }}</a>
+            </div>
+            <div class="flex items-center text-surface-600 dark:text-surface-300">
+              <i class="pi pi-briefcase mr-2"></i>
+              <span>{{ contact.transactions.length }} transaction(s)</span>
+            </div>
+          </div>
+
+          <ng-template pTemplate="footer">
+            <div class="flex justify-end gap-2 p-3 mt-auto border-t border-surface-200 dark:border-surface-700">
+              <button pButton pRipple icon="pi pi-pencil" class="p-button-secondary p-button-text" (click)="$event.stopPropagation(); openAddEditDialog(contact)" pTooltip="Edit" tooltipPosition="top"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-danger p-button-text" (click)="confirmDelete($event, contact)" pTooltip="Delete" tooltipPosition="top"></button>
+            </div>
+          </ng-template>
+        </p-card>
+      </div>
+    </div>
+
+    <ng-template #noContacts>
+      <div class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border rounded-lg bg-surface-100 dark:bg-surface-800">
+        <i class="pi pi-info-circle mr-2"></i>
+        No contacts found. Click "Add Contact" to get started.
+      </div>
+    </ng-template>
+  </div>
+</div>

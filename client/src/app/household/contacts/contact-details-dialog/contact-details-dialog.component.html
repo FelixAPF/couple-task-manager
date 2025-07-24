@@ -1,0 +1,38 @@
+<ng-container *ngIf="contact">
+  <div class="flex items-start gap-4 mb-6">
+    <p-avatar [label]="contact.name.charAt(0).toUpperCase()" size="xlarge" shape="circle" styleClass="bg-primary-500 text-white dark:bg-primary-400 flex-shrink-0"></p-avatar>
+    <div>
+      <h3 class="text-2xl font-bold text-surface-800 dark:text-surface-100">{{ contact.name }}</h3>
+      <p class="text-md text-surface-600 dark:text-surface-300"><i class="pi pi-envelope mr-2"></i>{{ contact.email }}</p>
+      <p class="text-md text-surface-600 dark:text-surface-300"><i class="pi pi-phone mr-2"></i><a [href]="'tel:' + contact.phoneNumber" class="hover:underline">{{ contact.phoneNumber }}</a></p>
+    </div>
+  </div>
+
+  <div class="flex justify-between items-center border-t pt-4 border-surface-200 dark:border-surface-700 mb-4">
+    <h4 class="text-xl font-semibold text-surface-700 dark:text-surface-200">Transactions</h4>
+    <button pButton type="button" label="Add Transaction" icon="pi pi-plus" class="p-button-sm" (click)="openAddEditTransactionDialog()"></button>
+  </div>
+
+  <div *ngIf="contact.transactions.length > 0; else noTransactions" class="flex flex-col gap-3 max-h-[40vh] overflow-y-auto p-1">
+     <div *ngFor="let transaction of contact.transactions; trackBy: trackByTransactionId" class="p-4 border rounded-lg bg-surface-50 dark:bg-surface-800 border-surface-200 dark:border-surface-600">
+        <div class="flex justify-between items-start gap-2">
+          <div class="flex-grow">
+            <p class="font-semibold text-surface-800 dark:text-surface-100">{{ transaction.description }}</p>
+            <p *ngIf="transaction.note" class="text-sm text-surface-600 dark:text-surface-400 italic mt-1">"{{ transaction.note }}"</p>
+            <div class="flex items-center gap-x-4 text-xs text-surface-500 dark:text-surface-400 mt-2">
+              <span><i class="pi pi-calendar mr-1"></i>{{ transaction.date | date:'longDate' }}</span>
+              <span class="font-semibold"><i class="pi pi-dollar mr-1"></i>{{ transaction.amount | currency:'CAD':'symbol':'1.2-2' }}</span>
+            </div>
+          </div>
+          <div class="flex-shrink-0 flex gap-1">
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-sm p-button-text p-button-secondary" (click)="openAddEditTransactionDialog(transaction)"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-sm p-button-text p-button-danger" (click)="confirmDelete($event, transaction)"></button>
+          </div>
+        </div>
+     </div>
+  </div>
+
+  <ng-template #noTransactions>
+      <p class="text-center text-surface-500 dark:text-surface-400 py-4 italic">No transactions recorded for this contact.</p>
+  </ng-template>
+</ng-container>

@@ -22,7 +22,7 @@
               <p-avatar [label]="contact.name.charAt(0).toUpperCase()" size="large" shape="circle" styleClass="bg-primary-500 text-white dark:bg-primary-400"></p-avatar>
               <div class="flex-grow">
                 <h3 class="text-xl font-bold text-surface-800 dark:text-surface-100">{{ contact.name }}</h3>
-                <p class="text-sm text-surface-500 dark:text-surface-400">{{ contact.email }}</p>
+                <a [href]="'mailto:' + contact.email" (click)="$event.stopPropagation()" class="hover:underline" class="text-sm text-surface-500 dark:text-surface-400">{{ contact.email }}</a>
               </div>
               <div *ngIf="contact.contactType">
                 <p-tag [value]="contact.contactType"></p-tag>

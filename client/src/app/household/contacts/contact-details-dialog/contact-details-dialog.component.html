@@ -3,7 +3,7 @@
     <p-avatar [label]="contact.name.charAt(0).toUpperCase()" size="xlarge" shape="circle" styleClass="bg-primary-500 text-white dark:bg-primary-400 flex-shrink-0"></p-avatar>
     <div>
       <h3 class="text-2xl font-bold text-surface-800 dark:text-surface-100">{{ contact.name }}</h3>
-      <p class="text-md text-surface-600 dark:text-surface-300"><i class="pi pi-envelope mr-2"></i>{{ contact.email }}</p>
+      <a [href]="'mailto:' + contact.email" (click)="$event.stopPropagation()" class="text-md hover:underline text-surface-600 dark:text-surface-300"><i class="pi pi-envelope mr-2"></i>{{ contact.email }}</a>
       <p class="text-md text-surface-600 dark:text-surface-300"><i class="pi pi-phone mr-2"></i><a [href]="'tel:' + contact.phoneNumber" class="hover:underline">{{ contact.phoneNumber }}</a></p>
     </div>
   </div>

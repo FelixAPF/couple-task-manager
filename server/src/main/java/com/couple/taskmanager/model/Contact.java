@@ -1,6 +1,5 @@
 package com.couple.taskmanager.model;
 
-import com.couple.taskmanager.model.dto.TransactionDto;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -24,6 +22,7 @@ public class Contact {
     private String name;
     private String email;
     private String phoneNumber;
+    private String contactType;
     private String note;
 
     @OneToMany

@@ -1,11 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
-import { DialogService, DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { Contact } from '../../../model/contact';
+import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { CalendarModule } from 'primeng/calendar';
+import { InputMaskModule } from 'primeng/inputmask';
 import { ContactService } from '../../../service/contact.service';
 import { SharedModule } from '../../../shared.module';
-import { InputMaskModule } from 'primeng/inputmask';
+import { Contact } from '../../../model/contact';
 
 @Component({
   selector: 'app-contact-form-dialog',
@@ -13,9 +14,9 @@ import { InputMaskModule } from 'primeng/inputmask';
   imports: [
     SharedModule,
     ReactiveFormsModule,
+    CalendarModule,
     InputMaskModule
   ],
-  providers: [MessageService],
   templateUrl: './contact-form-dialog.component.html',
 })
 export class ContactFormDialogComponent implements OnInit {
@@ -37,10 +38,11 @@ export class ContactFormDialogComponent implements OnInit {
       name: [this.contact?.name || '', Validators.required],
       email: [this.contact?.email || '', [Validators.email]],
       phoneNumber: [this.contact?.phoneNumber || '', Validators.required],
+      contactType: [this.contact?.contactType || '', Validators.required]
     });
   }
 
-  closeDialog(result?: any): void {
+  closeDialog(result = false): void {
     this.ref.close(result);
   }
 

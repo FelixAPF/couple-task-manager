@@ -5,6 +5,7 @@ export interface Contact {
     name: string;
     email: string;
     phoneNumber: string;
+    contactType: string;
     transactions: Transaction[];
     household: Household;
 }

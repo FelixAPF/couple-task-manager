@@ -3,19 +3,22 @@
     <div class="flex flex-col gap-2">
       <label for="name">Name</label>
       <input pInputText id="name" formControlName="name" />
-      <small *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched" class="p-error">Name is required.</small>
     </div>
 
     <div class="flex flex-col gap-2">
       <label for="email">Email</label>
       <input pInputText id="email" formControlName="email" type="email" />
-      <small *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched" class="p-error">A valid email is required.</small>
     </div>
 
     <div class="flex flex-col gap-2">
       <label for="phoneNumber">Phone Number</label>
-      <p-inputMask id="phoneNumber" mask="(999) 999-9999" formControlName="phoneNumber"></p-inputMask>
-      <small *ngIf="contactForm.get('phoneNumber')?.invalid && contactForm.get('phoneNumber')?.touched" class="p-error">Phone number is required.</small>
+      <p-inputMask id="phoneNumber" mask="(999) 999-9999" formControlName="phoneNumber" placeholder="(514) 123-4567"></p-inputMask>
+    </div>
+
+    <div class="flex flex-col gap-2">
+      <label for="contactType">Contact Type</label>
+      <input pInputText id="contactType" formControlName="contactType" />
+      <small *ngIf="contactForm.get('contactType')?.invalid && contactForm.get('contactType')?.touched" class="p-error">Contact type is required.</small>
     </div>
   </div>
 

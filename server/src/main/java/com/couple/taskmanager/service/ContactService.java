@@ -47,6 +47,7 @@ public class ContactService implements IGenericService<Contact, ContactDto>{
         if(contact.getName().isEmpty()) throw new IllegalArgumentException("Name cannot be empty");
         contact1.setName(contact.getName());
         contact1.setNote(contact.getNote());
+        contact1.setContactType(contact.getContactType());
         contact1.setPhoneNumber(contact.getPhoneNumber());
         contact1.setEmail(contact.getEmail());
         Contact save = repository.save(contact1);

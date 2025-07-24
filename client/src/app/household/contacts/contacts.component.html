@@ -20,9 +20,12 @@
           <ng-template pTemplate="header">
             <div class="flex items-center gap-4 p-4">
               <p-avatar [label]="contact.name.charAt(0).toUpperCase()" size="large" shape="circle" styleClass="bg-primary-500 text-white dark:bg-primary-400"></p-avatar>
-              <div>
+              <div class="flex-grow">
                 <h3 class="text-xl font-bold text-surface-800 dark:text-surface-100">{{ contact.name }}</h3>
                 <p class="text-sm text-surface-500 dark:text-surface-400">{{ contact.email }}</p>
+              </div>
+              <div *ngIf="contact.contactType">
+                <p-tag [value]="contact.contactType"></p-tag>
               </div>
             </div>
           </ng-template>

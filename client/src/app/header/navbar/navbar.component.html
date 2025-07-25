@@ -138,17 +138,17 @@
      </a>
     </ng-container>
  </div>
-  <div class="border-t border-b border-surface-200 dark:border-surface-700">
+  <!-- <div class="border-t border-b border-surface-200 dark:border-surface-700">
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
       <a *ngIf="household"
       routerLink="/household/contacts"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()"> <!-- Close menu on click -->
+      (click)="toggleMenu()">
       <i class="pi pi-address-book"></i>
       <span>{{ 'side-menu.contacts' | translate}}</span>
      </a>
     </ng-container>
- </div>
+ </div> -->
   <div class="border-t border-b border-surface-200 dark:border-surface-700">
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
       <a *ngIf="household"

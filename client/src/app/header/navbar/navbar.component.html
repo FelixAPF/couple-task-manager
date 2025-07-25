@@ -149,6 +149,17 @@
      </a>
     </ng-container>
  </div>
+  <div class="border-t border-b border-surface-200 dark:border-surface-700">
+    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
+      <a *ngIf="household"
+      routerLink="/tasks"
+      class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
+      (click)="toggleMenu()"> <!-- Close menu on click -->
+      <i class="pi pi-list"></i>
+      <span>{{ 'side-menu.tasks' | translate}}</span>
+     </a>
+    </ng-container>
+ </div>
 
   <div class="mt-auto pb-16 pt-4 border-t border-surface-200 dark:border-surface-700 flex-shrink-0"> <!-- Added flex-shrink-0 -->
     <div *ngIf="currentUser$ | async as user">

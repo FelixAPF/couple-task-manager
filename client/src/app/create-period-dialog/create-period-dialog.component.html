@@ -108,7 +108,7 @@
                     <!-- Embed the task assignment component -->
                     <app-task-assignment
                     [showCreateEachTaskOnce]="true"
-                    (submit)="submit($event)"
+                    (save)="submit($event)"
                     (cancel)="handleManualCancel()"> <!-- Use prevCallback to go back -->
                     </app-task-assignment>
                 </ng-template>

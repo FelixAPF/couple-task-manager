@@ -46,7 +46,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
   @Input() showCreateEachTaskOnce: boolean = false;
   taskObs: Observable<TaskWithAssignee[] | null>;
 
-  @Output() submit: EventEmitter<{ taskWithAssignees: TaskWithAssignee[], createEachOnce: boolean }> = new EventEmitter();
+  @Output() save: EventEmitter<{ taskWithAssignees: TaskWithAssignee[], createEachOnce: boolean }> = new EventEmitter();
   @Output() cancel: EventEmitter<boolean> = new EventEmitter();
 
   constructor(private taskAssignmentService: TaskAssignmentService, private cdr: ChangeDetectorRef ) {}
@@ -154,7 +154,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
       assigneeUserId: taskAssignment.assignee
     })).filter(task => task.assigneeUserId !== null);
 
-    this.submit.emit({ taskWithAssignees: tasksWithAssignment, createEachOnce: this.createEachTaskOnce?.value || false });
+    this.save.emit({ taskWithAssignees: tasksWithAssignment, createEachOnce: this.createEachTaskOnce?.value || false });
   }
 
   onCancel(){

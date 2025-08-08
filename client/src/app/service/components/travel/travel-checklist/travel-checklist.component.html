@@ -1,0 +1,14 @@
+<div class="container mt-4">
+  <div class="card">
+    <div class="card-body">
+      <p-selectButton [options]="viewOptions" [(ngModel)]="currentView" optionLabel="label" optionValue="value"></p-selectButton>
+
+      <div class="mt-4">
+        @switch (currentView) {
+          @case ('trips') { <app-trip-list></app-trip-list> }
+          @case ('template') { <app-travel-template></app-travel-template> }
+        }
+      </div>
+    </div>
+  </div>
+</div>

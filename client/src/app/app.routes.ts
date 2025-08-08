@@ -17,6 +17,8 @@ import { ToDoListComponent } from './household/to-do-list/to-do-list.component';
 import { WishListComponent } from './household/wish-list/wish-list.component';
 import { ServerErrorComponent } from './server-error/server-error.component';
 import { ContactsComponent } from './household/contacts/contacts.component';
+import { TravelChecklistComponent } from './service/components/travel/travel-checklist/travel-checklist.component';
+
 
 export const routes: Routes = [
       // --- Public Routes ---
@@ -41,6 +43,7 @@ export const routes: Routes = [
         { path: "history/:id", component: TaskHistoryComponent, canActivate: [authGuard]}
         ]
     },
+    { path: 'travel-checklist', component: TravelChecklistComponent, canActivate: [authGuard] },
     {
         path: 'household', children: [
             { path: 'manage', component: ManageHouseholdComponent, canActivate: [authGuard] },

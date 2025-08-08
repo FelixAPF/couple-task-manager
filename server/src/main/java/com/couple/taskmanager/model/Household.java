@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import com.couple.taskmanager.model.CTMUser;
+
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +32,8 @@ public class Household {
     private Boolean enableToDoList = false;
 
     private Boolean enableWishList = false;
+
+    private Boolean travelChecklistEnabled = false;
 
     @OneToMany
     @JsonManagedReference("household-way-to-care")

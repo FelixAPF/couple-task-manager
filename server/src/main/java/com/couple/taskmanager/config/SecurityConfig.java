@@ -50,6 +50,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/auth/**").permitAll() // Allow auth endpoints
                         .requestMatchers("/version/**").permitAll() // Allow auth endpoints
+                        .requestMatchers("/image/**").permitAll() // Allow auth endpoints
                         .requestMatchers(HttpMethod.GET, "/files/**").permitAll()
                         // No need to explicitly permit OPTIONS here when using http.cors()
                         .anyRequest().authenticated()) // Secure everything else

@@ -7,13 +7,10 @@ import com.couple.taskmanager.model.dto.HouseholdMemberDto;
 import com.couple.taskmanager.model.dto.UpdateHouseholdSettingsDto;
 import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.HouseholdRepository;
-import com.couple.taskmanager.utils.StreamUtils;
 import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -90,6 +87,10 @@ public class HouseholdService {
         Boolean newEnableWishList = updateHouseholdSettingsDto.getEnableWishList();
         if(newEnableWishList != null && !newEnableWishList.equals(household.getEnableWishList())){
             household.setEnableWishList(newEnableWishList);
+        }
+        Boolean newEnableTravelChecklist = updateHouseholdSettingsDto.getEnableTravelChecklist();
+        if(newEnableTravelChecklist != null && !newEnableTravelChecklist.equals(household.getEnableTravelChecklist())){
+            household.setEnableTravelChecklist(newEnableTravelChecklist);
         }
         return new HouseholdDto(repository.save(household));
     }

@@ -56,6 +56,14 @@
            <i class="pi pi-shopping-cart text-sm"></i> <!-- Icon: pi-shopping-cart or pi-tag -->
            <span>{{ 'side-menu.shopping-list' | translate}}</span> <!-- Ensure translation key exists -->
         </a>
+        <a
+           routerLink="/travel-checklist" 
+           routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
+           class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
+           [routerLinkActiveOptions]="{exact: true}">
+           <i class="pi pi-shopping-cart text-sm"></i> <!-- Icon: pi-shopping-cart or pi-tag -->
+           <span>{{ 'Travel Checklist' | translate}}</span> <!-- Ensure translation key exists -->
+        </a>
 
 
       </ng-container>
@@ -131,6 +139,17 @@
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
       <a *ngIf="household && household.enableWishList"
       routerLink="/household/wish-list"
+      class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
+      (click)="toggleMenu()"> <!-- Close menu on click -->
+      <i class="pi pi-shopping-bag"></i>
+      <span>{{ 'side-menu.wish-list' | translate}}</span>
+     </a>
+    </ng-container>
+ </div>
+  <div class="border-t border-b border-surface-200 dark:border-surface-700">
+    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
+      <a *ngIf="household && household.enableTravelChecklist"
+      routerLink="/household/travel"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
       (click)="toggleMenu()"> <!-- Close menu on click -->
       <i class="pi pi-shopping-bag"></i>

@@ -21,7 +21,8 @@ import { CheckboxChangeEvent } from 'primeng/checkbox';
 enum HouseholdSettingNames {
   WISH_LIST = "enableWishList",
   WAYS_TO_CARE = "enableWaysToCare",
-  TO_DO_LIST = "enableToDoList"
+  TO_DO_LIST = "enableToDoList",
+  TRAVEL_CHECKLIST = "enableTravelChecklist"
 }
 
 @Component({

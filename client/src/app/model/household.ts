@@ -8,6 +8,7 @@ export interface Household {
     waysToCare: WayToCare[];
     enableToDoList: boolean;
     enableWishList: boolean;
+    enableTravelChecklist: boolean;
     wishList: Item[];
     toDoList: ToDoItem[];
     toDoItems: WayToCare[];

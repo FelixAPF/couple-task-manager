@@ -112,7 +112,8 @@
       "no-members": "You are the only member of the household for now.",
       "enable-to-do-list": "Enable To Do List",
       "enable-to-do-list-description": "Create a list of activities, restaurants and other stuff that you wish to try.",
-      "enable-wish-list": "Enable Wish List"
+      "enable-wish-list": "Enable Wish List",
+      "enable-travel-checklist": "Enable Travel Checklist"
     }
   },
   "to-do-list": {

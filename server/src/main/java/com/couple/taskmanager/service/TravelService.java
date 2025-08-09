@@ -31,7 +31,7 @@ public class TravelService {
     public Household enableTravelChecklist(Long householdId, boolean enabled) {
         Household household = householdRepository.findById(householdId)
                 .orElseThrow(() -> new RuntimeException("Household not found"));
-        household.setTravelChecklistEnabled(enabled);
+        household.setEnableTravelChecklist(enabled);
         return householdRepository.save(household);
     }
 

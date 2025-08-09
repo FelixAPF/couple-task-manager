@@ -8,5 +8,6 @@ public class UpdateHouseholdSettingsDto {
     private Boolean enableWaysToCare;
     private Boolean enableToDoList;
     private Boolean enableWishList;
+    private Boolean enableTravelChecklist;
 
 }

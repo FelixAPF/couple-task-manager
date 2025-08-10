@@ -1,39 +1,53 @@
-.trip-header {
+/* Container for each checklist item */
+.checklist-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s ease-in-out;
 }
 
-.countdown {
-  font-size: 1.2rem;
-  font-weight: 500;
+/* Style for when an item is packed */
+.checklist-item.packed {
+  background-color: #e9f5e9;
+  border-color: #c8e6c9;
 }
 
-.category-title {
-  border-bottom: 2px solid #eee;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.item-packed {
+.checklist-item.packed .item-name {
   text-decoration: line-through;
-  color: #6c757d; /* Bootstrap's secondary text color */
+  color: #6c757d;
 }
 
-.item-controls {
-  gap: 0.5rem;
+/* ✅ UPDATED STYLE for the quantity input */
+/* This targets the PrimeNG component to control its size */
+:host ::ng-deep .quantity-input {
+  width: 6rem;
 }
 
-.quantity-input {
-  width: 60px;
+/* When the buttons are hidden, we center the text */
+:host ::ng-deep .quantity-input .p-inputnumber-input {
   text-align: center;
+  padding: 0.5rem 0.25rem !important; /* Adjust padding for better centering */
 }
 
-/* Make checkbox larger and easier to click */
-.form-check-input {
-  width: 1.25em;
-  height: 1.25em;
-  margin-top: 0.1em;
-  margin-right: 0.75rem;
+/* Increase the size of the checkbox for better touch interaction */
+:host ::ng-deep .p-checkbox .p-checkbox-box {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.align-baseline {
+  align-items: baseline;
+}
+
+.align-items-end {
+  align-items: flex-end;
+}
+
+.align-items-center {
+  align-items: center;
+
 }

@@ -9,6 +9,8 @@ import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { CalendarModule } from 'primeng/calendar';
+import { SharedModule } from '../../../../shared.module';
+import { PanelModule } from 'primeng/panel';
 
 @Component({
   selector: 'app-trip-list',
@@ -20,7 +22,9 @@ import { CalendarModule } from 'primeng/calendar';
     DialogModule,
     ButtonModule,
     InputTextModule,
-    CalendarModule
+    CalendarModule,
+    SharedModule,
+    PanelModule
   ],
   templateUrl: './trip-list.component.html',
 })

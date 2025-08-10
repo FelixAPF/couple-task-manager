@@ -1,0 +1,75 @@
+/* File: client/src/app/components/travel/countdown-timer/countdown-timer.component.css */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.countdown-container {
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  animation: fadeIn 0.5s ease-out;
+  font-family: 'Poppins', sans-serif; /* A cute, modern font */
+  max-width: 500px;
+  margin: 1rem auto;
+}
+
+.countdown-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.icon {
+  font-size: 2rem;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.countdown-body {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+}
+
+.time-segment {
+  display: flex;
+  flex-direction: column;
+}
+
+.number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #fff;
+  background: -webkit-linear-gradient(45deg, #ff8a00, #e52e71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
+  padding: 0.5rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

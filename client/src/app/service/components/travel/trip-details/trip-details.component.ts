@@ -3,17 +3,19 @@ import { CommonModule } from '@angular/common';
 import { Trip, TripItem, TravelService } from '../../../services/travel.service';
 
 // PrimeNG Imports
-import { AccordionModule } from 'primeng/accordion';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
+import { CountdownTimerComponent } from '../countdown-timer/countdown-timer.component';
+import { SharedModule } from '../../../../shared.module';
 
 @Component({
   selector: 'app-trip-details',
-  imports: [ CommonModule, FormsModule, AccordionModule, TableModule, CheckboxModule, InputNumberModule, ButtonModule, InputTextModule ],
+  imports: [ CommonModule, InputSwitchModule , SharedModule, CountdownTimerComponent, FormsModule, TableModule, CheckboxModule, InputNumberModule, ButtonModule, InputTextModule ],
   templateUrl: './trip-details.component.html'
 })
 export class TripDetailsComponent implements OnInit {

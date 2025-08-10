@@ -1,0 +1,18 @@
+.countdown-badge {
+  font-size: 0.9rem;
+  padding: 0.6em 1em;
+  background: linear-gradient(45deg, #6a11cb, #2575fc); /* A vibrant, modern gradient */
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease-in-out;
+}
+
+.list-group-item-action:hover .countdown-badge {
+  transform: scale(1.05); /* Make the badge pop on hover */
+}
+
+/* Optional: a cute icon for sparkles */
+.pi-sparkles {
+  font-size: 1.1rem; 
+}

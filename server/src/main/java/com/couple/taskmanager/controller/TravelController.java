@@ -64,14 +64,8 @@ public class TravelController {
         return travelService.updateTripItem(itemId, itemChanges);
     }
 
-    /**
-     * DELETE /api/travel/trips/{tripId}/items/{itemId}
-     * Deletes an item from a checklist.
-     */
-    @DeleteMapping("/trips/{tripId}/items/{itemId}")
-    public void deleteTripItem(@PathVariable Long tripId, @PathVariable Long itemId) {
-        travelService.deleteTripItem(itemId);
-    }
+
+
 
     // DTO for the request body
     @Getter

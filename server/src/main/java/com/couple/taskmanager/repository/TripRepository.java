@@ -8,4 +8,6 @@ import java.util.List;
 public interface TripRepository extends JpaRepository<Trip, Long> {
     List<Trip> findByUserIdOrderByDepartureDateDesc(Long userId);
 
+
+    void setTripCompletedEquals(boolean completed);
 }

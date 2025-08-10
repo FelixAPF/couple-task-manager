@@ -24,6 +24,7 @@ export interface Trip {
   destination: string;
   departureDate: string; // ISO date string
   items: TripItem[];
+  completed: boolean;
 }
 
 

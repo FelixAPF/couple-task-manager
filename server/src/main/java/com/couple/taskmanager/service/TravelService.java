@@ -86,6 +86,10 @@ public class TravelService {
         return tripItemRepository.save(itemData);
     }
 
+    public void markTripAsCompleted(Long tripId, boolean completed){
+        tripRepository.setTripCompletedEquals(completed);
+    }
+
     /**
      * Updates an existing item in a trip checklist (e.g., toggles packed status, changes quantity).
      */
@@ -108,6 +112,10 @@ public class TravelService {
             throw new RuntimeException("TripItem not found with id: " + itemId);
         }
         tripItemRepository.deleteById(itemId);
+    }
+
+    public void deleteTrip(Long tripId) {
+        tripRepository.deleteById(tripId);
     }
 
     // Add other methods for updating/deleting trips and trip items as needed

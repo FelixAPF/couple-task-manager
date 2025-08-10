@@ -63,7 +63,7 @@ export class TravelTemplateComponent implements OnInit {
     this.travelService.addTemplateItem(this.householdId, this.newItemForm.value)
       .subscribe(() => {
         this.loadTemplate();
-        this.newItemForm.reset({ category: 'Clothes' });
+        this.newItemForm.get('name')?.setValue('');
       });
   }
 

@@ -1,10 +1,6 @@
 <div *ngIf="trip" class="mb-6">
   <div class="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-4">
     <h2 class="text-3xl font-bold text-gray-800 m-0 text-center">{{ trip.destination }}</h2>
-    <div class="flex items-center gap-3 p-2 rounded-lg text-end align-items-end bg-gray-100 self-start md:self-center">
-      <label for="editModeToggle" class="font-medium text-gray-600">Edit Mode</label>
-      <p-inputSwitch [(ngModel)]="editMode" name="editModeToggle" inputId="editModeToggle"></p-inputSwitch>
-    </div>
   </div>
 
   <app-countdown-timer [targetDate]="trip.departureDate"></app-countdown-timer>
@@ -38,7 +34,7 @@
 
           <div *ngIf="editMode" class="flex items-center gap-2 mt-2 align-baseline">
             <span class="p-input-icon-left flex-grow">
-              <input pInputText [(ngModel)]="newItemName[category]" [name]="'newItem-' + category" placeholder="Add new item..." (keyup.enter)="addNewItem(category)" class="w-full m-0" />
+              <input pInputText [(ngModel)]="newItemName[category]" [name]="'newItem-' + category" placeholder="Ajouter un article..." (keyup.enter)="addNewItem(category)" class="w-full m-0" />
             </span>
             <p-button label="Add" (onClick)="addNewItem(category)" [styleClass]="'w-auto'" class="m-0"></p-button>
           </div>
@@ -46,4 +42,9 @@
       </p-accordion-content>
     </p-accordion-panel>
   </p-accordion>
+  
+    <div class="flex items-center gap-3 p-2 rounded-lg text-end align-items-end bg-gray-100 self-start md:self-center">
+      <label for="editModeToggle" class="font-medium text-gray-600">Mode modification</label>
+      <p-inputSwitch [(ngModel)]="editMode" name="editModeToggle" inputId="editModeToggle"></p-inputSwitch>
+    </div>
 </div>

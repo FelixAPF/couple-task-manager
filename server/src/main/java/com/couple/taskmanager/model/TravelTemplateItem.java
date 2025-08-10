@@ -1,5 +1,6 @@
 package com.couple.taskmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +15,8 @@ public class TravelTemplateItem {
     private String category;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "household_id")
-    private Household household;
+    @JoinColumn(name = "user_id") // The foreign key column
+    @JsonBackReference("user-template-item")
+    private CTMUser user;
 
-    // Getters and Setters
 }

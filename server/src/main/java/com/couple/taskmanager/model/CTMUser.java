@@ -59,6 +59,14 @@ public class CTMUser implements UserDetails {
     @JsonManagedReference("user-wish-list")
     private List<Item> wishList;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("user-trip")
+    private List<Trip> trips;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("user-template-item")
+    private List<TravelTemplateItem> travelTemplateItems;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

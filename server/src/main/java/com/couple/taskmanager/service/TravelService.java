@@ -1,9 +1,7 @@
 package com.couple.taskmanager.service;
 
-import com.couple.taskmanager.model.Household;
-import com.couple.taskmanager.model.TravelTemplateItem;
-import com.couple.taskmanager.model.Trip;
-import com.couple.taskmanager.model.TripItem;
+import com.couple.taskmanager.model.*;
+import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.TravelTemplateItemRepository;
 import com.couple.taskmanager.repository.TripRepository;
@@ -12,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +22,8 @@ public class TravelService {
     TravelTemplateItemRepository templateItemRepository;
     @Autowired
     TripRepository tripRepository;
+    @Autowired
+    CTMUserRepository userRepository;
 
     // Constructor injection
 
@@ -36,35 +37,33 @@ public class TravelService {
     }
 
     //== Template Methods ==//
-    public List<TravelTemplateItem> getTemplateItems(Long householdId) {
-        return templateItemRepository.findByHouseholdId(householdId);
+    public List<TravelTemplateItem> getTemplateItems(Long userId) {
+        return templateItemRepository.findByUserId(userId);
     }
 
     @Transactional
-    public TravelTemplateItem addTemplateItem(Long householdId, TravelTemplateItem item) {
-        Household household = householdRepository.findById(householdId)
-                .orElseThrow(() -> new RuntimeException("Household not found"));
-        item.setHousehold(household);
+    public TravelTemplateItem addTemplateItem(Long userId, TravelTemplateItem item) {
+        CTMUser ctmUser = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
+        item.setUser(ctmUser);
         return templateItemRepository.save(item);
     }
 
     //== Trip Methods ==//
-    public List<Trip> getTrips(Long householdId) {
-        return tripRepository.findByHouseholdIdOrderByDepartureDateDesc(householdId);
+    public List<Trip> getTrips(Long userId) {
+        return tripRepository.findByUserIdOrderByDepartureDateDesc(userId);
     }
 
     @Transactional
-    public Trip createTrip(Long householdId, String destination, LocalDate departureDate) {
-        Household household = householdRepository.findById(householdId)
-                .orElseThrow(() -> new RuntimeException("Household not found"));
+    public Trip createTrip(Long userId, String destination, LocalDate departureDate) {
+        CTMUser ctmUser = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
 
         Trip newTrip = new Trip();
-        newTrip.setHousehold(household);
+        newTrip.setUser(ctmUser);
         newTrip.setDestination(destination);
         newTrip.setDepartureDate(departureDate);
 
         // Load items from the household's template
-        List<TravelTemplateItem> templateItems = templateItemRepository.findByHouseholdId(householdId);
+        List<TravelTemplateItem> templateItems = templateItemRepository.findByUserId(userId);
         List<TripItem> tripItems = templateItems.stream().map(templateItem -> {
             TripItem tripItem = new TripItem();
             tripItem.setName(templateItem.getName());

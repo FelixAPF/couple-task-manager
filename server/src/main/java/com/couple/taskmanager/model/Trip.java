@@ -1,5 +1,7 @@
 package com.couple.taskmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,10 +16,12 @@ public class Trip {
     private LocalDate departureDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "household_id")
-    private Household household;
+    @JoinColumn(name = "user_id") // The foreign key column in the 'trip' table
+    @JsonBackReference("user-trip")
+    private CTMUser user;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "trip")
+    @JsonManagedReference("trip-item")
     private List<TripItem> items = new ArrayList<>();
 
     // Getters and Setters
@@ -46,12 +50,12 @@ public class Trip {
         this.departureDate = departureDate;
     }
 
-    public Household getHousehold() {
-        return household;
+    public CTMUser getUser() {
+        return user;
     }
 
-    public void setHousehold(Household household) {
-        this.household = household;
+    public void setUser(CTMUser user) {
+        this.user = user;
     }
 
     public List<TripItem> getItems() {

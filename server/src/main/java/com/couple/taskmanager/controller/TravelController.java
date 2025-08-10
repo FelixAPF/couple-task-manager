@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/households/{householdId}/travel")
+@RequestMapping("/api/households/{householdId}/{userId}travel")
 public class TravelController {
     @Autowired
     TravelService travelService;
@@ -22,24 +22,24 @@ public class TravelController {
 
     //== Template Endpoints ==//
     @GetMapping("/template")
-    public ResponseEntity<List<TravelTemplateItem>> getTemplate(@PathVariable Long householdId) {
-        return ResponseEntity.ok(travelService.getTemplateItems(householdId));
+    public List<TravelTemplateItem> getTemplate(@PathVariable Long householdId, @PathVariable Long userId) {
+        return travelService.getTemplateItems(userId);
     }
 
     @PostMapping("/template")
-    public ResponseEntity<TravelTemplateItem> addTemplateItem(@PathVariable Long householdId, @RequestBody TravelTemplateItem item) {
-        return ResponseEntity.ok(travelService.addTemplateItem(householdId, item));
+    public TravelTemplateItem addTemplateItem(@@PathVariable Long householdId, PathVariable Long userId, @RequestBody TravelTemplateItem item) {
+        return travelService.addTemplateItem(userId, item);
     }
 
     //== Trip Endpoints ==//
     @GetMapping("/trips")
-    public ResponseEntity<List<Trip>> getTrips(@PathVariable Long householdId) {
-        return ResponseEntity.ok(travelService.getTrips(householdId));
+    public List<Trip> getTrips(@PathVariable Long householdId, @PathVariable Long userId) {
+        return travelService.getTrips(householdId);
     }
 
     @PostMapping("/trips")
-    public ResponseEntity<Trip> createTrip(@PathVariable Long householdId, @RequestBody CreateTripRequest request) {
-        return ResponseEntity.ok(travelService.createTrip(householdId, request.getDestination(), request.getDepartureDate()));
+    public Trip createTrip(@PathVariable Long householdId, @PathVariable Long userId, @RequestBody CreateTripRequest request) {
+        return travelService.createTrip(userId, request.getDestination(), request.getDepartureDate());
     }
 
     // DTO for the request body
@@ -49,6 +49,7 @@ public class TravelController {
         private String destination;
         private LocalDate departureDate;
         // Getters
+
     }
 
 }

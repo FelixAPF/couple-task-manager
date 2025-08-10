@@ -43,7 +43,6 @@ export const routes: Routes = [
         { path: "history/:id", component: TaskHistoryComponent, canActivate: [authGuard]}
         ]
     },
-    { path: 'travel-checklist', component: TravelChecklistComponent, canActivate: [authGuard] },
     {
         path: 'household', children: [
             { path: 'manage', component: ManageHouseholdComponent, canActivate: [authGuard] },
@@ -51,6 +50,7 @@ export const routes: Routes = [
             { path: 'rewards', component: RewardsComponent, canActivate: [authGuard] },
             { path: 'to-do', component: ToDoListComponent, canActivate: [authGuard] },
             { path: 'wish-list', component: WishListComponent, canActivate: [authGuard] },
+            { path: 'travel', component: TravelChecklistComponent, canActivate: [authGuard] },
             { path: 'contacts', component: ContactsComponent, canActivate: [authGuard] },
         ]
     },

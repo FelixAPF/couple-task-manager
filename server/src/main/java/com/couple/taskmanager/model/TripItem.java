@@ -1,5 +1,6 @@
 package com.couple.taskmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,6 +16,7 @@ public class TripItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id")
+    @JsonBackReference("trip-item")
     private Trip trip;
 
     // Getters and Setters

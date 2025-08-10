@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environment';
 
 // Define interfaces for your data models
 export interface TravelTemplateItem {
@@ -31,7 +32,7 @@ export interface Trip {
 })
 export class TravelService {
   private getApiUrl(householdId: number) {
-    return `/api/households/${householdId}/travel`;
+    return `${environment.apiUrl}api/households/${householdId}/travel`;
   }
 
   constructor(private http: HttpClient) { }

@@ -33,10 +33,6 @@ public class Household {
 
     private Boolean enableTravelChecklist = false;
 
-    @OneToMany(mappedBy = "household", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("household-trip") // Give this reference a unique name
-    private List<Trip> trips;
-
     @OneToMany
     @JsonManagedReference("household-way-to-care")
     private List<WayToCare> waysToCare;
@@ -76,9 +72,5 @@ public class Household {
     @OneToMany
     @JsonManagedReference("household-shopping-items")
     private List<ShoppingItem> shoppingItems;
-
-    @OneToMany(mappedBy = "household", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("household-template-item")
-    private List<TravelTemplateItem> travelTemplateItems;
 
 }

@@ -1,19 +1,22 @@
 package com.couple.taskmanager.controller;
 
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.TravelTemplateItem;
 import com.couple.taskmanager.model.Trip;
+import com.couple.taskmanager.model.TripItem;
 import com.couple.taskmanager.service.TravelService;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/households/{householdId}/{userId}travel")
+@RequestMapping("/api/households/{householdId}/travel")
 public class TravelController {
     @Autowired
     TravelService travelService;
@@ -22,24 +25,52 @@ public class TravelController {
 
     //== Template Endpoints ==//
     @GetMapping("/template")
-    public List<TravelTemplateItem> getTemplate(@PathVariable Long householdId, @PathVariable Long userId) {
-        return travelService.getTemplateItems(userId);
+    public List<TravelTemplateItem> getTemplate(@PathVariable Long householdId, @AuthenticationPrincipal CTMUser user) {
+        return travelService.getTemplateItems(user.getId());
     }
 
     @PostMapping("/template")
-    public TravelTemplateItem addTemplateItem(@@PathVariable Long householdId, PathVariable Long userId, @RequestBody TravelTemplateItem item) {
-        return travelService.addTemplateItem(userId, item);
+    public TravelTemplateItem addTemplateItem(@PathVariable Long householdId, @RequestBody TravelTemplateItem item, @AuthenticationPrincipal CTMUser user) {
+        return travelService.addTemplateItem(user.getId(), item);
     }
 
     //== Trip Endpoints ==//
     @GetMapping("/trips")
-    public List<Trip> getTrips(@PathVariable Long householdId, @PathVariable Long userId) {
+    public List<Trip> getTrips(@PathVariable Long householdId, @AuthenticationPrincipal CTMUser user) {
         return travelService.getTrips(householdId);
     }
 
     @PostMapping("/trips")
-    public Trip createTrip(@PathVariable Long householdId, @PathVariable Long userId, @RequestBody CreateTripRequest request) {
-        return travelService.createTrip(userId, request.getDestination(), request.getDepartureDate());
+    public Trip createTrip(@PathVariable Long householdId, @RequestBody CreateTripRequest request, @AuthenticationPrincipal CTMUser user) {
+        return travelService.createTrip(user.getId(), request.getDestination(), request.getDepartureDate());
+    }
+
+    /**
+     * POST /api/travel/trips/{tripId}/items
+     * Adds a new item to the specified trip's checklist.
+     */
+    @PostMapping("/trips/{tripId}/items")
+    public TripItem addTripItem(@PathVariable Long tripId, @RequestBody TripItem itemData) {
+        return travelService.addTripItem(tripId, itemData);
+    }
+
+    /**
+     * PUT /api/travel/trips/{tripId}/items/{itemId}
+     * Updates an existing item in a checklist.
+     */
+    @PutMapping("/trips/{tripId}/items/{itemId}")
+    public TripItem updateTripItem(@PathVariable Long tripId, @PathVariable Long itemId, @RequestBody TripItem itemChanges) {
+        // The tripId is in the path for semantic clarity but not strictly needed by the service method
+        return travelService.updateTripItem(itemId, itemChanges);
+    }
+
+    /**
+     * DELETE /api/travel/trips/{tripId}/items/{itemId}
+     * Deletes an item from a checklist.
+     */
+    @DeleteMapping("/trips/{tripId}/items/{itemId}")
+    public void deleteTripItem(@PathVariable Long tripId, @PathVariable Long itemId) {
+        travelService.deleteTripItem(itemId);
     }
 
     // DTO for the request body

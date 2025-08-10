@@ -1,10 +1,7 @@
 package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.model.*;
-import com.couple.taskmanager.repository.CTMUserRepository;
-import com.couple.taskmanager.repository.HouseholdRepository;
-import com.couple.taskmanager.repository.TravelTemplateItemRepository;
-import com.couple.taskmanager.repository.TripRepository;
+import com.couple.taskmanager.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +21,8 @@ public class TravelService {
     TripRepository tripRepository;
     @Autowired
     CTMUserRepository userRepository;
+    @Autowired
+    TripItemRepository tripItemRepository;
 
     // Constructor injection
 
@@ -78,6 +77,37 @@ public class TravelService {
 
         newTrip.setItems(tripItems);
         return tripRepository.save(newTrip);
+    }
+
+    public TripItem addTripItem(Long tripId, TripItem itemData) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new RuntimeException("Trip not found with id: " + tripId));
+        itemData.setTrip(trip); // Set the relationship
+        return tripItemRepository.save(itemData);
+    }
+
+    /**
+     * Updates an existing item in a trip checklist (e.g., toggles packed status, changes quantity).
+     */
+    public TripItem updateTripItem(Long itemId, TripItem itemChanges) {
+        TripItem existingItem = tripItemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("TripItem not found with id: " + itemId));
+
+        // Update fields from the incoming data
+        existingItem.setPacked(itemChanges.isPacked());
+        existingItem.setQuantity(itemChanges.getQuantity());
+
+        return tripItemRepository.save(existingItem);
+    }
+
+    /**
+     * Deletes an item from a trip's checklist.
+     */
+    public void deleteTripItem(Long itemId) {
+        if (!tripItemRepository.existsById(itemId)) {
+            throw new RuntimeException("TripItem not found with id: " + itemId);
+        }
+        tripItemRepository.deleteById(itemId);
     }
 
     // Add other methods for updating/deleting trips and trip items as needed

@@ -23,6 +23,8 @@ export class TripDetailsComponent implements OnInit {
   householdId = 1; // Should be dynamic
   newItemName: { [key: string]: string } = {}; // To hold new item names for each category
 
+  editMode = false;
+
   constructor(private travelService: TravelService) {}
 
   ngOnInit(): void {

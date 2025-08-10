@@ -30,11 +30,11 @@ export class TravelTemplateComponent implements OnInit {
   
   // Using an object array for PrimeNG Dropdown
   categories = [
-    { label: 'Clothes', value: 'Clothes' },
+    { label: 'Vêtements', value: 'Clothes' },
     { label: 'Carry-on', value: 'Carry-on' },
-    { label: 'Pharmacy', value: 'Pharmacy' },
-    { label: 'Essentials', value: 'Essentials' },
-    { label: 'Other', value: 'Other' },
+    { label: 'Pharmacie', value: 'Pharmacy' },
+    { label: 'Essentiels', value: 'Essentials' },
+    { label: 'Autre', value: 'Other' },
   ];
   
   householdId = 1; // This should be dynamically set

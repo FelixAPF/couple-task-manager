@@ -22,7 +22,7 @@
               </span>
             </div>
             <p class="text-sm text-gray-600 mt-1">Départ le: {{ trip.departureDate | date: 'fullDate' }}</p>
-            <p-button label="Supprimer voyage" icon="pi pi-minus" (click)="deleteTrip($event, trip)" class="p-button-danger"></p-button>
+            <p-button label="Supprimer voyage" severity="danger" icon="pi pi-minus" (click)="deleteTrip($event, trip)" class="p-button-warning"></p-button>
 
           </div>
         }

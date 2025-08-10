@@ -13,8 +13,8 @@ import { FormsModule } from '@angular/forms';
 })
 export class TravelChecklistComponent {
   viewOptions: any[] = [
-    { label: 'My Trips', value: 'trips' },
-    { label: 'Manage Template', value: 'template' }
+    { label: 'Mes voyages', value: 'trips' },
+    { label: 'Gérer template', value: 'template' }
   ];
   currentView: 'trips' | 'template' = 'trips';
 }

@@ -45,6 +45,11 @@ public class TravelController {
         travelService.deleteTrip(tripId);
     }
 
+    @DeleteMapping("/trips/{tripId}/items/{itemId}")
+    public void deleteTripItem(@PathVariable Long tripId, @PathVariable Long itemId) {
+        travelService.deleteTripItem(itemId);
+    }
+
 
     @PostMapping("/trips")
     public Trip createTrip(@PathVariable Long householdId, @RequestBody CreateTripRequest request, @AuthenticationPrincipal CTMUser user) {

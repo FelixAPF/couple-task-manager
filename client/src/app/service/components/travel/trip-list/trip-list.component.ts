@@ -67,6 +67,13 @@ export class TripListComponent implements OnInit {
     this.selectedTrip = trip;
   }
 
+  deleteTrip(event: any, trip: Trip){
+   event.stopPropagation();
+    this.travelService.deleteTrip(this.householdId, trip.id).subscribe(() => {
+      this.trips = this.trips.filter(t => t.id !== trip.id);
+    });
+  }
+
   // Helper to calculate days until a trip
   daysUntil(dateStr: string): number {
     if (!dateStr) return 0;

@@ -72,6 +72,11 @@ export class TravelService {
     return this.http.post<TripItem>(url, item);
   }
 
+  deleteTrip(householdId: number, tripId: number) {
+    const url = `${this.getApiUrl(householdId)}/trips/${tripId}`;
+    return this.http.delete(url);
+  }
+
   /**
    * Deletes an item from a specific trip.
    */

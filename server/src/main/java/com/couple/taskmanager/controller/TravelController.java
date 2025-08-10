@@ -37,8 +37,14 @@ public class TravelController {
     //== Trip Endpoints ==//
     @GetMapping("/trips")
     public List<Trip> getTrips(@PathVariable Long householdId, @AuthenticationPrincipal CTMUser user) {
-        return travelService.getTrips(householdId);
+        return travelService.getTrips(user.getId());
     }
+
+    @DeleteMapping("/trips/{tripId}")
+    public void deleteTrip(@PathVariable Long tripId) {
+        travelService.deleteTrip(tripId);
+    }
+
 
     @PostMapping("/trips")
     public Trip createTrip(@PathVariable Long householdId, @RequestBody CreateTripRequest request, @AuthenticationPrincipal CTMUser user) {

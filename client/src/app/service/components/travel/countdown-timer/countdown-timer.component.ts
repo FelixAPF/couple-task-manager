@@ -23,7 +23,7 @@ export class CountdownTimerComponent implements OnInit {
   }
 
   updateCountdown(): void {
-    const target = new Date(this.targetDate).getTime();
+    const target = new Date(this.targetDate + 'T00:00:00').getTime();
     const now = new Date().getTime();
     const difference = target - now;
 

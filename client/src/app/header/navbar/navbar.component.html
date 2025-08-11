@@ -61,7 +61,7 @@
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
-           <i class="pi pi-shopping-cart text-sm"></i> <!-- Icon: pi-shopping-cart or pi-tag -->
+           <i class="fa-solid fa-plane text-sm"></i> <!-- Icon: pi-shopping-cart or pi-tag -->
            <span>{{ 'Travel Checklist' | translate}}</span> <!-- Ensure translation key exists -->
         </a>
 
@@ -152,7 +152,7 @@
       routerLink="/household/travel"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
       (click)="toggleMenu()"> <!-- Close menu on click -->
-      <i class="pi pi-shopping-bag"></i>
+      <i class="fa-solid fa-plane"></i>
       <span>{{ 'Travel Checklist' | translate}}</span>
      </a>
     </ng-container>

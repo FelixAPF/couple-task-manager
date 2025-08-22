@@ -26,7 +26,7 @@
                 [name]="'quantity-' + item.id" 
                 [showButtons]="true" 
                 styleClass="quantity-input" 
-                (onBlur)="onItemUpdate(item)">
+                (onChange)="onItemUpdate(item)">
               </p-inputNumber>
               <p-button *ngIf="editMode" icon="pi pi-trash" severity="danger" [text]="true" (onClick)="removeItem(item)"></p-button>
             </div>

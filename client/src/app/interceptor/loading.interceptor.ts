@@ -21,7 +21,7 @@ export class LoadingInterceptor implements HttpInterceptor {
   excludedLoadEndpoints: string[] =  [ ShoppingService.shoppingListSuggestionsEndPoint(), ShoppingService.shoppingListUpdateQuantityEndpoint(), RecipeService.randomRecipeEndpoint(), '/travel' ]
 
   intercept(request: HttpRequest<any>, next: any): Observable<HttpEvent<any>> {
-    if(this.excludedLoadEndpoints.includes(request.url) || this.excludedLoadEndpoints.some((endpoint) => request.url.startsWith(endpoint))){
+    if(this.excludedLoadEndpoints.includes(request.url) || this.excludedLoadEndpoints.some((endpoint) => request.url.startsWith(endpoint)) || request.url.includes('travel')){
       return next.handle(request);
     }
 

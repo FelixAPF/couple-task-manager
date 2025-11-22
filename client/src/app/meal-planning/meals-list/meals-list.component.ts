@@ -135,6 +135,10 @@ export class MealsListComponent implements OnInit {
     this.loadMealsForWeek();
   }
 
+  goToCurrentWeek(): void {
+    this.goToWeek(new Date());
+  }
+
   generateWeekDays(): void {
     this.weekDays = [];
     const monday = new Date(this.currentWeekStartDate);

@@ -57,6 +57,7 @@ export class MealsListComponent implements OnInit {
   @Output() weekDaySelect: EventEmitter<WeekDay | null> = new EventEmitter(); // For date selection in the parent component
   @Input() enableDateSelection: boolean = false; // For enabling date selection in the parent component
   @Input() enableCardModification: boolean = true; // For enabling card modification in the parent component
+  @Input() initialSelectedDay: Date | null = null;
   selectedDay: WeekDay | null = null; // For storing the selected day
 
 
@@ -86,6 +87,17 @@ export class MealsListComponent implements OnInit {
 
 
   ngOnInit(): void {
+    if(this.initialSelectedDay){
+      console.log(this.initialSelectedDay);
+      this.selectedDay = {
+        id: -1,
+        date: this.initialSelectedDay,
+        formattedDate: this.datePipe.transform(this.initialSelectedDay, 'EEEE d MMMM', this.locale) || '',
+        isoDate: this.datePipe.transform(this.initialSelectedDay, 'yyyy-MM-dd') || '',
+        borderClass: this.enableCardModification ? this.getPositionInCycle(this.initialSelectedDay) || '' : '',
+        meal: undefined
+      }
+    }
     this.householdService.retrieveHousehold().subscribe(household => {
       if (household?.members) {
         this.householdMembersBirthdays = household.members
@@ -110,7 +122,7 @@ export class MealsListComponent implements OnInit {
           })
           .filter((date): date is Date => date !== null); // Filter out any nulls from mapping/errors 
     
-        this.goToCurrentWeek();
+        this.goToWeek(this.initialSelectedDay || new Date());
         
       } else { 
         this.householdMembersBirthdays = []; // Ensure it's an empty array
@@ -262,8 +274,9 @@ export class MealsListComponent implements OnInit {
     this.displayWeek();
   }
 
-  goToCurrentWeek(): void {
-    const today = new Date();
+
+  goToWeek(date: Date): void {
+    const today = date;
     const currentDayOfWeek = (today.getDay() + 6) % 7; // 0=Mon, 1=Tue, ..., 6=Sun
     const monday = new Date(today);
     monday.setDate(today.getDate() - currentDayOfWeek);
@@ -424,6 +437,10 @@ export class MealsListComponent implements OnInit {
       }
     });
 
+
+  }
+
+  getWeekFromDate(): void {
 
   }
 

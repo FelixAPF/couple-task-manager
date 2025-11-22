@@ -67,6 +67,7 @@ export class MoveMealComponent implements OnInit, AfterViewInit, OnDestroy { // 
     // Pass necessary inputs to the component instance
     this.mealListComponentRef.instance.enableDateSelection = true;
     this.mealListComponentRef.instance.enableCardModification = false;
+    this.mealListComponentRef.instance.initialSelectedDay = this.config.data.date;
     // You might want to set the initial week based on the providedMeal's date
     // this.mealListComponentRef.instance.currentWeekStartDate = /* calculate start date */;
 

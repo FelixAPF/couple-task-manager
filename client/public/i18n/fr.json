@@ -147,7 +147,8 @@
     "assign-meal": "Assigner",
     "modify": "Modifier",
     "delete": "Supprimer",
-    "move": "Déplacer le repas"
+    "move": "Déplacer le repas",
+    "assign": "Assigner"
   },
   "general": {
     "update-available": "Une nouvelle version de l'application est disponible. Veuillez mettre à jour."
@@ -170,5 +171,9 @@
   "rewards.claim": "Réclamer",
   "rewards.coffee.name": "Café",
   "rewards.coffee.description": "Un délicieux café.",
-  "common.cancel": "Annuler"
+  "common.cancel": "Annuler",
+  "recipes": {
+    "assign-chef-prompt": "Qui sera le chef pour le repas?",
+    "unassigned": "Non assigné"
+  }
 }

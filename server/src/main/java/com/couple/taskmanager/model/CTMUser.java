@@ -47,6 +47,10 @@ public class CTMUser implements UserDetails {
     @JsonManagedReference("user-task-assignments")
     private List<TaskAssignment> taskAssignments;
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference("user-meal-assignments")
+    private List<Meal> assignedMeal;
+
     @OneToMany(mappedBy = "user")
     @JsonManagedReference("user-task-list")
     private List<TaskList> taskLists;

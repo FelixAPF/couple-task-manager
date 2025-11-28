@@ -4,10 +4,13 @@ import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Meal;
 import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.dto.MealDto;
+import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.MealRepository;
 import com.couple.taskmanager.repository.RecipeRepository;
 import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.AccessException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -21,6 +24,8 @@ public class MealService implements IGenericService<Meal, MealDto> {
     MealRepository repository;
     @Autowired
     RecipeRepository recipeRepository;
+    @Autowired
+    CTMUserRepository userRepository;
 
 
     @Override
@@ -115,5 +120,20 @@ public class MealService implements IGenericService<Meal, MealDto> {
         repository.save(meal1);
         repository.save(meal2);
         return new MealDto(meal1);
+    }
+
+    public void assignUserToMeal(Long mealId, Long userId, CTMUser user){
+        Meal meal = repository.findById(mealId).orElseThrow(() -> new NoSuchElementException("Meal with id " + mealId + " not found."));
+
+        CTMUser assignedUser = userRepository.findById(userId).orElse(null);
+        if(assignedUser != null && !user.getHousehold().getId().equals(assignedUser.getHousehold().getId())){
+            throw new AccessDeniedException("User is not apart of this household");
+        } else if (userId != 0 && !user.getHousehold().getId().equals(meal.getHousehold().getId())){
+            throw new AccessDeniedException("Meal is not a part of this household");
+        }
+
+        meal.setAssignedUser(assignedUser);
+
+        repository.save(meal);
     }
 }

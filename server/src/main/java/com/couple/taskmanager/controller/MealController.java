@@ -34,4 +34,9 @@ public class MealController extends GenericController<Meal, MealDto, MealService
     public MealDto swapMealToNewDate(@PathVariable("id") Long id, @RequestBody Date newDate, @AuthenticationPrincipal UserDetails userDetails){
         return this.service.swapMealToNewDate(id, newDate, (CTMUser) userDetails);
     }
+
+    @PostMapping("/{id}/assign/{userId}")
+    public void assignUserToMeal(@PathVariable("id") Long mealId, @PathVariable("userId") Long userId, @AuthenticationPrincipal UserDetails userDetails){
+        this.service.assignUserToMeal(mealId, userId, (CTMUser) userDetails);
+    }
 }

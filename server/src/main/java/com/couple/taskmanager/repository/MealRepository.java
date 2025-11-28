@@ -25,4 +25,5 @@ public interface MealRepository extends JpaRepository<Meal, Long> {
 
     @Query("DELETE FROM Meal m WHERE m.id = :mealId AND m.household.id = :householdId")
     void deleteByMealIdAndHouseholdId(Long mealId, Long householdId);
+
 }

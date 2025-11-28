@@ -26,4 +26,8 @@ public class Meal {
     @ManyToOne
     @JsonBackReference("household-meals")
     private Household household;
+
+    @ManyToOne
+    @JsonBackReference("user-meal-assignments")
+    private CTMUser assignedUser;
 }

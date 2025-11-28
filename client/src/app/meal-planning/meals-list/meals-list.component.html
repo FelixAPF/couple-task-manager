@@ -67,6 +67,11 @@
                           (click)="confirmRemoveMeal($event, day.meal)" aria-label="Supprimer le repas"
                           [pTooltip]="'meals.delete'|translate" tooltipPosition="top">
                   </button>
+                  <button pButton pRipple type="button" icon="pi pi-user"
+                          class="p-button-rounded p-button-text p-button-sm p-button-danger"
+                          (click)="confirmAssignMeal(day)" aria-label="Assigner le repas"
+                          [pTooltip]="'meals.assign'|translate" tooltipPosition="top">
+                  </button>
                 </div>
             </ng-template>
               <!-- If No Meal is Planned -->

@@ -3,10 +3,9 @@
       [numberOfBalloons]="50" 
       [minDuration]="10" 
       [maxDuration]="20">
-      
-      <div style="display: block; min-height: 100px;"> <ng-container *ngTemplateOutlet="template"></ng-container>
+      <div style="display: block; min-height: 100px;"> 
+        <ng-container *ngTemplateOutlet="template"></ng-container>
       </div>
-
   </app-balloon-container>
 </div>
 
@@ -15,45 +14,58 @@
 </ng-template>
 
 <ng-template #template>
-  <p-card [styleClass]="'day-card h-full flex flex-col bg-surface-0 dark:bg-surface-800 shadow-md rounded-lg overflow-hidden'"
+  <p-card [styleClass]="'day-card h-full flex flex-col bg-surface-0 dark:bg-surface-800 shadow-md hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1 rounded-xl overflow-hidden cursor-default'"
       [ngClass]="borderHighlightClass">
 
-
-      <!-- Card Header (Date) -->
       <ng-template pTemplate="header">
-        <div class="p-3 bg-surface-50 dark:bg-surface-700 border-b border-surface-200 dark:border-surface-600">
-          <h3 class="text-center text-md font-semibold text-primary-600 dark:text-primary-300">
+        <div class="p-3 bg-gradient-to-b from-surface-50 to-surface-100 dark:from-surface-700 dark:to-surface-800 border-b border-surface-200 dark:border-surface-600">
+          <h3 class="text-center text-sm uppercase tracking-wider font-bold text-primary-600 dark:text-primary-300">
             {{ title }}
           </h3>
         </div>
       </ng-template>
 
-      <!-- Card Content (Meal Details or Placeholder) -->
       <ng-template pTemplate="content">
-        <div class="p-3 flex-grow flex flex-col justify-center items-center text-center min-h-[120px]">
-          <!-- If Meal is Planned -->
+        <div class="p-3 flex-grow flex flex-col justify-center items-center text-center min-h-[140px]">
+          
           <div *ngIf="meal" class="w-full flex flex-col items-center">
-            <!-- Optional: Display Recipe Image -->
-            <div (click)="openRecipeView()">
-              <img
-              *ngIf="meal.recipe.imageUrl"
-              [src]="meal.recipe.imageUrl"
-              [alt]="recipeName"
-              class="w-20 h-20 object-cover rounded-md mb-2 shadow-sm">
-              <div *ngIf="!meal.recipe.imageUrl" class="w-20 h-20 flex items-center justify-center bg-surface-100 dark:bg-surface-600 rounded-md mb-2 text-surface-400 dark:text-surface-500">
-              <i class="pi pi-image text-3xl"></i>
+            
+            <div (click)="openRecipeView()" class="relative inline-block mb-3 cursor-pointer group rounded-xl"> 
+              
+              <div class="overflow-hidden rounded-xl shadow-sm">
+                <img *ngIf="meal.recipe.imageUrl"
+                     [src]="meal.recipe.imageUrl"
+                     [alt]="recipeName"
+                     class="w-24 h-24 object-cover transition-transform duration-500 group-hover:scale-110"> <div *ngIf="!meal.recipe.imageUrl" 
+                     class="w-24 h-24 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-600 text-surface-400 dark:text-surface-500 transition-transform duration-500 group-hover:scale-110">
+                  <i class="pi pi-image text-3xl opacity-50"></i>
+                </div>
               </div>
+
+              <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none"></div>
+
+              <div *ngIf="meal?.assignee as assignee" class="absolute -bottom-2 -right-2 z-20">
+                 <img
+                  [src]="assignee.imageUrl || 'assets/placeholder.jpg'"
+                  [alt]="'Photo de ' + (assignee.name || 'Membre')"
+                  class="w-9 h-9 rounded-full object-cover border-2 border-white dark:border-surface-800 shadow-md"
+                  onError="this.src='assets/placeholder.jpg'"
+                  [pTooltip]="assignee.name" 
+                  tooltipPosition="bottom"
+                />
+              </div>
+
             </div>
 
-            <!-- Recipe Name -->
-            <p class="text-sm font-medium text-surface-800 dark:text-surface-100 mb-1 truncate w-full"
+            <p class="text-sm font-semibold text-surface-700 dark:text-surface-100 mb-2 w-full line-clamp-2 leading-tight min-h-[2.5rem] flex items-center justify-center"
               [pTooltip]="recipeName" tooltipPosition="top">
               {{ recipeName }}
             </p>
-            <!-- Meal Location -->
-            <p *ngIf="meal.location" class="text-xs text-surface-500 dark:text-surface-400 mb-3">
-              <i class="pi pi-map-marker mr-1"></i>{{ meal.location }}
-            </p>
+            
+            <div *ngIf="meal.location" class="inline-flex items-center gap-1 px-2 py-1 bg-surface-100 dark:bg-surface-700 rounded-md text-xs font-medium text-surface-500 dark:text-surface-300 mb-2">
+              <i class="pi pi-map-marker text-[10px]"></i>
+              <span>{{ meal.location }}</span>
+            </div>
 
             <ng-container [ngTemplateOutlet]="customTemplate"></ng-container>
 
@@ -62,7 +74,5 @@
           
         </div>
       </ng-template>
-
     </p-card>
-    
 </ng-template>

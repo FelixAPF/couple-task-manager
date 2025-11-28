@@ -42,4 +42,8 @@ export class MealService {
     return this.http.put<Meal>(`${this.baseUrl}/${meal.id}/swap`, date );
   }
 
+  assignMeal(meal: Meal, assigneeId: number) {
+    return this.http.post<Meal>(`${this.baseUrl}/${meal.id}/assign/${assigneeId}`, {});
+  }
+
 }

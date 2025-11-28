@@ -1,3 +1,4 @@
+import { HouseholdMember } from "./household";
 import { Recipe } from "./recipes";
 
 export interface Meal {
@@ -5,4 +6,5 @@ export interface Meal {
     recipe: Recipe;
     date: Date;
     location: string;
+    assignee?: HouseholdMember;
 }

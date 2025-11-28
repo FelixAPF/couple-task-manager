@@ -5,6 +5,7 @@ import { SharedModule } from '../../shared.module';
 import { Meal } from '../../model/meals';
 import { MealService } from '../../service/meal.service';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { MealAssignDialogComponent } from "../meal-assign-dialog/meal-assign-dialog.component"
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
@@ -66,6 +67,7 @@ export class MealsListComponent implements OnInit {
   private mealsMap = new Map<string, Meal>();
   swipeTransform = 'translateX(0)';
   householdMembersBirthdays: undefined | Date[] = undefined; // Store household members' birthdays
+  householdMembers: HouseholdMember[] = [];
 
   currentWeekStartDate!: Date;
   formattedWeekRange: string = '';
@@ -100,6 +102,7 @@ export class MealsListComponent implements OnInit {
     }
     this.householdService.retrieveHousehold().subscribe(household => {
       if (household?.members) {
+        this.householdMembers = household.members;
         this.householdMembersBirthdays = household.members
           .map((member: HouseholdMember) => {
             if (!member.birthDay) {
@@ -137,6 +140,27 @@ export class MealsListComponent implements OnInit {
 
   goToCurrentWeek(): void {
     this.goToWeek(new Date());
+  }
+
+  confirmAssignMeal(day: WeekDay): void {
+    const meal = day.meal;
+    if(meal === undefined) return;
+    
+    this.dialogService.open(MealAssignDialogComponent, {
+      data: {
+        householdMembers: this.householdMembers
+      },
+      dismissableMask: true,
+      modal:true
+
+    }).onClose.subscribe((result) => {
+      if(result !== null && !result){
+        return;
+      }
+      this.mealService.assignMeal(meal, result === null ? 0 : result).subscribe(() => {
+        this.loadMealsForWeek();
+      });
+    })
   }
 
   generateWeekDays(): void {
@@ -359,7 +383,8 @@ export class MealsListComponent implements OnInit {
                   id: existingMeal?.id,
                   recipe: result.recipe,
                   date: result.date,
-                  location: result.location
+                  location: result.location,
+                  assignee: undefined
               };
               this.saveAssignedMeal(mealToSave);
           }

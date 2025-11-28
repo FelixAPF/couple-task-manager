@@ -1,0 +1,67 @@
+<div class="flex flex-col gap-4 w-full">
+    
+    <div class="text-center mb-2">
+        <p class="text-surface-600 dark:text-surface-300">
+            {{ 'recipes.assign-chef-prompt' | translate }} 
+        </p>
+    </div>
+
+    <div class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
+        
+        <div *ngFor="let member of householdMembers" 
+             (click)="selectMember(member)"
+             class="flex items-center p-3 rounded-lg border cursor-pointer transition-all duration-200 group relative"
+             [ngClass]="{
+                'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-sm': selectedMember === member,
+                'border-surface-200 dark:border-surface-700 hover:border-primary-300 hover:bg-surface-50 dark:hover:bg-surface-800': selectedMember !== member
+             }">
+
+            <ng-container *ngIf="member">
+                <img 
+                    [src]="member.imageUrl || 'assets/placeholder.jpg'" 
+                    class="w-10 h-10 rounded-full object-cover mr-4 border border-surface-200 dark:border-surface-600"
+                    onError="this.src='assets/placeholder.jpg'"
+                    alt="Avatar">
+
+                <span class="font-medium text-lg text-surface-800 dark:text-surface-100 flex-grow">
+                    {{ member.name }}
+                </span>
+            </ng-container>
+
+            <ng-container *ngIf="!member">
+                <div class="w-10 h-10 rounded-full bg-surface-200 dark:bg-surface-600 flex items-center justify-center mr-4 text-surface-500 dark:text-surface-400">
+                    <i class="pi pi-user-minus text-xl"></i>
+                </div>
+
+                <span class="font-medium text-lg text-surface-600 dark:text-surface-300 flex-grow italic">
+                    {{ 'recipes.unassigned' | translate }} </span>
+            </ng-container>
+
+            <div *ngIf="selectedMember === member" class="text-primary-600 dark:text-primary-400 animate-in fade-in zoom-in duration-200">
+                <i class="pi pi-check-circle text-xl"></i>
+            </div>
+            
+            <div *ngIf="selectedMember !== member" class="text-surface-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                 <i class="pi pi-angle-right"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="flex justify-end gap-2 mt-2 pt-3 border-t border-surface-200 dark:border-surface-700">
+        <p-button 
+            label="Annuler" 
+            (click)="cancel()" 
+            styleClass="p-button-text p-button-secondary text-sm">
+        </p-button>
+        <p-button 
+            label="Confirmer" 
+            icon="pi pi-check" 
+            (click)="confirm()" 
+            [disabled]="selectedMember === undefined" 
+            styleClass="p-button-primary text-sm">
+        </p-button>
+    </div>
+
+</div>

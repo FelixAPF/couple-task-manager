@@ -4,18 +4,51 @@ import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.ShoppingItem;
 import com.couple.taskmanager.model.dto.RecipeDto;
+import com.couple.taskmanager.service.RecipeAIParserService;
 import com.couple.taskmanager.service.RecipeService;
 import com.couple.taskmanager.service.ShoppingItemService;
 import jakarta.transaction.SystemException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/recipes")
 public class RecipeController extends GenericController<Recipe, RecipeDto, RecipeService> {
+
+    @Autowired
+    private RecipeAIParserService aiParserService;
+
+    @PostMapping(value = "/smart-import", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<RecipeDto> smartImportRecipe(@RequestParam("file") MultipartFile file) {
+        try {
+            RecipeDto recipe = aiParserService.parseRecipe(file);
+            return ResponseEntity.ok(recipe);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/smart-import-url")
+    public ResponseEntity<RecipeDto> smartImportUrl(@RequestBody Map<String, String> payload) {
+        String url = payload.get("url");
+        if (url == null || url.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            RecipeDto recipe = aiParserService.parseRecipeFromUrl(url);
+            return ResponseEntity.ok(recipe);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
     @PostMapping("/batch")
     public List<RecipeDto> batchSave(@RequestBody List<Recipe> recipes, @AuthenticationPrincipal UserDetails userDetails){

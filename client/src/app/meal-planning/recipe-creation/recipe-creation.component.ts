@@ -75,10 +75,15 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
 
   isScanning = false;
 
+  importOptions: any[] = [
+      { label: 'Image', value: 'image', icon: 'pi pi-image' },
+      { label: 'Lien / Vidéo', value: 'url', icon: 'pi pi-link' }
+  ];
+
   selectedFile: File | null = null;
   imagePreviewUrl: string | ArrayBuffer | null = null;
   initialImageUrl: string | null = null; // Store original image URL for comparison/reset
-
+  private _importMode: string = 'image';
   private subscriptions = new Subscription();
 
 
@@ -100,6 +105,21 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+
+
+    // Getter: Just gives the value to the UI
+    get importMode(): string {
+        return this._importMode;
+    }
+
+    // Setter: Intercepts changes from the UI
+    set importMode(value: string) {
+        // ONLY update if the new value is not null.
+        // If user clicks the active button, PrimeNG sends 'null', which we ignore.
+        if (value) {
+            this._importMode = value;
+        }
+    }
   // --- Form Initialization and Management ---
 
   private initForm(): void {

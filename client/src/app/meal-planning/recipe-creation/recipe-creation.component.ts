@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
 import { SharedModule } from '../../shared.module';
@@ -44,6 +44,7 @@ interface FileUploadResponse {
     // Explicit imports for clarity or if not fully covered by SharedModule
     InputTextModule,
     InputNumberModule,
+    FormsModule,
     TextareaModule,
     DropdownModule,
     ButtonModule,],
@@ -71,6 +72,8 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
   isEditMode = false; 
   recipeToEdit?: Recipe;
   recipeTypes: RecipeTypeOption[];
+
+  isScanning = false;
 
   selectedFile: File | null = null;
   imagePreviewUrl: string | ArrayBuffer | null = null;
@@ -132,7 +135,78 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     }
   }
 
+  // ... inside component class
+  importUrl: string = ''; // Add this property
+
+  onUrlImport() {
+    if (!this.importUrl) return;
+
+    this.isScanning = true;
+    this.messageService.add({ severity: 'info', summary: 'Analyse', detail: 'Récupération de la recette en ligne...' });
+
+    this.recipeService.smartImportUrl(this.importUrl).subscribe({
+      next: (recipeData) => {
+        this.populateForm(recipeData);
+        this.isScanning = false;
+        this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Recette importée !' });
+        this.importUrl = ''; // Reset
+      },
+      error: (err) => {
+        console.error(err);
+        this.isScanning = false;
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de lire ce lien.' });
+      }
+    });
+  }
+
   // --- Ingredient FormArray Management ---
+
+  onSmartImport(event: any) {
+    const file = event.files[0];
+    if (!file) return;
+
+    this.isScanning = true;
+    // Clear the file upload input if needed to allow re-uploading same file
+    // event.originalEvent.target.value = ''; 
+
+    this.recipeService.smartImport(file).subscribe({
+      next: (recipeData) => {
+        this.populateForm(recipeData);
+        this.isScanning = false;
+        // Optional: Show success message
+      },
+      error: (err) => {
+        console.error(err);
+        this.isScanning = false;
+        // Optional: Show error message
+      }
+    });
+  }
+
+  populateForm(data: Recipe) {
+    this.recipeForm.patchValue({
+      name: data.name,
+      description: data.description,
+      basePortionRatio: data.basePortionRatio,
+      imageUrl: data.imageUrl,
+      category: data.category
+      // map other fields like prepTime, cookTime if they exist in your form
+    });
+
+    // Handle Ingredients Array
+    const ingredientsArray = this.recipeForm.get('ingredients') as FormArray;
+    ingredientsArray.clear();
+
+    if (data.ingredients) {
+      data.ingredients.forEach(ing => {
+        ingredientsArray.push(this.fb.group({
+          name: [ing.name, Validators.required],
+          quantity: [ing.quantity],
+          unit: [ing.unit]
+        }));
+      });
+    }
+  }
 
   get ingredients(): FormArray {
     return this.recipeForm.get('ingredients') as FormArray;

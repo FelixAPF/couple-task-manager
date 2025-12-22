@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment';
 import { Recipe } from '../model/recipes';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +30,18 @@ export class RecipeService {
 
   randomRecipe(){
     return this.http.get<Recipe>(RecipeService.randomRecipeEndpoint());
+  }
+  
+  smartImport(file: File): Observable<Recipe> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // This calls the POST /api/recipe/smart-import endpoint we created in the Controller
+    return this.http.post<Recipe>(`${this.baseUrl}/smart-import`, formData);
+  }
+
+  smartImportUrl(url: string): Observable<Recipe> {
+    return this.http.post<Recipe>(`${this.baseUrl}/smart-import-url`, { url });
   }
 
   static randomRecipeEndpoint(){

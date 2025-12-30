@@ -40,7 +40,7 @@
       <app-footer-navbar></app-footer-navbar>
     </div>
 
-    <p-dialog 
+<p-dialog 
         [(visible)]="showUpdateDialog" 
         [modal]="true" 
         [draggable]="false" 
@@ -48,24 +48,26 @@
         [closable]="false"
         [showHeader]="false"
         styleClass="w-[90%] max-w-sm rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-surface-800"
-        [maskStyle]="{'backdrop-filter': 'blur(4px)', 'background-color': 'rgba(0,0,0,0.4)'}">
+        [maskStyle]="{'backdrop-filter': 'blur(5px)', 'background-color': 'rgba(0,0,0,0.4)'}">
         
         <div class="relative p-6 text-center">
             <button 
                 (click)="showUpdateDialog = false"
-                class="absolute top-4 right-4 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors">
+                class="absolute top-4 right-4 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors z-10">
                 <i class="pi pi-times text-xl"></i>
             </button>
 
-            <div class="mx-auto mb-4 bg-blue-50 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center">
-              <i class="pi pi-cloud-download text-3xl text-blue-500 dark:text-blue-400"></i>
+            <div class="mx-auto mb-5 w-28 h-28 rounded-full flex items-center justify-center bg-white dark:bg-surface-700 border-4 border-orange-100 dark:border-orange-500/30 shadow-lg relative">
+                <img src="assets/kyuubi.png" 
+                     alt="Kurama Update" 
+                     class="w-full h-full object-cover p-1 rounded-full"> 
             </div>
 
-            <h3 class="text-xl font-bold text-surface-900 dark:text-surface-50 mb-2">
-                Mise à jour disponible
+            <h3 class="text-2xl font-bold text-surface-900 dark:text-surface-50 mb-2">
+                Mise à jour disponible !
             </h3>
-            <p class="text-surface-600 dark:text-surface-300 text-sm mb-6 leading-relaxed">
-                Une nouvelle version de l'application est disponible avec de nouvelles fonctionnalités et correctifs.
+            <p class="text-surface-600 dark:text-surface-300 text-sm mb-6 leading-relaxed px-2">
+                Kurama a accumulé suffisament de Chakra pour une nouvelle version de l'application.
             </p>
 
             <button 
@@ -73,14 +75,14 @@
                 pRipple 
                 label="Mettre à jour maintenant" 
                 icon="pi pi-download"
-                class="w-full p-button-rounded p-button-primary font-semibold"
+                class="w-full p-button-rounded font-semibold !bg-orange-500 !border-orange-500 hover:!bg-orange-600"
                 (click)="openAppStore()">
             </button>
             
             <button 
                 (click)="showUpdateDialog = false"
-                class="mt-4 text-xs text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 transition-colors underline decoration-dotted">
-                Pas maintenant
+                class="mt-4 text-xs font-medium text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors">
+                Plus tard
             </button>
         </div>
     </p-dialog>

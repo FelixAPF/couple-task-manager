@@ -456,11 +456,9 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
                     // Determine due dates based on the flag
                     List<Date> dueDates;
                     boolean createOnce = Boolean.TRUE.equals(rqst.getCreateEachTaskOnce());
-                    if (createOnce) {
-                        dueDates = occurenceButAtLeastOne(startDate, periodEndDate, rqst.getExplicitDueDate(), task.getFrequency());
-                    } else {
-                        dueDates = occurenceInPeriod(startDate, periodEndDate, rqst.getExplicitDueDate(), task.getFrequency());
-                    }
+                    dueDates = createOnce
+                            ? Collections.singletonList(periodEndDate)
+                            : occurenceInPeriod(startDate, periodEndDate, rqst.getExplicitDueDate(), task.getFrequency());
 
                     if (dueDates.isEmpty()) {
                         log.debug("No due dates calculated for task {} (User {})", task.getId(), assignee.getId());
@@ -583,7 +581,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
         if (!datesInPeriod.isEmpty()) {
             // If occurrences were found within the period (respecting explicitEndDate), return *all* of them.
             log.trace("Found occurrences in period. Returning all occurrences: {}", datesInPeriod);
-            return datesInPeriod; // *** CHANGED: Return all dates ***
+            return Collections.singletonList(datesInPeriod.get(datesInPeriod.size() - 1)); // *** CHANGED: Return all dates ***
         } else {
             // No occurrences found within the period/rules.
             log.trace("No occurrences found in period. Returning period end date as the only due date: {}", periodEndDate);

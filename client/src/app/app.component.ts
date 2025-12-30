@@ -38,6 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
   subscription: Subscription = new Subscription();
   outdatedVersion: boolean = false;
   acknowledgeUpdate: boolean = false;
+  showUpdateDialog: boolean = false;
   
 
   constructor(private translate: TranslateService, private loadingService: LoadingService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
@@ -56,15 +57,18 @@ export class AppComponent implements OnInit, OnDestroy {
 
   public async openAppStore(): Promise<void> {
     await AppUpdate.openAppStore();
+    this.showUpdateDialog = false; // Close dialog on action
   }
 
   ngOnInit() {
     this.checkScreenWidth();
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
-      if(!this.platform.ANDROID) return;
+      //if(!this.platform.ANDROID) return;
+      console.log(BackEndVersion, version);
       if(parseFloat(BackEndVersion.version).toFixed(4) !== parseFloat(version).toFixed(4)) {
         this.outdatedVersion = true;
+        this.showUpdateDialog = true; // <--- Trigger the popup here
       }
     }));
 

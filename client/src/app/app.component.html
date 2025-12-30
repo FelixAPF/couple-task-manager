@@ -39,6 +39,51 @@
     </div> <div class="lg:hidden">
       <app-footer-navbar></app-footer-navbar>
     </div>
+
+    <p-dialog 
+        [(visible)]="showUpdateDialog" 
+        [modal]="true" 
+        [draggable]="false" 
+        [resizable]="false" 
+        [closable]="false"
+        [showHeader]="false"
+        styleClass="w-[90%] max-w-sm rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-surface-800"
+        [maskStyle]="{'backdrop-filter': 'blur(4px)', 'background-color': 'rgba(0,0,0,0.4)'}">
+        
+        <div class="relative p-6 text-center">
+            <button 
+                (click)="showUpdateDialog = false"
+                class="absolute top-4 right-4 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors">
+                <i class="pi pi-times text-xl"></i>
+            </button>
+
+            <div class="mx-auto mb-4 bg-blue-50 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center">
+              <i class="pi pi-cloud-download text-3xl text-blue-500 dark:text-blue-400"></i>
+            </div>
+
+            <h3 class="text-xl font-bold text-surface-900 dark:text-surface-50 mb-2">
+                Mise à jour disponible
+            </h3>
+            <p class="text-surface-600 dark:text-surface-300 text-sm mb-6 leading-relaxed">
+                Une nouvelle version de l'application est disponible avec de nouvelles fonctionnalités et correctifs.
+            </p>
+
+            <button 
+                pButton 
+                pRipple 
+                label="Mettre à jour maintenant" 
+                icon="pi pi-download"
+                class="w-full p-button-rounded p-button-primary font-semibold"
+                (click)="openAppStore()">
+            </button>
+            
+            <button 
+                (click)="showUpdateDialog = false"
+                class="mt-4 text-xs text-surface-500 hover:text-surface-700 dark:hover:text-surface-300 transition-colors underline decoration-dotted">
+                Pas maintenant
+            </button>
+        </div>
+    </p-dialog>
   
   </div>
 </body>

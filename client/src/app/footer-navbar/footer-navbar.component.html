@@ -22,8 +22,7 @@
       <i class="pi pi-home text-xl mb-1"></i>
       <span class="text-xs font-medium">Dashboard</span>
     </a>
-
-    <!-- Tasks Link
+ 
     <a routerLink="/tasks"
        routerLinkActive="active-link"
        class="nav-item flex flex-col items-center justify-center p-2 rounded-md
@@ -32,17 +31,7 @@
               transition-colors duration-150 w-1/5">
       <i class="pi pi-list text-xl mb-1"></i>
       <span class="text-xs font-medium">Tâches</span>
-    </a> -->
-    <a routerLink="/household/contacts"
-       routerLinkActive="active-link"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5">
-      <i class="pi pi-address-book text-xl mb-1"></i>
-      <span class="text-xs font-medium">Contacts</span>
     </a>
-    
     <!-- Recipes Link -->
     <a routerLink="/meals"
        routerLinkActive="active-link"
@@ -53,6 +42,16 @@
       <i class="fa-regular fa-lemon text-xl mb-1"></i>
       <span class="text-xs font-medium">Repas</span>
     </a>
+    <a routerLink="/household/contacts"
+       routerLinkActive="active-link"
+       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
+              text-surface-600 dark:text-surface-300
+              hover:text-primary-500 dark:hover:text-primary-400
+              transition-colors duration-150 w-1/5">
+      <i class="pi pi-address-book text-xl mb-1"></i>
+      <span class="text-xs font-medium">Contacts</span>
+    </a>
+    
     <!-- Shopping List Link -->
     <a routerLink="/shopping-list"
        routerLinkActive="active-link"
@@ -63,18 +62,6 @@
       <i class="pi pi-shopping-cart text-xl mb-1"></i>
       <span class="text-xs font-medium">Courses</span>
     </a>
-
-    <!-- Mise à jour Button -->
-    <button type="button"
-            (click)="openAppStore()"
-            class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-                   text-surface-600 dark:text-surface-300
-                   hover:text-primary-500 dark:hover:text-primary-400
-                   transition-colors duration-150 w-1/5"
-            aria-label="Vérifier les mises à jour">
-      <i class="pi pi-sync text-xl mb-1"></i> <!-- Or pi-download -->
-      <span class="text-xs font-medium">Mise à jour</span>
-    </button>
 
   </div>
 </div>

@@ -64,8 +64,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.checkScreenWidth();
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
-      //if(!this.platform.ANDROID) return;
-      console.log(BackEndVersion, version);
+      if(!this.platform.ANDROID) return;
       if(parseFloat(BackEndVersion.version).toFixed(4) !== parseFloat(version).toFixed(4)) {
         this.outdatedVersion = true;
         this.showUpdateDialog = true; // <--- Trigger the popup here
@@ -110,8 +109,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
             if (topmostDialogRef && typeof topmostDialogRef.close === 'function') {
               topmostDialogRef.close();
-            } else {
-                console.warn('Back button: Could not find close method on topmost dialog ref.');
             }
           }
           else if (this.router.url === '/dashboard') {
@@ -122,7 +119,6 @@ export class AppComponent implements OnInit, OnDestroy {
         });
       });
     } catch (error) {
-      console.error('Error adding back button listener:', error);
     }
   }
 

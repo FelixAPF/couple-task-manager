@@ -37,7 +37,7 @@ public class Task {
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
-            name = "task_tasklist",
+            name = "task_tasklist", // Primary table managed by JPA
             joinColumns = @JoinColumn(name = "task_id"),
             inverseJoinColumns = @JoinColumn(name= "tasklist_id")
     )

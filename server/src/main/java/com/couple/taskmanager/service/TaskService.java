@@ -9,6 +9,8 @@ import com.couple.taskmanager.repository.TaskListRepository;
 import com.couple.taskmanager.repository.TaskRepository;
 import com.couple.taskmanager.utils.DateUtils;
 import com.couple.taskmanager.utils.StreamUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,9 @@ public class TaskService implements IGenericService<Task, TaskDto > {
     TaskListService taskListService;
     @Autowired
     CTMUserService userService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
     @Override
@@ -77,19 +82,23 @@ public class TaskService implements IGenericService<Task, TaskDto > {
         Task taskToDelete = taskOptional.get();
         if(!Objects.equals(taskToDelete.getHousehold().getId(), householdId)) throw new IllegalArgumentException("This is not your household");
 
-        // Delete TaskAssignments associated with the Task
-        List<TaskAssignment> taskAssignments = taskAssignmentRepository.findAllByTaskIdAndCompletedTrueAndHouseholdId(id, user.getHousehold().getId());
-        taskAssignmentRepository.deleteAll(taskAssignments);
+        try {
+            entityManager.createNativeQuery("DELETE FROM task_list_tasks WHERE tasks_id = :id")
+                    .setParameter("id", id)
+                    .executeUpdate();
+        } catch (Exception e) {
 
-        // Remove the Task from TaskLists
-        List<TaskList> taskLists = new ArrayList<>(taskToDelete.getTaskLists()); // Create a copy to avoid ConcurrentModificationException
-        for (TaskList taskList : taskLists) {
-            taskToDelete.getTaskLists().remove(taskList); // Remove the task from the TaskList on this side of the relationship
-            taskList.getTasks().remove(taskToDelete);
-            taskListRepository.save(taskList); // Save the modified TaskList
         }
-        taskRepository.save(taskToDelete); // Update the Task
-        // Finally, delete the Task
+
+        // 2. Clear the Managed Relationship (task_tasklist) via JPA
+        for (TaskList taskList : taskToDelete.getTaskLists()) {
+            taskList.getTasks().remove(taskToDelete);
+            taskListRepository.save(taskList);
+        }
+        taskToDelete.getTaskLists().clear();
+        taskRepository.save(taskToDelete);
+
+        // 3. Delete the Task
         taskRepository.delete(taskToDelete);
     }
 

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class TaskListOccasionDto {
+    private Long id;
     private String name;
     private HouseholdDto householdDto;
     private List<TaskAssignDto> taskAssignments;
@@ -18,5 +19,6 @@ public class TaskListOccasionDto {
         this.name = byId.getName();
         this.taskAssignments = byId.getTaskAssignments().stream().map(TaskAssignDto::new).toList();
         this.householdDto = new HouseholdDto(byId.getHousehold());
+        this.id = byId.getId();
     }
 }

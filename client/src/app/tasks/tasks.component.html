@@ -1,88 +1,146 @@
-<div class="container p-4 mx-auto flex flex-col flex-grow">
+<div class="page-container">
+  
+  <p-toast></p-toast>
+  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
 
-  <div class="flex flex-col sm:flex-row justify-between items-center mb-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 gap-4">
-    <h2 class="text-xl sm:text-2xl font-semibold text-surface-800 dark:text-surface-100 text-center sm:text-left">
-      {{'tasks.manage-and-assign' | translate}}
-    </h2>
-    <div class="flex gap-2 w-full sm:w-auto justify-center sm:justify-end">
-      <p-button
-        (click)="create()"
-        [label]="'tasks.assign-tasks'|translate"
-        icon="pi pi-user-plus"
-        styleClass="p-button-outlined p-button-secondary flex-1 sm:flex-none"
-        pTooltip="Planifier les tâches pour une nouvelle période"
-        tooltipPosition="bottom">
-      </p-button>
-      <p-button
-        (click)="openNewTaskDialog()"
-        [label]="'tasks.create-task'|translate"
-        icon="pi pi-plus"
-        styleClass="p-button-raised p-button-primary flex-1 sm:flex-none"
-        pTooltip="Créer une nouvelle définition de tâche"
-        tooltipPosition="bottom">
-      </p-button>
+  <div class="header-card">
+    <div class="header-content">
+        <h1 class="page-title">Task Lists</h1>
+        <p class="page-subtitle">Manage seasonal or special occasion lists</p>
     </div>
-  </div>
-
-  <div class="mb-6 px-4"> <p-inputGroup>
-        <span class="p-inputGroup-addon mr-1">
-            <i class="pi pi-search"></i>
-        </span>
-        <input
-            type="text"
-            pInputText
-            [(ngModel)]="searchTerm"
-            (input)="applyFilter()"
-            [placeholder]="('tasks.search-placeholder' | translate) || 'Rechercher par titre ou description...'"
-            class="w-full"
-        />
-         <button *ngIf="searchTerm" pButton type="button" icon="pi pi-times" class="p-button-secondary p-button-text" (click)="searchTerm = ''; applyFilter()" pTooltip="Clear Search" tooltipPosition="bottom"></button>
-    </p-inputGroup>
-  </div>
-
-  <p-accordion [value]="accordionsOpenByDefault" [multiple]="true" styleClass="flex flex-col gap-4 h-full">
-    <p-accordion-panel [value]="i" *ngFor="let column of filteredMemberTaskColumns; let i = index; trackBy: trackByMemberId">
-      <p-accordion-header>
-        <div class="flex items-center gap-3 w-full"> <img
-            *ngIf="column.member"
-            [src]="column.member.imageUrl || 'assets/placeholder.jpg'"
-            [alt]="'Photo de ' + (column.member.name || 'Membre')"
-            class="w-10 h-10 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm flex-shrink-0" onError="this.src='assets/placeholder.jpg'"
-          />
-          <i *ngIf="!column.member" class="pi pi-question-circle text-xl text-surface-500 dark:text-surface-400 flex-shrink-0"></i> <p class="text-lg sm:text-xl font-semibold text-surface-800 dark:text-surface-100 truncate mr-2"> {{ column.member?.name ?? ('tasks.tasks-unassigned' | translate) }}
-          </p>
-          <p-badge *ngIf="column.tasks?.length" [value]="column.tasks.length" styleClass="ml-auto"></p-badge>
-        </div>
-      </p-accordion-header>
-      <p-accordion-content>
-        <app-assignee-task-list
-          (unassignEmitter)="unassign($event)"
-          (editTaskEmitter)="openNewTaskDialog($event, column.member)"
-          (deleteTaskEmitter)="deleteTask($event)"
-          [taskList]="{ tasks: column.tasks }" [index]="i"
-          [title]="column.member?.name ?? 'Tâches non assignées'"
-          [assignee]="column.member" class="flex-grow">
-        </app-assignee-task-list>
-        <div *ngIf="column.tasks.length === 0 && searchTerm" class="text-center py-4 text-surface-500 dark:text-surface-400">
-             Aucune tâche ne correspond à votre recherche pour {{ column.member?.name ?? 'les tâches non assignées' }}.
-         </div>
-      </p-accordion-content>
-    </p-accordion-panel>
-
-    <div *ngIf="filteredMemberTaskColumns.length === 0 && memberTaskColumns.length > 0 && searchTerm" class="flex flex-col items-center justify-center text-center py-10 flex-grow">
-        <i class="pi pi-search-minus text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
-        <p class="text-lg font-medium text-surface-600 dark:text-surface-300 mb-1">Aucune tâche trouvée</p>
-        <p class="text-sm text-surface-500 dark:text-surface-400">Essayez d'affiner vos termes de recherche.</p>
-    </div>
-
-    <div *ngIf="memberTaskColumns.length === 0" class="flex flex-col items-center justify-center text-center py-10 flex-grow">
-      <i class="pi pi-users text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
-      <p class="text-lg font-medium text-surface-600 dark:text-surface-300 mb-1">Aucun membre ou tâche dans le foyer.</p>
-      <p class="text-sm text-surface-500 dark:text-surface-400">Invitez un membre ou créez des tâches.</p>
+    <div class="header-actions">
+      <div class="flex gap-2 w-full sm:w-auto">
+        <input type="text" pInputText [(ngModel)]="newListName" placeholder="New List Name" class="header-input"/>
+        <p-button icon="pi pi-plus" label="Create List" (onClick)="createTaskList()" [disabled]="!newListName" styleClass="w-full sm:w-auto"></p-button>
       </div>
-  </p-accordion>
+    </div>
+  </div>
 
-  <div class="pb-12"></div>
-  <p-confirmDialog></p-confirmDialog>
+  <div *ngIf="!selectedOccasion" class="grid-container">
+    <div *ngFor="let occasion of taskListOccasions" 
+         class="occasion-card"
+         (click)="selectOccasion(occasion)">
+         
+      <div class="card-body">
+        <div class="card-header">
+            <h3>{{occasion.name}}</h3>
+            <button class="icon-btn-delete" (click)="deleteTaskList(occasion, $event)" pTooltip="Delete List">
+                <i class="pi pi-trash"></i>
+            </button>
+        </div>
+        
+        <div class="avatar-row">
+            <div *ngFor="let member of householdMembers" class="avatar-wrapper">
+                <p-avatar 
+                    [image]="member.imageUrl || 'assets/placeholder.jpg'" 
+                    size="large" 
+                    shape="circle" 
+                    styleClass="custom-avatar"
+                    [pTooltip]="member.name">
+                </p-avatar>
+                
+                <div class="badge-counter">
+                    {{ getTaskCountForUserInOccasion(occasion, member.id) }}
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <div class="card-footer">
+        <span><i class="pi pi-check-square"></i> {{occasion.taskAssignments.length}} Tasks</span>
+        <span class="view-link">View Details <i class="pi pi-arrow-right"></i></span>
+      </div>
+    </div>
+  </div>
 
-</div>
+  <div *ngIf="selectedOccasion" class="detail-container">
+    <div class="back-button-row">
+        <p-button icon="pi pi-arrow-left" label="Back to Lists" styleClass="p-button-outlined p-button-secondary" (onClick)="backToOverview()"></p-button>
+    </div>
+
+    <div class="detail-board">
+        <div class="board-header">
+            <h2>{{selectedOccasion.name}} <span class="subtitle">Assignment Board</span></h2>
+            <div class="total-badge">Total assigned: {{selectedOccasion.taskAssignments.length}}</div>
+        </div>
+
+        <div class="board-columns">
+            <div *ngFor="let member of householdMembers" class="board-column">
+                <div class="user-header">
+                    <div class="user-profile">
+                        <p-avatar [image]="member.imageUrl || 'assets/placeholder.jpg'" size="large" shape="circle"></p-avatar>
+                        <div class="user-meta">
+                            <h3>{{member.name}}</h3>
+                            <p>{{ getTasksForUser(member.id).length }} Tasks assigned</p>
+                        </div>
+                    </div>
+                    <p-button icon="pi pi-plus" [rounded]="true" [text]="true" (onClick)="openAssignDialog(member)" pTooltip="Assign Tasks"></p-button>
+                </div>
+
+                <div class="user-task-list">
+                    <div *ngFor="let assignment of getTasksForUser(member.id)" class="user-task-card">
+                        <i class="pi pi-check-circle task-icon"></i>
+                        <div class="task-details">
+                            <p class="t-title">{{assignment.task.title}}</p>
+                            <p class="t-desc">{{assignment.task.description}}</p>
+                        </div>
+                    </div>
+                    
+                    <div *ngIf="getTasksForUser(member.id).length === 0" class="empty-column-state">
+                        <i class="pi pi-inbox"></i>
+                        <span>No tasks assigned yet.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+  
+  <div class="library-container">
+    <div class="library-header">
+        <h2 class="section-title">Task Library <span class="count-badge">{{filteredCount}}</span></h2>
+        
+        <div class="library-controls">
+            <div class="search-box">
+                <i class="pi pi-search"></i>
+                <input type="text" pInputText [(ngModel)]="taskSearchTerm" (ngModelChange)="filterTasks()" placeholder="Search existing tasks..." />
+            </div>
+            <p-button label="New Task" icon="pi pi-plus" (onClick)="openCreateTaskDialog()"></p-button>
+        </div>
+    </div>
+
+    <div *ngFor="let group of groupedTasks" class="room-group">
+        <h3 class="room-header">
+            {{ group.room | roomPipe }} 
+            <span class="text-sm font-normal text-gray-400 ml-2">({{ group.tasks.length }})</span>
+        </h3>
+        
+        <div class="tasks-grid">
+            <div *ngFor="let task of group.tasks" class="library-task-card">
+                <div class="lib-card-content">
+                    <div class="lib-task-main">
+                        <span class="lib-task-title">{{task.title}}</span>
+                        <span class="lib-task-desc" *ngIf="task.description">{{task.description}}</span>
+                    </div>
+                    
+                    <div class="lib-badges">
+                        <span class="badge badge-frequency" *ngIf="task.frequency">
+                            <i class="pi pi-history"></i> {{ task.frequency | frequencyPipe }}
+                        </span>
+                        </div>
+                </div>
+                
+                <button class="lib-delete-btn" (click)="deleteGlobalTask(task, $event)" pTooltip="Delete Task Globally">
+                    <i class="pi pi-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="filteredCount === 0" class="empty-library">
+        <p>No tasks found. Create one to get started!</p>
+    </div>
+  </div>
+  </div>

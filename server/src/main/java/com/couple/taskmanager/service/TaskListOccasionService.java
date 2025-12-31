@@ -37,7 +37,8 @@ public class TaskListOccasionService implements IGenericService<TaskListOccasion
 
     @Override
     public List<TaskListOccasionDto> list(Long householdId, CTMUser user) {
-        return StreamUtils.mapToList(repository.findAllByHouseholdId(householdId), TaskListOccasionDto::new);
+        List<TaskListOccasion> allByHouseholdId = repository.findAllByHouseholdId(householdId);
+        return StreamUtils.mapToList(allByHouseholdId, TaskListOccasionDto::new);
     }
 
     public void createAndAddTaskAssignment(Long taskListOccasionId, Long taskId, Long assigneeId, CTMUser user){
@@ -77,9 +78,10 @@ public class TaskListOccasionService implements IGenericService<TaskListOccasion
 
     @Override
     public TaskListOccasionDto create(TaskListOccasion taskListOccasion, CTMUser user) {
-        if(!taskListOccasion.getHousehold().getId().equals(user.getHousehold().getId())){
-            throw new AccessDeniedException("User is not part of the right household");
-        }
+        Household household = householdRepository.findById(user.getHousehold().getId()).orElseThrow(IllegalArgumentException::new);
+        taskListOccasion.setId(null);
+        taskListOccasion.setHousehold(household);
+
         if(taskListOccasion.getName() == null || taskListOccasion.getName().isEmpty()){
             taskListOccasion.setTaskAssignments(new ArrayList<>());
         }

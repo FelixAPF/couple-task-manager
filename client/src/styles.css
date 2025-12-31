@@ -59,3 +59,13 @@ table > thead {
   .float-right{
     float:right;
 }
+
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.gap-2 { gap: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.w-full { width: 100%; }
+.font-bold { font-weight: bold; }
+.text-sm { font-size: 0.875rem; }
+.text-gray { color: #6b7280; }

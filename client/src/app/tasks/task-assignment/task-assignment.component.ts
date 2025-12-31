@@ -144,6 +144,7 @@ export class TaskAssignmentComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(){
+    console.log("SUBMIT")
     const tasksWithAssignment: TaskWithAssignee[] = this.taskAssignments.getRawValue()?.map(taskAssignment =>({
       task: {
         id: taskAssignment.taskId,

@@ -34,4 +34,8 @@ export class TaskPeriodService {
   deleteTaskPeriod(id?: number){
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
+
+  startPeriodFromTaskListOccasion(creationRqst: PeriodCreationRequest, taskListOccasionId: number){
+    return this.http.post<void>(`${this.baseUrl}/creation/${taskListOccasionId}`, creationRqst);
+  }
 }

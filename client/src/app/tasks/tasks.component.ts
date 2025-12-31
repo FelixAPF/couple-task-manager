@@ -245,6 +245,26 @@ filterTasks() {
     });
   }
 
+  openEditTaskDialog(task: Task, event: Event) {
+    event.stopPropagation(); // Stop card click if necessary
+    
+    this.ref = this.dialogService.open(CreateTaskDialogComponent, {
+        header: 'Edit Task',
+        width: '500px',
+        contentStyle: { overflow: 'visible' },
+        baseZIndex: 10000,
+        data: { task: task } // Pass the task to edit
+    });
+
+    this.ref.onClose.subscribe((result: any) => {
+        if (result) {
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Task updated successfully' });
+            this.loadTasks(); // Refresh to show changes
+            this.loadOccasions(); // Refresh occasions in case task names/details changed there too
+        }
+    });
+  }
+
   // --- Helpers ---
 
   selectOccasion(occasion: TaskListOccasion) {

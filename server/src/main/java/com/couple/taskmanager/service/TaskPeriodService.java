@@ -5,6 +5,7 @@ import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.*;
 import com.couple.taskmanager.model.dto.BasicTaskAssignmentRqstV1;
 import com.couple.taskmanager.model.dto.PeriodCreationRqstV1;
+import com.couple.taskmanager.model.dto.TaskListOccasionDto;
 import com.couple.taskmanager.model.dto.TaskPeriodDto;
 import com.couple.taskmanager.repository.*;
 import com.couple.taskmanager.utils.DateUtils;
@@ -39,6 +40,8 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
     CTMUserRepository userRepository;
     @Autowired
     HouseholdRepository householdRepository;
+    @Autowired
+    TaskListOccasionService occasionService;
 
     // --- Standard CRUD and List Methods ---
 
@@ -184,6 +187,17 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
 
 
     // --- Period Creation Logic ---
+    public TaskPeriodDto retrieveAndCreateTaskListPeriod(Long taskListId, PeriodCreationRqstV1 periodCreationRqstV1, CTMUser user) throws SystemException {
+        TaskListOccasionDto taskListOccasionDto = occasionService.get(taskListId, user.getHousehold().getId(), user);
+        periodCreationRqstV1.setTaskAssignmentRqst(taskListOccasionDto.getTaskAssignments().stream().map(taskAssignDto -> {
+            BasicTaskAssignmentRqstV1 basicTaskAssignmentRqstV1 = new BasicTaskAssignmentRqstV1();
+            basicTaskAssignmentRqstV1.setTaskId(taskAssignDto.getTask().getId());
+            basicTaskAssignmentRqstV1.setAssigneeUserId(taskAssignDto.getHouseholdMemberDto().getId());
+            return basicTaskAssignmentRqstV1;
+        }).toList());
+
+        return createPeriod(periodCreationRqstV1, user);
+    }
 
     /**
      * Main entry point for creating or updating a task period with assignments.

@@ -10,5 +10,8 @@ public enum Room {
     BALCONY,
     OUTSIDE,
     EVERYWHERE,
+    BASEMENT,
+    DINING_ROOM,
+    BATHROOM_2,
     OTHER
 }

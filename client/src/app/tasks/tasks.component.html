@@ -132,9 +132,15 @@
                         </div>
                 </div>
                 
-                <button class="lib-delete-btn" (click)="deleteGlobalTask(task, $event)" pTooltip="Delete Task Globally">
-                    <i class="pi pi-trash"></i>
-                </button>
+                <div class="lib-actions">
+                    <button class="lib-action-btn edit-btn" (click)="openEditTaskDialog(task, $event)" pTooltip="Edit Task">
+                        <i class="pi pi-pencil"></i>
+                    </button>
+                    
+                    <button class="lib-action-btn delete-btn" (click)="deleteGlobalTask(task, $event)" pTooltip="Delete Task Globally">
+                        <i class="pi pi-trash"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

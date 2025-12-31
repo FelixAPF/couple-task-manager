@@ -68,10 +68,19 @@ public class TaskService implements IGenericService<Task, TaskDto > {
 
     @Override
     public TaskDto update(Long id, Task task, CTMUser user) {
-        if(task.getHousehold() == null){
-            task.setHousehold(user.getHousehold());
-        }
-        return new TaskDto(taskRepository.save(task));
+        Task existingTask = taskRepository.findByIdAndHouseholdId(id, user.getHousehold().getId())
+                .orElseThrow(() -> new NoSuchElementException("Task not found or does not belong to your household"));
+
+        // Update fields
+        existingTask.setTitle(task.getTitle());
+        existingTask.setDescription(task.getDescription());
+        existingTask.setFrequency(task.getFrequency());
+        existingTask.setRoom(task.getRoom());
+
+        // Ensure household is kept (security)
+        existingTask.setHousehold(user.getHousehold());
+
+        return new TaskDto(taskRepository.save(existingTask));
     }
 
     @Override

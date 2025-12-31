@@ -17,11 +17,16 @@ import java.util.List;
 public class TaskPeriodController extends GenericController<TaskPeriod, TaskPeriodDto, TaskPeriodService> {
     @PostMapping("/creation")
     public TaskPeriodDto startPeriodCreation(@RequestBody PeriodCreationRqstV1 request, @AuthenticationPrincipal UserDetails userDetails) throws SystemException {
-        return service.createPeriod(request, (CTMUser) userDetails);
+        return service.createPeriod(request, false, (CTMUser) userDetails);
     }
 
     @GetMapping("/incomplete")
     public List<TaskPeriodDto> findALlIncompletePeriod(@AuthenticationPrincipal UserDetails userDetails){
         return service.listIncomplete((CTMUser) userDetails);
+    }
+
+    @PostMapping("/creation/{taskListOccasionId}")
+    public TaskPeriodDto startPeriodCreationFromTaskListOccasionId(@RequestBody PeriodCreationRqstV1 request, @PathVariable Long taskListOccasionId, @AuthenticationPrincipal UserDetails userDetails) throws SystemException {
+        return service.retrieveAndCreateTaskListPeriod(taskListOccasionId, request, (CTMUser) userDetails);
     }
 }

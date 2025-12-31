@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
@@ -16,29 +16,43 @@ import { SharedModule } from '../../shared.module';
   templateUrl: './create-task-dialog.component.html',
   styleUrls: ['./create-task-dialog.component.css']
 })
-export class CreateTaskDialogComponent {
+export class CreateTaskDialogComponent implements OnInit {
   task: Task = {};
+  isEditMode: boolean = false;
   
-  frequencies = [
-    { label: 'Daily', value: 'DAILY' },
-    { label: 'Weekly', value: 'WEEKLY' },
-    { label: 'Bi-Weekly', value: 'BIWEEKLY' },
-    { label: 'Monthly', value: 'MONTHLY' },
-    { label: 'Quarterly', value: 'QUARTERLY' },
-    { label: 'Yearly', value: 'YEARLY' }
-  ];
-
   rooms = [
-    { label: 'Kitchen', value: 'KITCHEN' },
-    { label: 'Living Room', value: 'LIVING_ROOM' },
-    { label: 'Dining Room', value: 'DINING_ROOM' },
-    { label: 'Bedroom', value: 'BEDROOM' },
-    { label: 'Bathroom', value: 'BATHROOM' },
-    { label: 'Office', value: 'OFFICE' },
-    { label: 'Outdoors', value: 'OUTDOOR' },
-    { label: 'General', value: 'GENERAL' }
+    { label: 'Cuisine', value: 'KITCHEN' },
+    { label: 'Salle à manger', value: 'DINING_ROOM' },
+    { label: 'Salle de bain #2', value: 'BATHROOM_2' },
+    { label: 'Salle de bain', value: 'BATHROOM' },
+    { label: 'Salon', value: 'LIVING_ROOM' },
+    { label: 'Bureau', value: 'OFFICE' },
+    { label: 'Chambre', value: 'BEDROOM' },
+    { label: 'Corridor', value: 'HALLWAY' },
+    { label: 'Balcon', value: 'BALCONY' },
+    { label: 'Dehors', value: 'OUTSIDE' },
+    { label: 'Partout', value: 'EVERYWHERE' },
+    { label: 'Sous-sol', value: 'BASEMENT' },
+    { label: 'Autre', value: 'OTHER' }
   ];
 
+  frequencies = [
+    { label: 'Bi-annuel', value: 'BIYEARLY' },
+    { label: 'Quotidien', value: 'DAILY' },
+    { label: 'Hebdomadaire', value: 'WEEKLY' },
+    { label: 'Bi-mensuel', value: 'BIWEEKLY' },
+    { label: 'Mensuel', value: 'MONTHLY' },
+    { label: 'Trimestriel', value: 'QUARTERLY' },
+    { label: 'Annuel', value: 'YEARLY' }
+  ];
+
+  ngOnInit() {
+    // If a task is passed, we are in Edit Mode
+    if (this.config.data?.task) {
+        this.task = { ...this.config.data.task }; // Clone to avoid mutating parent list
+        this.isEditMode = true;
+    }
+  }
   constructor(
     private taskService: TaskService,
     public ref: DynamicDialogRef,

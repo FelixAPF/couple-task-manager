@@ -45,12 +45,16 @@ import {  TabViewModule } from 'primeng/tabview';
 import {  RatingModule } from 'primeng/rating';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {ClipboardModule} from '@angular/cdk/clipboard';
+import { CalendarModule } from 'primeng/calendar';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { PickListModule } from 'primeng/picklist';
+
 
 @NgModule({
   declarations: [],
   imports: [
-    CommonModule, ColorPickerModule, ToastModule, KnobModule,  AvatarModule, RatingModule, TabViewModule, InputNumberModule, DialogModule, DropdownModule, ClipboardModule, PasswordModule, FileUploadModule, FontAwesomeModule, ProgressSpinnerModule, TagModule, ToolbarModule, Textarea, FieldsetModule, SelectButtonModule, TooltipModule, BadgeModule, AutoCompleteModule, InputTextModule, TextareaModule, MessageModule, ConfirmDialogModule, InputGroupModule,InputGroupAddonModule, TranslateModule,IconField,InputIcon, SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule,  FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, RouterModule, ButtonModule
+    CommonModule, ColorPickerModule, ToastModule, InputSwitchModule, PickListModule, CalendarModule,  KnobModule,  AvatarModule, RatingModule, TabViewModule, InputNumberModule, DialogModule, DropdownModule, ClipboardModule, PasswordModule, FileUploadModule, FontAwesomeModule, ProgressSpinnerModule, TagModule, ToolbarModule, Textarea, FieldsetModule, SelectButtonModule, TooltipModule, BadgeModule, AutoCompleteModule, InputTextModule, TextareaModule, MessageModule, ConfirmDialogModule, InputGroupModule,InputGroupAddonModule, TranslateModule,IconField,InputIcon, SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule,  FluidModule, DatePickerModule, Card, Toast, SplitButton, TableModule, RouterModule, ButtonModule
   ],
-  exports: [CommonModule, ColorPickerModule, ToastModule, KnobModule, AvatarModule, RatingModule, TabViewModule, InputNumberModule, DialogModule, DropdownModule, ClipboardModule, PasswordModule, FileUploadModule, FontAwesomeModule, ProgressSpinnerModule, TagModule, ToolbarModule, Textarea , FieldsetModule, SelectButtonModule, TooltipModule, BadgeModule, AutoCompleteModule, MessageModule, InputTextModule, TextareaModule, TranslateModule,InputGroupModule,InputGroupAddonModule, ConfirmDialogModule, IconField, InputIcon,SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, RouterModule, ButtonModule],
+  exports: [CommonModule, ColorPickerModule, ToastModule, InputSwitchModule, PickListModule, CalendarModule, KnobModule, AvatarModule, RatingModule, TabViewModule, InputNumberModule, DialogModule, DropdownModule, ClipboardModule, PasswordModule, FileUploadModule, FontAwesomeModule, ProgressSpinnerModule, TagModule, ToolbarModule, Textarea , FieldsetModule, SelectButtonModule, TooltipModule, BadgeModule, AutoCompleteModule, MessageModule, InputTextModule, TextareaModule, TranslateModule,InputGroupModule,InputGroupAddonModule, ConfirmDialogModule, IconField, InputIcon,SelectModule, AccordionModule,CheckboxModule, StepperModule, RadioButtonModule, FluidModule, DatePickerModule,Card, Toast, SplitButton, TableModule, RouterModule, ButtonModule],
 })
 export class SharedModule { }

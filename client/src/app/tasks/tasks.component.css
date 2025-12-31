@@ -529,3 +529,45 @@
         width: 100%;
     }
 }
+
+.lib-actions {
+    display: flex;
+    align-items: flex-start;
+    margin-left: 0.5rem;
+}
+
+.lib-action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lib-action-btn i {
+    font-size: 1rem;
+}
+
+/* Edit Button Color */
+.edit-btn {
+    color: #9ca3af;
+}
+
+.edit-btn:hover {
+    background-color: #eff6ff;
+    color: #3b82f6; /* Blue */
+}
+
+/* Delete Button Color */
+.delete-btn {
+    color: #d1d5db;
+}
+
+.delete-btn:hover {
+    background-color: #fef2f2;
+    color: #ef4444; /* Red */
+}

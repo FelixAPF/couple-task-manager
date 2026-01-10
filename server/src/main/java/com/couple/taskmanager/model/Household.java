@@ -62,6 +62,10 @@ public class Household {
     private List<TaskPeriod> taskPeriods;
 
     @OneToMany
+    @JsonManagedReference("household-task-list-occasion")
+    private List<TaskListOccasion> taskListOccasions;
+
+    @OneToMany
     @JsonManagedReference("household-tasks")
     private List<Task> tasks;
 

@@ -1,0 +1,27 @@
+<div class="dialog-content">
+    <div class="form-group">
+        <label for="title" class="label-bold">Task Title</label>
+        <input pInputText id="title" [(ngModel)]="task.title" placeholder="e.g. Vacuum the floor" autofocus class="full-width"/>
+    </div>
+
+    <div class="form-group">
+        <label for="desc" class="label-bold">Description</label>
+        <textarea pInputTextarea id="desc" [(ngModel)]="task.description" rows="3" placeholder="Additional details (optional)" class="full-width"></textarea>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group half-width">
+            <label class="label-bold">Frequency</label>
+            <p-dropdown [options]="frequencies" [(ngModel)]="task.frequency" placeholder="Select" appendTo="body" styleClass="full-width"></p-dropdown>
+        </div>
+        <div class="form-group half-width">
+            <label class="label-bold">Room</label>
+            <p-dropdown [options]="rooms" [(ngModel)]="task.room" placeholder="Select" appendTo="body" styleClass="full-width"></p-dropdown>
+        </div>
+    </div>
+
+    <div class="dialog-footer">
+        <p-button label="Cancel" styleClass="p-button-text" (onClick)="close()"></p-button>
+        <p-button label="Create Task" (onClick)="save()" [disabled]="!task.title || !task.frequency || !task.room"></p-button>
+    </div>
+</div>

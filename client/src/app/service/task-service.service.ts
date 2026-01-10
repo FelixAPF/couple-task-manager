@@ -54,6 +54,10 @@ export class TaskService implements OnDestroy {
     return this.http.post<void>(`${this.baseUrl}/create`, task);
   }
 
+  update(task: Task): Observable<Task> {
+    return this.http.put<Task>(`${this.baseUrl}/${task.id}`, task);
+  }
+
   completeTask(assignmentId: number): Observable<void>{
     return this.http.post<void>(`${this.baseUrl}/complete-assignment/${assignmentId}`, {}).pipe(tap(() => {
       this.confettiService.fireBasicConfetti();

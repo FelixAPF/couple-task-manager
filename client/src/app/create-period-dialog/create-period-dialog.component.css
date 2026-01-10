@@ -1,21 +1,121 @@
-.centerForm{
+.dialog-container {
     display: flex;
-    text-align: center;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-height: 400px;
+    padding-top: 0.5rem;
 }
 
-.input-width{
-    width: 300px;
-    margin-bottom: 10px;
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 1.5rem;
 }
 
-.dp-margin {
-    margin-top: 50px;
+.date-group {
+    flex-grow: 1;
 }
 
-.button-space{
-    padding-top:10px;
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.mb-8{
-    margin-bottom: 8px;
+.label-bold {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
 }
+
+.label-sm {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.switch-group {
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 5px;
+}
+
+/* Info Box */
+.info-box {
+    background-color: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+/* Picklist Styling */
+.picklist-wrapper {
+    flex-grow: 1;
+    margin-top: 1rem;
+}
+
+.task-item {
+    font-size: 0.9rem;
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.badge {
+    display: inline-flex;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-frequency {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border: 1px solid #e5e7eb;
+}
+
+/* PrimeNG Overrides */
+:host ::ng-deep .p-picklist .p-picklist-list {
+    border-color: #e5e7eb;
+}
+
+:host ::ng-deep .p-picklist .p-picklist-header {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: auto; 
+    padding-top: 1rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+

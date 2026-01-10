@@ -3,9 +3,7 @@ package com.couple.taskmanager.service;
 import com.couple.taskmanager.enums.CreationMethod; // Added missing import
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.*;
-import com.couple.taskmanager.model.dto.BasicTaskAssignmentRqstV1;
-import com.couple.taskmanager.model.dto.PeriodCreationRqstV1;
-import com.couple.taskmanager.model.dto.TaskPeriodDto;
+import com.couple.taskmanager.model.dto.*;
 import com.couple.taskmanager.repository.*;
 import com.couple.taskmanager.utils.DateUtils;
 import com.couple.taskmanager.utils.StreamUtils;
@@ -39,6 +37,8 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
     CTMUserRepository userRepository;
     @Autowired
     HouseholdRepository householdRepository;
+    @Autowired
+    TaskListOccasionService occasionService;
 
     // --- Standard CRUD and List Methods ---
 
@@ -184,12 +184,23 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
 
 
     // --- Period Creation Logic ---
+    public TaskPeriodDto retrieveAndCreateTaskListPeriod(Long taskListId, PeriodCreationRqstV1 periodCreationRqstV1, CTMUser user) throws SystemException {
+        TaskListOccasionDto taskListOccasionDto = occasionService.get(taskListId, user.getHousehold().getId(), user);
+        periodCreationRqstV1.setTaskAssignmentRqst(taskListOccasionDto.getTaskAssignments().stream().map(taskAssignDto -> {
+            BasicTaskAssignmentRqstV1 basicTaskAssignmentRqstV1 = new BasicTaskAssignmentRqstV1();
+            basicTaskAssignmentRqstV1.setTaskId(taskAssignDto.getTask().getId());
+            basicTaskAssignmentRqstV1.setAssigneeUserId(taskAssignDto.getHouseholdMemberDto().getId());
+            return basicTaskAssignmentRqstV1;
+        }).toList());
+
+        return createPeriod(periodCreationRqstV1, true, user);
+    }
 
     /**
      * Main entry point for creating or updating a task period with assignments.
      * Delegates to manual or automatic creation based on the request.
      */
-    public TaskPeriodDto createPeriod(PeriodCreationRqstV1 rqst, CTMUser user) throws SystemException {
+    public TaskPeriodDto createPeriod(PeriodCreationRqstV1 rqst, boolean isOccasionCreation, CTMUser user) throws SystemException {
         if (rqst.getCreationMethod() == null) {
             log.error("CreationMethod is null in PeriodCreationRqstV1");
             throw new IllegalArgumentException("CreationMethod must be specified.");
@@ -207,7 +218,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
 
         log.info("Creating period via {} method for user {}", rqst.getCreationMethod(), user.getId());
         return switch (rqst.getCreationMethod()) {
-            case AUTOMATIC -> createPeriodAutomatically(rqst, user);
+            case AUTOMATIC -> createPeriodAutomatically(rqst, isOccasionCreation, user);
             case MANUAL -> createPeriodManually(rqst, user);
         };
     }
@@ -373,7 +384,7 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
      * based on their TaskLists.
      */
     @Transactional
-    public TaskPeriodDto createPeriodAutomatically(PeriodCreationRqstV1 rqst, CTMUser user) throws SystemException {
+    public TaskPeriodDto createPeriodAutomatically(PeriodCreationRqstV1 rqst, boolean isOccasionCreation, CTMUser user) throws SystemException {
         Date periodEndDate;
         if(rqst.getExplicitDueDate() != null){
             periodEndDate = DateUtils.calculateEndDate(rqst.getStartDate(), rqst.getExplicitDueDate());
@@ -416,9 +427,15 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
         }
 
         log.info("Generating automatic assignments for {} users in household {}.", usersInHousehold.size(), household.getId());
-        List<TaskAssignment> newTaskAssignments = usersInHousehold.stream()
+
+        List<TaskAssignment> newTaskAssignments = new ArrayList<>();
+        if(isOccasionCreation){
+            newTaskAssignments = generateTaskAssignmentsFromAssign(rqst, taskPeriod, periodEndDate, household, user);
+        } else {
+            newTaskAssignments = usersInHousehold.stream()
                 .flatMap(assignee -> generateTaskAssignmentsForUser(assignee, rqst, taskPeriod, periodEndDate, household).stream())
                 .collect(Collectors.toList()); // Use Collectors.toList() for mutable list if needed later, or .toList() for immutable
+        }
 
         log.info("Generated {} new task assignments automatically for period {}.", newTaskAssignments.size(), isNewPeriod ? "(new)" : taskPeriod.getId());
 
@@ -470,6 +487,19 @@ public class TaskPeriodService implements IGenericService<TaskPeriod, TaskPeriod
                             .map(dueDate -> map(task, taskPeriod, assignee, dueDate, startDate, rqst.getExplicitDueDate(), creationDate, household));
                 })
                 .collect(Collectors.toList()); // Collect results for this user
+    }
+
+    private List<TaskAssignment> generateTaskAssignmentsFromAssign(PeriodCreationRqstV1 rqst, TaskPeriod taskPeriod, Date periodEndDate, Household household, CTMUser user){
+        return rqst.getTaskAssignmentRqst().stream().flatMap(assignRqst -> {
+            Task task = taskRepository.findById(assignRqst.getTaskId()).orElseThrow(NoSuchElementException::new);
+            CTMUser assignee = userRepository.findById(assignRqst.getAssigneeUserId()).orElseThrow(IllegalArgumentException::new);
+            boolean createOnce = Boolean.TRUE.equals(rqst.getCreateEachTaskOnce());
+            List<Date> dueDates = createOnce ? Collections.singletonList(periodEndDate) : occurenceInPeriod(rqst.getStartDate(), periodEndDate, rqst.getExplicitDueDate(), task.getFrequency());
+            if(dueDates.isEmpty()){
+                return Stream.empty();
+            }
+            return dueDates.stream().map(dueDate -> map(task, taskPeriod, assignee, dueDate, rqst.getStartDate(), rqst.getExplicitDueDate(), new Date(), household));
+        }).toList();
     }
 
 

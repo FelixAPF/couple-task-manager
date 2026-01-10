@@ -35,6 +35,10 @@ public class Task {
     @JsonManagedReference("task-task-assignments")
     private List<TaskAssignment> taskAssignments;
 
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @JsonManagedReference("task-task-assign")
+    private List<TaskAssign> taskAssigns;
+
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(
             name = "task_tasklist", // Primary table managed by JPA

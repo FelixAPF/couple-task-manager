@@ -2,6 +2,7 @@ package com.couple.taskmanager.repository;
 
 import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.ShoppingItem;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,6 +25,10 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     @Query("DELETE FROM Recipe r WHERE r.id = :recipeId AND r.household.id = :householdId")
     void deleteByRecipeIdAndHouseholdId(Long recipeId, Long householdId);
 
+    long countByHouseholdId(Long householdId);
+
     @Query(value = "SELECT * FROM recipe WHERE household_id = :householdId ORDER BY RANDOM() LIMIT 1", nativeQuery = true)
     Optional<Recipe> findRandomRecipeByHouseholdId_Random(@Param("householdId") Long householdId);
+
+    List<Recipe> findByHouseholdId(Long householdId, Pageable pageable);
 }

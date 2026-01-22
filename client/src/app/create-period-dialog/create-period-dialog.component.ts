@@ -14,12 +14,15 @@ import { HouseholdService } from '../service/household.service';
 import { Subscription } from 'rxjs';
 import { HouseholdMember } from '../model/household';
 
-// --- NEW IMPORTS ---
+// PrimeNG Imports
 import { TaskListOccasionService } from '../service/task-list-occasion-service.service';
 import { TaskListOccasion } from '../model/task-list-occasion';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputSwitchModule } from 'primeng/inputswitch';
+import { CalendarModule } from 'primeng/calendar';
+import { ButtonModule } from 'primeng/button';
+import { CommonModule } from '@angular/common';
 
 enum FormControlName {
   DURATION = "duration",
@@ -29,6 +32,7 @@ enum FormControlName {
   DURATION_TYPE = "durationType",
   EXPLICIT_DUE_DATE = "explicitDueDate",
   ASSIGNEE = "assignee",
+  CREATE_ONCE = "createOnce",
 }
 
 export interface TaskWithAssignee {
@@ -40,33 +44,32 @@ export interface TaskWithAssignee {
   selector: 'app-create-period-dialog',
   standalone: true,
   imports: [
-    SharedModule, 
-    ReactiveFormsModule, 
-    FormsModule, // Required for [(ngModel)]
+    CommonModule,
+    SharedModule,
+    ReactiveFormsModule,
+    FormsModule,
     TaskAssignmentComponent,
-    // Fix NG8002: Import PrimeNG modules here
-    SelectButtonModule, 
-    DropdownModule, 
-    InputSwitchModule
+    SelectButtonModule,
+    DropdownModule,
+    InputSwitchModule,
+    CalendarModule,
+    ButtonModule
   ],
   templateUrl: './create-period-dialog.component.html',
   styleUrls: ['./create-period-dialog.component.css'],
   providers: [DatePipe]
 })
 export class CreatePeriodDialogComponent implements OnInit {
-  // Injected services
   private householdService = inject(HouseholdService);
   private fb = inject(FormBuilder);
   private taskPeriodService = inject(TaskPeriodService);
   private ref = inject(DynamicDialogRef);
-  private datePipe = inject(DatePipe); 
+  private datePipe = inject(DatePipe);
   private taskService = inject(TaskService);
-  public taskAssignmentService = inject(TaskAssignmentService); 
+  public taskAssignmentService = inject(TaskAssignmentService);
   private translate = inject(TranslateService);
-  // NEW INJECTION
   private occasionService = inject(TaskListOccasionService);
 
-  // Component State
   manualStepActivated: boolean = false;
   subscription: Subscription = new Subscription();
   existingTaskPeriods: TaskPeriod[] = [];
@@ -74,61 +77,54 @@ export class CreatePeriodDialogComponent implements OnInit {
   frequencies: { label: string, value: Frequency }[];
   existingPeriodSelected: boolean = false;
   tasks: Task[] = [];
-  taskAssignments: TaskWithAssignee[] = []; 
+  taskAssignments: TaskWithAssignee[] = [];
 
-  // --- NEW STATE FOR OCCASION LOGIC ---
   creationSourceOptions = [
     { label: 'Liste', value: 'OCCASION', disabled: false },
-    { label: 'Sélection manuelle', value: 'CUSTOM', disabled: true }
+    { label: 'Sélection manuelle', value: 'CUSTOM', disabled: false }
   ];
-  selectedSource: string = 'OCCASION'; 
+  selectedSource: string = 'OCCASION';
   occasions: TaskListOccasion[] = [];
   selectedOccasion: TaskListOccasion | null = null;
-  autoCreateFromOccasion: boolean = true; 
-  // ------------------------------------
+  autoCreateFromOccasion: boolean = true;
 
-  // Make enums available in template
   FREQUENCY = Frequency;
   CREATION_METHOD = CreationMethod;
-  DURATION_TYPE = DurationType; 
+  DURATION_TYPE = DurationType;
 
-  // Form Group Definition
   formGroup = this.fb.group({
-    [FormControlName.DURATION]: [null as Frequency | null, []], 
+    [FormControlName.DURATION]: [null as Frequency | null, []],
     [FormControlName.START_DATE]: [new Date(), Validators.required],
     [FormControlName.CREATION_METHOD]: [CreationMethod.AUTOMATIC, Validators.required],
     [FormControlName.DURATION_TYPE]: [DurationType.PERIOD, Validators.required],
-    [FormControlName.EXPLICIT_DUE_DATE]: [null as Date | null, []] 
+    [FormControlName.EXPLICIT_DUE_DATE]: [null as Date | null, []],
+    [FormControlName.CREATE_ONCE]: [false] // Added default off
   });
 
   constructor(){
       this.frequencies = Array.from(Object.values(Frequency)).map((frequency) => ({
-        label: this.translate.instant(`FREQUENCY.${frequency}`), 
+        label: this.translate.instant(`FREQUENCY.${frequency}`),
         value: frequency
       }));
    }
 
-  // --- Getters ---
   get duration(){ return this.formGroup.get(FormControlName.DURATION) as FormControl<Frequency | null>; }
   get startDate(){ return this.formGroup.get(FormControlName.START_DATE) as FormControl<Date>; }
   get creationMethod(){ return this.formGroup.get(FormControlName.CREATION_METHOD) as FormControl<CreationMethod>; }
   get durationType(){ return this.formGroup.get(FormControlName.DURATION_TYPE) as FormControl<DurationType>; }
   get explicitDueDate(){ return this.formGroup.get(FormControlName.EXPLICIT_DUE_DATE) as FormControl<Date | null>; }
+  get createOnce(){ return this.formGroup.get(FormControlName.CREATE_ONCE) as FormControl<boolean>; } // Added getter
   get isAutomaticCreation() { return this.creationMethod?.value === CreationMethod.AUTOMATIC; }
 
-  // --- Lifecycle Hooks ---
   ngOnInit(): void {
-    // Load existing incomplete periods
     this.taskPeriodService.retrieveTaskPeriodsIncomplete().subscribe(periods => {
       this.existingTaskPeriods = periods;
     });
 
-    // Subscribe to household changes
     this.subscription.add(this.householdService.household$.subscribe((household) => {
       this.assignees = household?.members || [];
     }));
 
-    // NEW: Load Occasions
     this.occasionService.list().subscribe(occasions => {
         this.occasions = occasions;
         if(this.occasions.length > 0) {
@@ -136,10 +132,8 @@ export class CreatePeriodDialogComponent implements OnInit {
         }
     });
 
-    // Initialize Validators
     this.updateValidators(this.durationType.value);
 
-    // Subscribe to DurationType changes
     this.subscription.add(
         this.durationType.valueChanges.subscribe(type => {
             this.updateValidators(type);
@@ -151,26 +145,23 @@ export class CreatePeriodDialogComponent implements OnInit {
     this.subscription.unsubscribe();
   }
 
-  // REQUIRED BY TEMPLATE (Fixing NG9 error)
-  dummyCallback = () => {
-    // Callback logic is handled by activateSecondFormGroup internals setting manualStepActivated = true
-  };
+  dummyCallback = () => {};
 
   private updateValidators(type: DurationType | null): void {
-    const durationControl = this.duration; 
-    const explicitDueDateControl = this.explicitDueDate; 
+    const durationControl = this.duration;
+    const explicitDueDateControl = this.explicitDueDate;
 
     if (!durationControl || !explicitDueDateControl) return;
 
     durationControl.clearValidators();
-    durationControl.reset(null, { emitEvent: false }); 
+    durationControl.reset(null, { emitEvent: false });
 
     explicitDueDateControl.clearValidators();
-    explicitDueDateControl.reset(null, { emitEvent: false }); 
+    explicitDueDateControl.reset(null, { emitEvent: false });
 
-    if (type === DurationType.PERIOD) { 
+    if (type === DurationType.PERIOD) {
       durationControl.setValidators(Validators.required);
-    } else if (type === DurationType.EXPLICIT) { 
+    } else if (type === DurationType.EXPLICIT) {
       explicitDueDateControl.setValidators(Validators.required);
     }
 
@@ -178,7 +169,6 @@ export class CreatePeriodDialogComponent implements OnInit {
     explicitDueDateControl.updateValueAndValidity({ emitEvent: false });
   }
 
-  // --- NEW: Toggle Logic ---
   toggleOccasionAutoCreate(isAuto: boolean) {
       this.autoCreateFromOccasion = isAuto;
       if (isAuto) {
@@ -187,8 +177,7 @@ export class CreatePeriodDialogComponent implements OnInit {
           this.creationMethod.setValue(CreationMethod.MANUAL);
       }
   }
-  
-  // NEW: Reset logic when switching Main Modes (Fixing NG9 error 'onModeChange does not exist')
+
   onModeChange() {
       this.autoCreateFromOccasion = true;
       if(this.selectedSource === 'OCCASION') {
@@ -196,12 +185,11 @@ export class CreatePeriodDialogComponent implements OnInit {
       } else {
         this.creationMethod.setValue(CreationMethod.MANUAL);
       }
-      this.onOccasionChange(); // Re-trigger filter if needed
+      this.onOccasionChange();
   }
-  
-  // Also needed for dropdown change
+
   onOccasionChange() {
-      // Any logic needed when occasion changes (e.g. updating info text)
+      // Stub
   }
 
   disableOtherFields(event: any): void {
@@ -216,22 +204,21 @@ export class CreatePeriodDialogComponent implements OnInit {
     this.formGroup.updateValueAndValidity();
   }
 
-  activateSecondFormGroup(activateCallback: () => void): void { 
-    this.formGroup.markAllAsTouched(); 
+  activateSecondFormGroup(activateCallback: () => void): void {
+    this.formGroup.markAllAsTouched();
     if (!this.formGroup.valid) {
         console.warn("Form is invalid.");
-        return; 
-    }
-
-    // NEW: If "From Template" AND "Auto Create" are ON, we don't go to manual step.
-    if (this.selectedSource === 'OCCASION' && this.autoCreateFromOccasion && this.selectedOccasion) {
-        this.submit(); // Direct submit with undefined manual data
         return;
     }
-    
-    this.retrieveTasksForAssignment(); 
+
+    if (this.selectedSource === 'OCCASION' && this.autoCreateFromOccasion && this.selectedOccasion) {
+        this.submit();
+        return;
+    }
+
+    this.retrieveTasksForAssignment();
     this.manualStepActivated = true;
-    if(activateCallback) activateCallback(); 
+    if(activateCallback) activateCallback();
   }
 
   handleManualCancel(): void {
@@ -243,61 +230,63 @@ export class CreatePeriodDialogComponent implements OnInit {
     this.taskService.retrieveTasks().subscribe(tasks => {
       this.tasks = tasks;
 
-      // --- NEW LOGIC: Filter tasks if using Occasion Mode ---
       if (this.selectedSource === 'OCCASION' && this.selectedOccasion) {
           const occasionTaskIds = this.selectedOccasion.taskAssignments.map(ta => ta.task.id!);
           this.tasks = this.tasks.filter(t => occasionTaskIds.includes(t.id!));
       }
-      // -----------------------------------------------------
 
       this.taskAssignments = this.tasks.map(task => ({
-        assigneeUserId: null, 
+        assigneeUserId: null,
         task
       }));
-      
+
       this.taskAssignmentService.setTaskAssignments(this.taskAssignments);
+      this.manualStepActivated = true;
     });
   }
 
-  // Changed type to 'any' to avoid strict template check error 'NG5'
-  submit(manualAssignmentData?: any): void { 
+  submit(manualAssignmentData?: any): void {
     this.formGroup.markAllAsTouched();
     if (!this.formGroup.valid) {
+        console.error("Form is invalid", this.formGroup.errors);
         return;
     }
 
-    const formValue = this.formGroup.getRawValue(); 
+    const formValue = this.formGroup.getRawValue();
+
+    const assignmentsSource = manualAssignmentData?.taskWithAssignees || this.taskAssignments;
 
     const result: PeriodCreationRequest = {
-      periodId: null, 
-      duration: formValue[FormControlName.DURATION]!, 
-      startDate: formValue[FormControlName.START_DATE]!, 
+      periodId: null,
+      duration: formValue[FormControlName.DURATION]!,
+      startDate: formValue[FormControlName.START_DATE]!,
       explicitDueDate: formValue[FormControlName.DURATION_TYPE] === DurationType.EXPLICIT
                         ? formValue[FormControlName.EXPLICIT_DUE_DATE]
-                        : null, 
-      creationMethod: formValue[FormControlName.CREATION_METHOD]!, 
-      taskAssignmentRqst: manualAssignmentData?.taskWithAssignees?.map(
+                        : null,
+      creationMethod: formValue[FormControlName.CREATION_METHOD]!,
+
+      taskAssignmentRqst: assignmentsSource.map(
           (taskWithAssignee: TaskWithAssignee) => ({
               taskId: taskWithAssignee.task.id!,
               assigneeUserId: taskWithAssignee.assigneeUserId
           })
-      ) || [], 
-      createEachTaskOnce: manualAssignmentData?.createEachOnce || false 
+      ),
+
+      // Updated to use the form control value
+      createEachTaskOnce: formValue[FormControlName.CREATE_ONCE] || manualAssignmentData?.createEachOnce || false
     };
 
-    // --- NEW LOGIC ---
+
     if (this.selectedSource === 'OCCASION' && this.autoCreateFromOccasion && this.selectedOccasion) {
-        // Option 1: Occasion Auto-Create
         this.taskPeriodService.startPeriodFromTaskListOccasion(result, this.selectedOccasion.id)
             .subscribe({
                 next: () => this.close(true),
-                error: () => this.close(false)
+                error: (err) => { console.error(err); this.close(false); }
             });
     } else {
-        // Option 2: Generic Create
         this.taskPeriodService.initiateCreatePeriod(result).subscribe({
             next: () => this.close(true),
-            error: () => this.close(false)
+            error: (err) => { console.error(err); this.close(false); }
         });
     }
   }

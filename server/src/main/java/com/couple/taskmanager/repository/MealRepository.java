@@ -26,4 +26,6 @@ public interface MealRepository extends JpaRepository<Meal, Long> {
     @Query("DELETE FROM Meal m WHERE m.id = :mealId AND m.household.id = :householdId")
     void deleteByMealIdAndHouseholdId(Long mealId, Long householdId);
 
+    @Query("SELECT m FROM Meal m WHERE m.date BETWEEN :tomorrowStart AND :tomorrowEnd AND m.isThawingNeeded = true")
+    List<Meal> findByDateBetweenAndIsThawingNeededTrue(Date tomorrowStart, Date tomorrowEnd);
 }

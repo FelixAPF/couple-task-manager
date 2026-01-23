@@ -18,6 +18,7 @@ import { VersionControlService } from './service/version-control.service';
 import { asyncScheduler, delay, observeOn, Subscription } from 'rxjs';
 import * as BackEndVersion from "../../version.json";
 import { HouseholdService } from './service/household.service';
+import { PushNotificationService } from './service/push.notification.service';
 
 
 @Component({
@@ -42,7 +43,7 @@ export class AppComponent implements OnInit, OnDestroy {
   
 
   constructor(private translate: TranslateService, private loadingService: LoadingService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
-  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private householdService: HouseholdService) {
+  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private pushNotificationService: PushNotificationService, private householdService: HouseholdService) {
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');
@@ -96,6 +97,8 @@ export class AppComponent implements OnInit, OnDestroy {
       localStorage.setItem('language', 'fr');
       this.translate.use('fr');
     }
+
+    this.pushNotificationService.initPush()
   }
 
   async setupBackButtonListener(): Promise<void> {

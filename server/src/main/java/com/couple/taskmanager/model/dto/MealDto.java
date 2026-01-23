@@ -18,12 +18,14 @@ public class MealDto {
     private Date date;
     private RecipeDto recipe;
     private HouseholdMemberDto assignee;
+    private Boolean isThawingNeeded;
 
     public MealDto(Meal meal){
         this.id = meal.getId();
         this.location = meal.getLocation();
         this.date = meal.getDate();
         this.recipe = new RecipeDto(meal.getRecipe());
+        this.isThawingNeeded = meal.getIsThawingNeeded();
 
         CTMUser user = meal.getAssignedUser();
         if (user != null) {

@@ -7,4 +7,5 @@ export interface Meal {
     date: Date;
     location: string;
     assignee?: HouseholdMember;
+    isThawingNeeded?: boolean;
 }

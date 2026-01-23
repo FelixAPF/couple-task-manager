@@ -12,6 +12,14 @@ jobs:
     # --- Initial Setup ---
     - name: Checkout Repository Code
       uses: actions/checkout@v4
+      
+    - name: Create Google Services JSON File
+      run: |
+        echo "${{ secrets.ANDROID_GOOGLE_SERVICES_JSON_BASE64 }}" | base64 -d > client/android/app/google-services.json
+         
+    - name: Create Server Firebase Key
+       run: |
+        echo "${{ secrets.SERVER_FIREBASE_JSON_BASE64 }}" | base64 -d > server/src/main/resources/firebase-service-account.json
 
     - name: Set up Node.js
       uses: actions/setup-node@v4

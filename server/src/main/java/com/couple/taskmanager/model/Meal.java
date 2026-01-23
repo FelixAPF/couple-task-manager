@@ -20,6 +20,9 @@ public class Meal {
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
+    @Column(columnDefinition = "boolean default false")
+    private Boolean isThawingNeeded = false;
+
     private Date date;
     private String location;
 

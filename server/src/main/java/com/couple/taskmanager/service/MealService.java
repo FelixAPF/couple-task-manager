@@ -72,6 +72,7 @@ public class MealService implements IGenericService<Meal, MealDto> {
         newMeal.setHousehold(user.getHousehold());
         newMeal.setDate(meal.getDate());
         newMeal.setLocation(meal.getLocation());
+        newMeal.setIsThawingNeeded(meal.getIsThawingNeeded());
         newMeal.setRecipe(byId.orElse(recipe));
         return new MealDto(repository.save(newMeal));
     }

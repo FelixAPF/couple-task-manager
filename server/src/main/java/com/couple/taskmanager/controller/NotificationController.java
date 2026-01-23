@@ -24,10 +24,4 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/test")
-    public ResponseEntity<?> sendTestNotification(@AuthenticationPrincipal CTMUser user) {
-        // This sends a notification immediately to the user calling the API
-        firebaseService.sendNotificationToUser(user, "Test Success!", "If you read this, FCM is working!");
-        return ResponseEntity.ok().build();
-    }
 }

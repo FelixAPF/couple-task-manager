@@ -52,7 +52,7 @@ export class PushNotificationService {
       // Based on your Controller: public ResponseEntity<Void> registerToken(@RequestBody String token)
       // You might need to send it as a raw string or wrapper object. 
       // Let's assume raw string for now based on your previous code.
-      this.http.post(`${environment.apiUrl}/api/notifications/token`, this.fcmToken).subscribe({
+      this.http.post(`${environment.apiUrl}api/notifications/token`, this.fcmToken).subscribe({
         next: () => console.log('Token sent to backend successfully'),
         error: (err) => console.error('Failed to send token (likely not logged in):', err)
       });

@@ -18,11 +18,13 @@ import { WishListComponent } from './household/wish-list/wish-list.component';
 import { ServerErrorComponent } from './server-error/server-error.component';
 import { ContactsComponent } from './household/contacts/contacts.component';
 import { TravelChecklistComponent } from './service/components/travel/travel-checklist/travel-checklist.component';
+import { PrivacyComponent } from './privacy/privacy.component'
 
 
 export const routes: Routes = [
       // --- Public Routes ---
     { path: 'login', component: LoginComponent },
+    { path: 'privacy-policy', component: PrivacyComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'server-error', component: ServerErrorComponent }, // Add this route
     { path: '', pathMatch: 'full', redirectTo: 'dashboard'

@@ -29,6 +29,26 @@ export const passwordMatchValidator: ValidatorFn = (control: AbstractControl): V
   }
 };
 
+export const getAge = (dateOfBirth: Date)  => {
+  const currentDate = new Date();
+
+  const currentYearDifference = currentDate.getUTCFullYear() - dateOfBirth.getUTCFullYear();
+  return (dateOfBirth.getUTCMonth() <= currentDate.getUTCMonth() && dateOfBirth.getUTCDate() <= currentDate.getUTCDate()) 
+    ? currentYearDifference
+    : currentYearDifference -1 ;
+}
+
+export const dateOfBirthValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
+  const dateOfBirth = control.get('birthDay');
+  if(!dateOfBirth) return null;
+  
+  if(getAge(new Date(dateOfBirth.value)) < 13 || !dateOfBirth.touched){
+    dateOfBirth.setErrors({ 'age': true })
+    return { age: true }
+  }
+  return {}
+}
+
 @Component({
   selector: 'app-register',
   imports: [SharedModule, ReactiveFormsModule],
@@ -52,7 +72,7 @@ export class RegisterComponent implements OnInit {
     newHouseholdName: ['', []], // Add householdName, not required by default
     password: ['', [Validators.required, Validators.minLength(6)]], // Add minLength or other password rules
     confirmPassword: ['', [Validators.required]]
-  }, { validators: passwordMatchValidator }); // Apply the custom validator at the group level
+  }, { validators: [ passwordMatchValidator, dateOfBirthValidator ] }); // Apply the custom validator at the group level
 
   // --- Getters for easier template access ---
   get name() { return this.registerForm.get('name'); }

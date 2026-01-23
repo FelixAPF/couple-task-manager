@@ -16,4 +16,9 @@ public class TaskListOccasionController extends GenericController<TaskListOccasi
     public void addTask(@PathVariable("id") Long taskListOccasionId, @PathVariable("taskId") Long taskId, @RequestBody AssigneeDto assigneeId, @AuthenticationPrincipal UserDetails userDetails){
         service.createAndAddTaskAssignment(taskListOccasionId, taskId, assigneeId.getAssigneeId(), (CTMUser) userDetails);
     }
+
+    @DeleteMapping("{id}/tasks/{taskId}/assignee/{assigneeId}")
+    public void unassignTaskFromUser(@PathVariable("id") Long taskListOccasionId, @PathVariable("taskId") Long taskId, @PathVariable("assigneeId") Long assigneeId, @AuthenticationPrincipal UserDetails userDetails){
+        service.unassignTaskFromUser(taskListOccasionId, taskId, assigneeId, (CTMUser) userDetails);
+    }
 }

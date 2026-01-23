@@ -31,4 +31,10 @@ export class TaskListOccasionService {
     // Based on the controller fix `createAndAddTaskAssignment`, we send a POST
     return this.http.post<void>(`${this.apiUrl}/${occasionId}/add-task/${taskId}`, { assigneeId });
   }
+
+  removeTaskAssignment(occasionId: number, taskId: number, assigneeId: number): Observable<void> {
+    // Sending assigneeId wrapped in an object or directly depending on your final controller fix.
+    // Based on the controller fix `createAndAddTaskAssignment`, we send a POST
+    return this.http.delete<void>(`${this.apiUrl}/${occasionId}/tasks/${taskId}/assignee/${assigneeId}`)
+  }
 }

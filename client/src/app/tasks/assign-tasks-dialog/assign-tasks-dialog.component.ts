@@ -20,6 +20,8 @@ export class AssignTasksDialogComponent implements OnInit {
   tasks: Task[] = [];
   filteredTasks: Task[] = [];
   selectedTasks: number[] = []; 
+
+  assignedMap: { [taskId: number]: string } = {};
   
   // Search & Filter State
   searchTerm: string = '';
@@ -60,12 +62,26 @@ export class AssignTasksDialogComponent implements OnInit {
     public config: DynamicDialogConfig
   ) {}
 
-  ngOnInit(): void {
-    this.assigneeName = this.config.data?.assigneeName || 'User';
+ngOnInit(): void {
+    // 1. Initialize Selection from passed data
+    if (this.config.data?.currentSelection) {
+        this.selectedTasks = [...this.config.data.currentSelection];
+    }
+
+    // 2. Initialize Assignment Map (who else has this task?)
+    if (this.config.data?.assignedMap) {
+        this.assignedMap = this.config.data.assignedMap;
+    }
+
     this.taskService.retrieveTasks().subscribe(tasks => {
       this.tasks = tasks;
       this.filteredTasks = tasks;
     });
+  }
+
+  // Helper to get assignee name
+  getAssignee(taskId: number): string | null {
+    return this.assignedMap[taskId] || null;
   }
 
   filterTasks() {

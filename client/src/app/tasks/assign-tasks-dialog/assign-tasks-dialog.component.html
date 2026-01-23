@@ -39,10 +39,15 @@
         <p-checkbox [binary]="true" [ngModel]="task.id && isSelected(task.id)" (onChange)="task.id && toggleSelection(task.id)" (click)="$event.stopPropagation()"></p-checkbox>
       </div>
       
-      <div class="task-content">
-        <span class="task-title" [pTooltip]="task.title" tooltipPosition="top" [tooltipDisabled]="(task.title?.length || 0) < 30">
+      <div class="task-content">  
+        <span class="task-title" [pTooltip]="task.title" tooltipPosition="top">
             {{task.title}}
         </span>
+        
+        <div *ngIf="task.id && getAssignee(task.id)" class="assigned-indicator">
+            <i class="pi pi-user mr-1 text-xs"></i> 
+            <span>Assigned to {{ getAssignee(task.id) }}</span>
+        </div>
         <span class="task-desc" *ngIf="task.description">
             {{task.description}}
         </span>

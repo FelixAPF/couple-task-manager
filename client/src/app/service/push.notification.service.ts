@@ -8,13 +8,13 @@ import { environment } from "../environment";
 @Injectable({ providedIn: 'root' })
 export class PushNotificationService {
   
+  // Store the token locally so we can send it later if needed
+  private fcmToken: string | null = null;
+
   constructor(private http: HttpClient) {}
 
   public initPush() {
-    // Only run on native devices (Android/iOS)
-    const isPushNotificationsAvailable = Capacitor.isNativePlatform();
-
-    if (isPushNotificationsAvailable) {
+    if (Capacitor.isNativePlatform()) {
       this.register();
       this.addListeners();
     }
@@ -27,26 +27,35 @@ export class PushNotificationService {
       permStatus = await PushNotifications.requestPermissions();
     }
 
-    if (permStatus.receive !== 'granted') {
-      console.error('User denied permissions!');
-      return;
+    if (permStatus.receive === 'granted') {
+      await PushNotifications.register();
     }
-
-    await PushNotifications.register();
   }
 
   private addListeners() {
     PushNotifications.addListener('registration', token => {
-      // Send token to backend
-      this.http.post(`${environment.apiUrl}/api/notifications/token`, token.value).subscribe();
+      console.log('Push Token Received:', token.value);
+      this.fcmToken = token.value; // Cache it!
+      this.sendTokenToBackend();   // Try sending it immediately
     });
 
     PushNotifications.addListener('registrationError', err => {
       console.error('Registration error: ', err.error);
     });
+  }
 
-    PushNotifications.addListener('pushNotificationReceived', notification => {
-      console.log('Push received: ', notification);
-    });
+  // Call this method AFTER login
+  public sendTokenToBackend() {
+    if (this.fcmToken) {
+      console.log('Sending cached token to backend...');
+      // Ensure the string is sent as a simple string or JSON depending on your backend
+      // Based on your Controller: public ResponseEntity<Void> registerToken(@RequestBody String token)
+      // You might need to send it as a raw string or wrapper object. 
+      // Let's assume raw string for now based on your previous code.
+      this.http.post(`${environment.apiUrl}/api/notifications/token`, this.fcmToken).subscribe({
+        next: () => console.log('Token sent to backend successfully'),
+        error: (err) => console.error('Failed to send token (likely not logged in):', err)
+      });
+    }
   }
 }

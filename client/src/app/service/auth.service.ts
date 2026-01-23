@@ -67,4 +67,8 @@ export class AuthService {
     this.householdService.setHousehold(null); // Clear household data on logout
     this.router.navigate(['/login'], { queryParams: { sessionExpired: expiredToken } });
   }
+
+  deleteAccount(): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/account`);
+  }
 }

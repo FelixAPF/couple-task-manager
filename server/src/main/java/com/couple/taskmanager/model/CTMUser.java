@@ -55,15 +55,15 @@ public class CTMUser implements UserDetails {
     @JsonManagedReference("user-meal-assignments")
     private List<Meal> assignedMeal;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     @JsonManagedReference("user-task-list")
     private List<TaskList> taskLists;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.REMOVE)
     @JsonManagedReference("user-ways-to-care")
     private List<WayToCare> waysToCare;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.REMOVE)
     @JsonManagedReference("user-wish-list")
     private List<Item> wishList;
 

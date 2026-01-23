@@ -17,6 +17,8 @@ import { AvatarModule } from 'primeng/avatar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner'; // Import ProgressSpinnerModule
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CheckboxChangeEvent } from 'primeng/checkbox';
+import { AuthService } from '../../service/auth.service';
+import { Router } from '@angular/router';
 
 enum HouseholdSettingNames {
   WISH_LIST = "enableWishList",
@@ -45,6 +47,8 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
   // --- Injected Services ---
   private householdService = inject(HouseholdService);
   private messageService = inject(MessageService);
+  private authService = inject(AuthService);
+  private router = inject(Router);
   SETTING_NAMES = HouseholdSettingNames;
 
   // --- State ---
@@ -225,6 +229,24 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
                 // so the checkbox should revert visually when isUpdatingSettings becomes false.
             }
         });
+  }
+
+
+  confirmDeleteAccount() {
+    if (confirm("Are you absolutely sure? All your data will be permanently removed.")) {
+      this.authService.deleteAccount().subscribe({
+        next: () => {
+          // Clear local storage/session
+          this.authService.logout(); 
+          // Redirect to login or welcome page
+          this.router.navigate(['/login']);
+        },
+        error: (err) => {
+          console.error("Failed to delete account", err);
+          alert("An error occurred while deleting your account.");
+        }
+      });
+    }
   }
 
   togglToDoList(event: CheckboxChangeEvent, household: Household): void {

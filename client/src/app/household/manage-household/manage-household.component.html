@@ -141,6 +141,18 @@
 
     </div> <!-- End Members Grid -->
 
+    <div class="mt-8 border-t border-red-200 pt-6">
+        <h3 class="text-lg font-medium text-red-600">Danger Zone</h3>
+        <p class="text-sm text-gray-500 mb-4">
+            Once you delete your account, there is no going back. Please be certain.
+        </p>
+        <button 
+            (click)="confirmDeleteAccount()" 
+            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
+            Delete My Account
+        </button>
+    </div>
+
   </div> <!-- End Household Data Container -->
 
   <!-- Template for No Household Loaded -->

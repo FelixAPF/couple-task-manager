@@ -15,7 +15,7 @@ public class Household {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "household", fetch = FetchType.EAGER) // Changed to EAGER
+    @OneToMany(mappedBy = "household", fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE}) // Changed to EAGER
     @JsonManagedReference("household-users")
     private List<CTMUser> users;
 

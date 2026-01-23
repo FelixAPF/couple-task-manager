@@ -49,7 +49,8 @@ public class FirebaseMessagingService {
                 .build();
 
         try {
-            FirebaseMessaging.getInstance().sendMulticast(message);
+            // CORRECTION ICI : Utilisez sendEachForMulticast au lieu de sendMulticast
+            FirebaseMessaging.getInstance().sendEachForMulticast(message);
         } catch (FirebaseMessagingException e) {
             e.printStackTrace();
         }
@@ -68,17 +69,20 @@ public class FirebaseMessagingService {
                 .build();
 
         try {
-            FirebaseMessaging.getInstance().sendMulticast(message);
+            // CORRECTION ICI AUSSI
+            FirebaseMessaging.getInstance().sendEachForMulticast(message);
         } catch (FirebaseMessagingException e) {
             e.printStackTrace();
         }
     }
 
     public void saveToken(CTMUser user, String token) {
-        if (tokenRepository.findByToken(token).isEmpty()) {
+        // Nettoyage basique si jamais des guillemets traînent
+        String cleanToken = token.replace("\"", "");
+        if (tokenRepository.findByToken(cleanToken).isEmpty()) {
             DeviceToken deviceToken = new DeviceToken();
             deviceToken.setUser(user);
-            deviceToken.setToken(token);
+            deviceToken.setToken(cleanToken);
             tokenRepository.save(deviceToken);
         }
     }

@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 import { AuthService } from '../../service/auth.service';
 import { AuthRequest } from '../../model/auth';
 import { SharedModule } from '../../shared.module';
+import { PushNotificationService } from '../../service/push.notification.service';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,7 @@ export class LoginComponent implements OnInit {
   private router = inject(Router);
   private messageService = inject(MessageService); // Inject MessageService
   private route = inject(ActivatedRoute); // Inject ActivatedRoute 
+  private pushService = inject(PushNotificationService);
 
   // --- Form Definition ---
   loginForm = this.fb.group({
@@ -71,6 +73,7 @@ export class LoginComponent implements OnInit {
       .subscribe({
         next: (user) => {
           this.messageService.add({ /* ... success message ... */ });
+          this.pushService.sendTokenToBackend();
 
           // Check for returnUrl query parameter
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard'; // Default to dashboard

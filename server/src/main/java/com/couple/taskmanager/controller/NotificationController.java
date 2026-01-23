@@ -19,7 +19,8 @@ public class NotificationController {
 
     @PostMapping("/token")
     public ResponseEntity<Void> registerToken(@AuthenticationPrincipal CTMUser user, @RequestBody String token) {
-        firebaseService.saveToken(user, token);
+        String cleanToken = token.replace("\"", "");
+        firebaseService.saveToken(user, cleanToken);
         return ResponseEntity.ok().build();
     }
 

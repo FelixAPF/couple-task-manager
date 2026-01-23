@@ -89,7 +89,7 @@ jobs:
       id: extract_version # Give the step an ID to reference its output
       run: |
         # Use grep -E for extended regex, match start of line, whitespace, exact pattern, then extract value
-        VERSION_NAME=$(grep -E '^\s*versionName\s+"[^"]+"' client/android/app/build.gradle | sed -n 's/.*versionName "\(.*\)".*/\1/p' | head -n 1)
+        VERSION_NAME=$(grep -E '^\s*versionName\s+"[^"]+"' client/android/app/build.g33radle | sed -n 's/.*versionName "\(.*\)".*/\1/p' | head -n 1)
         echo "Extracted Version Name: $VERSION_NAME"
         # Check if VERSION_NAME is empty before setting output
         if [ -z "$VERSION_NAME" ]; then
@@ -107,7 +107,7 @@ jobs:
         packageName: com.couple.taskmanager # !!! REPLACE with your actual package name !!!
         releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
         track: internal
-        status: draft
+        status: completed
 
     # --- Notify Version Endpoint ---
     - name: Post Version to Endpoint

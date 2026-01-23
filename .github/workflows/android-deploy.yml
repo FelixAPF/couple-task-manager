@@ -107,7 +107,7 @@ jobs:
         packageName: com.couple.taskmanager # !!! REPLACE with your actual package name !!!
         releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
         track: internal
-        status: draft
+        status: completed
 
     # --- Notify Version Endpoint ---
     - name: Post Version to Endpoint

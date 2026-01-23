@@ -104,7 +104,7 @@ public class TaskListOccasionService implements IGenericService<TaskListOccasion
             }
             return false;
         });
-
+        //Test
         if (removed) {
             repository.save(occasion);
         }

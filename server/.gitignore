@@ -33,5 +33,5 @@ build/
 .vscode/
 .upload-dir/
 
-**/src/main/resources/firebase-service-account.json
-**/src/main/resources/service-account.json
+server/src/main/resources/firebase-service-account.json
+client/android/app/google-services.json

@@ -87,4 +87,23 @@ public class TaskListOccasionService implements IGenericService<TaskListOccasion
         }
         return new TaskListOccasionDto(repository.save(taskListOccasion));
     }
+
+    public void unassignTaskFromUser(Long taskListOccasionId, Long taskId, Long assigneeId, CTMUser userDetails) {
+        TaskListOccasion occasion = repository.findById(taskListOccasionId).orElseThrow(NoSuchElementException::new);
+
+        if(!userDetails.getHousehold().getId().equals(occasion.getHousehold().getId())){
+            throw new AccessDeniedException("User is not part of the right household");
+        }
+
+        // Remove the assignment from the list directly.
+        // This modifies the collection on the parent entity.
+        boolean removed = occasion.getTaskAssignments().removeIf(ta ->
+                ta.getTask().getId().equals(taskId) &&
+                        ta.getAssignee().getId().equals(assigneeId)
+        );
+
+        if (removed) {
+            repository.saveAndFlush(occasion);
+        }
+    }
 }

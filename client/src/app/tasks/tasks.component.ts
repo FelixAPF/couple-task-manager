@@ -284,27 +284,61 @@ filterTasks() {
     return occasion.taskAssignments.filter(ta => ta.householdMemberDto.id === userId).length;
   }
 
-  openAssignDialog(member: HouseholdMember) {
+openAssignDialog(member: HouseholdMember) {
     if (!this.selectedOccasion) return;
+
+    // 1. Get IDs of tasks ALREADY assigned to this user (for pre-selection)
+    const userAssignments = this.getTasksForUser(member.id);
+    const existingTaskIds = userAssignments.map(a => a.task.id!);
+
+    // 2. Map of Task ID -> Member Name (for showing who else has the task)
+    // We iterate over ALL assignments in the occasion
+    const assignedToOthersMap: { [taskId: number]: string } = {};
+    this.selectedOccasion.taskAssignments.forEach(assignment => {
+        // If assigned to someone else, record it
+        if (assignment.householdMemberDto.id !== member.id && assignment.task.id) {
+            assignedToOthersMap[assignment.task.id] = assignment.householdMemberDto.name;
+        }
+    });
 
     this.ref = this.dialogService.open(AssignTasksDialogComponent, {
         header: `Assign Tasks to ${member.name}`,
         width: '500px',
         contentStyle: { overflow: 'auto' },
         baseZIndex: 10000,
-        data: { assigneeName: member.name }
-    });
-
-    this.ref.onClose.subscribe((taskIds: number[]) => {
-        if (taskIds && taskIds.length > 0) {
-            const requests = taskIds.map(taskId => 
-              this.taskListOccasionService.addTaskAssignment(this.selectedOccasion!.id, taskId, member.id)
-            );
-    
-            forkJoin(requests).subscribe(() => {
-              this.loadOccasions(); 
-            });
+        data: { 
+            assigneeName: member.name,
+            currentSelection: existingTaskIds, // Pass existing selection
+            assignedMap: assignedToOthersMap   // Pass info about others
         }
     });
-  }
+
+    this.ref.onClose.subscribe((resultSelection: number[]) => {
+              if (resultSelection) {
+                  const tasksToAdd = resultSelection.filter(id => !existingTaskIds.includes(id));
+                  const tasksToRemove = existingTaskIds.filter(id => !resultSelection.includes(id));
+                  
+                  const requests: any[] = [];
+                  tasksToAdd.forEach(taskId => {
+                    requests.push(this.taskListOccasionService.addTaskAssignment(this.selectedOccasion!.id, taskId, member.id));
+                  });             
+                  // 2. Build Remove Requests
+                  tasksToRemove.forEach(taskId => {
+                      // We need to find the specific assignment ID to delete it, or call an endpoint that takes occasionId + taskId + userId
+                      // Assuming your service supports removing by task ID for a user in a list
+                      requests.push(this.taskListOccasionService.removeTaskAssignment(this.selectedOccasion!.id, taskId, member.id));
+                  });             
+                  if (requests.length > 0) {
+                      forkJoin(requests).subscribe(() => {
+                        let detailMsg = '';
+                        if(tasksToAdd.length > 0) detailMsg += `Added ${tasksToAdd.length} tasks. `;
+                        if(tasksToRemove.length > 0) detailMsg += `Removed ${tasksToRemove.length} tasks.`;
+                      
+                        this.messageService.add({ severity: 'success', summary: 'Updated', detail: detailMsg });
+                        this.loadOccasions(); 
+                      });
+                  } 
+            }
+        });
+      }
 }

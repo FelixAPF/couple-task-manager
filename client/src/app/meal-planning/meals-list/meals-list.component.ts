@@ -157,6 +157,9 @@ export class MealsListComponent implements OnInit {
       if(result !== null && !result){
         return;
       }
+
+      meal.isThawingNeeded = result.isThawingNeeded;
+      console.log("IS THAWING NEEDED ", meal.isThawingNeeded);
       this.mealService.assignMeal(meal, result === null ? 0 : result).subscribe(() => {
         this.loadMealsForWeek();
       });
@@ -377,14 +380,15 @@ export class MealsListComponent implements OnInit {
     // Handle dialog close using the local const
     // Add a check in case dialogRef is somehow undefined (though unlikely)
     if (dialogRef) {
-      dialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string }) => {
+      dialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string, isThawingNeeded: boolean }) => {
           if (result && result.recipe && result.date && result.location !== undefined) {
               const mealToSave: Meal = {
                   id: existingMeal?.id,
                   recipe: result.recipe,
                   date: result.date,
                   location: result.location,
-                  assignee: undefined
+                  assignee: undefined,
+                  isThawingNeeded: result.isThawingNeeded
               };
               this.saveAssignedMeal(mealToSave);
           }

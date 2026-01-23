@@ -49,7 +49,6 @@ public class FirebaseMessagingService {
                 .build();
 
         try {
-            // CORRECTION ICI : Utilisez sendEachForMulticast au lieu de sendMulticast
             FirebaseMessaging.getInstance().sendEachForMulticast(message);
         } catch (FirebaseMessagingException e) {
             e.printStackTrace();

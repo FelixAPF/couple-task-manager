@@ -29,7 +29,7 @@ android {
     versionCode project.hasProperty('versionCode') ? project.property('versionCode').toInteger() : 1
 
     // Set versionName manually here. Update this string when you release a new user-facing version.
-    versionName "2.23"
+    versionName "2.24"
 
     // Use the defined versionName to set the archive base name
     def date = new Date()
@@ -84,7 +84,7 @@ dependencies {
   implementation project(':capacitor-cordova-android-plugins')
   implementation platform('com.google.firebase:firebase-bom:33.7.0')
   
-  // Analytics (Optionnel mais recommandÃƒÂ© pour vÃƒÂ©rifier que Firebase est connectÃƒÂ©)
+  // Analytics (Optionnel mais recommandÃƒÆ’Ã‚Â© pour vÃƒÆ’Ã‚Â©rifier que Firebase est connectÃƒÆ’Ã‚Â©)
   implementation 'com.google.firebase:firebase-analytics'
 }
 

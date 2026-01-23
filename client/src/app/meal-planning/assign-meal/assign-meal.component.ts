@@ -53,6 +53,8 @@ export class AssignMealComponent implements OnInit {
   formattedTargetDate: string = '';
   selectedLocation: string = 'Maison';
   searchTerm: string = ''; // <-- Property for search input
+    isThawingNeeded: boolean = false;
+
 
   constructor(
     private recipeService: RecipeService,
@@ -72,6 +74,10 @@ export class AssignMealComponent implements OnInit {
         this.selectedLocation = this.dialogConfig.data.meal.location;
       } else {
         this.selectedLocation = 'Maison';
+      }
+
+      if(this.dialogConfig.data.meal?.isThawingNeeded){
+        this.isThawingNeeded = this.dialogConfig.data.meal.isThawingNeeded;
       }
 
       this.loadRecipes();
@@ -134,7 +140,8 @@ export class AssignMealComponent implements OnInit {
       this.dialogRef.close({
           recipe: this.selectedRecipe,
           date: this.targetDate,
-          location: this.selectedLocation
+          location: this.selectedLocation,
+          isThawingNeeded: this.isThawingNeeded
         });
     } else {
        this.messageService.add({ severity: 'warn', summary: 'Sélection requise', detail: 'Veuillez sélectionner une recette.' });

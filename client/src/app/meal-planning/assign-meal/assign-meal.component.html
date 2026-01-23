@@ -51,10 +51,19 @@
         <label for="location" class="block text-sm font-medium mb-1 text-surface-700 dark:text-surface-200">Lieu du repas</label>
         <input #locationInput id="location" type="text" pInputText [(ngModel)]="selectedLocation" class="w-full">
     </div>
+      <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100">
+          <div class="flex flex-col">
+              <span class="font-semibold text-blue-800">Décongélation requise</span>
+              <span class="text-xs text-blue-600">Envoyer une notification à 20:00 la veille du repas</span>
+          </div>
+          <p-inputSwitch [(ngModel)]="isThawingNeeded"></p-inputSwitch>
+      </div>
     <!-- End Location Input -->
 
     <!-- Dialog Footer -->
     <div class="dialog-footer flex justify-between items-center mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+
+      
        <div>
          <button pButton pRipple type="button" icon="pi pi-plus" label="Créer Recette" class="p-button-outlined p-button-secondary mr-2" (click)="openCreateRecipeDialog()" pTooltip="Créer une nouvelle recette"></button>
        </div>

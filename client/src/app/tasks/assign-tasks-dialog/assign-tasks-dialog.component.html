@@ -73,7 +73,7 @@
 
   <div class="dialog-footer">
     <p-button label="Cancel" styleClass="p-button-text" (onClick)="close()"></p-button>
-    <p-button label="Assign Tasks" (onClick)="submit()" [disabled]="selectedTasks.length === 0">
+    <p-button label="Assign Tasks" (onClick)="submit()">
         <ng-template pTemplate="icon">
             <i class="pi pi-check mr-2"></i>
             <span *ngIf="selectedTasks.length > 0" class="font-bold mr-1">{{selectedTasks.length}}</span>

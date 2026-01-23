@@ -26,7 +26,7 @@ public class TaskListOccasion {
     @JsonBackReference("household-task-list-occasion")
     private Household household;
 
-    @OneToMany(mappedBy = "taskListOccasion", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "taskListOccasion", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("task-list-occasion-task-assign")
     private List<TaskAssign> taskAssignments = new ArrayList<>();
 

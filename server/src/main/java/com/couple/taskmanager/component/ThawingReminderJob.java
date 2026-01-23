@@ -21,7 +21,7 @@ public class ThawingReminderJob {
     private FirebaseMessagingService notificationService;
 
     // Runs every day at 8 PM server time
-    @Scheduled(cron = "0 35 17 * * *")
+    @Scheduled(cron = "0 50 17 * * *", zone = "America/Toronto")
     public void checkThawingNeeded() {
         // Calculate "Tomorrow"
         Calendar cal = Calendar.getInstance();

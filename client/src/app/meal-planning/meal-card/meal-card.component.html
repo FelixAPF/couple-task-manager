@@ -44,7 +44,7 @@
 
               <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none"></div>
 
-              <div *ngIf="meal?.assignee as assignee" class="absolute -bottom-2 -right-2 z-20">
+              <div *ngIf="meal?.assignedUser as assignee" class="absolute -bottom-2 -right-2 z-20">
                  <img
                   [src]="assignee.imageUrl || 'assets/placeholder.jpg'"
                   [alt]="'Photo de ' + (assignee.name || 'Membre')"

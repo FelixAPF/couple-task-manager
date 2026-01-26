@@ -17,7 +17,7 @@ public class MealDto {
     private String location;
     private Date date;
     private RecipeDto recipe;
-    private HouseholdMemberDto assignee;
+    private HouseholdMemberDto assignedUser;
     private Boolean isThawingNeeded;
 
     public MealDto(Meal meal){
@@ -29,7 +29,7 @@ public class MealDto {
 
         CTMUser user = meal.getAssignedUser();
         if (user != null) {
-            this.assignee = new HouseholdMemberDto(user.getId(), user.getName(), user.getEmail(), user.getImageUrl(), user.getBirthDay(), user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList(), user.getRewardColor(), user.getRewardPoints());
+            this.assignedUser = new HouseholdMemberDto(user.getId(), user.getName(), user.getEmail(), user.getImageUrl(), user.getBirthDay(), user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList(), user.getRewardColor(), user.getRewardPoints());
         }
     }
 }

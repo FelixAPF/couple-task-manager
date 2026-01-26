@@ -380,14 +380,15 @@ export class MealsListComponent implements OnInit {
     // Handle dialog close using the local const
     // Add a check in case dialogRef is somehow undefined (though unlikely)
     if (dialogRef) {
-      dialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string, isThawingNeeded: boolean }) => {
+      dialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string, isThawingNeeded: boolean, assignee: any }) => {
           if (result && result.recipe && result.date && result.location !== undefined) {
+            console.log(result);
               const mealToSave: Meal = {
                   id: existingMeal?.id,
                   recipe: result.recipe,
                   date: result.date,
                   location: result.location,
-                  assignee: undefined,
+                  assignedUser: result.assignee,
                   isThawingNeeded: result.isThawingNeeded
               };
               this.saveAssignedMeal(mealToSave);

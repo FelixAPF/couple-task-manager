@@ -6,6 +6,6 @@ export interface Meal {
     recipe: Recipe;
     date: Date;
     location: string;
-    assignee?: HouseholdMember;
+    assignedUser?: HouseholdMember;
     isThawingNeeded?: boolean;
 }

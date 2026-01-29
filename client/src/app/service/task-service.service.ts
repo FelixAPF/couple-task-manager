@@ -84,4 +84,7 @@ export class TaskService implements OnDestroy {
     return this.http.get<TaskHistoryDto>(`${this.baseUrl}/${taskId}/history`);
   }
   
+  reassignTask(assignmentId: number, newAssigneeId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/reassign/${assignmentId}`, newAssigneeId);
+  }
 }

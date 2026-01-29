@@ -2,7 +2,10 @@ package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.TaskAssignment;
+import com.couple.taskmanager.model.dto.HouseholdMemberDto;
+import com.couple.taskmanager.model.dto.TaskAssignDto;
 import com.couple.taskmanager.model.dto.TaskAssignmentDto;
+import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.TaskAssignmentRepository;
 import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,8 @@ import java.util.NoSuchElementException;
 public class TaskAssignmentService implements IGenericService<TaskAssignment, TaskAssignmentDto> {
     @Autowired
     TaskAssignmentRepository taskAssignmentRepository;
+    @Autowired
+    CTMUserRepository userRepository;
 
 
     @Override
@@ -40,11 +45,25 @@ public class TaskAssignmentService implements IGenericService<TaskAssignment, Ta
 
     @Override
     public void delete(Long id, Long householdId, CTMUser user) {
-
+        TaskAssignment taskAssignment = taskAssignmentRepository.findById(id).orElseThrow(NoSuchElementException::new);
+        if(!taskAssignment.getHousehold().getId().equals(householdId)){
+            throw new IllegalArgumentException("This task assignment is not part of your household");
+        }
+        taskAssignmentRepository.delete(taskAssignment);
     }
 
     @Override
     public TaskAssignmentDto create(TaskAssignment taskAssignment, CTMUser user) {
         return null;
+    }
+
+    public void reassignTaskAssignment(Long id, Long newAssigneeId, CTMUser user){
+        CTMUser assignee = userRepository.findById(newAssigneeId).orElseThrow(NoSuchElementException::new);
+        if (!assignee.getHousehold().getId().equals(user.getHousehold().getId())) {
+            throw new IllegalArgumentException("This user is not part of your household");
+        }
+        TaskAssignment taskAssignment1 = taskAssignmentRepository.findById(id).orElseThrow(NoSuchElementException::new);
+        taskAssignment1.setAssignee(assignee);
+        taskAssignmentRepository.save(taskAssignment1);
     }
 }

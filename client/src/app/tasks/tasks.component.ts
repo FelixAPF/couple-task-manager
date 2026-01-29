@@ -3,7 +3,7 @@ import { Component, inject, OnInit, OnDestroy, AfterViewInit } from '@angular/co
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { forkJoin, Subject, Subscription } from 'rxjs';
 import { takeUntil, take } from 'rxjs/operators';
 
@@ -33,6 +33,8 @@ import { AssignTasksDialogComponent } from './assign-tasks-dialog/assign-tasks-d
 import { CreateTaskDialogComponent } from './create-task-dialog/create-task-dialog.component';
 import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
 import { RoomPipe } from '../shared/pipes/room-pipe';
+import { TaskAssignmentDto } from '../model/task-period';
+import { ReassignTaskDialogComponent } from './reassign-task/reassign-task.component';
 
 interface MemberTaskColumn {
   member: HouseholdMember | null;
@@ -283,6 +285,7 @@ filterTasks() {
   getTaskCountForUserInOccasion(occasion: TaskListOccasion, userId: number): number {
     return occasion.taskAssignments.filter(ta => ta.householdMemberDto.id === userId).length;
   }
+
 
 openAssignDialog(member: HouseholdMember) {
     if (!this.selectedOccasion) return;

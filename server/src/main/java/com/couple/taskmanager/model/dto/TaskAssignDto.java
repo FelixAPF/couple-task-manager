@@ -7,10 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class TaskAssignDto {
+    private Long id;
     private TaskDto task;
     private HouseholdMemberDto householdMemberDto;
 
     public TaskAssignDto(TaskAssign taskAssign){
+        this.id = taskAssign.getId();
         this.task = new TaskDto(taskAssign.getTask());
         this.householdMemberDto = new HouseholdMemberDto(taskAssign.getAssignee());
     }

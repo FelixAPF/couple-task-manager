@@ -39,4 +39,9 @@ public class MealController extends GenericController<Meal, MealDto, MealService
     public void assignUserToMeal(@PathVariable("id") Long mealId, @PathVariable("userId") Long userId, @AuthenticationPrincipal UserDetails userDetails){
         this.service.assignUserToMeal(mealId, userId, (CTMUser) userDetails);
     }
+
+    @GetMapping("/meal/today")
+    public MealDto getMealForToday(@AuthenticationPrincipal UserDetails userDetails){
+        return this.service.retrieveDtoByDate(new Date(), (CTMUser) userDetails);
+    }
 }

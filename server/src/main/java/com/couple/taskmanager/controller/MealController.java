@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class MealController extends GenericController<Meal, MealDto, MealService
 
     @GetMapping("/meal/today")
     public MealDto getMealForToday(@AuthenticationPrincipal UserDetails userDetails){
-        return this.service.retrieveDtoByDate(new Date(), (CTMUser) userDetails);
+        OffsetDateTime today = OffsetDateTime.now();
+
+        Date date = java.sql.Date.valueOf(today.toLocalDate());
+        return this.service.retrieveDtoByDate(date, (CTMUser) userDetails);
     }
 }

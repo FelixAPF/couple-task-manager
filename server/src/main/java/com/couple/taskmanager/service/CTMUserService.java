@@ -212,13 +212,14 @@ public class CTMUserService implements UserDetailsService {
         // 3. Gestion du Foyer
         Household household = managedUser.getHousehold();
         if (household != null) {
+            // Remove user from the list in memory
             household.getUsers().remove(managedUser);
             managedUser.setHousehold(null);
 
-            entityManager.createNativeQuery("DELETE FROM household_users WHERE users_id = :userId")
-                    .setParameter("userId", managedUser.getId())
-                    .executeUpdate();
+            // REMOVED: Native Query "DELETE FROM household_users"
+            // Reason: This relation is mapped via foreign key in CTMUser table, no join table exists.
 
+            // Check if household is empty and delete or save
             if (household.getUsers().isEmpty()) {
                 householdRepository.delete(household);
             } else {

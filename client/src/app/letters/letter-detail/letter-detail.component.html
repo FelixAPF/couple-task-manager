@@ -3,7 +3,7 @@
   <div *ngIf="letter" class="max-w-3xl w-full animate-pop">
     
     <button routerLink="/letters" class="mb-6 flex items-center text-slate-500 hover:text-slate-900 transition-colors font-medium text-sm">
-      <span class="material-icons mr-1 text-base">arrow_back_ios</span> Back to Mailbox
+      <span class="material-icons mr-1 text-base">arrow_back_ios</span> Retour à la boîte à malle
     </button>
 
     <div class="bg-white rounded-3xl shadow-2xl overflow-hidden relative">
@@ -16,7 +16,7 @@
           <div class="flex items-center gap-4">
             <img [src]="letter.sender.imageUrl || 'assets/placeholder.jpg'" class="w-14 h-14 rounded-full border-4 border-slate-800 shadow-md object-cover">
             <div>
-              <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Incoming Message</p>
+              <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Message entrant</p>
               <h1 class="text-2xl font-bold text-white">{{ letter.title }}</h1>
             </div>
           </div>
@@ -36,7 +36,7 @@
 
         <div class="mt-12 flex justify-end">
           <div class="text-center">
-             <p class="font-handwriting text-2xl text-slate-800 transform -rotate-6">With love,</p>
+             <p class="font-handwriting text-2xl text-slate-800 transform -rotate-6">Avec amour,</p>
              <p class="font-bold text-slate-900 mt-1">{{ letter.sender.name }}</p>
           </div>
         </div>
@@ -72,7 +72,7 @@
              </span>
 
              <div *ngIf="letter.selectedOption === option" class="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-               REPLY
+               RÉPONDRE
              </div>
           </div>
 
@@ -82,16 +82,16 @@
           <button (click)="submitReply()" 
                   [disabled]="!selectedChoice || isSubmitting"
                   class="w-full bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-            <span *ngIf="!isSubmitting">Send Reply</span>
+            <span *ngIf="!isSubmitting">Envoyer réponse</span>
             <span *ngIf="isSubmitting" class="flex items-center justify-center gap-2">
-              <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span> Sending...
+              <span class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span> Envoi...
             </span>
           </button>
         </div>
 
         <div *ngIf="letter.selectedOption" class="mt-6 text-center animate-fade-in-up">
            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">
-             Replied on {{ letter.repliedDate | date:'medium' }}
+             Réponse {{ letter.repliedDate | date:'medium' }}
            </p>
         </div>
 

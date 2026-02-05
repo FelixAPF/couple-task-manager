@@ -4,7 +4,7 @@ import {
     style,
     query,
     group,
-    animate,
+    animate, stagger
   } from '@angular/animations';
   
   export const routeAnimations = trigger('routeAnimations', [
@@ -42,3 +42,26 @@ import {
       ])
     ])
   ]);
+
+
+export const listAnimation = trigger('listAnimation', [
+  transition('* <=> *', [
+    query(':enter', [
+      style({ opacity: 0, transform: 'translateY(20px)' }),
+      stagger('100ms', [
+        animate('500ms cubic-bezier(0.35, 0, 0.25, 1)',
+        style({ opacity: 1, transform: 'none' }))
+      ])
+    ], { optional: true })
+  ])
+]);
+
+export const flyInOut = trigger('flyInOut', [
+  transition(':enter', [
+    style({ transform: 'translateY(20px)', opacity: 0 }),
+    animate('300ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+  ]),
+  transition(':leave', [
+    animate('300ms ease-in', style({ transform: 'translateY(20px)', opacity: 0 }))
+  ])
+]);

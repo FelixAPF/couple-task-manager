@@ -1,77 +1,116 @@
 <nav class="bg-white dark:bg-gray-950 shadow-md fixed top-0 left-0 right-0 z-50 h-16 sm:h-20 flex px-4 sm:px-6">
-  <!-- Use items-center on the outer container to vertically align all sections -->
-  <div class="navbar-inner-container w-full h-full flex justify-between items-center">
+  <div class="navbar-inner-container w-full h-full flex justify-between items-center relative">
 
-    <!-- Left Section (Logo/Brand) -->
-    <div class="flex items-center flex-shrink-0"> <!-- items-center here aligns img and text -->
-        <img src="assets/app.png" alt="App Icon" class="h-6 w-6 sm:h-6 sm:w-6 lg:w-12 lg:h-12 mr-2">
+    <div class="flex items-center flex-shrink-0"> <img src="assets/app.png" alt="App Icon" class="h-6 w-6 sm:h-6 sm:w-6 lg:w-12 lg:h-12 mr-2">
         <div class="font-semibold text-lg text-surface-600 dark:text-surface-300 hidden sm:block">
          Couple Task Manager
         </div>
     </div>
 
-    <!-- Center Section (Desktop Navigation Links) -->
-    <!-- Hidden on mobile (default), flex row on sm and up -->
     <div class="hidden sm:flex items-center space-x-4 lg:space-x-6">
       <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
 
-        <!-- Dashboard Link -->
-        <!-- Assuming Dashboard is always available when in a household -->
         <a routerLink="/dashboard"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
-           <i class="pi pi-th-large text-sm"></i> <!-- Icon: pi-th-large or pi-home -->
-           <span>{{ 'side-menu.dashboard' | translate}}</span> <!-- Ensure translation key exists -->
+           <i class="pi pi-th-large text-sm"></i>
+           <span>{{ 'side-menu.dashboard' | translate}}</span>
         </a>
 
-        <!-- Tasks Link -->
-        <!-- Assuming an 'enableTasks' flag on household object -->
         <a
            routerLink="/tasks"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
-           <i class="pi pi-list text-sm"></i> <!-- Icon: pi-list or pi-check-circle -->
-           <span>{{ 'side-menu.tasks' | translate}}</span> <!-- Ensure translation key exists -->
+           <i class="pi pi-list text-sm"></i>
+           <span>{{ 'side-menu.tasks' | translate}}</span>
         </a>
-        <!-- Meals Link -->
-        <!-- Assuming an 'enableMeals' flag on household object -->
+
         <a
            routerLink="/meals"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
-           <i class="pi pi-utensils text-sm"></i> <!-- Icon: pi-utensils or pi-book -->
-           <span>{{ 'side-menu.meals' | translate}}</span> <!-- Ensure translation key exists -->
+           <i class="pi pi-utensils text-sm"></i>
+           <span>{{ 'side-menu.meals' | translate}}</span>
         </a>
 
-        <!-- Shopping List Link -->
-        <!-- Assuming an 'enableShoppingList' flag on household object -->
         <a
-           routerLink="/shopping-list" 
+           routerLink="/shopping-list"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
-           <i class="pi pi-shopping-cart text-sm"></i> <!-- Icon: pi-shopping-cart or pi-tag -->
-           <span>{{ 'side-menu.shopping-list' | translate}}</span> <!-- Ensure translation key exists -->
+           <i class="pi pi-shopping-cart text-sm"></i>
+           <span>{{ 'side-menu.shopping-list' | translate}}</span>
         </a>
+        
         <a
         routerLink="/household/travel"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
-           <i class="fa-solid fa-plane text-sm"></i> <!-- Icon: pi-shopping-cart or pi-tag -->
-           <span>{{ 'Travel Checklist' | translate}}</span> <!-- Ensure translation key exists -->
+           <i class="fa-solid fa-plane text-sm"></i>
+           <span>{{ 'Travel Checklist' | translate}}</span>
         </a>
-
 
       </ng-container>
     </div>
 
-    <!-- Right Section (Desktop Buttons / Mobile Trigger) -->
-    <div class="flex items-center space-x-4 flex-shrink-0"> <!-- Added flex-shrink-0 here -->
-      <!-- Mobile Menu Button (Hamburger) -->
+    <div class="flex items-center space-x-4 flex-shrink-0">
+      
+      <div class="relative" *ngIf="(isLoggedIn$ | async)">
+        <button (click)="toggleNotifications()" class="p-2 text-surface-600 dark:text-surface-300 hover:text-pink-500 transition-colors relative focus:outline-none rounded-full hover:bg-surface-100 dark:hover:bg-surface-800">
+          <i class="pi pi-bell text-xl sm:text-2xl"></i>
+          
+          <span *ngIf="(unreadCount$ | async) as count" 
+                class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-red-500 rounded-full min-w-[18px]">
+            {{ count > 99 ? '99+' : count }}
+          </span>
+        </button>
+
+        <div *ngIf="showNotifications" 
+             class="absolute right-0 mt-3 w-80 sm:w-96 bg-white dark:bg-surface-900 rounded-xl shadow-2xl overflow-hidden border border-slate-100 dark:border-surface-700 z-[100] animate-fade-in-up origin-top-right">
+          
+          <div class="px-4 py-3 border-b border-slate-100 dark:border-surface-700 bg-slate-50 dark:bg-surface-800 flex justify-between items-center">
+            <h3 class="font-bold text-slate-800 dark:text-surface-100">Notifications</h3>
+          </div>
+
+          <div class="max-h-[400px] overflow-y-auto">
+            <div *ngIf="notifications.length === 0" class="p-8 text-center text-slate-400">
+              <i class="pi pi-bell-slash text-2xl mb-2"></i>
+              <p class="text-sm">No notifications yet</p>
+            </div>
+
+            <div *ngFor="let note of notifications" 
+                 (click)="handleNotificationClick(note)"
+                 class="p-4 border-b border-slate-50 dark:border-surface-800 hover:bg-slate-50 dark:hover:bg-surface-800 cursor-pointer transition-colors flex gap-3 relative">
+              
+              <div *ngIf="!note.read" class="absolute left-2 top-1/2 -mt-1 w-2 h-2 bg-blue-500 rounded-full"></div>
+
+              <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                   [ngClass]="{
+                     'bg-pink-100 text-pink-600': note.type === 'LETTER',
+                     'bg-blue-100 text-blue-600': note.type === 'TASK',
+                     'bg-gray-100 text-gray-600': note.type === 'GENERIC'
+                   }">
+                <i class="pi" 
+                   [ngClass]="{
+                     'pi-envelope': note.type === 'LETTER',
+                     'pi-check-square': note.type === 'TASK',
+                     'pi-info-circle': note.type === 'GENERIC'
+                   }"></i>
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-bold text-slate-800 dark:text-surface-100 truncate">{{ note.title }}</h4>
+                <p class="text-xs text-slate-500 dark:text-surface-400 mt-1 line-clamp-2">{{ note.message }}</p>
+                <p class="text-[10px] text-slate-400 mt-2">{{ note.createdDate | date:'short' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="">
         <button pButton pRipple type="button" icon="pi pi-bars" class="p-button-text" (click)="toggleMenu()"></button>
       </div>
@@ -81,33 +120,40 @@
 </nav>
 
 
-<!-- Mobile Menu Overlay & Panel (Example Structure) -->
-<!-- Overlay to close menu on outside click -->
-<div *ngIf="isMenuOpen" class=" fixed inset-0 z-40" (click)="toggleMenu()"></div>
+<div *ngIf="isMenuOpen" class="fixed inset-0 z-40" (click)="toggleMenu()"></div>
 
-<!-- Sliding Menu Panel -->
 <div *ngIf="isMenuOpen"
      class="mobile-menu-panel fixed top-0 right-0 h-full w-64 lg:w-128 sm:w-64 bg-surface-0 dark:bg-surface-900 shadow-lg z-50 p-4 transition-transform duration-300 ease-in-out transform flex flex-col"
      [class.translate-x-0]="isMenuOpen"
      [class.translate-x-full]="!isMenuOpen">
 
-  <!-- Menu Header -->
   <div class="flex justify-between items-center mb-6">
     <span class="font-semibold text-lg text-surface-800 dark:text-surface-100">{{'side-menu.menu'|translate}}</span>
     <button pButton pRipple type="button" icon="pi pi-times" class="p-button-text p-button-rounded" (click)="toggleMenu()"></button>
   </div>
-  <!-- Optional: Add language/theme switches at the bottom -->
+  
   <div class="border-t border-b border-surface-200 dark:border-surface-700">
      <button pButton pRipple (click)="useLanguage('en')" label="EN" class="p-button-text p-button-sm"></button>
      <button pButton pRipple (click)="useLanguage('fr')" label="FR" class="p-button-text p-button-sm"></button>
-     <!-- Add theme switch button if needed -->
   </div>
+
+  <div class="border-t border-b border-surface-200 dark:border-surface-700">
+    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
+      <a routerLink="/letters"
+      class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
+      (click)="toggleMenu()">
+      <i class="pi pi-envelope"></i>
+      <span>Letters</span>
+     </a>
+    </ng-container>
+ </div>
+
   <div class="border-t border-b border-surface-200 dark:border-surface-700">
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
       <a *ngIf="household && household.enableWaysToCare"
       routerLink="/household/ways-to-care"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()"> <!-- Close menu on click -->
+      (click)="toggleMenu()">
       <i class="pi pi-heart-fill"></i>
       <span>{{ 'side-menu.ways-to-care' | translate}}</span>
      </a>
@@ -118,7 +164,7 @@
       <a *ngIf="household"
       routerLink="/household/rewards"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()"> <!-- Close menu on click -->
+      (click)="toggleMenu()">
       <i class="pi pi-star-fill "></i>
       <span>{{ 'side-menu.rewards' | translate}}</span>
      </a>
@@ -129,7 +175,7 @@
       <a *ngIf="household && household.enableToDoList"
       routerLink="/household/to-do"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()"> <!-- Close menu on click -->
+      (click)="toggleMenu()">
       <i class="pi pi-car"></i>
       <span>{{ 'side-menu.to-do-list' | translate}}</span>
      </a>
@@ -140,7 +186,7 @@
       <a *ngIf="household && household.enableWishList"
       routerLink="/household/wish-list"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()"> <!-- Close menu on click -->
+      (click)="toggleMenu()">
       <i class="pi pi-shopping-bag"></i>
       <span>{{ 'side-menu.wish-list' | translate}}</span>
      </a>
@@ -151,36 +197,26 @@
       <a *ngIf="household && household.enableTravelChecklist"
       routerLink="/household/travel"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()"> <!-- Close menu on click -->
+      (click)="toggleMenu()">
       <i class="fa-solid fa-plane"></i>
       <span>{{ 'Travel Checklist' | translate}}</span>
      </a>
     </ng-container>
  </div>
-  <!-- <div class="border-t border-b border-surface-200 dark:border-surface-700">
-    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
-      <a *ngIf="household"
-      routerLink="/household/contacts"
-      class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()">
-      <i class="pi pi-address-book"></i>
-      <span>{{ 'side-menu.contacts' | translate}}</span>
-     </a>
-    </ng-container>
- </div> -->
+
   <div class="border-t border-b border-surface-200 dark:border-surface-700">
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
       <a *ngIf="household"
       routerLink="/tasks"
       class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()"> <!-- Close menu on click -->
+      (click)="toggleMenu()">
       <i class="pi pi-list"></i>
       <span>{{ 'side-menu.tasks' | translate}}</span>
      </a>
     </ng-container>
  </div>
 
-  <div class="mt-auto pb-16 pt-4 border-t border-surface-200 dark:border-surface-700 flex-shrink-0"> <!-- Added flex-shrink-0 -->
+  <div class="mt-auto pb-16 pt-4 border-t border-surface-200 dark:border-surface-700 flex-shrink-0">
     <div *ngIf="currentUser$ | async as user">
       <div *ngIf="user?.roles?.includes(USER_ROLE.USER)">
         <p-checkbox
@@ -193,7 +229,7 @@
         </label>  
       </div>
     </div>
-    <!-- Household Join Code Section -->
+    
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
         <div *ngIf="household && household.householdJoinKey" class="mb-4">
             <label class="block text-xs font-medium text-surface-500 dark:text-surface-400 mb-1">{{'side-menu.household-invitation-code'|translate}} :</label>
@@ -221,20 +257,14 @@
             {{'side-menu.join-household' | translate}}
     </button>
 
-
-  <!-- Menu Items -->
   <div class="flex flex-col space-y-2 flex-grow overflow-y-auto">
-    <!-- Add other mobile navigation links here -->
-    <!-- Example: <a routerLink="/dashboard" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Dashboard</a> -->
-    <!-- Example: <a routerLink="/tasks" class="p-button p-button-text text-left w-full justify-start" (click)="toggleMenu()">Tasks</a> -->
     <a *ngIf="(isLoggedIn$ | async) && (household$ | async)"
        routerLink="/household/manage"
        class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-       (click)="toggleMenu()"> <!-- Close menu on click -->
+       (click)="toggleMenu()">
        <i class="pi pi-cog"></i>
        <span>{{ 'side-menu.manage-household' | translate}}</span>
     </a>
-    <!-- *** ADD MOBILE LOGOUT BUTTON BACK *** -->
     <button *ngIf="isLoggedIn$ | async"
             pButton
             pRipple
@@ -244,9 +274,8 @@
             (click)="logout()">
             {{'side-menu.logout' | translate}}
     </button>
-    <!-- *** END MOBILE LOGOUT BUTTON *** -->
 
-  </div> <!-- End Menu Items -->
+  </div>
 
   </div>
 </div>

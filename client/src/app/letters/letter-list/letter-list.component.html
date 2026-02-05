@@ -1,0 +1,103 @@
+<div class="min-h-screen bg-slate-50 pb-24">
+  <div class="relative bg-white shadow-sm pt-8 pb-12 px-6 overflow-hidden">
+    <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-pink-50 rounded-full blur-3xl opacity-60"></div>
+    <div class="max-w-5xl mx-auto flex justify-between items-end relative z-10">
+      <div>
+        <h1 class="text-4xl font-extrabold text-slate-800 tracking-tight">Your Mailbox</h1>
+        <p class="text-slate-500 mt-2 text-lg">Send love, share thoughts, keep memories.</p>
+      </div>
+      <a routerLink="/letters/new" 
+         class="group flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-full font-medium shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+        <span class="material-icons text-xl group-hover:rotate-12 transition-transform">edit_note</span>
+        Write Letter
+      </a>
+    </div>
+  </div>
+
+  <div class="max-w-5xl mx-auto px-6 mt-10 space-y-12">
+    
+    <section>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-pink-100 p-2 rounded-lg">
+          <span class="material-icons text-pink-600">mark_email_unread</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800">Waiting for you</h2>
+        <span *ngIf="unopenedLetters.length > 0" class="bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+          {{ unopenedLetters.length }} New
+        </span>
+      </div>
+
+      <div [@listAnimation]="unopenedLetters.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngIf="!isLoading && unopenedLetters.length === 0" class="col-span-full py-12 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+          <span class="material-icons text-6xl text-slate-200 mb-4">inbox</span>
+          <p class="text-slate-400 font-medium">No new mail... why not send one?</p>
+        </div>
+
+        <div *ngFor="let letter of unopenedLetters" 
+             (click)="openLetter(letter.id)"
+             class="group relative bg-white cursor-pointer rounded-2xl shadow-sm hover:shadow-xl border border-pink-100 overflow-hidden transition-all duration-300 hover:-translate-y-2">
+          
+          <div class="h-2 w-full bg-gradient-to-r from-pink-400 to-rose-400"></div>
+          
+          <div class="p-6">
+            <div class="flex justify-between items-start mb-4">
+               <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-pink-50 text-pink-700">
+                 {{ letter.letterType }}
+               </span>
+               <span class="text-xs text-slate-400 font-medium">
+                 {{ letter.createdDate | date:'MMM d' }}
+               </span>
+            </div>
+
+            <div *ngIf="letter.repliedDate && !letter.replyRead" class="mb-3">
+               <span class="text-xs font-bold text-green-600 flex items-center gap-1">
+                 <span class="material-icons text-sm">reply</span> New Reply!
+               </span>
+            </div>
+            
+            <h3 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-pink-600 transition-colors">
+              {{ letter.title }}
+            </h3>
+            
+            <div class="flex items-center gap-3 mt-4 pt-4 border-t border-slate-50">
+              <img [src]="letter.sender.imageUrl || 'assets/placeholder.jpg'" class="w-8 h-8 rounded-full ring-2 ring-white shadow-sm object-cover">
+              <span class="text-sm font-medium text-slate-600">From {{ letter.sender.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex items-center gap-3 mb-6">
+        <div class="bg-slate-100 p-2 rounded-lg">
+           <span class="material-icons text-slate-600">drafts</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-800">Opened Memories</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div *ngFor="let letter of openedLetters" 
+             (click)="openLetter(letter.id)"
+             class="relative bg-slate-50 hover:bg-white border border-transparent hover:border-slate-200 rounded-xl p-5 cursor-pointer transition-all duration-200 hover:shadow-md group">
+          
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-bold text-slate-700">{{ letter.title }}</h3>
+              <p class="text-xs text-slate-400 mt-1">
+                {{ letter.sender.name }} • {{ letter.createdDate | date:'shortDate' }}
+              </p>
+            </div>
+            <button (click)="deleteLetter(letter.id, $event)" class="text-slate-300 hover:text-red-500 transition-colors p-1 rounded-md hover:bg-red-50 opacity-0 group-hover:opacity-100">
+              <span class="material-icons text-lg">delete_outline</span>
+            </button>
+          </div>
+          
+          <div *ngIf="letter.selectedOption" class="mt-3 text-xs bg-green-100 text-green-700 inline-block px-2 py-1 rounded">
+             Replied: {{ letter.selectedOption }}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

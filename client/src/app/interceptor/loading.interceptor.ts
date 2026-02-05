@@ -1,4 +1,3 @@
-// src/app/interceptors/loading.interceptor.ts
 import { Injectable, inject } from '@angular/core';
 import {
   HttpRequest,
@@ -8,24 +7,37 @@ import {
   HttpResponse
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { catchError, finalize, map } from 'rxjs/operators';
-import { LoadingService } from '../service/loading/loading.service'; // Adjust path if needed
+import { catchError, map } from 'rxjs/operators';
+import { LoadingService } from '../service/loading/loading.service'; 
 import { ShoppingService } from '../service/shopping.service';
 import { RecipeService } from '../service/recipe.service';
 
 @Injectable()
 export class LoadingInterceptor implements HttpInterceptor {
 
-  private activeRequests = 0;
   private loadingService = inject(LoadingService);
-  excludedLoadEndpoints: string[] =  [ ShoppingService.shoppingListSuggestionsEndPoint(), ShoppingService.shoppingListUpdateQuantityEndpoint(), RecipeService.randomRecipeEndpoint(), '/travel' ]
+  
+  // Existing exclusions
+  excludedLoadEndpoints: string[] =  [ 
+    ShoppingService.shoppingListSuggestionsEndPoint(), 
+    ShoppingService.shoppingListUpdateQuantityEndpoint(), 
+    RecipeService.randomRecipeEndpoint(), 
+    '/travel' 
+  ];
 
   intercept(request: HttpRequest<any>, next: any): Observable<HttpEvent<any>> {
-    if(this.excludedLoadEndpoints.includes(request.url) || this.excludedLoadEndpoints.some((endpoint) => request.url.startsWith(endpoint)) || request.url.includes('travel')){
+    // Check if the URL should be excluded from the loading spinner
+    // We added 'notifications/unread-count' to the check
+    if(this.excludedLoadEndpoints.includes(request.url) || 
+       this.excludedLoadEndpoints.some((endpoint) => request.url.startsWith(endpoint)) || 
+       request.url.includes('travel') || 
+       request.url.includes('notifications/unread-count')) { 
+      
       return next.handle(request);
     }
 
     this.loadingService.setLoading(true, request.url);
+    
     return next.handle(request)
       .pipe(catchError((err) => {
         this.loadingService.setLoading(false, request.url);

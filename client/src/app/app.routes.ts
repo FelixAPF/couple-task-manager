@@ -19,6 +19,9 @@ import { ServerErrorComponent } from './server-error/server-error.component';
 import { ContactsComponent } from './household/contacts/contacts.component';
 import { TravelChecklistComponent } from './service/components/travel/travel-checklist/travel-checklist.component';
 import { PrivacyComponent } from './privacy/privacy.component'
+import { LetterListComponent } from './letters/letter-list/letter-list.component';
+import { CreateLetterComponent } from './letters/create-letter/create-letter.component';
+import { LetterDetailComponent } from './letters/letter-detail/letter-detail.component';
 
 
 export const routes: Routes = [
@@ -54,6 +57,15 @@ export const routes: Routes = [
             { path: 'wish-list', component: WishListComponent, canActivate: [authGuard] },
             { path: 'travel', component: TravelChecklistComponent, canActivate: [authGuard] },
             { path: 'contacts', component: ContactsComponent, canActivate: [authGuard] },
+        ]
+    },
+    {
+        path: 'letters',
+        canActivate: [authGuard],
+        children: [
+            { path: '', component: LetterListComponent },
+            { path: 'new', component: CreateLetterComponent },
+            { path: 'view/:id', component: LetterDetailComponent }
         ]
     },
     { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },

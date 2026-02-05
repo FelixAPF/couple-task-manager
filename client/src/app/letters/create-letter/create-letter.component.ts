@@ -16,6 +16,7 @@ import { HouseholdMember } from '../../model/household';
 export class CreateLetterComponent implements OnInit {
   letterForm: FormGroup;
   householdMembers: HouseholdMember[] = [];
+  currentUser: HouseholdMember | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -37,8 +38,11 @@ export class CreateLetterComponent implements OnInit {
   ngOnInit(): void {
     this.householdService.retrieveHousehold().subscribe(household => {
       // Filter out current user if needed, or backend handles "self" check
+      if(household?.currentUser)
+        this.currentUser = household.currentUser;
       if(!household?.members) return;
       this.householdMembers = household?.members;
+
     });
 
     // Watch for toggle changes
@@ -52,6 +56,10 @@ export class CreateLetterComponent implements OnInit {
       }
       this.letterForm.get('optionsTitle')?.updateValueAndValidity();
     });
+  }
+
+  get nonSelfHouseholdMembers(): HouseholdMember[] {
+    return this.householdMembers.filter(member => member.id !== this.currentUser?.id);
   }
 
   get options(): FormArray {

@@ -35,6 +35,15 @@ public class CTMUserService implements UserDetailsService {
     private TaskAssignmentRepository taskAssignmentRepository;
 
     @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private DeviceTokenRepository deviceTokenRepository;
+
+    @Autowired
+    private LetterRepository letterRepository;
+
+    @Autowired
     private TaskListRepository taskListRepository;
 
     @PersistenceContext
@@ -126,23 +135,55 @@ public class CTMUserService implements UserDetailsService {
         CTMUser managedUser = ctmUserRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
+        // ---------------------------------------------------------------------
+        // 0. PRE-CLEANUP: Notifications, Tokens, Letters
+        // ---------------------------------------------------------------------
+
+        // 1. Delete Notifications
+        List<Notification> notifications = notificationRepository.findByUserOrderByCreatedDateDesc(managedUser);
+        if (notifications != null && !notifications.isEmpty()) {
+            notificationRepository.deleteAll(notifications);
+        }
+
+        // 2. Delete Device Tokens (Push Notifications)
+        List<DeviceToken> tokens = deviceTokenRepository.findAllByUser(managedUser);
+        if (tokens != null && !tokens.isEmpty()) {
+            deviceTokenRepository.deleteAll(tokens);
+        }
+
+        // 3. Delete Letters (Sent & Received)
+        // Sent letters
+        List<Letter> sentLetters = letterRepository.findBySenderOrderByCreatedDateDesc(managedUser);
+        if (sentLetters != null && !sentLetters.isEmpty()) {
+            letterRepository.deleteAll(sentLetters);
+        }
+
+        // Received letters (Unopened)
+        List<Letter> receivedUnopened = letterRepository.findByReceiverAndOpenedFalseOrderByCreatedDateDesc(managedUser);
+        if (receivedUnopened != null && !receivedUnopened.isEmpty()) {
+            letterRepository.deleteAll(receivedUnopened);
+        }
+
+        // Received letters (Opened)
+        List<Letter> receivedOpened = letterRepository.findByReceiverAndOpenedTrueOrderByCreatedDateDesc(managedUser);
+        if (receivedOpened != null && !receivedOpened.isEmpty()) {
+            letterRepository.deleteAll(receivedOpened);
+        }
+
+        // ---------------------------------------------------------------------
+        // EXISTING CLEANUP LOGIC
+        // ---------------------------------------------------------------------
+
         // 1. Supprimer les assignations de tâches
-        // CORRECTION : On ne fait pas setAssignee(null), on supprime directement.
-        // On copie la liste pour éviter une ConcurrentModificationException si on itérait directement
         List<TaskAssignment> assignmentsToDelete = new ArrayList<>(managedUser.getTaskAssignments());
 
-        // Option A: Suppression une par une (plus sûr pour les cascades)
         for (TaskAssignment assignment : assignmentsToDelete) {
             taskAssignmentRepository.delete(assignment);
         }
 
-        // Option B (plus rapide si disponible): taskAssignmentRepository.deleteAll(assignmentsToDelete);
-
-        // Vider la liste en mémoire pour que Hibernate ne tente pas de sauver des relations orphelines
         managedUser.getTaskAssignments().clear();
 
         if (managedUser.getTaskLists() != null && !managedUser.getTaskLists().isEmpty()) {
-            // Créer une copie pour itérer sans modifier la collection source pendant la boucle
             List<TaskList> listsToDelete = new ArrayList<>(managedUser.getTaskLists());
 
             for (TaskList list : listsToDelete) {
@@ -152,25 +193,23 @@ public class CTMUserService implements UserDetailsService {
                     tasksToDelete.addAll(list.getTasks());
 
                     // B. IMPORTANT : Vider la liste et SAUVEGARDER
-                    // Cela force Hibernate à exécuter "DELETE FROM task_tasklist WHERE..."
                     list.getTasks().clear();
                     taskListRepository.saveAndFlush(list);
                 }
 
-                // C. Supprimer les tâches orphelines (et leurs assignations par cascade si configuré)
-                // Note: Si vos tâches ont des contraintes (ex: assignations), assurez-vous que Task.java a CascadeType.REMOVE sur les assignations
+                // C. Supprimer les tâches orphelines
                 if (!tasksToDelete.isEmpty()) {
                     taskRepository.deleteAll(tasksToDelete);
                 }
 
-                // D. Supprimer la liste (maintenant qu'elle n'est plus référencée dans task_tasklist)
+                // D. Supprimer la liste
                 taskListRepository.delete(list);
             }
 
             managedUser.getTaskLists().clear();
         }
 
-        // 3. Gestion du Foyer (Le reste de votre code qui fonctionnait)
+        // 3. Gestion du Foyer
         Household household = managedUser.getHousehold();
         if (household != null) {
             household.getUsers().remove(managedUser);

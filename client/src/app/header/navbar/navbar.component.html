@@ -92,12 +92,14 @@
                    [ngClass]="{
                      'bg-pink-100 text-pink-600': note.type === 'LETTER',
                      'bg-blue-100 text-blue-600': note.type === 'TASK',
+                     'bg-orange-100 text-orange-600': note.type === 'MEAL', 
                      'bg-gray-100 text-gray-600': note.type === 'GENERIC'
                    }">
                 <i class="pi" 
                    [ngClass]="{
                      'pi-envelope': note.type === 'LETTER',
                      'pi-check-square': note.type === 'TASK',
+                     'pi-inbox': note.type === 'MEAL', 
                      'pi-info-circle': note.type === 'GENERIC'
                    }"></i>
               </div>

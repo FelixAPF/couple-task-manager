@@ -1,5 +1,6 @@
 package com.couple.taskmanager.component;
 
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Meal;
 import com.couple.taskmanager.repository.MealRepository;
 import com.couple.taskmanager.service.FirebaseMessagingService;
@@ -20,29 +21,44 @@ public class ThawingReminderJob {
     @Autowired
     private FirebaseMessagingService notificationService;
 
-    // Runs every day at 8 PM server time
+    // Runs every day at 7 PM server time
     @Scheduled(cron = "0 0 19 * * *", zone = "America/Toronto")
     public void checkThawingNeeded() {
-        // Calculate "Tomorrow"
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DAY_OF_YEAR, 1);
         Date tomorrowStart = DateUtils.getStartOfDay(cal.getTime());
         Date tomorrowEnd = DateUtils.getEndOfDay(cal.getTime());
 
-        // You likely need a custom query in MealRepository for this:
-        // List<Meal> findByDateBetweenAndIsThawingNeededTrue(Date start, Date end);
         List<Meal> meals = mealRepository.findByDateBetweenAndIsThawingNeededTrue(tomorrowStart, tomorrowEnd);
 
         for (Meal meal : meals) {
             String recipeName = meal.getRecipe() != null ? meal.getRecipe().getName() : "Unknown Meal";
-            String message = "N'oubliez pas de décongeler les ingrédients pour: " + recipeName;
+            String title = "Décongélation requise ❄️";
+            String message = "Pour demain: " + recipeName;
 
             if (meal.getAssignedUser() != null) {
-                // Notify Assignee
-                notificationService.sendNotificationToUser(meal.getAssignedUser(), "Décongélation nourriture", message);
+                // Notify Assignee with "MEAL" type navigation
+                notificationService.sendNotificationWithNavigation(
+                        meal.getAssignedUser(),
+                        title,
+                        message,
+                        "MEAL",
+                        meal.getId()
+                );
             } else {
                 // Notify Household
-                notificationService.sendNotificationToUsers(meal.getHousehold().getUsers(), "Décongélation nourriture", message);
+                List<CTMUser> users = meal.getHousehold().getUsers();
+                if (users != null) {
+                    for (CTMUser user : users) {
+                        notificationService.sendNotificationWithNavigation(
+                                user,
+                                title,
+                                message,
+                                "MEAL",
+                                meal.getId()
+                        );
+                    }
+                }
             }
         }
     }

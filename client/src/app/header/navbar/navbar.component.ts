@@ -124,6 +124,8 @@ toggleMenu(): void {
       this.router.navigate(['/letters/view', notification.referenceId]);
     } else if (notification.type === 'TASK') {
       this.router.navigate(['/tasks']);
+    } else if (notification.type === 'MEAL') {
+      this.router.navigate(['/meals']);
     } else {
       // Generic fallback
       this.router.navigate(['/dashboard']);

@@ -59,17 +59,6 @@ public class LetterService {
             );
         } catch (Exception e) { e.printStackTrace(); }
 
-        // ... in replyToLetter method ...
-        try {
-            firebaseMessagingService.sendNotificationWithNavigation(
-                    sender,
-                    "Réponse à un courrier",
-                    letter.getReceiver().getName() + " a répondu à: " + letter.getTitle(),
-                    "LETTER",
-                    letter.getId() // Pass the ID for redirection
-            );
-        } catch (Exception e) { e.printStackTrace(); }
-
         return savedLetter;
     }
 
@@ -162,15 +151,15 @@ public class LetterService {
         CTMUser sender = userRepository.findById(senderId).orElse(letter.getSender());
 
         try {
-            firebaseMessagingService.sendNotificationToUser(
+            firebaseMessagingService.sendNotificationWithNavigation(
                     sender,
                     "Réponse à un courrier",
-                    user.getName() + " a répondu à: " + letter.getTitle()
+                    letter.getReceiver().getName() + " a répondu à: " + letter.getTitle(),
+                    "LETTER",
+                    letter.getId() // Pass the ID for redirection
             );
-        } catch (Exception e) {
-            System.err.println("Failed to send notification: " + e.getMessage());
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
+
 
         return saved;
     }

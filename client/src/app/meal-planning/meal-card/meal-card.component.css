@@ -1,60 +1,46 @@
-/* c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\meal-planning\meal-card\meal-card.component.css */
-
 /* Target the host element when the highlight class is present */
-:host(.highlight-monday) .p-card { /* Target the p-card element *within* the host */
-    border: 2px solid #a7f3d0; /* Example: Light green/teal */
-    /* box-shadow: 0 0 5px 1px #a7f3d0; */ /* Optional glow */
-  }
-  
-  :host(.highlight-wednesday) .p-card { /* Target the p-card element *within* the host */
-    border: 2px solid #3b82f6; /* Example: Medium blue */
-     /* box-shadow: 0 0 5px 1px #3b82f6; */ /* Optional glow */
-  }
-  
-  /* Ensure the card itself handles box-sizing if needed (usually does) */
-  :host .p-card {
+:host(.highlight-monday) .p-card { 
+    border: 2px solid #a7f3d0; 
+}
+
+:host(.highlight-wednesday) .p-card { 
+    border: 2px solid #3b82f6; 
+}
+
+:host .p-card {
     box-sizing: border-box;
-    /* Remove default border if the highlight border should fully replace it */
-    /* border: none; */ /* Uncomment if you ONLY want the highlight border */
-  }
-  
-  /* Add any other specific styles for the meal card here */
-  :host {
-    display: block; /* Ensure the host takes up block space */
-    height: 100%; /* Ensure host fills the container height */
-  }
-  
-  /* Adjust internal padding if border makes things look cramped */
-  /* :host(.highlight-monday) .p-card .p-card-body,
-  :host(.highlight-wednesday) .p-card .p-card-body {
-     padding: calc(var(--card-body-padding) - 1px); /* Example if using CSS vars */
-  /* } */
-  
-  /* Make sure the image placeholder icon is centered */
-  .p-card-content i.pi-image {
-      margin: auto;
-  }
-  
-  .first .p-card {
+}
+
+:host {
+    display: block; 
+    height: 100%; 
+}
+
+.p-card-content i.pi-image {
+    margin: auto;
+}
+
+.first .p-card {
     border: 2px solid #a7f3d0 !important;
     box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
     border-radius: 0.5rem;
-  }  
-  .last .p-card {
+}  
+
+.last .p-card {
     border: 2px solid #3d535a !important;
     box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
     border-radius: 0.5rem;
-  }
-  
-  .today .p-card {
+}
+
+.today .p-card {
     border: 2px solid #feffac !important;
     box-shadow: 0 0 8px rgba(128, 128, 128, 0.5);
     border-radius: 0.5rem;
-  }
+}
 
-  .selected .p-card {
+.selected .p-card {
     border: 2px solid #3b82f6 !important;
     box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
     background-color:  #b6dcdd !important;
     border-radius: 0.5rem;
-  }
+}

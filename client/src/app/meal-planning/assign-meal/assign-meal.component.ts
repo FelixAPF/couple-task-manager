@@ -81,8 +81,8 @@ export class AssignMealComponent implements OnInit {
         this.isThawingNeeded = this.dialogConfig.data.meal.isThawingNeeded;
       }
 
-      if(this.dialogConfig.data.meal?.assignee) { 
-        this.assignee = this.dialogConfig.data.meal?.assignee;
+      if(this.dialogConfig.data.meal?.assignedUser) { 
+        this.assignee = this.dialogConfig.data.meal?.assignedUser;
       } 
 
       this.loadRecipes();
@@ -142,6 +142,7 @@ export class AssignMealComponent implements OnInit {
 
   assignSelectedMeal(): void {
     if (this.selectedRecipe) {
+      console.log("ASSIGNING SELECTED MEAL", this.assignee);
       this.dialogRef.close({
           recipe: this.selectedRecipe,
           date: this.targetDate,

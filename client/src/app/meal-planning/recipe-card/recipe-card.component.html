@@ -1,8 +1,15 @@
 <p-card [styleClass]="'recipe-card h-full flex flex-col bg-surface-0 dark:bg-surface-800 shadow-md hover:shadow-lg transition-shadow duration-200 rounded-lg overflow-hidden'">
-    <!-- Header, Title, Subtitle... -->
     <ng-template pTemplate="header">
-      <div class="relative h-48 bg-surface-100 dark:bg-surface-700">
-        <img *ngIf="recipe.imageUrl; else imagePlaceholder" [src]="recipe.imageUrl" [alt]="recipe.name" class="w-full h-full object-cover">
+      <div class="relative h-48 bg-surface-100 dark:bg-surface-700 group"> <img *ngIf="recipe.imageUrl; else imagePlaceholder" [src]="recipe.imageUrl" [alt]="recipe.name" class="w-full h-full object-cover">
+        
+        <button 
+          (click)="openEditRecipe($event)"
+          class="absolute bottom-2 right-2 z-30 w-10 h-10 flex items-center justify-center cursor-pointer bg-white/95 dark:bg-surface-800/95 backdrop-blur-sm rounded-full shadow-md hover:bg-primary-500 hover:text-white transition-all duration-200 border border-surface-200 dark:border-surface-600"
+          [pTooltip]="'Modifier la recette'"
+          tooltipPosition="left">
+          <i class="pi pi-pencil text-[10px]"></i>
+        </button>
+
         <ng-template #imagePlaceholder>
           <div #imagePlaceholderRef class="absolute inset-0 flex items-center justify-center text-surface-400 dark:text-surface-500">
             <i class="pi pi-image text-5xl"></i>
@@ -10,11 +17,13 @@
         </ng-template>
       </div>
     </ng-template>
+
     <ng-template pTemplate="title">
       <span class="block truncate text-lg font-semibold text-surface-800 dark:text-surface-100" [pTooltip]="recipe.name" tooltipPosition="top">
         {{ recipe.name }}
       </span>
     </ng-template>
+    
     <ng-template pTemplate="subtitle">
       <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs text-surface-600 dark:text-surface-400 mb-2">
         <span *ngIf="recipe.category">
@@ -23,7 +32,6 @@
       </div>
     </ng-template>
 
-    <!-- Card Content -->
     <ng-template pTemplate="content">
       <div class="flex-grow">
         <p #descriptionParagraph *ngIf="recipe.description"
@@ -31,11 +39,9 @@
         [class.line-clamp-3]="clampDescription && !overrideDescriptionClamp">
        {{ recipe.description }}
      </p>
-        <!-- Combined and Styled Show More/Less Link -->
         <span *ngIf="clampDescription && isDescriptionOverflowing"
         (click)="toggleDescriptionClamp()"
         class="text-xs text-primary-600 dark:text-primary-400 hover:underline cursor-pointer font-medium mt-1 inline-block mb-3  description-paragraph">
-        <!-- Text still depends on the override flag -->
           {{ overrideDescriptionClamp ? 'Voir moins' : 'Voir plus' }}
         </span>
 
@@ -65,7 +71,6 @@
                               (Base: {{ recipe.basePortionRatio }} portion{{ recipe.basePortionRatio > 1 ? 's' : '' }})
                         </small>
                     </div>
-
                 </div>
                 <ul class="list-disc pl-5 space-y-1 text-sm text-surface-700 dark:text-surface-300 mt-3"> <li *ngFor="let ingredient of scaledIngredients">
                         {{ formatIngredient(ingredient) }} <i class="pi pi-plus-circle hover" (click)="addIngredientToShopList(ingredient)" style="font-size:0.9rem"></i>
@@ -83,8 +88,6 @@
     <ng-template pTemplate="footer" *ngIf="buttonsTemplate">
         <div class="flex justify-end gap-2 pt-2 border-t border-surface-100 dark:border-surface-700 mt-auto">
             <ng-container [ngTemplateOutlet]="buttonsTemplate"></ng-container>
-
         </div>
     </ng-template>
-
   </p-card>

@@ -7,8 +7,9 @@ import { TagSeverity } from '../recipes-list/recipes-list.component';
 import { ShoppingService } from '../../service/shopping.service';
 import { ItemType, ShoppingItem, Store } from '../../model/shopping-item';
 import { Subscription } from 'rxjs';
-import { DialogService } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { SelectStoreComponent } from '../../shopping-planning/select-store/select-store.component';
+import { RecipeCreationComponent } from '../recipe-creation/recipe-creation.component';
 
 @Component({
   selector: 'app-recipe-card',
@@ -35,6 +36,7 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{
   displayPortionRatio: number | null = null; // User-editable portion ratio
   // --- End Ingredient Scaling ---
   subscription: Subscription = new Subscription();
+  recipeDialogRef: DynamicDialogRef | undefined; // Ref for the dialog
 
   constructor(private cdRef: ChangeDetectorRef) {}
 
@@ -81,6 +83,23 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{
       this.subscription.add(this.shoppingService.addShoppingItem(shoppingItem).subscribe());
     })
 
+  }
+
+  openEditRecipe(event: MouseEvent) {
+    event.stopPropagation(); //
+    if (!this.recipe) return;
+
+    this.recipeDialogRef = this.dialogService.open(RecipeCreationComponent, {
+        header: 'Modifier la recette',
+        width: '90%',
+        modal: true,
+        dismissableMask:true,
+        contentStyle: {"max-height": "90vh", "overflow": "auto"},
+        baseZIndex: 10001,
+        data: { 
+          recipe: this.recipe // Pass current recipe data
+        }
+    });
   }
 
   ngAfterViewInit(): void {

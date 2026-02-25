@@ -1,99 +1,124 @@
 :host {
-    display: block; /* Ensure the host takes up space */
-    position: relative; /* Context for absolutely positioned balloons */
-    /* REMOVED width/height/min-height - size will come from content */
-    /* overflow: hidden; */ /* Allow balloons to float outside bounds */
-  }
+  display: block; /* Essential for height to work */
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
 
-  .balloon-wrapper {
-    /* Let wrapper take size of content */
-    position: relative; 
-    width: 100%; /* Take width of host */
-    /* REMOVED absolute positioning and height */
-    overflow: visible; 
-  }
+.balloon-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%; /* Force to fill host */
+  overflow: visible;
+}
 
-  .content-projection {
-    /* Content takes its natural size */
-    position: relative; 
-    z-index: 1; 
-    /* REMOVED width/height */
-  }
+.content-projection {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%; /* Force to pass height to your p-card */
+}
 
-  .balloon {
-    position: absolute;
-    /* Removed fixed bottom positioning */
-    width: 50px;  /* Base width */
-    height: 65px; /* Base height */
-    transform-origin: bottom center;
-    /* Apply TWO animations: floatAway (delayed) and gentleBob (also delayed randomly) */
-    animation:
-      floatAway var(--duration, 10s) ease-in-out var(--delay, 0s) infinite,
-      gentleBob 3s ease-in-out var(--bob-delay, 0s) infinite; /* Apply random delay to bobbing */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    z-index: 2; /* Ensure balloons float above projected content */
-    pointer-events: none; /* Prevent balloons from interfering with clicks */
-  }
+/* 1. VERTICAL MOVEMENT */
+.balloon-float {
+  position: absolute;
+  pointer-events: none;
+  /* Apply scale and blur for depth of field */
+  transform: scale(var(--balloon-scale));
+  filter: blur(var(--balloon-blur));
+  /* Floating animation */
+  opacity: 0;
+  animation: floatAway var(--duration) cubic-bezier(0.35, 0.1, 0.25, 1) var(--delay) infinite;
+}
 
-  .balloon-body {
-    width: 100%;
-    height: 100%;
-    /* background-color: red; */ /* REMOVED Default color, will be set by style binding */
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; /* Balloon shape */
-    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.2); /* Simple shading */
-    transform: rotateZ(-5deg); /* Slight initial tilt */
-    position: relative; /* Needed for the ::after pseudo-element (knot) */
-  }
+/* 2. HORIZONTAL MOVEMENT & PHYSICS */
+.balloon-sway {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: bottom center;
+  /* Bobbing/swaying animation independent of vertical floating */
+  animation: gentleBob 4s ease-in-out var(--bob-delay) infinite alternate;
+}
 
-  /* Small "knot" at the bottom of the balloon */
-  .balloon-body::after {
-    content: '';
-    position: absolute;
-    bottom: -2px; /* Position slightly below the body */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    background-color: inherit; /* Inherit balloon color */
-    border-radius: 50%;
-    filter: brightness(85%); /* Make knot slightly darker */
-  }
+/* 3. 3D GLOSSY BALLOON MATERIAL */
+.balloon-body {
+  width: 50px;
+  height: 65px;
+  background-color: var(--balloon-color);
+  
+  /* Create glossy latex effect using dual radial gradients */
+  background-image: 
+    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.2) 20%, transparent 40%),
+    radial-gradient(circle at 70% 70%, transparent 40%, rgba(0, 0, 0, 0.2) 100%);
+    
+  /* Tear-drop shape */
+  border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
+  
+  /* Inner shadows for edge volume */
+  box-shadow: 
+    inset -4px -4px 12px rgba(0, 0, 0, 0.2), 
+    inset 4px 4px 8px rgba(255, 255, 255, 0.3),
+    0 10px 15px rgba(0, 0, 0, 0.1); /* Subtle drop shadow onto environment */
+    
+  position: relative;
+}
 
-  .balloon-string {
-    width: 1px; /* Keep it thin */
-    height: 40px; /* String length */
-    background-color: #bdbdbd; /* Lighter grey color for string */
-    margin-top: 1px; /* Adjust slightly to connect visually below the knot */
-  }
+/* The Tied Knot */
+.balloon-body::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  /* CSS Triangle */
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 7px solid var(--balloon-color);
+  /* Darken the knot slightly for realism */
+  filter: brightness(80%); 
+}
 
-  /* Animation Keyframes - Main floating away animation */
-  @keyframes floatAway {
-    /* 0% state is now implicitly handled by the element's base styles and the gentleBob animation */
-    25% {
-      transform: translateY(-25vh) translateX(calc(var(--sway, 0px) * 0.5)) rotateZ(5deg) scale(1.05);
-    }
-    50% {
-      transform: translateY(-50vh) translateX(calc(var(--sway, 0px) * -0.3)) rotateZ(-8deg) scale(1);
-    }
-    75% {
-      transform: translateY(-75vh) translateX(calc(var(--sway, 0px) * 0.7)) rotateZ(10deg) scale(0.95);
-    }
-    100% {
-      transform: translateY(calc(-100vh - 100px)) translateX(var(--sway, 0px)) rotateZ(-10deg) scale(0.9);
-      opacity: 0; /* Fade out completely */
-    }
-  }
+/* Curved, delicate string */
+.balloon-string {
+  width: 1px;
+  height: 55px;
+  /* Fades out at the bottom */
+  background: linear-gradient(to bottom, rgba(200, 200, 200, 0.8), transparent);
+  margin-top: 5px;
+  position: relative;
+  /* Slight natural curve to the string */
+  border-radius: 50% / 10%;
+  box-shadow: -1px 0 2px rgba(0,0,0,0.05);
+}
 
-  /* Animation: Subtle continuous movement */
-  @keyframes gentleBob {
-    0%, 100% {
-      /* Match initial slight tilt */
-      transform: rotateZ(-5deg) translateY(0);
-    }
-    50% {
-      /* Bob up slightly and rotate the other way */
-      transform: rotateZ(3deg) translateY(-5px);
-    }
+/* -- ANIMATIONS -- */
+
+/* Float vertically across the screen */
+@keyframes floatAway {
+  0% {
+    transform: scale(var(--balloon-scale)) translateY(0);
+    opacity: 0;
   }
+  5% {
+    opacity: 1; /* Fade in smoothly */
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    /* Travel upwards. Calculates distance dynamically. */
+    transform: scale(var(--balloon-scale)) translateY(calc(-120vh - 200px));
+    opacity: 0; 
+  }
+}
+
+/* Sway side-to-side and tilt naturally */
+@keyframes gentleBob {
+  0% {
+    transform: translateX(calc(var(--sway) * -0.5)) rotateZ(-4deg);
+  }
+  100% {
+    transform: translateX(var(--sway)) rotateZ(4deg);
+  }
+}

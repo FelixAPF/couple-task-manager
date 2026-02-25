@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, OnChanges, SimpleChanges, TemplateRef, ViewChild, AfterViewInit, inject, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnChanges, SimpleChanges, TemplateRef, ViewChild, AfterViewInit, inject, OnDestroy, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms'; // Import FormsModule for ngModel
 import { InputNumberModule } from 'primeng/inputnumber'; // Import InputNumberModule
 import { Ingredient, Recipe, RecipeType } from '../../model/recipes';
@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { SelectStoreComponent } from '../../shopping-planning/select-store/select-store.component';
 import { RecipeCreationComponent } from '../recipe-creation/recipe-creation.component';
+import { RecipeService } from '../../service/recipe.service';
 
 @Component({
   selector: 'app-recipe-card',
@@ -29,6 +30,7 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{
 
   shoppingService = inject(ShoppingService);
   dialogService = inject(DialogService);
+  recipeService = inject(RecipeService);
 
   // --- Ingredient Scaling ---
   originalIngredients: Ingredient[] = []; // Store base ingredients
@@ -88,6 +90,7 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{
   openEditRecipe(event: MouseEvent) {
     event.stopPropagation(); //
     if (!this.recipe) return;
+    const recipeBeforeUpdate = { ...this.recipe };
 
     this.recipeDialogRef = this.dialogService.open(RecipeCreationComponent, {
         header: 'Modifier la recette',
@@ -100,6 +103,14 @@ export class RecipeCardComponent implements OnChanges, AfterViewInit, OnDestroy{
           recipe: this.recipe // Pass current recipe data
         }
     });
+
+    this.recipeDialogRef.onClose.subscribe(() => {
+      if(this.recipe !== recipeBeforeUpdate && this.recipe.id){
+        this.recipeService.getRecipeById(this.recipe.id).subscribe((recipe) => {
+          this.recipe = recipe;
+        })
+      }
+    })
   }
 
   ngAfterViewInit(): void {

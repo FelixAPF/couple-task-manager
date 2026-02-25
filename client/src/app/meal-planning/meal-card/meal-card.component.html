@@ -1,11 +1,13 @@
-<div style="position: relative;" *ngIf="isBirthday else regularTemplate">
+<div class="h-full w-full relative block" *ngIf="isBirthday else regularTemplate">
+  
   <app-balloon-container 
-      [numberOfBalloons]="50" 
+      class="h-full w-full block"
+      [numberOfBalloons]="30" 
       [minDuration]="10" 
       [maxDuration]="20">
-      <div style="display: block; min-height: 100px;"> 
-        <ng-container *ngTemplateOutlet="template"></ng-container>
-      </div>
+      
+      <ng-container *ngTemplateOutlet="template"></ng-container>
+      
   </app-balloon-container>
 </div>
 

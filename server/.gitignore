@@ -34,4 +34,5 @@ build/
 .upload-dir/
 
 server/src/main/resources/firebase-service-account.json
-client/android/app/google-services.json
+
+src/main/resources/firebase-service-account.json

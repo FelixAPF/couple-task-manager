@@ -8,6 +8,7 @@ import { HouseholdService } from './household.service';
 
 interface AuthResponse {
   token: string;
+  refreshToken: string;
 }
 
 @Injectable({
@@ -16,6 +17,7 @@ interface AuthResponse {
 export class AuthService {
   readonly baseUrl: string = `${environment.apiUrl}auth`;
   private readonly TOKEN_KEY = 'authToken'; // Key for localStorage
+  private readonly REFRESH_TOKEN_KEY = 'refreshToken'; 
   private subscription = new Subscription(); // Subscription to manage observables
 
   // Use BehaviorSubject to hold the current login state
@@ -38,23 +40,45 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  login(authRequest: AuthRequest): Observable<AuthResponse> { // Expect AuthResponse object
-    // Remove responseType: 'text', let Angular parse JSON by default
-    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, authRequest)
-      .pipe(
-        tap(response => { // The response is now the parsed AuthResponse object
-          if (response && response.token) {
-            // Store ONLY the token string from the response object
-            localStorage.setItem(this.TOKEN_KEY, response.token);
-            this.subscription.add(this.householdService.retrieveHousehold().subscribe()); // Fetch household data after login
-            // Update the login state
-            this.isLoggedInSubject.next(true);
-          } else {
-            console.error('AuthService: Invalid login response structure.', response);
-            this.isLoggedInSubject.next(false);
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  }
+
+login(authRequest: AuthRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/login`, authRequest).pipe(
+      tap(response => {
+        if (response && response.token) {
+          localStorage.setItem(this.TOKEN_KEY, response.token);
+          // Store the refresh token securely
+          if (response.refreshToken) {
+            localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
           }
-        })
-      );
+          
+          this.subscription.add(this.householdService.retrieveHousehold().subscribe());
+          this.isLoggedInSubject.next(true);
+        } else {
+          this.isLoggedInSubject.next(false);
+        }
+      })
+    );
+  }
+
+refreshToken(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+    
+    return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, { refreshToken }).pipe(
+      tap((response: AuthResponse) => {
+        // On sauvegarde le nouvel Access Token
+        localStorage.setItem(this.TOKEN_KEY, response.token);
+        
+        // NOUVEAU : On sauvegarde le nouveau Refresh Token s'il est fourni
+        if (response.refreshToken) {
+          localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+        }
+        
+        this.isLoggedInSubject.next(true);
+      })
+    );
   }
 
   register(registerRequest: RegisterRequest): Observable<RegisterRequest> { 
@@ -63,6 +87,7 @@ export class AuthService {
 
   logout(expiredToken: boolean = false): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     this.isLoggedInSubject.next(false);
     this.householdService.setHousehold(null); // Clear household data on logout
     this.router.navigate(['/login'], { queryParams: { sessionExpired: expiredToken } });

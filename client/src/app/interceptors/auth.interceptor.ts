@@ -1,6 +1,6 @@
 import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { catchError, EMPTY, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, EMPTY, filter, Observable, switchMap, take, throwError } from 'rxjs';
 import { environment } from '../environment';
 import { AuthService } from '../service/auth.service';
 import { Router } from '@angular/router';
@@ -11,7 +11,50 @@ export class AuthInterceptor implements HttpInterceptor {
 
   private authService = inject(AuthService);
   private router = inject(Router);
+  private isRefreshing = false;
+  // Used to queue up API calls that happen while the token is refreshing
+  private refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
 
+
+  private addTokenHeader(request: HttpRequest<any>, token: string | null): HttpRequest<any> {
+    if (token && request.url.startsWith(environment.apiUrl)) {
+      return request.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
+    }
+    return request;
+  }
+
+  // Handles the silent refresh logic
+  private handle401Error(request: HttpRequest<any>, next: HttpHandler) {
+    if (!this.isRefreshing) {
+      this.isRefreshing = true;
+      this.refreshTokenSubject.next(null);
+
+      return this.authService.refreshToken().pipe(
+        switchMap((token: any) => {
+          this.isRefreshing = false;
+          // Notify queued requests that the new token is ready
+          this.refreshTokenSubject.next(token.token);
+          // Retry the original failed request
+          return next.handle(this.addTokenHeader(request, token.token));
+        }),
+        catchError((err) => {
+          this.isRefreshing = false;
+          // If the refresh token is also expired or invalid, THEN force a logout
+          this.authService.logout(true);
+          return throwError(() => err);
+        })
+      );
+    } else {
+      // If a refresh is already happening, queue this request until the token is updated
+      return this.refreshTokenSubject.pipe(
+        filter(token => token != null),
+        take(1),
+        switchMap(jwt => {
+          return next.handle(this.addTokenHeader(request, jwt));
+        })
+      );
+    }
+  }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
@@ -36,10 +79,9 @@ export class AuthInterceptor implements HttpInterceptor {
         // BUT sometimes backends use 401/403 interchangeably for expired tokens.
         // We'll trigger logout on 401 primarily, as it's the standard for auth failure.
         if (error.status === 401) {
-          console.warn('AuthInterceptor: Received 401 Unauthorized. Logging out.');
-          // Perform logout actions via AuthService
-          this.authService.logout(true);
-
+          if (error.status === 401 && !req.url.includes('/auth/login')) {
+            return this.handle401Error(authReq, next);
+          }
           // Prevent the error from propagating to the component's error handler
           // because we've handled it by logging out. Return EMPTY observable.
           return EMPTY; // Or: return throwError(() => new Error('Session expired')); if you want to signal differently

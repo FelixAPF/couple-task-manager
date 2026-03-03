@@ -2,6 +2,7 @@ package com.couple.taskmanager.filter;
 
 import com.couple.taskmanager.service.CTMUserService;
 import com.couple.taskmanager.utils.JwtUtils;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,23 +37,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        String userEmail = null; // Modifier ici
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
+
         jwt = authHeader.substring(7);
-        userEmail = jwtUtils.extractUsername(jwt);
+
+        // NOUVEAU: On capture l'exception d'expiration
+        try {
+            userEmail = jwtUtils.extractUsername(jwt);
+        } catch (ExpiredJwtException e) {
+            logger.warn("JWT Token a expiré: " + e.getMessage());
+        } catch (Exception e) {
+            logger.warn("Impossible de lire le JWT Token: " + e.getMessage());
+        }
+
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-            if (jwtUtils.validateToken(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            // Note: On pourrait aussi enlever la validation du temps ici puisqu'elle est gérée au-dessus,
+            // mais ce n'est pas grave de la garder pour plus de sécurité.
+            try {
+                if (jwtUtils.validateToken(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                logger.warn("Erreur lors de la validation du token: " + e.getMessage());
             }
         }
         filterChain.doFilter(request, response);

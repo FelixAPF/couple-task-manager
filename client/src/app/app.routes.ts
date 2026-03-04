@@ -22,6 +22,7 @@ import { PrivacyComponent } from './privacy/privacy.component'
 import { LetterListComponent } from './letters/letter-list/letter-list.component';
 import { CreateLetterComponent } from './letters/create-letter/create-letter.component';
 import { LetterDetailComponent } from './letters/letter-detail/letter-detail.component';
+import { FoodIntakeTrackingDashboardComponent } from './food-intake-tracking-dashboard/food-intake-tracking-dashboard.component'
 
 
 export const routes: Routes = [
@@ -46,6 +47,11 @@ export const routes: Routes = [
         { path: "", component: TasksComponent, canActivate: [authGuard] },
         { path: "add-task", component: AddTaskComponent, canActivate: [authGuard] },
         { path: "history/:id", component: TaskHistoryComponent, canActivate: [authGuard]}
+        ]
+    },
+    {
+        path: 'food-tracking', children: [
+            { path: "", component: FoodIntakeTrackingDashboardComponent, canActivate: [authGuard] }
         ]
     },
     {

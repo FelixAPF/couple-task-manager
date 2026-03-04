@@ -9,6 +9,7 @@ export interface Household {
     enableToDoList: boolean;
     enableWishList: boolean;
     enableTravelChecklist: boolean;
+    enableFoodIntakeTracking: boolean;
     wishList: Item[];
     toDoList: ToDoItem[];
     toDoItems: WayToCare[];

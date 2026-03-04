@@ -113,7 +113,8 @@
       "enable-to-do-list": "Enable To Do List",
       "enable-to-do-list-description": "Create a list of activities, restaurants and other stuff that you wish to try.",
       "enable-wish-list": "Enable Wish List",
-      "enable-travel-checklist": "Enable Travel Checklist"
+      "enable-travel-checklist": "Enable Travel Checklist",
+      "enable-food-intake-tracking": "Enable food intake tracking"
     }
   },
   "to-do-list": {
@@ -174,5 +175,8 @@
   "recipes": {
     "assign-chef-prompt": "Who will be the chef for this meal?",
     "unassigned": "Unassigned"
+  },
+  "footer-navbar": {
+    "food-intake-tracking": "Tracking"
   }
 }

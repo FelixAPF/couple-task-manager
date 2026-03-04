@@ -1,96 +1,73 @@
 <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 <p-toast></p-toast>
-<div class="p-4 md:p-6 pb-16 flex flex-col flex-grow transition-transform duration-300 ease-in-out"
-     [style.transform]="swipeTransform"
-     (swipe)="swipeNavigation($event)">
+<div class="p-4 md:p-6 pb-16 flex flex-col flex-grow">
 
-
-  <!-- Error Message: Keep flex justify-center items-center flex-grow -->
   <div *ngIf="errorLoading" class="flex justify-center items-center flex-grow">
      <p-message severity="error" text="Une erreur est survenue lors du chargement du plan de repas."></p-message>
   </div>
 
-  <!-- Only show controls and grid when not loading/error -->
   <div *ngIf="!errorLoading">
+    
+    <app-week-navigation-control 
+      [initialDate]="initialSelectedDay"
+      [birthdays]="householdMembersBirthdays"
+      (weekChanged)="onWeekChanged($event)">
+      
+      <ng-template let-day>
+        
+        <app-meal-card 
+          [id]="day.isToday ? 'today' : day.id" 
+          [customTemplate]="customTemplate" 
+          [noMealPlanned]="noMealPlanned" 
+          (click)="selectDay(day)"
+          [title]="day.formattedDate" 
+          [isBirthday]="day.isBirthday" 
+          [borderHighlightClass]="getBorderClass(day)" 
+          [meal]="getMealForDay(day.isoDate)">
+        </app-meal-card>
+        
+        <ng-template #customTemplate>
+          <div class="flex justify-center gap-2 mt-auto" *ngIf="enableCardModification">
+            <button pButton pRipple type="button" icon="pi pi-arrow-right"
+                    class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
+                    (click)="moveMeal(day.date, getMealForDay(day.isoDate))" aria-label="Déplacer le repas"
+                    [pTooltip]="'meals.move'|translate" tooltipPosition="top">
+            </button>
+            <button pButton pRipple type="button" icon="pi pi-pencil"
+                    class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
+                    (click)="assignMeal(day.date, getMealForDay(day.isoDate))" aria-label="Modifier le repas"
+                    [pTooltip]="'meals.modify'|translate" tooltipPosition="top">
+            </button>
+            <button pButton pRipple type="button" icon="pi pi-trash"
+                    class="p-button-rounded p-button-text p-button-sm p-button-danger"
+                    (click)="confirmRemoveMeal($event, getMealForDay(day.isoDate))" aria-label="Supprimer le repas"
+                    [pTooltip]="'meals.delete'|translate" tooltipPosition="top">
+            </button>
+            <button pButton pRipple type="button" icon="pi pi-user"
+                    class="p-button-rounded p-button-text p-button-sm p-button-danger"
+                    (click)="confirmAssignMeal(day)" aria-label="Assigner le repas"
+                    [pTooltip]="'meals.assign'|translate" tooltipPosition="top">
+            </button>
+          </div>
+        </ng-template>
 
-    <!-- === Week Navigation Controls === -->
-    <div class="flex justify-between items-center mb-4 md:mb-6 px-2 py-2 rounded-lg bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 shadow-sm">
-      <button pButton pRipple type="button" icon="pi pi-arrow-left"
-              class="p-button-rounded p-button-text"
-              (click)="previousWeek()"
-              [pTooltip]="'meals.previous-week'|translate" tooltipPosition="bottom"
-              aria-label="Semaine précédente">
-      </button>
+        <ng-template #noMealPlanned>
+          <div class="flex flex-col items-center">
+            <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>
+            <p class="text-xs text-surface-500 dark:text-surface-400 italic mb-3">
+              {{ 'meals.no-meal-planned' | translate }}
+            </p>
+            <button *ngIf="enableCardModification" pButton pRipple type="button" icon="pi pi-plus" [label]="'meals.assign-meal'|translate"
+                    class="p-button-sm p-button-outlined"
+                    (click)="assignMeal(day.date, undefined)"
+                    aria-label="Assigner un repas">
+            </button>
+          </div>
+        </ng-template>
+        
+      </ng-template>
 
-      <div class="flex flex-col items-center">
-         <span class="text-sm font-semibold text-surface-800 dark:text-surface-100">
-           {{ formattedWeekRange }}
-         </span>
-         <button pButton pRipple type="button" [label]="'meals.current-week' | translate"
-                 class="p-button-link p-button-sm !text-xs !py-0 !px-1"
-                 (click)="goToCurrentWeek()"
-                 aria-label="Aller à la semaine actuelle">
-         </button>
-      </div>
-
-
-      <button pButton pRipple type="button" icon="pi pi-arrow-right"
-              class="p-button-rounded p-button-text"
-              (click)="nextWeek()"
-              [pTooltip]="'meals.next-week'|translate" tooltipPosition="bottom"
-              aria-label="Semaine suivante">
-      </button>
-    </div>
-    <!-- === End Week Navigation Controls === -->
-     
-    <!-- Week Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-6">
-        <!-- Day Card Loop -->
-        <div *ngFor="let day of weekDays" class="day-card-wrapper">
-          <app-meal-card [id]="getPositionInCycle(day.date) === 'today' ? 'today' : day.id" [customTemplate]="customTemplate" [noMealPlanned]="noMealPlanned" (click)="selectDay(day)"
-            [title]="day.formattedDate" [isBirthday]="day.isBirthday" [borderHighlightClass]="selectedDay?.id === day.id ? 'selected' :  day.borderClass" [meal]="day.meal"></app-meal-card>
-            <ng-template #customTemplate>
-                            <!-- Action Buttons -->
-                <div class="flex justify-center gap-2 mt-auto" *ngIf="enableCardModification">
-                  <button pButton pRipple type="button" icon="pi pi-arrow-right"
-                          class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
-                          (click)="moveMeal(day.date, day.meal)" aria-label="Déplacer le repas"
-                          [pTooltip]="'meals.move'|translate" tooltipPosition="top">
-                  </button>
-                  <button pButton pRipple type="button" icon="pi pi-pencil"
-                          class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
-                          (click)="assignMeal(day.date, day.meal)" aria-label="Modifier le repas"
-                          [pTooltip]="'meals.modify'|translate" tooltipPosition="top">
-                  </button>
-                  <button pButton pRipple type="button" icon="pi pi-trash"
-                          class="p-button-rounded p-button-text p-button-sm p-button-danger"
-                          (click)="confirmRemoveMeal($event, day.meal)" aria-label="Supprimer le repas"
-                          [pTooltip]="'meals.delete'|translate" tooltipPosition="top">
-                  </button>
-                  <button pButton pRipple type="button" icon="pi pi-user"
-                          class="p-button-rounded p-button-text p-button-sm p-button-danger"
-                          (click)="confirmAssignMeal(day)" aria-label="Assigner le repas"
-                          [pTooltip]="'meals.assign'|translate" tooltipPosition="top">
-                  </button>
-                </div>
-            </ng-template>
-              <!-- If No Meal is Planned -->
-              <ng-template #noMealPlanned>
-                <div class="flex flex-col items-center">
-                  <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>
-                  <p class="text-xs text-surface-500 dark:text-surface-400 italic mb-3">
-                    {{ 'meals.no-meal-planned' | translate }}
-                  </p>
-                  <button *ngIf="enableCardModification" pButton pRipple type="button" icon="pi pi-plus" [label]="'meals.assign-meal'|translate"
-                          class="p-button-sm p-button-outlined"
-                          (click)="assignMeal(day.date, day.meal)"
-                          aria-label="Assigner un repas">
-                  </button>
-                </div>
-              </ng-template>
-        </div> <!-- End Day Card Loop -->
-      </div> <!-- End Week Grid -->
+    </app-week-navigation-control>
 
   </div> 
-
-</div> <!-- End Outer Padding Div -->
+</div>

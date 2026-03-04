@@ -46,15 +46,6 @@
            <i class="pi pi-shopping-cart text-sm"></i>
            <span>{{ 'side-menu.shopping-list' | translate}}</span>
         </a>
-        
-        <a
-        routerLink="/household/travel"
-           routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
-           class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
-           [routerLinkActiveOptions]="{exact: true}">
-           <i class="fa-solid fa-plane text-sm"></i>
-           <span>{{ 'Travel Checklist' | translate}}</span>
-        </a>
 
       </ng-container>
     </div>
@@ -204,18 +195,6 @@
       (click)="toggleMenu()">
       <i class="fa-solid fa-plane"></i>
       <span>{{ 'Travel Checklist' | translate}}</span>
-     </a>
-    </ng-container>
- </div>
-
-  <div class="border-t border-b border-surface-200 dark:border-surface-700">
-    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
-      <a *ngIf="household"
-      routerLink="/tasks"
-      class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
-      (click)="toggleMenu()">
-      <i class="pi pi-list"></i>
-      <span>{{ 'side-menu.tasks' | translate}}</span>
      </a>
     </ng-container>
  </div>

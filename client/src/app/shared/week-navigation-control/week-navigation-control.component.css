@@ -1,0 +1,9 @@
+[style*="transform"][style*="translateX"].flex-grow {
+  touch-action: pan-y !important; 
+}
+
+.day-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}

@@ -63,5 +63,17 @@
       <span class="text-xs font-medium">Courses</span>
     </a>
 
+    <!-- Shopping List Link -->
+    <a routerLink="/food-tracking"
+      *ngIf="household && household.enableFoodIntakeTracking"
+       routerLinkActive="active-link"
+       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
+              text-surface-600 dark:text-surface-300
+              hover:text-primary-500 dark:hover:text-primary-400
+              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
+      <i class="fa fa-cutlery text-xl mb-1"></i>
+      <span class="text-xs font-medium">{{'footer-navbar.food-intake-tracking'|translate}}</span>
+    </a>
+
   </div>
 </div>

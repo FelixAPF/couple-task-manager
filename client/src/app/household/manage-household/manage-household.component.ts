@@ -24,7 +24,8 @@ enum HouseholdSettingNames {
   WISH_LIST = "enableWishList",
   WAYS_TO_CARE = "enableWaysToCare",
   TO_DO_LIST = "enableToDoList",
-  TRAVEL_CHECKLIST = "enableTravelChecklist"
+  TRAVEL_CHECKLIST = "enableTravelChecklist",
+  FOOD_INTAKE = "enableFoodIntakeTracking"
 }
 
 @Component({

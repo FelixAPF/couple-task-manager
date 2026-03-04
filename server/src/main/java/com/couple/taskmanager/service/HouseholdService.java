@@ -92,6 +92,10 @@ public class HouseholdService {
         if(newEnableTravelChecklist != null && !newEnableTravelChecklist.equals(household.getEnableTravelChecklist())){
             household.setEnableTravelChecklist(newEnableTravelChecklist);
         }
+        Boolean newEnableTrackingFoodIntake = updateHouseholdSettingsDto.getEnableFoodIntakeTracking();
+        if(newEnableTrackingFoodIntake != null && !newEnableTrackingFoodIntake.equals(household.getEnableFoodIntakeTracking())){
+            household.setEnableFoodIntakeTracking(newEnableTrackingFoodIntake);
+        }
         return new HouseholdDto(repository.save(household));
     }
 

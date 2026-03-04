@@ -3,10 +3,15 @@ import { MealService } from '../../service/meal.service';
 import { SharedModule } from '../../shared.module';
 import { DynamicDialogConfig, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { Meal } from '../../model/meals';
-import { MealsListComponent, WeekDay } from '../meals-list/meals-list.component';
+import { MealsListComponent } from '../meals-list/meals-list.component';
+import { WeekDayContext } from '../../shared/week-navigation-control/week-navigation-control.component';
 import { MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+
+interface MealDayContext extends WeekDayContext {
+  meal?: Meal
+}
 
 @Component({
   selector: 'app-move-meal',
@@ -81,7 +86,7 @@ export class MoveMealComponent implements OnInit, AfterViewInit, OnDestroy { // 
   }
 
   // Renamed to avoid conflict with potential template event handlers
-  onDateSelectedFromList(day: WeekDay | null) {
+  onDateSelectedFromList(day: MealDayContext | null) {
     this.selectedDate = day?.date || null;
     this.selectedMeal = day?.meal || null; // Assuming you want to capture the selected meal as well 
   }

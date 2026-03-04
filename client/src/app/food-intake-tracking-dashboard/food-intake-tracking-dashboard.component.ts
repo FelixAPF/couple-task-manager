@@ -6,6 +6,7 @@ import { HouseholdMember } from '../model/household';
 import { SharedModule } from '../shared.module';
 import { WeekDayContext, WeekNavigationControlComponent, WeekRangeEvent } from '../shared/week-navigation-control/week-navigation-control.component';
 import { HouseholdService } from '../service/household.service';
+import { FoodIntakeService } from '../service/food-intake.service';
 import { ChartModule } from 'primeng/chart';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogModule } from 'primeng/dialog';
@@ -20,15 +21,15 @@ export enum FoodIntakeMealType {
 }
 
 export interface FoodIntakeUnit {
-  id: string; 
+  id?: number; 
   date: string; 
-  assigneeId: number; // Changed from string to number to match HouseholdMember.id
+  assigneeId: number; 
   description: string;
   mealType: FoodIntakeMealType;
   porteinPortion: number;
   vegetablePortion: number;
-  testPortion: number;
-  test2Portion: number;
+  carbohydratePortion: number;
+  fatPortion: number;
   imageUrl?: string | null; 
 }
 
@@ -56,6 +57,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   public FoodIntakeMealType = FoodIntakeMealType;
 
   private householdService: HouseholdService = inject(HouseholdService);
+  private foodIntakeService: FoodIntakeService = inject(FoodIntakeService);
 
   initialSelectedDay: Date | null = null;
   selectedDay: WeekDayContext | null = null;
@@ -70,10 +72,14 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   intakeData: FoodIntakeUnit[] = [];
   chartData: any;
 
-  // Dialog State
+  // Add/Edit Dialog State
   displayMealDialog: boolean = false;
   isEditMode: boolean = false;
   editingMeal: Partial<FoodIntakeUnit> = {};
+
+  // Photo Viewer State
+  displayImageViewer: boolean = false;
+  viewerImageUrl: string = '';
   
   constructor(private datePipe: DatePipe, @Inject(LOCALE_ID) private locale: string) {}
   
@@ -84,8 +90,8 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
 
   get proteinCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.porteinPortion, 0); }
   get vegetableCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.vegetablePortion, 0); }
-  get testCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.testPortion, 0); }
-  get test2Count() { return this.filteredIntakeData.reduce((prev, current) => prev + current.test2Portion, 0); }
+  get carbohydrateCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.carbohydratePortion, 0); }
+  get fatCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.fatPortion, 0); }
   
   ngOnInit(): void {
     if(this.initialSelectedDay){
@@ -104,7 +110,6 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     this.householdService.retrieveHousehold().subscribe(household => {
       if (household?.members && household.members.length > 0) {
         this.householdMembers = household.members;
-        
         this.selectedMember = household.currentUser ?? household.members[0];
 
         this.householdMembersBirthdays = household.members
@@ -122,7 +127,6 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
           })
           .filter((date): date is Date => date !== null);
           
-        this.generateMockData();
         this.updateChartData();
       } else { 
         this.householdMembersBirthdays = [];
@@ -130,33 +134,18 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     });
   }
 
-  private generateMockData(): void {
-    const today = new Date();
-    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-    const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+  loadMeals(): void {
+    if (!this.currentStartDate || !this.currentEndDate) return;
+    
+    const startStr = this.datePipe.transform(this.currentStartDate, 'yyyy-MM-dd')!;
+    const endStr = this.datePipe.transform(this.currentEndDate, 'yyyy-MM-dd')!;
 
-    const todayIso = this.datePipe.transform(today, 'yyyy-MM-dd')!;
-    const yesterdayIso = this.datePipe.transform(yesterday, 'yyyy-MM-dd')!;
-    const tomorrowIso = this.datePipe.transform(tomorrow, 'yyyy-MM-dd')!;
-
-    this.intakeData = [];
-
-    this.householdMembers.forEach((member, index) => {
-      if (!member.id) return;
-      const mId = member.id;
-      const modifier = index * 0.5; 
-
-      this.intakeData.push(
-        { id: `1_${mId}`, assigneeId: mId, date: yesterdayIso, description: "Bol de céréale, 1 pomme, 1 banane", mealType: FoodIntakeMealType.BREAKFAST, porteinPortion: 0, vegetablePortion: 2 + modifier, testPortion: 1, test2Portion: 0 },
-        { id: `2_${mId}`, assigneeId: mId, date: yesterdayIso, description: "Bol de salade avec concombre, tomates et du poulet", mealType: FoodIntakeMealType.LUNCH, porteinPortion: 2 + modifier, vegetablePortion: 2, testPortion: 0.5, test2Portion: 1 },
-        { id: `3_${mId}`, assigneeId: mId, date: yesterdayIso, description: "Steak saignant avec bacon enrobé, asperges", mealType: FoodIntakeMealType.DINNER, porteinPortion: 3, vegetablePortion: 3, testPortion: 1, test2Portion: 0 },
-        { id: `4_${mId}`, assigneeId: mId, date: todayIso, description: "Crèpes nutella bananes", mealType: FoodIntakeMealType.BREAKFAST, porteinPortion: 0.5, vegetablePortion: 2, testPortion: 1, test2Portion: 1.5 },
-        { id: `5_${mId}`, assigneeId: mId, date: todayIso, description: "Kraft Dinner Saucisse", mealType: FoodIntakeMealType.LUNCH, porteinPortion: 2, vegetablePortion: 0, testPortion: 0, test2Portion: 0 },
-        { id: `6_${mId}`, assigneeId: mId, date: todayIso, description: "Poulet grillé avec riz et brocoli", mealType: FoodIntakeMealType.DINNER, porteinPortion: 3.5, vegetablePortion: 3 + modifier, testPortion: 1, test2Portion: 0 },
-        { id: `7_${mId}`, assigneeId: mId, date: todayIso, description: "Yogourt grec et amandes", mealType: FoodIntakeMealType.SNACK, porteinPortion: 1.5, vegetablePortion: 0, testPortion: 0.5, test2Portion: 0 },
-        { id: `8_${mId}`, assigneeId: mId, date: tomorrowIso, description: "Toast avocat et oeuf", mealType: FoodIntakeMealType.BREAKFAST, porteinPortion: 1, vegetablePortion: 1, testPortion: 0, test2Portion: 0 },
-        { id: `9_${mId}`, assigneeId: mId, date: tomorrowIso, description: "Reste de poulet grillé", mealType: FoodIntakeMealType.LUNCH, porteinPortion: 3, vegetablePortion: 2.5, testPortion: 0, test2Portion: 0 }
-      );
+    this.foodIntakeService.getIntakeUnits(startStr, endStr).subscribe({
+      next: (data) => {
+        this.intakeData = data;
+        this.updateChartData();
+      },
+      error: (err) => console.error('Failed to load intake data', err)
     });
   }
 
@@ -166,9 +155,33 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
 
     this.chartData = {
-      labels: ['Protéines', 'Légumes', 'Test', 'Test2'],
-      datasets: [{
-          data: [this.proteinCount, this.vegetableCount, this.testCount, this.test2Count]
+labels: [
+`🍗 Protéines`,
+        `🥕 Légumes`,
+        `🌾 Glucides`,
+        `💧 Lipides`
+      ],
+datasets: [{
+          data: [
+            this.proteinCount, 
+            this.vegetableCount, 
+            this.carbohydrateCount, 
+            this.fatCount
+          ],
+          // Use explicit rgba strings to guarantee Chart.js interprets them correctly
+          backgroundColor: [
+              'rgba(239, 68, 68, 0.7)',   // Red-500
+              'rgba(34, 197, 94, 0.7)',   // Green-500
+              'rgba(245, 158, 11, 0.7)',  // Amber-500
+              'rgba(59, 130, 246, 0.7)'   // Blue-500
+          ],
+          borderColor: [
+              'rgb(239, 68, 68)',
+              'rgb(34, 197, 94)',
+              'rgb(245, 158, 11)',
+              'rgb(59, 130, 246)'
+          ],
+          borderWidth: 2
       }]
     };
 
@@ -182,6 +195,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     this.currentStartDate = event.startDate;
     this.currentEndDate = event.endDate;
     this.selectedDay = event.days.find(d => d.isToday) || event.days[0];
+    this.loadMeals();
   }
 
   onDaySelectFromCalendar(day: WeekDayContext): void {
@@ -191,6 +205,14 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   onHouseholdMemberSelected(householdMember: HouseholdMember){
     this.selectedMember = householdMember;
     this.updateChartData(); 
+  }
+
+  // --- Photo Viewer Logic ---
+  openImageViewer(imageUrl: string, event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+    this.viewerImageUrl = imageUrl;
+    this.displayImageViewer = true;
   }
 
   // --- Dialog & Form Logic ---
@@ -203,15 +225,14 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     const targetDate = this.selectedDay ? this.selectedDay.isoDate : this.datePipe.transform(new Date(), 'yyyy-MM-dd')!;
 
     this.editingMeal = {
-      id: Date.now().toString(), 
       date: targetDate,
       assigneeId: this.selectedMember.id, 
       mealType: mealType,
       description: '',
       porteinPortion: 0.0,
       vegetablePortion: 0.0,
-      testPortion: 0.0,
-      test2Portion: 0.0,
+      carbohydratePortion: 0.0,
+      fatPortion: 0.0,
       imageUrl: null
     };
     this.displayMealDialog = true;
@@ -223,7 +244,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     this.displayMealDialog = true;
   }
 
-  adjustPortion(macro: 'porteinPortion' | 'vegetablePortion' | 'testPortion' | 'test2Portion', delta: number) {
+  adjustPortion(macro: 'porteinPortion' | 'vegetablePortion' | 'carbohydratePortion' | 'fatPortion', delta: number) {
     const currentValue = this.editingMeal[macro] || 0;
     const newValue = currentValue + delta;
     if (newValue >= 0) {
@@ -248,18 +269,25 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   }
 
   saveMeal() {
-    if (this.isEditMode) {
-      const index = this.intakeData.findIndex(m => m.id === this.editingMeal.id);
-      if (index !== -1) {
-        this.intakeData[index] = this.editingMeal as FoodIntakeUnit;
-      }
-    } else {
-      this.intakeData.push(this.editingMeal as FoodIntakeUnit);
+    this.foodIntakeService.saveIntakeUnit(this.editingMeal as FoodIntakeUnit).subscribe({
+      next: () => {
+        this.displayMealDialog = false;
+        this.loadMeals();
+      },
+      error: (err) => console.error("Error saving meal:", err)
+    });
+  }
+
+  deleteMeal() {
+    if (this.editingMeal.id) {
+      this.foodIntakeService.deleteIntakeUnit(this.editingMeal.id).subscribe({
+        next: () => {
+          this.displayMealDialog = false;
+          this.loadMeals();
+        },
+        error: (err) => console.error("Error deleting meal:", err)
+      });
     }
-    
-    this.intakeData = [...this.intakeData];
-    this.updateChartData();
-    this.displayMealDialog = false;
   }
 
   // --- Helper Methods for Template Display ---
@@ -272,10 +300,10 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     return meals.reduce((acc, curr) => {
       acc.protein += curr.porteinPortion;
       acc.vegetable += curr.vegetablePortion;
-      acc.test += curr.testPortion;
-      acc.test2 += curr.test2Portion;
+      acc.carbohydrate += curr.carbohydratePortion;
+      acc.fat += curr.fatPortion;
       return acc;
-    }, { protein: 0, vegetable: 0, test: 0, test2: 0 });
+    }, { protein: 0, vegetable: 0, carbohydrate: 0, fat: 0 });
   }
 
   getMealIcon(mealType: FoodIntakeMealType): string {

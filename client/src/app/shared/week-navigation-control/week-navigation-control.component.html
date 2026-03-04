@@ -28,8 +28,8 @@
             aria-label="Semaine suivante">
     </button>
   </div>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-6">
-    <div *ngFor="let day of weekDays" class="day-card-wrapper">
+  <div class="flex flex-wrap justify-center gap-4 md:gap-6">
+    <div *ngFor="let day of weekDays" class="w-full min-w-[260px] max-w-[340px] flex-grow flex flex-col transition-all duration-300">
         <ng-container *ngTemplateOutlet="dayTemplate; context: { $implicit: day }"></ng-container>
     </div>
   </div>

@@ -5,6 +5,13 @@ const config: CapacitorConfig = {
   appId: 'com.couple.taskmanager',
   appName: 'couple-task-manager',
   webDir: 'dist/client/browser',
+  server: {    
+    androidScheme: 'https',    
+    iosScheme: 'https',    
+    hostname: 'coupletaskmanager.com'
+  },
+    // REMPLACEZ ICI par le domaine que vous utilisez en production  },
+
   plugins: {
     StatusBar: {
       style: Style.Light,

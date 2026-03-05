@@ -6,8 +6,26 @@
 html, body {
     margin: 0;
     padding: 0;
-  }
+    height: 100%;
+    
+    /* Prevent rubber-band scrolling (bounce effect) on mobile browsers */
+    overscroll-behavior-y: none;
+    
+    /* Force browser to handle touches without zooming (fixes iOS zoom issue) */
+    touch-action: pan-x pan-y;
+    
+    /* Prevent text selection and magnifier glass on long press */
+    -webkit-user-select: none;
+    user-select: none;
+    
+    /* Prevent callout menu on long press */
+    -webkit-touch-callout: none;
+}
 html, body { height: 100%; }
+input, textarea {
+    -webkit-user-select: auto;
+    user-select: auto;
+}
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
 }
 .d-block{

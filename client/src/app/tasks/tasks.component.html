@@ -5,13 +5,13 @@
 
   <div class="header-card">
     <div class="header-content">
-        <h1 class="page-title">Task Lists</h1>
-        <p class="page-subtitle">Manage seasonal or special occasion lists</p>
+        <h1 class="page-title">{{'tasks.task-list'|translate}}</h1>
+        <p class="page-subtitle">{{'tasks.task-list-subtitle'|translate}}</p>
     </div>
     <div class="header-actions">
       <div class="flex gap-2 w-full sm:w-auto">
-        <input type="text" pInputText [(ngModel)]="newListName" placeholder="New List Name" class="header-input"/>
-        <p-button icon="pi pi-plus" label="Create List" (onClick)="createTaskList()" [disabled]="!newListName" styleClass="w-full sm:w-auto"></p-button>
+        <input type="text" pInputText [(ngModel)]="newListName" [placeholder]="'tasks.placeholder.new-task-list-name'|translate" class="header-input"/>
+        <p-button icon="pi pi-plus" [label]="'tasks.task-list-create-list'|translate" (onClick)="createTaskList()" [disabled]="!newListName" styleClass="w-full sm:w-auto"></p-button>
       </div>
     </div>
   </div>
@@ -47,8 +47,8 @@
       </div>
       
       <div class="card-footer">
-        <span><i class="pi pi-check-square"></i> {{occasion.taskAssignments.length}} Tasks</span>
-        <span class="view-link">View Details <i class="pi pi-arrow-right"></i></span>
+        <span><i class="pi pi-check-square"></i> {{occasion.taskAssignments.length}} {{'tasks.tasks'|translate}}</span>
+        <span class="view-link">{{'tasks.view-details'|translate}} <i class="pi pi-arrow-right"></i></span>
       </div>
     </div>
   </div>
@@ -60,8 +60,8 @@
 
     <div class="detail-board">
         <div class="board-header">
-            <h2>{{selectedOccasion.name}} <span class="subtitle">Assignment Board</span></h2>
-            <div class="total-badge">Total assigned: {{selectedOccasion.taskAssignments.length}}</div>
+            <h2>{{selectedOccasion.name}} <span class="subtitle">{{'tasks.assignment-board'|translate}}</span></h2>
+            <div class="total-badge">{{'tasks.total-assigned'|translate}} {{selectedOccasion.taskAssignments.length}}</div>
         </div>
 
         <div class="board-columns">
@@ -71,7 +71,7 @@
                         <p-avatar [image]="member.imageUrl || 'assets/placeholder.jpg'" size="large" shape="circle"></p-avatar>
                         <div class="user-meta">
                             <h3>{{member.name}}</h3>
-                            <p>{{ getTasksForUser(member.id).length }} Tasks assigned</p>
+                            <p>{{ getTasksForUser(member.id).length }} {{'tasks.task-assigned'|translate}}</p>
                         </div>
                     </div>
                     <p-button icon="pi pi-plus" [rounded]="true" [text]="true" (onClick)="openAssignDialog(member)" pTooltip="Assign Tasks"></p-button>
@@ -88,7 +88,7 @@
                     
                     <div *ngIf="getTasksForUser(member.id).length === 0" class="empty-column-state">
                         <i class="pi pi-inbox"></i>
-                        <span>No tasks assigned yet.</span>
+                        <span>{{'tasks.no-task-assigned'|translate}}</span>
                     </div>
                 </div>
             </div>
@@ -100,14 +100,14 @@
   
   <div class="library-container">
     <div class="library-header">
-        <h2 class="section-title">Task Library <span class="count-badge">{{filteredCount}}</span></h2>
+        <h2 class="section-title">{{'tasks.task-library'|translate}} <span class="count-badge">{{filteredCount}}</span></h2>
         
         <div class="library-controls">
             <div class="search-box">
                 <i class="pi pi-search"></i>
-                <input type="text" pInputText [(ngModel)]="taskSearchTerm" (ngModelChange)="filterTasks()" placeholder="Search existing tasks..." />
+                <input type="text" pInputText [(ngModel)]="taskSearchTerm" (ngModelChange)="filterTasks()" [placeholder]="'tasks.search-existing-tasks'|translate" />
             </div>
-            <p-button label="New Task" icon="pi pi-plus" (onClick)="openCreateTaskDialog()"></p-button>
+            <p-button [label]="'tasks.new-task'|translate" icon="pi pi-plus" (onClick)="openCreateTaskDialog()"></p-button>
         </div>
     </div>
 
@@ -133,11 +133,11 @@
                 </div>
                 
                 <div class="lib-actions">
-                    <button class="lib-action-btn edit-btn" (click)="openEditTaskDialog(task, $event)" pTooltip="Edit Task">
+                    <button class="lib-action-btn edit-btn" (click)="openEditTaskDialog(task, $event)" [pTooltip]="'tasks.edit-task'|translate">
                         <i class="pi pi-pencil"></i>
                     </button>
                     
-                    <button class="lib-action-btn delete-btn" (click)="deleteGlobalTask(task, $event)" pTooltip="Delete Task Globally">
+                    <button class="lib-action-btn delete-btn" (click)="deleteGlobalTask(task, $event)" [pTooltip]="'tasks.delete-task'|translate">
                         <i class="pi pi-trash"></i>
                     </button>
                 </div>
@@ -146,7 +146,7 @@
     </div>
 
     <div *ngIf="filteredCount === 0" class="empty-library">
-        <p>No tasks found. Create one to get started!</p>
+        <p>{{'tasks.no-tasks'|translate}}</p>
     </div>
   </div>
   </div>

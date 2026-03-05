@@ -4,11 +4,13 @@ import { TableModule } from 'primeng/table';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
 import { AdminService, AdminMetricDto } from '../../service/admin.service';
+import { SharedModule } from '../../shared.module';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, TableModule, ChartModule, ButtonModule],
+  imports: [CommonModule, TableModule, ChartModule, ButtonModule, SharedModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
@@ -18,7 +20,7 @@ export class AdminDashboardComponent implements OnInit {
   expandedChartData: any;
   chartOptions: any;
 
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService, private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.adminService.getMetrics().subscribe({

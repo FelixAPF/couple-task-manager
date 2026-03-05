@@ -141,7 +141,25 @@
     "tasks-unassigned": "Tasks unassigned",
     "manage-and-assign": "Manage & Assign",
     "create-task": "Create Task",
-    "assign-tasks": "Assign Tasks"
+    "assign-tasks": "Assign Tasks",
+    "task-library": "Task Library",
+    "search-existing-tasks": "Search existing tasks...",
+    "no-tasks": "No tasks found. Create one to get started!",
+    "no-task-assigned": "No tasks assigned yet.",
+    "task-assigned": " Tasks assigned",
+    "assignment-board": "Assignment Board",
+    "total-assigned": "Total assigned:",
+    "view-details": "View Details",
+    "tasks": "Tasks",
+    "task-list": "Task Lists",
+    "task-list-subtitle": "Manage seasonal or special occasion lists",
+    "task-list-create-list": "Create List",
+    "placeholder": {
+      "new-task-list-name": "New List Name"
+    },
+    "new-task": "New Task",
+    "edit-task": "Edit Task",
+    "delete-task": "Delete Task Globally"
   },
   "meals": {
     "plan": "Meals Plan",
@@ -184,5 +202,46 @@
   },
   "footer-navbar": {
     "food-intake-tracking": "Tracking"
+  },
+  "register": {
+    "name-required": "Name is required.",
+    "email-required": "Email is required.",
+    "enter-valid-email": "Please enter a valid email address.",
+    "password": "Password",
+    "password-required": "Password is required.",
+    "password-min-length": "Password must be at least 6 characters long.",
+    "confirm-password": "Confirm password",
+    "please-confirm-password": "Please confirm your password.",
+    "password-no-match": "Passwords do not match.",
+    "date-of-birth": "Date of Birth",
+    "create-new-household": "Create a new household",
+    "household-token": "Household Token",
+    "placeholder": {
+      "please-enter-token": "Enter the household invitation token",
+      "enter-household-name": "Enter a name for your new household",
+      "create-password": "Create a password",
+      "your-name": "Choose a name",
+      "re-enter-password": "Re-enter your password"
+    },
+    "household-token-required": "Household Token is required.",
+    "household-name": "Household Name",
+    "household-name-required": "Household Name is required.",
+    "already-registered": "Already have an account?",
+    "login-here": "Login here",
+    "name": "Name",
+    "register": "Register"
+  },
+  "login": {
+    "placeholder": {
+      "enter-password": "your password"
+    },
+    "no-account": "Don't have an account?",
+    "register": "Register here",
+    "by-registering-part-1": "By logging in, you agree to our ",
+    "by-registering-part-2": "Privacy Policy",
+    "login": "Login"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard"
   }
 }

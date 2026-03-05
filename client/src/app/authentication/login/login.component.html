@@ -15,7 +15,7 @@
           id="email"
           type="email"
           formControlName="email"
-          placeholder="your.email@example.com"
+          placeholder="votre.email@example.com"
           class="w-full"
           [ngClass]="{'p-invalid': email?.invalid && (email?.dirty || email?.touched)}"
           aria-describedby="email-error"
@@ -24,18 +24,18 @@
           *ngIf="email?.invalid && (email?.dirty || email?.touched)"
           id="email-error"
           class="p-error text-xs">
-          <span *ngIf="email?.errors?.['required']">Email is required.</span>
-          <span *ngIf="email?.errors?.['email']">Please enter a valid email address.</span>
+          <span *ngIf="email?.errors?.['required']">{{'register.email-required'|translate}}</span>
+          <span *ngIf="email?.errors?.['email']">{{'register.enter-valid-email'|translate}}</span>
         </small>
       </div>
 
       <!-- Password Field -->
       <div class="flex flex-col gap-2">
-        <label for="password" class="font-medium text-surface-700 dark:text-surface-200">Password</label>
+        <label for="password" class="font-medium text-surface-700 dark:text-surface-200">{{'register.password'|translate}}</label>
         <p-password
           id="password"
           formControlName="password"
-          placeholder="Enter your password"
+          [placeholder]="'login.placeholder.enter-password'|translate"
           [toggleMask]="true"
           styleClass="w-full"
           inputStyleClass="w-full"
@@ -47,7 +47,7 @@
           *ngIf="password?.invalid && (password?.dirty || password?.touched)"
           id="password-error"
           class="p-error text-xs">
-          <span *ngIf="password?.errors?.['required']">Password is required.</span>
+          <span *ngIf="password?.errors?.['required']">{{'register.password-required'|translate}}</span>
         </small>
       </div>
 
@@ -56,21 +56,21 @@
         pButton
         pRipple
         type="submit"
-        label="Login"
+        [label]="'login.login'|translate"
         icon="pi pi-sign-in"
         class="w-full mt-3"  >
       </button>
 
       <!-- Registration Link -->
       <div class="text-center mt-3">
-        <span class="text-surface-600 dark:text-surface-400 text-sm">Don't have an account? </span>
+        <span class="text-surface-600 dark:text-surface-400 text-sm">{{'login.no-account'|translate}} </span>
         <a routerLink="/register" class="text-primary-500 dark:text-primary-400 hover:underline text-sm font-medium">
-          Register here
+          {{'login.register'|translate}}
         </a>
       </div>
       <p class="mt-4 text-xs text-center text-gray-500">
-        By logging in, you agree to our 
-        <a routerLink="/privacy-policy" class="text-blue-500 hover:underline">Privacy Policy</a>.
+        {{'login.by-registering-part-1'|translate}}
+        <a routerLink="/privacy-policy" class="text-blue-500 hover:underline">{{'login.by-registering-part-2'|translate}}</a>.
       </p>
 
     </form>

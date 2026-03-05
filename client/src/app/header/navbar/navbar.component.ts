@@ -8,8 +8,8 @@ import { HouseholdService } from '../../service/household.service';
 import { MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { JoinHouseholdComponent } from '../../household/join-household/join-household.component';
-import { Observable } from 'rxjs';
-import { HouseholdMember, UserRole } from '../../model/household';
+import { Observable, Subscription } from 'rxjs';
+import { Household, HouseholdMember, UserRole } from '../../model/household';
 import { AppNotification } from '../../model/notification';
 import { NotificationService } from '../../service/notification.service';
 
@@ -38,6 +38,8 @@ export class NavbarComponent implements OnInit {
   isLoggedIn$ = this.authService.isLoggedIn$; // Make public for template access
   household$ = this.householdService.household$; // <-- Expose household observable
   currentUser$: Observable<HouseholdMember | null> = this.householdService.currentUser$;
+  subscription: Subscription = new Subscription();
+  household: Household | null = null;
 
   constructor(private router: Router, private translate: TranslateService, private messageService: MessageService, private eRef: ElementRef){}
 
@@ -51,6 +53,12 @@ export class NavbarComponent implements OnInit {
       })) {
       }
     }, 60000);
+
+    this.subscription.add(
+      this.householdService.retrieveHousehold().subscribe((household) => {
+        this.household = household;
+      })
+    )
   }
 
   useLanguage(language: string): void {

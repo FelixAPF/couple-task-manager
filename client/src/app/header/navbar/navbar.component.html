@@ -22,6 +22,7 @@
 
         <a
            routerLink="/tasks"
+          *ngIf="household.enableTasks"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
@@ -31,6 +32,7 @@
 
         <a
            routerLink="/meals"
+          *ngIf="household.enableMeal"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
@@ -40,11 +42,21 @@
 
         <a
            routerLink="/shopping-list"
+           *ngIf="household.enableShoppingList"
            routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
            class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
            [routerLinkActiveOptions]="{exact: true}">
            <i class="pi pi-shopping-cart text-sm"></i>
            <span>{{ 'side-menu.shopping-list' | translate}}</span>
+        </a>
+        <a
+           routerLink="/food-tracking"
+           *ngIf="household.enableFoodIntakeTracking"
+           routerLinkActive="text-primary-500 dark:text-primary-400 font-semibold border-b-2 border-primary-500"
+           class="p-button p-button-text text-surface-600 dark:text-surface-300 flex items-center gap-1 px-2 py-1 transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-300"
+           [routerLinkActiveOptions]="{exact: true}">
+           <i class="fa fa-cutlery text-xl mb-1"></i>
+           <span>{{'footer-navbar.food-intake-tracking'|translate}}</span>
         </a>
 
       </ng-container>
@@ -205,7 +217,7 @@
     <ng-container *ngIf="isAdmin()">
       <a routerLink="/admin/dashboard" class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group cursor-pointer">
         <i class="pi pi-chart-bar w-6 h-6 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
-        <span class="ml-3">Admin Dashboard</span>
+        <span class="ml-3">{{'admin.dashboard'|translate}}</span>
       </a>
     </ng-container>
     

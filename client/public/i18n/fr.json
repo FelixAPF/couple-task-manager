@@ -74,7 +74,7 @@
     "menu": "Menu",
     "ways-to-care": "Petites Attentions",
     "to-do-list": "Activités à faire",
-    "dashboard": "Dashboard",
+    "dashboard": "Tableau de bord",
     "tasks": "Tâches",
     "meals": "Repas",
     "shopping-list": "Liste d'épicerie",
@@ -142,7 +142,25 @@
     "manage-and-assign": "Gestion & Répartition",
     "create-task": "Créer Tâche",
     "assign-tasks": "Assigner les tâches",
-    "search-placeholder": "Rechercher par titre ou description..."
+    "search-placeholder": "Rechercher par titre ou description...",
+    "task-library": "Librairie de tâches",
+    "search-existing-tasks": "Chercher tâches existantes...",
+    "no-tasks": "Aucune tâche existante. Créez en une pour débuter!",
+    "no-task-assigned": "Aucune tâche assignée.",
+    "task-assigned": "tâches assignées",
+    "assignment-board": "Tableau d'assignation",
+    "total-assigned": "Total assignées:",
+    "view-details": "Voir détails",
+    "tasks": "tâches",
+    "task-list": "Listes de tâches",
+    "task-list-subtitle": "Gérer des listes de tâches saisonnières ou pour occasions spéciales",
+    "task-list-create-list": "Créer liste",
+    "placeholder": {
+      "new-task-list-name": "Nouvelle liste"
+    },
+    "new-task": "Nouvelle tâche",
+    "edit-task": "Modifier la tâche",
+    "delete-task": "Supprimer la tâche"
   },
   "meals": {
     "plan": "Plan Repas",
@@ -185,5 +203,46 @@
   },
   "footer-navbar": {
     "food-intake-tracking": "Tracking"
+  },
+  "register": {
+    "name-required": "Le nom est requis",
+    "email-required": "Le courriel est requis.",
+    "enter-valid-email": "Veuillez entrer un courriel valide.",
+    "password": "Mot de passe",
+    "password-required": "Mot de passe requis.",
+    "password-min-length": "Le mot de passe doit avoir au moins 6 chiffres, lettres ou symboles.",
+    "confirm-password": "Confirmer le mot de passe",
+    "please-confirm-password": "Veuillez confirmer le mot de passe.",
+    "password-no-match": "Les mots de passe ne sont pas identiques.",
+    "date-of-birth": "Date de naissance",
+    "create-new-household": "Créer un nouveau domicile",
+    "household-token": "Clé d'invitation au domicile",
+    "placeholder": {
+      "please-enter-token": "Entrer la clé d'invitation",
+      "enter-household-name": "Entrez un nom pour votre domicile",
+      "create-password": "Créer un mot de passe",
+      "your-name": "Votre nom",
+      "re-enter-password": "Entrer votre mot de passe à nouveau"
+    },
+    "household-token-required": "La clé d'invitation est requise.",
+    "household-name": "Nom du domicile",
+    "household-name-required": "Le nom de domicile est requis.",
+    "already-registered": "Déjà inscrit?",
+    "login-here": "Se connecter",
+    "name": "Nom",
+    "register": "S'inscrire"
+  },
+  "login": {
+    "placeholder": {
+      "enter-password": "mot de passe"
+    },
+    "no-account": "Pas encore inscrit?",
+    "register": "S'inscrire",
+    "by-registering-part-1": "En vous connectant, vous acceptez nos",
+    "by-registering-part-2": "conditions d'utilisation",
+    "login": "Connexion"
+  },
+  "admin": {
+    "dashboard": "Tableau de bord administrateur"
   }
 }

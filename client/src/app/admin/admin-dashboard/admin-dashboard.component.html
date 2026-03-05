@@ -1,13 +1,77 @@
 <div class="p-6 h-full flex flex-col">
   <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Admin Dashboard</h1>
   
-  <div class="card bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 flex-grow">
-    <div *ngIf="metrics.length === 0" class="text-center py-10 text-gray-500">
+  <div class="card bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 flex-grow overflow-hidden flex flex-col">
+    <div *ngIf="metrics.length === 0" class="text-center py-10 text-gray-500 flex-grow flex items-center justify-center">
       Loading metrics or no households available...
     </div>
     
-    <div *ngIf="metrics.length > 0" style="height: 500px;">
-      <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="100%"></p-chart>
+    <div *ngIf="metrics.length > 0" class="flex-grow">
+      <p-table 
+        [value]="metrics" 
+        dataKey="householdName"
+        rowExpandMode="single"
+        (onRowExpand)="onRowExpand($event)"
+        [paginator]="true" 
+        [rows]="25" 
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        styleClass="p-datatable-lg custom-mobile-table">
+        
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem"></th>
+            <th pSortableColumn="householdName" class="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700 font-semibold py-4">
+              Household Name <p-sortIcon field="householdName"></p-sortIcon>
+            </th>
+            <th pSortableColumn="numberOfUsers" class="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700 font-semibold py-4 w-1/4 hidden md:table-cell">
+              Users <p-sortIcon field="numberOfUsers"></p-sortIcon>
+            </th>
+            <th pSortableColumn="numberOfRecipes" class="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-700 font-semibold py-4 w-1/4 hidden md:table-cell">
+              Recipes <p-sortIcon field="numberOfRecipes"></p-sortIcon>
+            </th>
+          </tr>
+        </ng-template>
+        
+        <ng-template pTemplate="body" let-metric let-expanded="expanded">
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+            <td class="border-b dark:border-gray-700 py-4">
+              <button type="button" pButton pRipple [pRowToggler]="metric" class="p-button-text p-button-rounded p-button-plain" [icon]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+            </td>
+            <td class="border-b dark:border-gray-700 py-4">
+              <span class="md:hidden font-bold text-gray-500 dark:text-gray-400 block mb-1">Household</span>
+              <span class="text-gray-800 dark:text-gray-200 font-medium">{{ metric.householdName }}</span>
+            </td>
+            <td class="border-b dark:border-gray-700 py-4 hidden md:table-cell">
+              <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 shadow-sm min-w-[3rem]">
+                {{ metric.numberOfUsers }}
+              </span>
+            </td>
+            <td class="border-b dark:border-gray-700 py-4 hidden md:table-cell">
+              <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-200 shadow-sm min-w-[3rem]">
+                {{ metric.numberOfRecipes }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="rowexpansion" let-metric>
+          <tr>
+            <td colspan="4" class="p-4 bg-gray-50 dark:bg-gray-900/50">
+              <div class="p-4 border rounded-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-inner">
+                <h5 class="text-lg font-semibold mb-4 text-center text-gray-700 dark:text-gray-300">
+                  Stats for {{ metric.householdName }}
+                </h5>
+                <div class="h-64 relative">
+                  <p-chart type="bar" [data]="expandedChartData" [options]="chartOptions"></p-chart>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+        
+      </p-table>
     </div>
   </div>
 </div>

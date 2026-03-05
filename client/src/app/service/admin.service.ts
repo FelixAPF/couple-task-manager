@@ -16,6 +16,6 @@ export class AdminService {
   constructor(private http: HttpClient) {}
 
   getMetrics(): Observable<AdminMetricDto[]> {
-    return this.http.get<AdminMetricDto[]>(`${environment.apiUrl}/admin/metrics`);
+    return this.http.get<AdminMetricDto[]>(`${environment.apiUrl}admin/metrics`);
   }
 }

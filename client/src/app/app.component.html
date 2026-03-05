@@ -1,91 +1,88 @@
-<body>
-  <div class="flex flex-col min-h-screen bg-surface-50 dark:bg-surface-900 text-surface-700 dark:text-surface-200">
+<div class="min-h-[100dvh] flex flex-col bg-surface-50 dark:bg-surface-900 text-surface-700 dark:text-surface-200">
 
-    <app-navbar></app-navbar>
-  
-    <p-progressSpinner *ngIf="isLoading"
-      class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-8 h-8" strokeWidth="4"
-      animationDuration=".5s">
-    </p-progressSpinner>
-  
-    <div class="relative flex flex-col flex-grow overflow-y-auto pt-16" [hidden]="isLoading"
-         [@routeAnimations]="prepareRoute(outlet)"> <div *ngIf="outdatedVersion && !acknowledgeUpdate">
+  <app-navbar></app-navbar>
+
+  <p-progressSpinner *ngIf="isLoading"
+    class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-8 h-8" strokeWidth="4"
+    animationDuration=".5s">
+  </p-progressSpinner>
+
+  <main class="relative flex flex-col flex-grow pt-16 sm:pt-20 pb-20 lg:pb-0 z-0 w-full" [hidden]="isLoading"
+      [@routeAnimations]="prepareRoute(outlet)"> 
+      
       <div *ngIf="outdatedVersion && !acknowledgeUpdate"
          class="bg-yellow-100 dark:bg-yellow-900/60 border-l-4 border-yellow-500 dark:border-yellow-400
               text-yellow-800 dark:text-yellow-100
-              p-3 mx-2 sm:mx-4
-              mb-4 md:mb-6
+              p-3 mx-2 sm:mx-4 mt-4 mb-4 md:mb-6
               rounded-md shadow-lg
               flex items-center justify-between gap-3
-              relative z-30"> <!-- z-index might not be needed if positioned normally -->
+              relative z-30"> 
 
-          <span class="text-sm font-medium flex items-center" (click)="openAppStore()">
-            <i class="pi pi-exclamation-triangle mr-2 flex-shrink-0"></i>
-            <span>{{'general.update-available'|translate}}</span>
-          </span>
+        <span class="text-sm font-medium flex items-center cursor-pointer" (click)="openAppStore()">
+          <i class="pi pi-exclamation-triangle mr-2 flex-shrink-0"></i>
+          <span>{{'general.update-available'|translate}}</span>
+        </span>
 
-          <button pButton pRipple type="button" icon="pi pi-times"
-                  class="p-button-rounded p-button-text p-button-sm flex-shrink-0
-                          !text-yellow-800 dark:!text-yellow-100
-                          hover:!bg-yellow-200/50 dark:hover:!bg-yellow-700/50"
-                  (click)="closeUpdateDialog()"
-                  aria-label="Fermer l'avertissement de mise à jour">
-          </button>
-        </div>
+        <button pButton pRipple type="button" icon="pi pi-times"
+                class="p-button-rounded p-button-text p-button-sm flex-shrink-0
+                        !text-yellow-800 dark:!text-yellow-100
+                        hover:!bg-yellow-200/50 dark:hover:!bg-yellow-700/50"
+                (click)="closeUpdateDialog()"
+                aria-label="Fermer l'avertissement de mise à jour">
+        </button>
       </div>
-  
+
       <router-outlet #outlet="outlet"></router-outlet>
+  </main> 
   
-    </div> <div class="lg:hidden">
-      <app-footer-navbar></app-footer-navbar>
-    </div>
-
-<p-dialog 
-        [(visible)]="showUpdateDialog" 
-        [modal]="true" 
-        [draggable]="false" 
-        [resizable]="false" 
-        [closable]="false"
-        [showHeader]="false"
-        styleClass="w-[90%] max-w-sm rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-surface-800"
-        [maskStyle]="{'backdrop-filter': 'blur(5px)', 'background-color': 'rgba(0,0,0,0.4)'}">
-        
-        <div class="relative p-6 text-center">
-            <button 
-                (click)="showUpdateDialog = false"
-                class="absolute top-4 right-4 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors z-10">
-                <i class="pi pi-times text-xl"></i>
-            </button>
-
-            <div class="mx-auto mb-5 w-28 h-28 rounded-full flex items-center justify-center bg-white dark:bg-surface-700 border-4 border-orange-100 dark:border-orange-500/30 shadow-lg relative">
-                <img src="assets/kyuubi.png" 
-                     alt="Kurama Update" 
-                     class="w-full h-full object-cover p-1 rounded-full"> 
-            </div>
-
-            <h3 class="text-2xl font-bold text-surface-900 dark:text-surface-50 mb-2">
-                Mise à jour disponible !
-            </h3>
-            <p class="text-surface-600 dark:text-surface-300 text-sm mb-6 leading-relaxed px-2">
-                Kurama a accumulé suffisament de Chakra pour une nouvelle version de l'application.
-            </p>
-
-            <button 
-                pButton 
-                pRipple 
-                label="Mettre à jour maintenant" 
-                icon="pi pi-download"
-                class="w-full p-button-rounded font-semibold !bg-orange-500 !border-orange-500 hover:!bg-orange-600"
-                (click)="openAppStore()">
-            </button>
-            
-            <button 
-                (click)="showUpdateDialog = false"
-                class="mt-4 text-xs font-medium text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors">
-                Plus tard
-            </button>
-        </div>
-    </p-dialog>
-  
+  <div class="lg:hidden z-50">
+    <app-footer-navbar></app-footer-navbar>
   </div>
-</body>
+
+  <p-dialog 
+      [(visible)]="showUpdateDialog" 
+      [modal]="true" 
+      [draggable]="false" 
+      [resizable]="false" 
+      [closable]="false"
+      [showHeader]="false"
+      styleClass="w-[90%] max-w-sm rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-surface-800"
+      [maskStyle]="{'backdrop-filter': 'blur(5px)', 'background-color': 'rgba(0,0,0,0.4)'}">
+      
+      <div class="relative p-6 text-center">
+          <button 
+              (click)="showUpdateDialog = false"
+              class="absolute top-4 right-4 text-surface-400 hover:text-surface-600 dark:hover:text-surface-200 transition-colors z-10">
+              <i class="pi pi-times text-xl"></i>
+          </button>
+
+          <div class="mx-auto mb-5 w-28 h-28 rounded-full flex items-center justify-center bg-white dark:bg-surface-700 border-4 border-orange-100 dark:border-orange-500/30 shadow-lg relative">
+              <img src="assets/kyuubi.png" 
+                   alt="Kurama Update" 
+                   class="w-full h-full object-cover p-1 rounded-full"> 
+          </div>
+
+          <h3 class="text-2xl font-bold text-surface-900 dark:text-surface-50 mb-2">
+              Mise à jour disponible !
+          </h3>
+          <p class="text-surface-600 dark:text-surface-300 text-sm mb-6 leading-relaxed px-2">
+              Kurama a accumulé suffisament de Chakra pour une nouvelle version de l'application.
+          </p>
+
+          <button 
+              pButton 
+              pRipple 
+              label="Mettre à jour maintenant" 
+              icon="pi pi-download"
+              class="w-full p-button-rounded font-semibold !bg-orange-500 !border-orange-500 hover:!bg-orange-600"
+              (click)="openAppStore()">
+          </button>
+          
+          <button 
+              (click)="showUpdateDialog = false"
+              class="mt-4 text-xs font-medium text-surface-400 hover:text-surface-600 dark:hover:text-surface-300 transition-colors">
+              Plus tard
+          </button>
+      </div>
+  </p-dialog>
+</div>

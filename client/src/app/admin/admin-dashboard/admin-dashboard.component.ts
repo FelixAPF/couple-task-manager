@@ -1,18 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TableModule } from 'primeng/table';
 import { ChartModule } from 'primeng/chart';
+import { ButtonModule } from 'primeng/button';
 import { AdminService, AdminMetricDto } from '../../service/admin.service';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, ChartModule],
+  imports: [CommonModule, TableModule, ChartModule, ButtonModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.css']
 })
 export class AdminDashboardComponent implements OnInit {
   metrics: AdminMetricDto[] = [];
-  chartData: any;
+  
+  expandedChartData: any;
   chartOptions: any;
 
   constructor(private adminService: AdminService) {}
@@ -21,78 +24,53 @@ export class AdminDashboardComponent implements OnInit {
     this.adminService.getMetrics().subscribe({
       next: (data) => {
         this.metrics = data;
-        this.initChart();
+        this.initChartOptions();
       },
       error: (err) => console.error('Failed to load admin metrics', err)
     });
   }
 
-  initChart(): void {
+  initChartOptions() {
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-color');
-    const textColorSecondary = documentStyle.getPropertyValue('--text-color-secondary');
     const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
-
-    this.chartData = {
-      labels: this.metrics.map(m => m.householdName),
-      datasets: [
-        {
-          label: 'Number of Users',
-          backgroundColor: documentStyle.getPropertyValue('--blue-500') || '#3B82F6',
-          borderColor: documentStyle.getPropertyValue('--blue-500') || '#3B82F6',
-          data: this.metrics.map(m => m.numberOfUsers)
-        },
-        {
-          label: 'Number of Recipes',
-          backgroundColor: documentStyle.getPropertyValue('--pink-500') || '#EC4899',
-          borderColor: documentStyle.getPropertyValue('--pink-500') || '#EC4899',
-          data: this.metrics.map(m => m.numberOfRecipes)
-        }
-      ]
-    };
 
     this.chartOptions = {
       maintainAspectRatio: false,
-      aspectRatio: 0.8,
+      aspectRatio: 2.5,
       plugins: {
-        legend: {
-          labels: {
-            color: textColor
-          }
-        },
-        title: {
-          display: true,
-          text: 'Household Statistics',
-          color: textColor,
-          font: {
-            size: 16
-          }
-        }
+        legend: { display: false }
       },
       scales: {
         x: {
-          ticks: {
-            color: textColorSecondary,
-            font: {
-              weight: 500
-            }
-          },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false
-          }
+          ticks: { color: textColor },
+          grid: { color: surfaceBorder, drawBorder: false }
         },
         y: {
-          ticks: {
-            color: textColorSecondary,
-            stepSize: 1
-          },
-          grid: {
-            color: surfaceBorder,
-            drawBorder: false
-          }
+          ticks: { color: textColor, stepSize: 1 },
+          grid: { color: surfaceBorder, drawBorder: false }
         }
       }
+    };
+  }
+
+  onRowExpand(event: any) {
+    const metric: AdminMetricDto = event.data;
+    const documentStyle = getComputedStyle(document.documentElement);
+    
+    // Generate a fresh chart just for the clicked row
+    this.expandedChartData = {
+      labels: ['Total Users', 'Total Recipes'],
+      datasets: [
+        {
+          label: 'Count',
+          backgroundColor: [
+            documentStyle.getPropertyValue('--blue-500') || '#3B82F6',
+            documentStyle.getPropertyValue('--pink-500') || '#EC4899'
+          ],
+          data: [metric.numberOfUsers, metric.numberOfRecipes]
+        }
+      ]
     };
   }
 }

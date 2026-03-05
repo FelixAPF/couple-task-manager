@@ -1,0 +1,13 @@
+<div class="p-6 h-full flex flex-col">
+  <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Admin Dashboard</h1>
+  
+  <div class="card bg-white dark:bg-gray-800 shadow-xl rounded-lg p-6 flex-grow">
+    <div *ngIf="metrics.length === 0" class="text-center py-10 text-gray-500">
+      Loading metrics or no households available...
+    </div>
+    
+    <div *ngIf="metrics.length > 0" style="height: 500px;">
+      <p-chart type="bar" [data]="chartData" [options]="chartOptions" height="100%"></p-chart>
+    </div>
+  </div>
+</div>

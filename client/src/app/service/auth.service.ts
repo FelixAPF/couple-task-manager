@@ -63,6 +63,47 @@ login(authRequest: AuthRequest): Observable<AuthResponse> {
     );
   }
 
+  getCurrentUser(): any {
+    const token = localStorage.getItem('authToken'); // Adjust this key if your app uses 'jwt' or 'accessToken'
+    console.log("GETTING TOKEN ", token)
+    if (token) {
+      try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(atob(payload));
+        
+        // Map the role based on Spring Boot JWT claims
+        let userRole = decoded.role;
+        console.log("USER ROLE IS ", userRole);
+        if (!userRole && decoded.roles && decoded.roles.length > 0) {
+          // If roles is an array like ["ROLE_ADMIN"]
+          userRole = decoded.roles[0].replace('ROLE_', '');
+        } else if (!userRole && decoded.authorities && decoded.authorities.length > 0) {
+          // If authorities is an array of objects
+          userRole = decoded.authorities[0].authority.replace('ROLE_', '');
+        }
+
+        return {
+          ...decoded,
+          role: userRole
+        };
+      } catch (e) {
+        console.error('Error decoding JWT token', e);
+      }
+    }
+    
+    // Fallback if you store the user object directly in localStorage during login
+    const userStr = localStorage.getItem('user'); 
+    if (userStr) {
+      try {
+        return JSON.parse(userStr);
+      } catch (e) {
+        return null;
+      }
+    }
+    
+    return null;
+  }
+
 refreshToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
     

@@ -140,4 +140,9 @@ toggleMenu(): void {
     }
   }
 
+  isAdmin(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user && user.role === 'ADMIN';
+  }
+
 }

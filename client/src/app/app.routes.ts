@@ -23,6 +23,8 @@ import { LetterListComponent } from './letters/letter-list/letter-list.component
 import { CreateLetterComponent } from './letters/create-letter/create-letter.component';
 import { LetterDetailComponent } from './letters/letter-detail/letter-detail.component';
 import { FoodIntakeTrackingDashboardComponent } from './food-intake-tracking-dashboard/food-intake-tracking-dashboard.component'
+import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard.component';
+import { AdminGuard } from './guard/admin.guard';
 
 
 export const routes: Routes = [
@@ -65,6 +67,7 @@ export const routes: Routes = [
             { path: 'contacts', component: ContactsComponent, canActivate: [authGuard] },
         ]
     },
+    
     {
         path: 'letters',
         canActivate: [authGuard],
@@ -73,6 +76,11 @@ export const routes: Routes = [
             { path: 'new', component: CreateLetterComponent },
             { path: 'view/:id', component: LetterDetailComponent }
         ]
+    },
+    { 
+        path: 'admin/dashboard', 
+        component: AdminDashboardComponent, 
+        canActivate: [AdminGuard] 
     },
     { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },
 

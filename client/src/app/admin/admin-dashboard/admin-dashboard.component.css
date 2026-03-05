@@ -1,0 +1,8 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.card {
+  border: 1px solid var(--surface-border, #e5e7eb);
+}

@@ -43,8 +43,9 @@ public class AuthController {
     public ResponseEntity<JwtResponse> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
-            String token = jwtUtils.generateToken(authRequest.getEmail());
-            RefreshToken refreshToken = refreshTokenService.createRefreshToken(authRequest.getEmail());
+            CTMUser user = (CTMUser) authentication.getPrincipal();
+            String token = jwtUtils.generateToken(user.getEmail(), user.getRole().name());
+            RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getEmail());
 
             return ResponseEntity.ok(new JwtResponse(token, refreshToken.getToken()));
         } else {
@@ -65,8 +66,8 @@ public class AuthController {
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)
                 .map(user -> {
-                    // 1. On génère le nouvel Access Token (courte durée)
-                    String token = jwtUtils.generateToken(user.getEmail());
+                    // 1. On génère le nouvel Access Token (courte durée) avec le role ajouté
+                    String token = jwtUtils.generateToken(user.getEmail(), user.getRole().name());
 
                     // 2. NOUVEAU : On génère un NOUVEAU Refresh Token (qui écrase l'ancien en base de données)
                     // Cela repousse la date d'expiration de 6 mois (ou la durée configurée)

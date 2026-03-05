@@ -6,3 +6,80 @@
 .card {
   border: 1px solid var(--surface-border, #e5e7eb);
 }
+
+/* Ensure the PrimeNG table background blends with the card */
+::ng-deep .p-datatable .p-datatable-wrapper {
+  border-radius: 0.5rem;
+}
+
+/* Paginator styling to match the modern look */
+::ng-deep .p-paginator {
+  background-color: transparent !important;
+  border: none !important;
+  padding-top: 1rem;
+}
+
+::ng-deep .p-paginator .p-paginator-current {
+  color: #6b7280; /* text-gray-500 */
+}
+
+/* Dark mode paginator overrides */
+@media (prefers-color-scheme: dark) {
+  ::ng-deep .p-paginator .p-paginator-current {
+    color: #9ca3af; /* text-gray-400 */
+  }
+  ::ng-deep .p-paginator .p-paginator-pages .p-paginator-page {
+    color: #e5e7eb;
+  }
+}
+
+/* -------------------------------------------
+   Mobile Responsive Table Overrides 
+   ------------------------------------------- */
+@media (max-width: 767px) {
+  /* Hide the standard table header on mobile */
+  ::ng-deep .custom-mobile-table .p-datatable-thead {
+    display: none !important;
+  }
+
+  /* Convert rows into flex-column cards */
+  ::ng-deep .custom-mobile-table .p-datatable-tbody > tr {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+    background-color: #f9fafb;
+    overflow: hidden;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  /* Dark mode support for mobile cards (Tailwind 'dark' class) */
+  :host-context(.dark) ::ng-deep .custom-mobile-table .p-datatable-tbody > tr {
+    background-color: #374151; /* bg-gray-700 */
+    border-color: #4b5563;     /* border-gray-600 */
+  }
+
+  /* Distribute space between the injected title and the metric pill/value */
+  ::ng-deep .custom-mobile-table .p-datatable-tbody > tr > td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1rem !important;
+    width: 100% !important;
+  }
+
+  :host-context(.dark) ::ng-deep .custom-mobile-table .p-datatable-tbody > tr > td {
+    border-bottom-color: #4b5563;
+  }
+
+  ::ng-deep .custom-mobile-table .p-datatable-tbody > tr > td:last-child {
+    border-bottom: none !important;
+  }
+
+  /* Prevent row hover highlighting from clashing with card styles on mobile */
+  ::ng-deep .custom-mobile-table .p-datatable-tbody > tr:hover {
+    background-color: inherit;
+  }
+}

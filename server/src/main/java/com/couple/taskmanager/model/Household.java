@@ -35,6 +35,10 @@ public class Household {
 
     private Boolean enableFoodIntakeTracking = false;
 
+    private Boolean enableMeal = true;
+    private Boolean enableTasks = true;
+    private Boolean enableShoppingList = true;
+
     @OneToMany
     @JsonManagedReference("household-way-to-care")
     private List<WayToCare> waysToCare;

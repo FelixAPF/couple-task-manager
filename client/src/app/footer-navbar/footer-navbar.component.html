@@ -24,6 +24,7 @@
     </a>
 
     <a routerLink="/tasks"
+        *ngIf="household && household.enableTasks"
        routerLinkActive="active-link"
        class="nav-item flex flex-col items-center justify-center p-2 rounded-md
               text-surface-600 dark:text-surface-300
@@ -34,6 +35,7 @@
     </a>
     <!-- Recipes Link -->
     <a routerLink="/meals"
+        *ngIf="household && household.enableMeal"
        routerLinkActive="active-link"
        class="nav-item flex flex-col items-center justify-center p-2 rounded-md
               text-surface-600 dark:text-surface-300
@@ -54,6 +56,7 @@
 
     <!-- Shopping List Link -->
     <a routerLink="/shopping-list"
+        *ngIf="household && household.enableShoppingList"
        routerLinkActive="active-link"
        class="nav-item flex flex-col items-center justify-center p-2 rounded-md
               text-surface-600 dark:text-surface-300

@@ -30,7 +30,7 @@ export const SourceMap = {
     [Assignee.Deux]: "assets/deux.jpg",
     [Assignee.Unassigned]: "assets/placeholder.jpg",
   }
-    
+
 enum FormControlName {
   DISPLAY_DURATION = 'displayDuration'
 }
@@ -49,7 +49,7 @@ export class MyTasksComponent implements OnInit {
   subscription: Subscription = new Subscription();
   dataSource = new MatTableDataSource<TaskAssignment>();
   @Output() taskCompleteEmitter: EventEmitter<number> = new EventEmitter();
-  
+
   assigneeOptions: any[] = [];
   readonly SOURCE_MAP = SourceMap;
   taskAssignments: TaskAssignment[] = [];
@@ -62,7 +62,7 @@ export class MyTasksComponent implements OnInit {
 
   menuItems: MenuItem[] = [];
   selectedTaskAssignment: TaskAssignmentDto | null = null;
-  
+
   get displayDuration(){
     return this.formGroup.get(FormControlName.DISPLAY_DURATION);
   }
@@ -131,7 +131,7 @@ export class MyTasksComponent implements OnInit {
                     label: 'Delete',
                     severity: 'danger'
                 },
-            
+
                 accept: () => {
                   this.taskAssignmentService.deleteTaskAssignment(assignment.id).subscribe(() => {
                     this.retrieveTaskByAssignee();
@@ -141,7 +141,7 @@ export class MyTasksComponent implements OnInit {
                 reject: () => {
                     this.messageService.add({ severity: 'error', summary: 'Rejected', detail: 'You have rejected' });
                 }
-            });  
+            });
     }
 
 onTaskMenu(event: any, task: TaskAssignmentDto, contextMenu: any) {
@@ -192,7 +192,7 @@ onTaskMenu(event: any, task: TaskAssignmentDto, contextMenu: any) {
     if (this.ignoreNextClick) {
         setTimeout(() => {
             this.ignoreNextClick = false;
-        }, 500); 
+        }, 500);
     }
   }
   changeUser(){
@@ -203,7 +203,7 @@ onTaskMenu(event: any, task: TaskAssignmentDto, contextMenu: any) {
       this.selectedAssignee = this.householdMembers[selectedAssigneeIndex + 1];
     }
     this.selectedAssigneeId = this.selectedAssignee.id;
-    
+
     this.retrieveTaskByAssignee();
   }
 
@@ -244,7 +244,7 @@ onTaskMenu(event: any, task: TaskAssignmentDto, contextMenu: any) {
       breakpoints: {
  '1199px': '75vw', '575px': '90vw'
       },
-    });  
+    });
     dialogRef.onClose.subscribe((res) => {
       if (onCloseFn) {
         onCloseFn(res);
@@ -293,7 +293,7 @@ onTaskMenu(event: any, task: TaskAssignmentDto, contextMenu: any) {
     this.retrieveTaskByAssignee();
   }
 
-  
+
   datePastDeadline(dueDate: any): boolean {
     return new Date(dueDate) < this.today;
   }

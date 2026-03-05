@@ -114,7 +114,13 @@
       "enable-to-do-list-description": "Create a list of activities, restaurants and other stuff that you wish to try.",
       "enable-wish-list": "Enable Wish List",
       "enable-travel-checklist": "Enable Travel Checklist",
-      "enable-food-intake-tracking": "Enable food intake tracking"
+      "enable-food-intake-tracking": "Enable food intake tracking",
+      "enable-tasks": "Enable tasks",
+      "enable-meals": "Enable meals",
+      "enable-shopping-list": "Enable Shopping List",
+      "enable-tasks-description": "Create and assign tasks to help with planning",
+      "enable-meals-description": "Create and manage recipes. Make your weekly dinner plans",
+      "enable-shopping-list-description": "Manage and update your shopping list that everyone in the household can see."
     }
   },
   "to-do-list": {

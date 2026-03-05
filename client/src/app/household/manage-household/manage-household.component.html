@@ -13,6 +13,51 @@
         <div class="flex items-center gap-3 relative">
             <p-checkbox
                 [binary]="true"
+                inputId="enableTasks"
+                [ngModel]="household.enableTasks"
+                (onChange)="toggleNewSetting($event, household, SETTING_NAMES.TASKS)"
+                [disabled]="isUpdatingSettings()">
+            </p-checkbox>
+            <label for="enableWaysToCare" class="text-surface-700 dark:text-surface-200 cursor-pointer">
+                {{ 'manage-household.settings.enable-tasks' | translate }}
+            </label>
+        </div>
+        <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
+                {{ 'manage-household.settings.enable-tasks-description' | translate }}
+        </small>   
+        <div class="flex items-center gap-3 relative">
+            <p-checkbox
+                [binary]="true"
+                inputId="enableMeal"
+                [ngModel]="household.enableMeal"
+                (onChange)="toggleNewSetting($event, household, SETTING_NAMES.MEALS)"
+                [disabled]="isUpdatingSettings()">
+            </p-checkbox>
+            <label for="enableMeal" class="text-surface-700 dark:text-surface-200 cursor-pointer">
+                {{ 'manage-household.settings.enable-meals' | translate }}
+            </label>
+        </div>
+        <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
+                {{ 'manage-household.settings.enable-meals-description' | translate }}
+        </small>   
+        <div class="flex items-center gap-3 relative">
+            <p-checkbox
+                [binary]="true"
+                inputId="enableShoppingList"
+                [ngModel]="household.enableShoppingList"
+                (onChange)="toggleNewSetting($event, household, SETTING_NAMES.SHOPPING_LIST)"
+                [disabled]="isUpdatingSettings()">
+            </p-checkbox>
+            <label for="enableShoppingList" class="text-surface-700 dark:text-surface-200 cursor-pointer">
+                {{ 'manage-household.settings.enable-shopping-list' | translate }}
+            </label>
+        </div>
+        <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
+                {{ 'manage-household.settings.enable-shopping-list-description' | translate }}
+        </small>   
+        <div class="flex items-center gap-3 relative">
+            <p-checkbox
+                [binary]="true"
                 inputId="enableWaysToCare"
                 [ngModel]="household.enableWaysToCare"
                 (onChange)="toggleWaysToCare($event, household)"
@@ -28,12 +73,12 @@
         <div class="pt-2 flex items-center gap-3 relative">
             <p-checkbox
                 [binary]="true"
-                inputId="enableWaysToCare"
+                inputId="enableToDoList"
                 [ngModel]="household.enableToDoList"
                 (onChange)="togglToDoList($event, household)"
                 [disabled]="isUpdatingSettings()">
             </p-checkbox>
-            <label for="enableWaysToCare" class="text-surface-700 dark:text-surface-200 cursor-pointer">
+            <label for="enableToDoList" class="text-surface-700 dark:text-surface-200 cursor-pointer">
                 {{ 'manage-household.settings.enable-to-do-list' | translate }}
             </label>
         </div>

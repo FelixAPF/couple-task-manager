@@ -114,7 +114,13 @@
       "enable-to-do-list-description": "Créez une liste d'activités, restaurants et autres que vous souhaitez essayer.",
       "enable-wish-list": "Activer liste de souhaits",
       "enable-travel-checklist": "Activer les listes de voyages",
-      "enable-food-intake-tracking": "Activer le suivi de consommation de nourriture"
+      "enable-food-intake-tracking": "Activer le suivi de consommation de nourriture",
+      "enable-tasks": "Activer les tâches",
+      "enable-meals": "Activer les repas",
+      "enable-shopping-list": "Activer la liste de course",
+      "enable-tasks-description": "Créer et assigner des tâches pour aider à la planification",
+      "enable-meals-description": "Créer et gérer des recettes à l'aide d'outils d'IA. Permet de gérer votre menu de la semaine.",
+      "enable-shopping-list-description": "Gérer votre liste d'épicerie et de courses pour que chacun puisse voir les choses manquantes au domicile."
     }
   },
   "to-do-list": {

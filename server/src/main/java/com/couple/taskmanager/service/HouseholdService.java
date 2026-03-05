@@ -96,6 +96,18 @@ public class HouseholdService {
         if(newEnableTrackingFoodIntake != null && !newEnableTrackingFoodIntake.equals(household.getEnableFoodIntakeTracking())){
             household.setEnableFoodIntakeTracking(newEnableTrackingFoodIntake);
         }
+        Boolean newEnableMeal = updateHouseholdSettingsDto.getEnableMeal();
+        if(newEnableMeal != null && !newEnableMeal.equals(household.getEnableMeal())){
+            household.setEnableMeal(newEnableMeal);
+        }
+        Boolean newEnableTasks = updateHouseholdSettingsDto.getEnableTasks();
+        if(newEnableTasks != null && !newEnableTasks.equals(household.getEnableTasks())){
+            household.setEnableTasks(newEnableTasks);
+        }
+        Boolean newEnableShoppingList = updateHouseholdSettingsDto.getEnableShoppingList();
+        if(newEnableShoppingList != null && !newEnableShoppingList.equals(household.getEnableShoppingList())){
+            household.setEnableShoppingList(newEnableShoppingList);
+        }
         return new HouseholdDto(repository.save(household));
     }
 

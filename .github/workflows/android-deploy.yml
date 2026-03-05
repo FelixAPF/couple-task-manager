@@ -3,6 +3,7 @@ name: Build Docker Images & Deploy Android
 on:
   push:
     branches: [ main ] # Trigger workflow on pushes to the main branch
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:

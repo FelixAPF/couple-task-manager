@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NonNull;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Date;
 import java.util.List;
@@ -31,6 +33,7 @@ public class Meal {
     private Household household;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference("user-meal-assignments")
     private CTMUser assignedUser;
 }

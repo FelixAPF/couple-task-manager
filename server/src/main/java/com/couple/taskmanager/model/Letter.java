@@ -3,6 +3,8 @@ package com.couple.taskmanager.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Date;
 import java.util.List;
@@ -24,11 +26,13 @@ public class Letter {
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnoreProperties({"password", "taskAssignments", "taskAssigns", "assignedMeal", "taskLists", "waysToCare", "wishList", "trips", "travelTemplateItems", "household"})
     private CTMUser sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnoreProperties({"password", "taskAssignments", "taskAssigns", "assignedMeal", "taskLists", "waysToCare", "wishList", "trips", "travelTemplateItems", "household"})
     private CTMUser receiver;
 

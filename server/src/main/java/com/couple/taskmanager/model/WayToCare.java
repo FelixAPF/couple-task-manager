@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Data
 @Entity
@@ -22,6 +24,7 @@ public class WayToCare {
 
     @ManyToOne
     @JoinColumn(name = "assignee_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference("user-ways-to-care")
     private CTMUser assignee;
 

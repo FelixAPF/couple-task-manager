@@ -118,8 +118,21 @@
           </div>
         </div>
       </div>
-      <div class="">
-        <button pButton pRipple type="button" icon="pi pi-bars" class="p-button-text" (click)="toggleMenu()"></button>
+      <div class="ml-2 flex items-center">
+        <ng-container *ngIf="(currentUser$ | async) as user; else defaultMenu">
+          <button (click)="toggleMenu()" 
+                  class="w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-surface-200 dark:border-surface-700 hover:border-primary-500 dark:hover:border-primary-400 transition-colors focus:outline-none flex items-center justify-center bg-surface-100 dark:bg-surface-800 cursor-pointer shadow-sm">
+            <img *ngIf="user.imageUrl" [src]="user.imageUrl" alt="Profile" class="w-full h-full object-cover">
+            
+            <span *ngIf="!user.imageUrl" class="text-surface-600 dark:text-surface-300 font-bold text-sm sm:text-base">
+              {{ user.name ? user.name.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : 'U') }}
+            </span>
+          </button>
+        </ng-container>
+
+        <ng-template #defaultMenu>
+          <button pButton pRipple type="button" icon="pi pi-bars" class="p-button-text p-button-rounded" (click)="toggleMenu()"></button>
+        </ng-template>
       </div>
     </div>
 

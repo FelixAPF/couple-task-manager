@@ -3,6 +3,8 @@ package com.couple.taskmanager.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.Date;
 
@@ -27,6 +29,7 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnoreProperties({"password", "taskAssignments", "taskAssigns", "assignedMeal", "taskLists", "waysToCare", "wishList", "trips", "travelTemplateItems", "household", "notifications"})
     private CTMUser user;
 }

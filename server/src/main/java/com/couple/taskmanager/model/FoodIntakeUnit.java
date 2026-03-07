@@ -3,6 +3,8 @@ package com.couple.taskmanager.model;
 import com.couple.taskmanager.enums.FoodIntakeMealType;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
@@ -20,6 +22,7 @@ public class FoodIntakeUnit {
     private Household household;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "assignee_id", nullable = false)
     private CTMUser assignee;
 

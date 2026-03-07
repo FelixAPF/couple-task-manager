@@ -35,6 +35,12 @@ public class CTMUserService implements UserDetailsService {
     private TaskAssignmentRepository taskAssignmentRepository;
 
     @Autowired
+    private MealRepository mealRepository;
+
+    @Autowired
+    private RecipeRepository recipeRepository;
+
+    @Autowired
     private NotificationRepository notificationRepository;
 
     @Autowired
@@ -169,6 +175,9 @@ public class CTMUserService implements UserDetailsService {
         if (receivedOpened != null && !receivedOpened.isEmpty()) {
             letterRepository.deleteAll(receivedOpened);
         }
+
+
+
 
         // ---------------------------------------------------------------------
         // EXISTING CLEANUP LOGIC

@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter
@@ -25,6 +27,7 @@ public class Item {
 
     @ManyToOne
     @JoinColumn(name = "assignee_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference("user-wish-list")
     private CTMUser assignee;
 

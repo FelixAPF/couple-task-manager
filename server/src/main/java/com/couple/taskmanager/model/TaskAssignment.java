@@ -28,6 +28,7 @@ public class TaskAssignment {
 
     @NonNull
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference("user-task-assignments")
     private CTMUser assignee;
 

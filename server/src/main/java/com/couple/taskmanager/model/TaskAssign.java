@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -18,6 +20,7 @@ public class TaskAssign {
     private Task task;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference("user-task-assign")
     private CTMUser assignee;
 

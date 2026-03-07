@@ -5,6 +5,9 @@ on:
     branches: [ main ] # Trigger workflow on pushes to the main branch
   workflow_dispatch:
 
+permissions:
+  contents: write # Needed so the action can push the updated version files back to GitHub
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -12,6 +15,42 @@ jobs:
     # --- Initial Setup ---
     - name: Checkout Repository Code
       uses: actions/checkout@v4
+
+    # --- NEW: Version Parsing & Auto-Update ---
+    - name: Parse Commit Message and Update Version
+      id: version_bump
+      run: |
+        COMMIT_MSG="${{ github.event.head_commit.message }}"
+        echo "Commit message: $COMMIT_MSG"
+        
+        # Regex to capture V2.39 or V2.39.1 etc. at the beginning of the commit message
+        if [[ "$COMMIT_MSG" =~ ^V([0-9]+(\.[0-9]+)+) ]]; then
+          NEW_VERSION="${BASH_REMATCH[1]}"
+          echo "Detected version $NEW_VERSION from commit message!"
+          
+          # Update build.gradle
+          sed -i -E 's/(versionName\s+")[^"]+("\s*)/\1'"$NEW_VERSION"'\2/' client/android/app/build.gradle
+          
+          # Update version.json using jq
+          jq '.version = "'"$NEW_VERSION"'"' client/version.json > tmp.json && mv tmp.json client/version.json
+          
+          # Commit and push changes back to the repository
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add client/android/app/build.gradle client/version.json
+          
+          # Commit with [skip ci] so this push doesn't trigger the workflow again
+          git diff --quiet && git diff --staged --quiet || git commit -m "chore: bump version to $NEW_VERSION [skip ci]"
+          git push
+          
+          # Export to environment for later steps
+          echo "APP_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+        else
+          echo "No version tag found in commit message. Using existing file versions."
+          # Extract existing version from build.gradle as fallback
+          FALLBACK_VERSION=$(grep -E '^\s*versionName\s+"[^"]+"' client/android/app/build.gradle | sed -n 's/.*versionName "\(.*\)".*/\1/p' | head -n 1)
+          echo "APP_VERSION=$FALLBACK_VERSION" >> $GITHUB_ENV
+        fi
 
     - name: Create Google Services JSON File
       run: |
@@ -92,21 +131,6 @@ jobs:
         SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_SIGNING_KEY_PASSWORD }}
         SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_SIGNING_STORE_PASSWORD }}
 
-    # --- Extract Version Name ---
-    - name: Extract App Version Name
-      id: extract_version # Give the step an ID to reference its output
-      run: |
-        # Use grep -E for extended regex, match start of line, whitespace, exact pattern, then extract value
-        VERSION_NAME=$(grep -E '^\s*versionName\s+"[^"]+"' client/android/app/build.gradle | sed -n 's/.*versionName "\(.*\)".*/\1/p' | head -n 1)
-        echo "Extracted Version Name: $VERSION_NAME"
-        # Check if VERSION_NAME is empty before setting output
-        if [ -z "$VERSION_NAME" ]; then
-          echo "Error: Could not extract version name."
-          exit 1
-        fi
-        # Set the version name as an output variable for this step
-        echo "app_version=$VERSION_NAME" >> $GITHUB_OUTPUT
-
     # --- Upload to Google Play ---
     - name: Upload Android App Bundle to Internal Testing
       uses: r0adkll/upload-google-play@v1
@@ -120,11 +144,5 @@ jobs:
     # --- Notify Version Endpoint ---
     - name: Post Version to Endpoint
       run: |
-        # Use the output from the 'extract_version' step
-        APP_VERSION="${{ steps.extract_version.outputs.app_version }}"
-        echo "Posting version $APP_VERSION to endpoint..."
-        # Make the POST request with the version appended to the URL path
-        # Ensure your endpoint https://server.coupletaskmanager.com/version/ expects this format
-        curl -X POST https://server.coupletaskmanager.com/version/"$APP_VERSION"
-      # Optional: Add 'continue-on-error: true' if this step failing shouldn't stop the workflow
-      # continue-on-error: true
+        echo "Posting version ${{ env.APP_VERSION }} to endpoint..."
+        curl -X POST https://server.coupletaskmanager.com/version/${{ env.APP_VERSION }}

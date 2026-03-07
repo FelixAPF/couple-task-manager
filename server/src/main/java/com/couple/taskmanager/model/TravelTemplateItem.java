@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Getter @Setter
@@ -16,6 +18,7 @@ public class TravelTemplateItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // The foreign key column
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference("user-template-item")
     private CTMUser user;
 

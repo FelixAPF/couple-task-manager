@@ -2,19 +2,23 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 
-/* You can add global styles to
+/* You can add global styles */
 /* Global fix to ensure PrimeNG dialogs do not get obscured by the fixed bottom footer */
 .p-dialog .p-dialog-content {
   padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* Ensure the dialog is positioned above the footer */
+/* Ensure the dialog is positioned exactly between the top and bottom navbars */
 .p-dialog {
+  /* Pushes the modal below the top navbar and device notch */
+  margin-top: calc(4rem + env(safe-area-inset-top, 0px)) !important;
+  /* Pushes the modal above the bottom footer and gesture bar */
   margin-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)) !important;
+  /* Ensures the modal automatically shrinks to fit the exact visible space without overflowing */
+  max-height: calc(100% - 8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
 }
 
-this file,
-and also import other style files */ html,
+html,
 body {
   margin: 0;
   padding: 0;

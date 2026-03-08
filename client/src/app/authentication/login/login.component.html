@@ -15,6 +15,7 @@
           id="email"
           type="email"
           formControlName="email"
+          autocomplete="on"
           placeholder="votre.email@example.com"
           class="w-full"
           [ngClass]="{'p-invalid': email?.invalid && (email?.dirty || email?.touched)}"

@@ -2,35 +2,60 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 
-/* You can add global styles to this file, and also import other style files */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    
-    /* Prevent rubber-band scrolling (bounce effect) on mobile browsers */
-    overscroll-behavior-y: none;
-    
-    /* Force browser to handle touches without zooming (fixes iOS zoom issue) */
-    touch-action: pan-x pan-y;
-    
-    /* Prevent text selection and magnifier glass on long press */
-    -webkit-user-select: none;
-    user-select: none;
-    
-    /* Prevent callout menu on long press */
-    -webkit-touch-callout: none;
+/* You can add global styles to
+/* Global fix to ensure PrimeNG dialogs do not get obscured by the fixed bottom footer */
+.p-dialog .p-dialog-content {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
 }
-html, body { height: 100%; }
-input, textarea {
-    -webkit-user-select: auto;
-    user-select: auto;
+
+/* Ensure the dialog is positioned above the footer */
+.p-dialog {
+  margin-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)) !important;
 }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
+
+this file,
+and also import other style files */ html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+
+  /* Prevent rubber-band scrolling (bounce effect) on mobile browsers */
+  overscroll-behavior-y: none;
+
+  /* Force browser to handle touches without zooming (fixes iOS zoom issue) */
+  touch-action: pan-x pan-y;
+
+  /* Prevent text selection and magnifier glass on long press */
+  -webkit-user-select: none;
+  user-select: none;
+
+  /* Prevent callout menu on long press */
+  -webkit-touch-callout: none;
 }
-.d-block{
-    display: block;
+
+html,
+body {
+  height: 100%;
 }
+
+input,
+textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
+}
+
+.d-block {
+  display: block;
+}
+
 .nav-item.active-link {
   /* Use the CSS variable for the primary color */
   color: var(--primary-500);
@@ -41,49 +66,74 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; padding: en
   /* Use the CSS variable for the dark mode primary color */
   color: var(--primary-400);
 }
+
 .hover {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .item-center {
-    align-items: center;
+  align-items: center;
 }
 
 .ml-8px {
-    margin-left: 8px;
+  margin-left: 8px;
 }
 
 
 .text-center {
-    text-align: center;
+  text-align: center;
 }
 
-.delete-button{
-    background-color: red !important;
+.delete-button {
+  background-color: red !important;
 }
 
-table > thead {
-    background-color: #63C4DA !important;
-    opacity: 0.8;
-  }
+table>thead {
+  background-color: #63C4DA !important;
+  opacity: 0.8;
+}
+
 .mat-mdc-row:nth-child(odd) {
-    background-color: white
-  }
-  
-  .mat-mdc-row:nth-child(even) {
-    background-color: white
-  }
+  background-color: white
+}
 
-  .float-right{
-    float:right;
+.mat-mdc-row:nth-child(even) {
+  background-color: white
+}
+
+.float-right {
+  float: right;
 }
 
 
-.flex { display: flex; }
-.flex-col { flex-direction: column; }
-.gap-2 { gap: 0.5rem; }
-.mb-4 { margin-bottom: 1rem; }
-.w-full { width: 100%; }
-.font-bold { font-weight: bold; }
-.text-sm { font-size: 0.875rem; }
-.text-gray { color: #6b7280; }
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-gray {
+  color: #6b7280;
+}

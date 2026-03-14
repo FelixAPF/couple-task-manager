@@ -9,6 +9,7 @@ import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.RefreshTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,12 +33,6 @@ public class RefreshTokenService {
         CTMUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 1. Supprimer l'ancien token de cet utilisateur
-        refreshTokenRepository.deleteByUser(user);
-
-        // 🚨 NOUVEAU : Forcer l'exécution immédiate du DELETE en base de données
-        refreshTokenRepository.flush();
-
         // 2. Créer et sauvegarder le nouveau token
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
@@ -49,6 +44,11 @@ public class RefreshTokenService {
 
     public Optional<RefreshToken> findByToken(RefreshTokenRequest request) {
         return refreshTokenRepository.findByToken(request.getRefreshToken());
+    }
+
+    @Transactional@Scheduled(cron = "0 0 0 * * ?") // Runs every day at midnightpublic
+    void purgeExpiredRefreshTokens() {
+        refreshTokenRepository.deleteByExpiryDateBefore(Instant.now());
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {

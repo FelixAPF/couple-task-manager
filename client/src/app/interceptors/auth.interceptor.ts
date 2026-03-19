@@ -96,7 +96,13 @@ export class AuthInterceptor implements HttpInterceptor {
 
            // If 403 means lack of permission, re-throw the error for component handling
            return throwError(() => error);
-        }  else if(error.status >= 500) {
+        } else if (error.status === 0) {
+            // NOUVEAU: Handle status 0 (Offline / Network dropping on app resume)
+            // We just pass the error along so the component fails silently or shows a toast,
+            // rather than destroying the user's session by navigating away.
+            console.warn('Network error: Device might be offline or waking up.');
+            return throwError(() => error);
+        } else if(error.status >= 500) {
             return throwError(() => error);
 
         } else {

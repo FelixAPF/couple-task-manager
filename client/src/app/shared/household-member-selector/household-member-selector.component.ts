@@ -1,8 +1,7 @@
-import { Component, EventEmitter, inject, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HouseholdService } from '../../service/household.service';
 import { HouseholdMember } from '../../model/household';
-import { SharedModule } from '../../shared.module';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -18,6 +17,10 @@ export class HouseholdMemberSelectorComponent implements OnInit, OnDestroy {
   householdMembers: HouseholdMember[] = [];
   currentUser: HouseholdMember | null = null;
   selectedUser: HouseholdMember | null = null;
+  
+  // NEW: Allow passing a pre-selected user
+  @Input() preSelectedUser: HouseholdMember | null | undefined = null;
+  
   @Output() householdMemberSelected: EventEmitter<HouseholdMember> = new EventEmitter();
 
   ngOnDestroy(): void {
@@ -27,11 +30,20 @@ export class HouseholdMemberSelectorComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription.add(
       this.householdService.retrieveHousehold().subscribe((household) => {
-        console.log("Household " ,household);
         this.householdMembers = household?.members ?? []
-        console.log(this.householdMembers)
         this.currentUser = household?.currentUser ?? null;
-        this.selectedUser = this.currentUser;
+        
+        // Use the pre-selected user if provided, otherwise default to current user
+        if (this.preSelectedUser) {
+            this.selectedUser = this.householdMembers.find(m => m.id === this.preSelectedUser?.id) || this.currentUser;
+        } else {
+            this.selectedUser = this.currentUser;
+        }
+
+        // Emit the initial state so the parent component gets the value immediately
+        if (this.selectedUser) {
+            this.householdMemberSelected.emit(this.selectedUser);
+        }
       })
     )
   }
@@ -40,6 +52,4 @@ export class HouseholdMemberSelectorComponent implements OnInit, OnDestroy {
     this.selectedUser = householdMember;
     this.householdMemberSelected.emit(householdMember);
   }
-
-
 }

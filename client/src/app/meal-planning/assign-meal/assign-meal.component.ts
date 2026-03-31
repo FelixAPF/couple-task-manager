@@ -1,4 +1,3 @@
-// c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\meal-planning\assign-meal\assign-meal.component.ts
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { SharedModule } from '../../shared.module';
@@ -15,9 +14,11 @@ import { TooltipModule } from 'primeng/tooltip';
 import { RecipeCreationComponent } from '../recipe-creation/recipe-creation.component';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { IconFieldModule } from 'primeng/iconfield'; // <-- Import IconFieldModule
-import { InputIconModule } from 'primeng/inputicon'; // <-- Import InputIconModule
-import { TagModule } from 'primeng/tag'; // <-- Import TagModule if not already in SharedModule
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { TagModule } from 'primeng/tag';
+// NEW: Import the selector
+import { HouseholdMemberSelectorComponent } from '../../shared/household-member-selector/household-member-selector.component';
 
 @Component({
   selector: 'app-assign-meal',
@@ -33,9 +34,10 @@ import { TagModule } from 'primeng/tag'; // <-- Import TagModule if not already 
     TooltipModule,
     FormsModule,
     InputTextModule,
-    IconFieldModule,  // <-- Add IconFieldModule
-    InputIconModule,  // <-- Add InputIconModule
-    TagModule         // <-- Add TagModule
+    IconFieldModule,
+    InputIconModule,
+    TagModule,
+    HouseholdMemberSelectorComponent // <-- Added to imports
   ],
   templateUrl: './assign-meal.component.html',
   styleUrls: ['./assign-meal.component.css'],
@@ -43,19 +45,18 @@ import { TagModule } from 'primeng/tag'; // <-- Import TagModule if not already 
 })
 export class AssignMealComponent implements OnInit {
 
-  @ViewChild('locationInput') locationInputRef: ElementRef<HTMLInputElement>;
+  @ViewChild('locationInput') locationInputRef!: ElementRef<HTMLInputElement>;
 
   recipes: Recipe[] = [];
-  filteredRecipes: Recipe[] = []; // <-- Array for filtered results 
+  filteredRecipes: Recipe[] = []; 
   errorLoading: boolean = false;
   selectedRecipe: Recipe | null = null;
   targetDate!: Date;
   formattedTargetDate: string = '';
   selectedLocation: string = 'Maison';
-  searchTerm: string = ''; // <-- Property for search input
-    isThawingNeeded: boolean = false;
+  searchTerm: string = ''; 
+  isThawingNeeded: boolean = false;
   assignee: any = undefined;
-
 
   constructor(
     private recipeService: RecipeService,
@@ -102,7 +103,6 @@ export class AssignMealComponent implements OnInit {
 
         const existingMealRecipeId = this.dialogConfig.data?.meal?.recipe?.id;
         if (existingMealRecipeId) {
-            // Find in the original list, then select
             const recipeToSelect = this.recipes.find(r => r.id === existingMealRecipeId);
             if (recipeToSelect) {
               this.selectRecipe(recipeToSelect);
@@ -110,28 +110,24 @@ export class AssignMealComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error("Error loading recipes:", err); 
         this.errorLoading = true;
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les recettes.' });
       }
     });
   }
 
-  // Method to filter recipes based on searchTerm
   filterRecipes(): void {
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) {
-      this.filteredRecipes = [...this.recipes]; // Show all if search is empty
+      this.filteredRecipes = [...this.recipes]; 
     } else {
       this.filteredRecipes = this.recipes.filter(recipe =>
         recipe.name.toLowerCase().includes(term) ||
         (recipe.category && recipe.category.toLowerCase().includes(term))
-        // Add || recipe.description.toLowerCase().includes(term) if needed
       );
     }
   }
 
-  // Call filterRecipes when search input changes
   onSearchChange(): void {
     this.filterRecipes();
   }
@@ -140,9 +136,13 @@ export class AssignMealComponent implements OnInit {
     this.selectedRecipe = recipe;
   }
 
+  // NEW: Handler for the selector component
+  onAssigneeSelected(member: any): void {
+    this.assignee = member;
+  }
+
   assignSelectedMeal(): void {
     if (this.selectedRecipe) {
-      console.log("ASSIGNING SELECTED MEAL", this.assignee);
       this.dialogRef.close({
           recipe: this.selectedRecipe,
           date: this.targetDate,
@@ -166,9 +166,9 @@ export class AssignMealComponent implements OnInit {
     createRef.onClose.subscribe((newRecipe?: Recipe) => {
         if (newRecipe) {
             this.messageService.add({ severity: 'success', summary: 'Succès', detail: `Recette "${newRecipe.name}" créée.` });
-            this.recipes.unshift(newRecipe); // Add to the main list
-            this.filterRecipes(); // <-- Re-filter the list
-            this.selectRecipe(newRecipe); // Select the newly added recipe
+            this.recipes.unshift(newRecipe);
+            this.filterRecipes(); 
+            this.selectRecipe(newRecipe); 
         }
 
         setTimeout(() => {

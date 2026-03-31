@@ -20,10 +20,20 @@
       [ngClass]="borderHighlightClass">
 
       <ng-template pTemplate="header">
-        <div class="p-3 bg-gradient-to-b from-surface-50 to-surface-100 dark:from-surface-700 dark:to-surface-800 border-b border-surface-200 dark:border-surface-600">
-          <h3 class="text-center text-sm uppercase tracking-wider font-bold text-primary-600 dark:text-primary-300">
+        <div class="relative p-3 bg-gradient-to-b from-surface-50 to-surface-100 dark:from-surface-700 dark:to-surface-800 border-b border-surface-200 dark:border-surface-600 flex items-center justify-center">
+          
+          <h3 class="text-sm uppercase tracking-wider font-bold text-primary-600 dark:text-primary-300 m-0">
             {{ title }}
           </h3>
+
+          <div *ngIf="meal" class="absolute right-2 flex items-center">
+            <button pButton pRipple type="button" icon="pi pi-trash"
+                  class="p-button-rounded p-button-text p-button-sm w-8 h-8 !p-0 text-surface-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                  (click)="onRemoveClick($event)" aria-label="Supprimer le repas"
+                  [pTooltip]="'meals.delete' | translate" tooltipPosition="left">
+            </button>
+          </div>
+
         </div>
       </ng-template>
 
@@ -38,13 +48,32 @@
                 <img *ngIf="meal.recipe.imageUrl"
                      [src]="meal.recipe.imageUrl"
                      [alt]="recipeName"
-                     class="w-24 h-24 object-cover transition-transform duration-500 group-hover:scale-110"> <div *ngIf="!meal.recipe.imageUrl" 
+                     class="w-24 h-24 object-cover transition-transform duration-500 group-hover:scale-110"> 
+                <div *ngIf="!meal.recipe.imageUrl" 
                      class="w-24 h-24 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-600 text-surface-400 dark:text-surface-500 transition-transform duration-500 group-hover:scale-110">
                   <i class="pi pi-image text-3xl opacity-50"></i>
                 </div>
               </div>
 
               <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none"></div>
+
+               <div *ngIf="meal.isThawingNeeded" 
+                   class="absolute -top-2 -left-2 z-20 flex items-center justify-center w-8 h-8 bg-blue-50 dark:bg-blue-900 text-blue-500 dark:text-blue-300 rounded-full shadow-md border-2 border-white dark:border-surface-800 transition-transform duration-300 hover:scale-110"
+                   pTooltip="Décongélation requise" 
+                   tooltipPosition="top">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <line x1="12" y1="2" x2="12" y2="22"></line>
+                  <line x1="20" y1="16" x2="16" y2="12"></line>
+                  <line x1="20" y1="8" x2="16" y2="12"></line>
+                  <line x1="4" y1="8" x2="8" y2="12"></line>
+                  <line x1="4" y1="16" x2="8" y2="12"></line>
+                  <line x1="16" y1="4" x2="12" y2="8"></line>
+                  <line x1="8" y1="4" x2="12" y2="8"></line>
+                  <line x1="16" y1="20" x2="12" y2="16"></line>
+                  <line x1="8" y1="20" x2="12" y2="16"></line>
+                </svg>
+              </div>
 
               <div *ngIf="meal?.assignedUser as assignee" class="absolute -bottom-2 -right-2 z-20">
                  <img

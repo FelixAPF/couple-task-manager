@@ -74,6 +74,9 @@ public class MealService implements IGenericService<Meal, MealDto> {
         newMeal.setLocation(meal.getLocation());
         newMeal.setIsThawingNeeded(meal.getIsThawingNeeded());
         newMeal.setRecipe(byId.orElse(recipe));
+
+        CTMUser assignedUser = userRepository.findById(meal.getAssignedUser().getId()).orElseThrow(NoSuchElementException::new);
+        newMeal.setAssignedUser(assignedUser);
         return new MealDto(repository.save(newMeal));
     }
 

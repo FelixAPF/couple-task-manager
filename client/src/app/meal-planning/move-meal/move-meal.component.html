@@ -26,7 +26,7 @@
       styleClass="p-button-text">
     </p-button>
 
-    <div *ngIf="selectedMeal === null else mealExistBlock"> <!-- Renamed else reference for clarity -->
+    <div *ngIf="!selectedMeal; else mealExistBlock"> <!-- Renamed else reference for clarity -->
       <p-button
         label="Déplacer"
         icon="pi pi-check"

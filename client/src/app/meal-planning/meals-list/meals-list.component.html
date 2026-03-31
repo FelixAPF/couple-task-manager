@@ -1,6 +1,7 @@
 <p-confirmDialog [style]="{width: '50vw'}"></p-confirmDialog>
 <p-toast></p-toast>
-<div class="p-4 md:p-6 pb-16 flex flex-col flex-grow">
+
+<div class="p-4 md:p-6 pb-16 flex flex-col flex-grow relative overflow-hidden" cdkDropListGroup>
 
   <div *ngIf="errorLoading" class="flex justify-center items-center flex-grow">
      <p-message severity="error" text="Une erreur est survenue lors du chargement du plan de repas."></p-message>
@@ -15,50 +16,90 @@
       
       <ng-template let-day>
         
-        <app-meal-card 
-          [id]="day.isToday ? 'today' : day.id" 
-          [customTemplate]="customTemplate" 
-          [noMealPlanned]="noMealPlanned" 
-          (click)="selectDay(day)"
-          [title]="day.formattedDate" 
-          [isBirthday]="day.isBirthday" 
-          [borderHighlightClass]="getBorderClass(day)" 
-          [meal]="getMealForDay(day.isoDate)">
-        </app-meal-card>
+        <div class="h-full w-full relative rounded-xl transition-all"
+             cdkDropList
+             [cdkDropListData]="day"
+             [cdkDropListSortingDisabled]="true"
+             (cdkDropListDropped)="onDrop($event)">
+             
+           <div *ngIf="getMealForDay(day.isoDate) as currentMeal; else emptyDay"
+                cdkDrag
+                [cdkDragData]="currentMeal"
+                [cdkDragDisabled]="!enableCardModification"
+                (cdkDragStarted)="onDragStarted()"
+                (cdkDragEnded)="onDragEnded()"
+                class="h-full w-full cursor-grab active:cursor-grabbing">
+              
+              <div *cdkDragPlaceholder class="opacity-60 border-2 border-dashed border-primary-400 dark:border-primary-600 rounded-xl h-full w-full min-h-[160px] bg-primary-50 dark:bg-primary-900/20 flex flex-col items-center justify-center">
+                 <i class="pi pi-arrow-right-arrow-left text-3xl text-primary-400 dark:text-primary-500 mb-2 opacity-50"></i>
+                 <span class="text-[10px] font-bold text-primary-500 uppercase tracking-widest opacity-70">Échange en cours</span>
+              </div>
+
+              <div *cdkDragPreview class="shadow-2xl rounded-xl opacity-95 scale-105 rotate-2 transition-all cursor-grabbing pointer-events-none">
+                   <app-meal-card 
+                    [id]="day.isToday ? 'today' : day.id" 
+                    [title]="day.formattedDate" 
+                    [isBirthday]="day.isBirthday" 
+                    [borderHighlightClass]="getBorderClass(day)" 
+                    [meal]="currentMeal">
+                  </app-meal-card>
+              </div>
+
+              <app-meal-card 
+                [id]="day.isToday ? 'today' : day.id" 
+                [customTemplate]="customTemplate" 
+                [noMealPlanned]="noMealPlanned" 
+                (click)="selectDay(day)"
+                (removeMealClick)="confirmRemoveMeal($event, currentMeal)"
+                [title]="day.formattedDate" 
+                [isBirthday]="day.isBirthday" 
+                [borderHighlightClass]="getBorderClass(day)" 
+                [meal]="currentMeal">
+              </app-meal-card>
+           </div>
+           
+           <ng-template #emptyDay>
+              <div class="h-full w-full">
+                <app-meal-card 
+                  [id]="day.isToday ? 'today' : day.id" 
+                  [customTemplate]="customTemplate" 
+                  [noMealPlanned]="noMealPlanned" 
+                  (click)="selectDay(day)"
+                  [title]="day.formattedDate" 
+                  [isBirthday]="day.isBirthday" 
+                  [borderHighlightClass]="getBorderClass(day)" 
+                  [meal]="undefined">
+                </app-meal-card>
+              </div>
+           </ng-template>
+
+        </div>
         
         <ng-template #customTemplate>
-          <div class="flex justify-center gap-2 mt-auto" *ngIf="enableCardModification">
-            <button pButton pRipple type="button" icon="pi pi-arrow-right"
-                    class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
+          <div class="w-full flex items-center justify-center gap-2 mt-3 pt-2 border-t border-surface-100 dark:border-surface-700/60" *ngIf="enableCardModification">
+            <button pButton pRipple type="button" icon="pi pi-arrow-right-arrow-left"
+                    class="p-button-rounded p-button-text p-button-sm text-surface-400 dark:text-surface-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
                     (click)="moveMeal(day.date, getMealForDay(day.isoDate))" aria-label="Déplacer le repas"
                     [pTooltip]="'meals.move'|translate" tooltipPosition="top">
             </button>
             <button pButton pRipple type="button" icon="pi pi-pencil"
-                    class="p-button-rounded p-button-text p-button-sm text-primary-500 dark:text-primary-400"
+                    class="p-button-rounded p-button-text p-button-sm text-surface-400 dark:text-surface-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-colors"
                     (click)="assignMeal(day.date, getMealForDay(day.isoDate))" aria-label="Modifier le repas"
                     [pTooltip]="'meals.modify'|translate" tooltipPosition="top">
-            </button>
-            <button pButton pRipple type="button" icon="pi pi-trash"
-                    class="p-button-rounded p-button-text p-button-sm p-button-danger"
-                    (click)="confirmRemoveMeal($event, getMealForDay(day.isoDate))" aria-label="Supprimer le repas"
-                    [pTooltip]="'meals.delete'|translate" tooltipPosition="top">
-            </button>
-            <button pButton pRipple type="button" icon="pi pi-user"
-                    class="p-button-rounded p-button-text p-button-sm p-button-danger"
-                    (click)="confirmAssignMeal(day)" aria-label="Assigner le repas"
-                    [pTooltip]="'meals.assign'|translate" tooltipPosition="top">
             </button>
           </div>
         </ng-template>
 
         <ng-template #noMealPlanned>
-          <div class="flex flex-col items-center">
-            <i class="pi pi-calendar-times text-3xl text-surface-400 dark:text-surface-500 mb-2"></i>
-            <p class="text-xs text-surface-500 dark:text-surface-400 italic mb-3">
+          <div class="flex flex-col items-center justify-center py-4 h-full opacity-80 hover:opacity-100 transition-opacity">
+            <div class="w-12 h-12 rounded-full bg-surface-100 dark:bg-surface-800 flex items-center justify-center mb-3">
+               <i class="pi pi-calendar-plus text-xl text-surface-400 dark:text-surface-500"></i>
+            </div>
+            <p class="text-sm font-medium text-surface-500 dark:text-surface-400 mb-4">
               {{ 'meals.no-meal-planned' | translate }}
             </p>
             <button *ngIf="enableCardModification" pButton pRipple type="button" icon="pi pi-plus" [label]="'meals.assign-meal'|translate"
-                    class="p-button-sm p-button-outlined"
+                    class="p-button-sm p-button-outlined p-button-rounded hover:shadow-md transition-shadow"
                     (click)="assignMeal(day.date, undefined)"
                     aria-label="Assigner un repas">
             </button>
@@ -70,4 +111,18 @@
     </app-week-navigation-control>
 
   </div> 
+
+  <div class="fixed bottom-2 left-0 w-full h-28 bg-surface-900/90 dark:bg-black/80 backdrop-blur-md flex flex-col items-center justify-center transition-transform duration-300 ease-out z-[100] border-t-2 border-surface-700 shadow-[0_-15px_40px_rgba(0,0,0,0.3)]"
+       [ngClass]="isDraggingCard ? 'translate-y-0' : 'translate-y-full'"
+       cdkDropList
+       [cdkDropListData]="'cancel'"
+       (cdkDropListDropped)="onDrop($event)">
+     
+     <div class="flex flex-col items-center opacity-80 hover:opacity-100 transition-opacity">
+       <i class="pi pi-times text-3xl mb-2 text-surface-300"></i>
+       <span class="font-bold uppercase tracking-widest text-sm text-surface-400">Glisser ici pour annuler</span>
+     </div>
+
+  </div>
+
 </div>

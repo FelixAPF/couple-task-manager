@@ -24,6 +24,9 @@ export class MealCardComponent {
 
   isHouseholdMemberBirthday: boolean = false;
 
+  // NEW: Emit when the delete button in the header is clicked
+  @Output() removeMealClick: EventEmitter<Event> = new EventEmitter<Event>();
+
 
   get recipeName(){
     return this.meal?.recipe?.name || 'Recette inconnue';
@@ -31,6 +34,7 @@ export class MealCardComponent {
 
   constructor(@Inject(LOCALE_ID) private locale: string, private dialogService: DialogService, ) {
   }
+  
   openRecipeView(){
     this.recipeDialogRef = this.dialogService.open(RecipeDialogComponent, {
         dismissableMask: true,
@@ -42,5 +46,11 @@ export class MealCardComponent {
           recipe: this.meal?.recipe
         }
     });
+  }
+
+  // NEW: Handler to emit the delete event
+  onRemoveClick(event: Event) {
+      event.stopPropagation(); // Prevent the card from being selected when clicking delete
+      this.removeMealClick.emit(event);
   }
 }

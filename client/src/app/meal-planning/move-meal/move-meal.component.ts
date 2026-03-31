@@ -85,10 +85,19 @@ export class MoveMealComponent implements OnInit, AfterViewInit, OnDestroy { // 
     this.cdr.detectChanges();
   }
 
-  // Renamed to avoid conflict with potential template event handlers
   onDateSelectedFromList(day: MealDayContext | null) {
     this.selectedDate = day?.date || null;
-    this.selectedMeal = day?.meal || null; // Assuming you want to capture the selected meal as well 
+    
+    // FIX: The emitted 'day' object does not contain the meal. 
+    // We must fetch it directly from the MealsListComponent instance!
+    if (day && day.isoDate && this.mealListComponentRef) {
+      this.selectedMeal = this.mealListComponentRef.instance.getMealForDay(day.isoDate) || null;
+    } else {
+      this.selectedMeal = null;
+    }
+
+    // Force Angular to update the view so the swap buttons appear
+    this.cdr.detectChanges();
   }
 
   submitMove() {
@@ -118,30 +127,21 @@ export class MoveMealComponent implements OnInit, AfterViewInit, OnDestroy { // 
  
   }
 
-  swapMeal() {
-    if (!this.selectedDate) {
-      this.messageService.add({ severity: 'warn', summary: 'Date manquante', detail: 'Veuillez sélectionner une nouvelle date dans la liste.' });
-      return;
+swapMeal() {
+    if (this.providedMeal && this.selectedDate) {
+      this.mealService.swapMeal(this.providedMeal, this.selectedDate).subscribe({
+        next: (result) => {
+          // CRITICAL: Close the dialog and pass the result back to the parent
+          this.ref.close(result);
+        },
+        error: (err) => {
+          console.error('Error swapping meals:', err);
+          // Optional: You can also use this.messageService here to show a toast error
+        }
+      });
     }
-    if (!this.providedMeal) { 
-      this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de déplacer, données de repas manquantes.' });
-      this.ref.close(false);
-      return;
-    }
-    this.mealService.swapMeal(this.providedMeal, this.selectedDate).subscribe({
-      next: (response) => { 
-        this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas déplacé avec succès.' });
-        this.ref.close(response); // Close the dialog and indicate success
-      },
-      error: (error) => { 
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Le déplacement du repas a échoué.' });
-        // Don't close on error
-      }
-    });
-
-    // Optional: Add loading state indication
- 
   }
+  
 
   cancelMove() {
     this.ref.close(false);

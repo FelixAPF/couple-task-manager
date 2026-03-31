@@ -19,6 +19,16 @@ import { HouseholdService } from '../../service/household.service';
 import { HouseholdMember } from '../../model/household';
 import { WeekNavigationControlComponent, WeekDayContext, WeekRangeEvent } from '../../shared/week-navigation-control/week-navigation-control.component';
 
+// CDK Imports
+import { 
+  CdkDragDrop, 
+  CdkDrag, 
+  CdkDropList, 
+  CdkDropListGroup, 
+  CdkDragPreview, 
+  CdkDragPlaceholder 
+} from '@angular/cdk/drag-drop';
+
 @Component({
   selector: 'app-meals-list',
   standalone: true,
@@ -30,7 +40,12 @@ import { WeekNavigationControlComponent, WeekDayContext, WeekRangeEvent } from '
     ProgressSpinnerModule,
     MessageModule,
     MealCardComponent,
-    WeekNavigationControlComponent
+    WeekNavigationControlComponent,
+    CdkDropListGroup,
+    CdkDropList,
+    CdkDrag,
+    CdkDragPreview,
+    CdkDragPlaceholder
   ],
   templateUrl: './meals-list.component.html',
   styleUrls: ['./meals-list.component.css'],
@@ -49,6 +64,9 @@ export class MealsListComponent implements OnInit {
   
   selectedDay: WeekDayContext | null = null;
   errorLoading: boolean = false;
+  
+  // NEW: State to track if the user is currently dragging a card
+  isDraggingCard: boolean = false;
   
   private mealsMap = new Map<string, Meal>();
   private currentStartDate: Date | null = null;
@@ -303,5 +321,67 @@ export class MealsListComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer le repas.' });
       }
     });
+  }
+
+  // NEW: Drag handlers to trigger UI animations
+  onDragStarted() {
+    this.isDraggingCard = true;
+  }
+
+  onDragEnded() {
+    this.isDraggingCard = false;
+  }
+
+  onDrop(event: CdkDragDrop<any>) {
+    // UPDATED: Check if dropped in the same spot OR dropped in the designated cancel zone
+    if (event.previousContainer === event.container || event.container.data === 'cancel') {
+      return; 
+    }
+
+    const sourceMeal = event.item.data as Meal;
+    const targetDay = event.container.data as WeekDayContext;
+    const sourceDay = event.previousContainer.data as WeekDayContext;
+
+    if (!sourceMeal || !targetDay || !sourceDay) return;
+
+    const targetMeal = this.getMealForDay(targetDay.isoDate);
+
+    // Optimistic UI Update
+    this.mealsMap.delete(sourceDay.isoDate);
+    if (targetMeal) {
+        this.mealsMap.set(sourceDay.isoDate, { ...targetMeal, date: new Date(sourceDay.date) });
+    }
+    this.mealsMap.set(targetDay.isoDate, { ...sourceMeal, date: new Date(targetDay.date) });
+
+    const requestDate = new Date(targetDay.date);
+
+    // Convert date to string to prevent backend 500 parsing errors on swap/move
+    const formattedDateString = requestDate.toISOString().split('T')[0];
+
+    if (targetMeal) {
+      this.mealService.swapMeal(sourceMeal, requestDate).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas échangés !' });
+          this.loadMealsForWeek();
+        },
+        error: (err) => {
+          console.error(err);
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Échec de l\'échange.' });
+          this.loadMealsForWeek(); 
+        }
+      });
+    } else {
+      this.mealService.moveMeal(sourceMeal, requestDate).subscribe({
+        next: () => {
+          this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Repas déplacé !' });
+          this.loadMealsForWeek(); 
+        },
+        error: (err) => {
+          console.error(err);
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Échec du déplacement.' });
+          this.loadMealsForWeek(); 
+        }
+      });
+    }
   }
 }

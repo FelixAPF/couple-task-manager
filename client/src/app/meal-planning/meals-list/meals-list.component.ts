@@ -67,7 +67,7 @@ export class MealsListComponent implements OnInit {
   
   // NEW: State to track if the user is currently dragging a card
   isDraggingCard: boolean = false;
-  
+  //
   private mealsMap = new Map<string, Meal>();
   private currentStartDate: Date | null = null;
   private currentEndDate: Date | null = null;

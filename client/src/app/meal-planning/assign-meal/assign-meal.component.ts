@@ -17,8 +17,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { TagModule } from 'primeng/tag';
-// NEW: Import the selector
 import { HouseholdMemberSelectorComponent } from '../../shared/household-member-selector/household-member-selector.component';
+import { AiMealPlannerDialogComponent } from '../../ai-meal-planner-dialog/ai-meal-planner-dialog.component';
 
 @Component({
   selector: 'app-assign-meal',
@@ -37,7 +37,7 @@ import { HouseholdMemberSelectorComponent } from '../../shared/household-member-
     IconFieldModule,
     InputIconModule,
     TagModule,
-    HouseholdMemberSelectorComponent // <-- Added to imports
+    HouseholdMemberSelectorComponent
   ],
   templateUrl: './assign-meal.component.html',
   styleUrls: ['./assign-meal.component.css'],
@@ -56,7 +56,9 @@ export class AssignMealComponent implements OnInit {
   selectedLocation: string = 'Maison';
   searchTerm: string = ''; 
   isThawingNeeded: boolean = false;
-  assignee: any = undefined;
+  
+  // Setting this explicitly to null ensures the dialog defaults to "Nobody Assigned"
+  assignee: any = null;
 
   constructor(
     private recipeService: RecipeService,
@@ -82,8 +84,8 @@ export class AssignMealComponent implements OnInit {
         this.isThawingNeeded = this.dialogConfig.data.meal.isThawingNeeded;
       }
 
-      if(this.dialogConfig.data.meal?.assignedUser) { 
-        this.assignee = this.dialogConfig.data.meal?.assignedUser;
+      if(this.dialogConfig.data.meal?.assignedUser !== undefined) { 
+        this.assignee = this.dialogConfig.data.meal.assignedUser;
       } 
 
       this.loadRecipes();
@@ -136,7 +138,6 @@ export class AssignMealComponent implements OnInit {
     this.selectedRecipe = recipe;
   }
 
-  // NEW: Handler for the selector component
   onAssigneeSelected(member: any): void {
     this.assignee = member;
   }
@@ -181,5 +182,21 @@ export class AssignMealComponent implements OnInit {
 
   closeDialog(): void {
     this.dialogRef.close();
+  }
+
+  openAiPlannerDialog(): void {
+    const aiRef = this.dialogService.open(AiMealPlannerDialogComponent, {
+        header: 'Planificateur IA de la semaine',
+        width: '90%',
+        contentStyle: {"max-height": "80vh", "overflow": "auto"},
+        baseZIndex: 10001
+    });
+
+    aiRef.onClose.subscribe((success: boolean) => {
+        if (success) {
+            // Close the assign meal dialog so the user can see the newly populated calendar
+            this.closeDialog();
+        }
+    });
   }
 }

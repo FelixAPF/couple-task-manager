@@ -18,10 +18,10 @@ export class HouseholdMemberSelectorComponent implements OnInit, OnDestroy {
   currentUser: HouseholdMember | null = null;
   selectedUser: HouseholdMember | null = null;
   
-  // NEW: Allow passing a pre-selected user
-  @Input() preSelectedUser: HouseholdMember | null | undefined = null;
+  // Allow passing a pre-selected user. Undefined triggers the fallback to currentUser.
+  @Input() preSelectedUser: HouseholdMember | null | undefined = undefined;
   
-  @Output() householdMemberSelected: EventEmitter<HouseholdMember> = new EventEmitter();
+  @Output() householdMemberSelected: EventEmitter<HouseholdMember | null> = new EventEmitter();
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
@@ -33,22 +33,23 @@ export class HouseholdMemberSelectorComponent implements OnInit, OnDestroy {
         this.householdMembers = household?.members ?? []
         this.currentUser = household?.currentUser ?? null;
         
-        // Use the pre-selected user if provided, otherwise default to current user
-        if (this.preSelectedUser) {
-            this.selectedUser = this.householdMembers.find(m => m.id === this.preSelectedUser?.id) || this.currentUser;
+        // Use the pre-selected user if explicitly provided (even if it is null for "nobody")
+        // otherwise default to current user for backward compatibility
+        if (this.preSelectedUser !== undefined) {
+            this.selectedUser = this.preSelectedUser ? (this.householdMembers.find(m => m.id === this.preSelectedUser?.id) || null) : null;
         } else {
             this.selectedUser = this.currentUser;
         }
 
         // Emit the initial state so the parent component gets the value immediately
-        if (this.selectedUser) {
+        if (this.selectedUser !== undefined) {
             this.householdMemberSelected.emit(this.selectedUser);
         }
       })
     )
   }
 
-  clicked(householdMember: HouseholdMember): void{
+  clicked(householdMember: HouseholdMember | null): void {
     this.selectedUser = householdMember;
     this.householdMemberSelected.emit(householdMember);
   }

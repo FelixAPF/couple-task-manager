@@ -1,6 +1,5 @@
 package com.couple.taskmanager.service;
 
-import aj.org.objectweb.asm.commons.Remapper;
 import com.couple.taskmanager.exception.TokenRefreshException;
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.RefreshToken;
@@ -33,7 +32,6 @@ public class RefreshTokenService {
         CTMUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. Créer et sauvegarder le nouveau token
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
@@ -42,19 +40,27 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
+    // NEW: Rotate existing token to prevent DB bloat and push the expiry date further
+    @Transactional
+    public RefreshToken rotateRefreshToken(RefreshToken existingToken) {
+        existingToken.setToken(UUID.randomUUID().toString());
+        existingToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
+        return refreshTokenRepository.save(existingToken); // This updates the existing row
+    }
+
     public Optional<RefreshToken> findByToken(RefreshTokenRequest request) {
         return refreshTokenRepository.findByToken(request.getRefreshToken());
     }
 
-    @Transactional@Scheduled(cron = "0 0 0 * * ?") // Runs every day at midnightpublic
-    void purgeExpiredRefreshTokens() {
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * ?") // Runs every day at midnight
+    public void purgeExpiredRefreshTokens() {
         refreshTokenRepository.deleteByExpiryDateBefore(Instant.now());
     }
 
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
-
             throw new TokenRefreshException("Refresh token was expired. Please make a new signin request");
         }
         return token;

@@ -19,6 +19,7 @@
     <div class="flex flex-col gap-3">
         <div class="flex justify-between items-center">
             <label class="font-semibold text-surface-700 dark:text-surface-200">1. Choisir la recette</label>
+            <button pButton pRipple type="button" icon="pi pi-sparkles" label="IA Planner" class="p-button-text p-button-sm p-button-help" (click)="openAiPlannerDialog()" pTooltip="Planifier la semaine avec l'IA"></button>
             <button pButton pRipple type="button" icon="pi pi-plus" label="Nouvelle" class="p-button-text p-button-sm p-button-secondary" (click)="openCreateRecipeDialog()" pTooltip="Créer une nouvelle recette"></button>
         </div>
 

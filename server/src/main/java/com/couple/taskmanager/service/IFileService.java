@@ -11,6 +11,8 @@ public interface IFileService {
 
     String store(MultipartFile file);
 
+    String storeFromUrl(String urlString);
+
     Stream<Path> loadAll();
 
     Path load(String filename);
@@ -18,5 +20,4 @@ public interface IFileService {
     Resource loadAsResource(String filename);
 
     void deleteAll();
-
 }

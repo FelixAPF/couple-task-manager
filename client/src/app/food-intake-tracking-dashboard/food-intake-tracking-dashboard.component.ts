@@ -155,20 +155,19 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
 
     this.chartData = {
-labels: [
-`🍗 Protéines`,
+      labels: [
+        `🍗 Protéines`,
         `🥕 Légumes`,
         `🌾 Glucides`,
         `💧 Lipides`
       ],
-datasets: [{
+      datasets: [{
           data: [
             this.proteinCount, 
             this.vegetableCount, 
             this.carbohydrateCount, 
             this.fatCount
           ],
-          // Use explicit rgba strings to guarantee Chart.js interprets them correctly
           backgroundColor: [
               'rgba(239, 68, 68, 0.7)',   // Red-500
               'rgba(34, 197, 94, 0.7)',   // Green-500
@@ -202,7 +201,7 @@ datasets: [{
     this.selectedDay = day;
   }
     
-  onHouseholdMemberSelected(householdMember: HouseholdMember){
+  onHouseholdMemberSelected(householdMember: HouseholdMember | null){
     this.selectedMember = householdMember;
     this.updateChartData(); 
   }

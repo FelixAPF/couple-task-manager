@@ -13,6 +13,7 @@ import org.springframework.expression.AccessException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,6 +28,17 @@ public class MealService implements IGenericService<Meal, MealDto> {
     @Autowired
     CTMUserRepository userRepository;
 
+    // FIX: Utility method to strictly lock dates to midnight on the server
+    private Date normalizeDate(Date date) {
+        if (date == null) return null;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        return cal.getTime();
+    }
 
     @Override
     public MealDto get(Long id, Long householdId, CTMUser user) {
@@ -44,6 +56,8 @@ public class MealService implements IGenericService<Meal, MealDto> {
             meal.setHousehold(user.getHousehold());
         }
         if(repository.existsById(id)){
+            meal.setId(id);
+            meal.setDate(normalizeDate(meal.getDate()));
             return new MealDto(repository.save(meal));
         }
         throw new NoSuchElementException();
@@ -70,19 +84,59 @@ public class MealService implements IGenericService<Meal, MealDto> {
         }
         Meal newMeal = new Meal();
         newMeal.setHousehold(user.getHousehold());
-        newMeal.setDate(meal.getDate());
+        newMeal.setDate(normalizeDate(meal.getDate()));
         newMeal.setLocation(meal.getLocation());
         newMeal.setIsThawingNeeded(meal.getIsThawingNeeded());
         newMeal.setRecipe(byId.orElse(recipe));
 
-        CTMUser assignedUser = userRepository.findById(meal.getAssignedUser().getId()).orElseThrow(NoSuchElementException::new);
-        newMeal.setAssignedUser(assignedUser);
+        if (meal.getAssignedUser() != null && meal.getAssignedUser().getId() != null) {
+            CTMUser assignedUser = userRepository.findById(meal.getAssignedUser().getId()).orElse(null);
+            newMeal.setAssignedUser(assignedUser);
+        }
+
         return new MealDto(repository.save(newMeal));
     }
 
+    public List<MealDto> createBulk(List<Meal> meals, CTMUser user) {
+        return meals.stream().map(meal -> {
+            Date normalizedDate = normalizeDate(meal.getDate());
+
+            Recipe recipe = meal.getRecipe();
+            Optional<Recipe> byId = recipeRepository.findById(recipe.getId());
+            if(byId.isEmpty()){
+                if(recipe.getHousehold() == null){
+                    recipe.setHousehold(user.getHousehold());
+                }
+                recipe = recipeRepository.save(recipe);
+            }
+
+            // FIX: UPSERT LOGIC
+            // Before, it was trying to create new meals even if one existed, causing a crash.
+            // Now, it finds the existing meal and silently overwrites it.
+            Meal existingMeal = repository.findByDateAndHouseholdId(normalizedDate, user.getHousehold().getId()).orElse(null);
+
+            if (existingMeal != null) {
+                existingMeal.setRecipe(byId.orElse(recipe));
+                existingMeal.setLocation(meal.getLocation());
+                existingMeal.setIsThawingNeeded(meal.getIsThawingNeeded());
+
+                if (meal.getAssignedUser() != null && meal.getAssignedUser().getId() != null) {
+                    CTMUser assignedUser = userRepository.findById(meal.getAssignedUser().getId()).orElse(null);
+                    existingMeal.setAssignedUser(assignedUser);
+                } else {
+                    existingMeal.setAssignedUser(null);
+                }
+                return new MealDto(repository.save(existingMeal));
+            } else {
+                meal.setDate(normalizedDate);
+                return this.create(meal, user);
+            }
+        }).toList();
+    }
+
     public List<MealDto> retrieveByDateRange(long startDateMillis, long endDateMillis, CTMUser user) {
-        Date startDate = new Date(startDateMillis);
-        Date endDate = new Date(endDateMillis);
+        Date startDate = normalizeDate(new Date(startDateMillis));
+        Date endDate = normalizeDate(new Date(endDateMillis));
         return StreamUtils.mapToList(repository.findByDateBetweenAndHouseholdId(startDate, endDate, user.getHousehold().getId()), MealDto::new);
     }
 
@@ -93,11 +147,12 @@ public class MealService implements IGenericService<Meal, MealDto> {
     }
 
     private Meal retrieveByDate(Date date, CTMUser user) {
-        return repository.findByDateAndHouseholdId(date, user.getHousehold().getId()).orElse(null);
+        return repository.findByDateAndHouseholdId(normalizeDate(date), user.getHousehold().getId()).orElse(null);
     }
 
     public MealDto moveMealToNewDate(Long id, Date newDate, CTMUser user) {
-        Meal currentMeal = retrieveByDate(newDate, user);
+        Date normalizedNewDate = normalizeDate(newDate);
+        Meal currentMeal = retrieveByDate(normalizedNewDate, user);
         Meal meal = repository.findById(id).orElseThrow(()-> new NoSuchElementException("Meal with id " + id + " not found."));
         if(meal == null) throw new NoSuchElementException();
         if(currentMeal != null){
@@ -107,13 +162,14 @@ public class MealService implements IGenericService<Meal, MealDto> {
             repository.delete(currentMeal);
         }
 
-        meal.setDate(newDate);
+        meal.setDate(normalizedNewDate);
         return new MealDto(repository.save(meal));
     }
 
     public MealDto swapMealToNewDate(Long id, Date newDate, CTMUser user) {
+        Date normalizedNewDate = normalizeDate(newDate);
         Meal meal1 = repository.findById(id).orElseThrow(()-> new NoSuchElementException("Meal with id " + id + " not found."));
-        Meal meal2 = repository.findByDateAndHouseholdId(newDate, user.getHousehold().getId()).orElseThrow(NoSuchElementException::new);
+        Meal meal2 = repository.findByDateAndHouseholdId(normalizedNewDate, user.getHousehold().getId()).orElseThrow(NoSuchElementException::new);
         if (!meal1.getHousehold().getId().equals(user.getHousehold().getId()) || !meal2.getHousehold().getId().equals(user.getHousehold().getId()) ) {
             throw new IllegalArgumentException("This meal is not part of your household");
         }
@@ -137,7 +193,6 @@ public class MealService implements IGenericService<Meal, MealDto> {
         }
 
         meal.setAssignedUser(assignedUser);
-
         repository.save(meal);
     }
 }

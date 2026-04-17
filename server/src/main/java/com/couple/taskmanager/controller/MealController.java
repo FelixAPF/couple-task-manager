@@ -1,3 +1,4 @@
+// server/src/main/java/com/couple/taskmanager/controller/MealController.java
 package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.model.CTMUser;
@@ -31,6 +32,7 @@ public class MealController extends GenericController<Meal, MealDto, MealService
     public MealDto moveMealToNewDate(@PathVariable("id") Long id, @RequestBody Date newDate, @AuthenticationPrincipal UserDetails userDetails){
         return this.service.moveMealToNewDate(id, newDate, (CTMUser) userDetails);
     }
+
     @PutMapping("/{id}/swap")
     public MealDto swapMealToNewDate(@PathVariable("id") Long id, @RequestBody Date newDate, @AuthenticationPrincipal UserDetails userDetails){
         return this.service.swapMealToNewDate(id, newDate, (CTMUser) userDetails);
@@ -44,8 +46,12 @@ public class MealController extends GenericController<Meal, MealDto, MealService
     @GetMapping("/meal/today")
     public MealDto getMealForToday(@AuthenticationPrincipal UserDetails userDetails){
         OffsetDateTime today = OffsetDateTime.now();
-
         Date date = java.sql.Date.valueOf(today.toLocalDate());
         return this.service.retrieveDtoByDate(date, (CTMUser) userDetails);
+    }
+
+    @PostMapping("/bulk")
+    public List<MealDto> bulkSave(@RequestBody List<Meal> meals, @AuthenticationPrincipal UserDetails userDetails){
+        return this.service.createBulk(meals, (CTMUser) userDetails);
     }
 }

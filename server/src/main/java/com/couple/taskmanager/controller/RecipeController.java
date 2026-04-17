@@ -2,11 +2,9 @@ package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Recipe;
-import com.couple.taskmanager.model.ShoppingItem;
 import com.couple.taskmanager.model.dto.RecipeDto;
 import com.couple.taskmanager.service.RecipeAIParserService;
 import com.couple.taskmanager.service.RecipeService;
-import com.couple.taskmanager.service.ShoppingItemService;
 import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,7 +48,25 @@ public class RecipeController extends GenericController<Recipe, RecipeDto, Recip
         }
     }
 
-    @PostMapping("/batch")
+    @GetMapping("/ai/generate")
+    public ResponseEntity<?> generateRandomBulk(
+            @RequestParam("count") int count,
+            @RequestParam(value = "cuisines", required = false) List<String> cuisines) { // <--- Changed to List<String>
+        try {
+            List<RecipeDto> recipes = aiParserService.generateBulkRecipes(count, cuisines);
+            return ResponseEntity.ok(recipes);
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("429")) {
+                return ResponseEntity.status(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS)
+                        .body("Quota AI dépassé. Veuillez patienter.");
+            }
+            System.err.println("===== CONTROLLER AI GENERATION ERROR =====");
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping({"/batch", "/bulk"})
     public List<RecipeDto> batchSave(@RequestBody List<Recipe> recipes, @AuthenticationPrincipal UserDetails userDetails){
         return this.service.create(recipes, (CTMUser) userDetails);
     }

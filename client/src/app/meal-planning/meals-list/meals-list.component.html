@@ -9,6 +9,10 @@
 
   <div *ngIf="!errorLoading">
     
+    <div class="flex justify-end mb-4" *ngIf="enableCardModification">
+        <button pButton pRipple type="button" icon="pi pi-sparkles" label="Remplir avec l'IA" class="p-button-outlined p-button-sm p-button-help" (click)="openAiPlannerDialog()"></button>
+    </div>
+
     <app-week-navigation-control 
       [initialDate]="initialSelectedDay"
       [birthdays]="householdMembersBirthdays"

@@ -1,16 +1,15 @@
 package com.couple.taskmanager.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.Instant;
-import java.util.List;
 
 @Data
 @Entity
+@Table(name = "user_refresh_tokens") // RENAMED TABLE to cleanly bypass the old DB constraint
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

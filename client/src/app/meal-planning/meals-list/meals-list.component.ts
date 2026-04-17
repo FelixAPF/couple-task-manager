@@ -18,8 +18,8 @@ import { MoveMealComponent } from '../move-meal/move-meal.component';
 import { HouseholdService } from '../../service/household.service';
 import { HouseholdMember } from '../../model/household';
 import { WeekNavigationControlComponent, WeekDayContext, WeekRangeEvent } from '../../shared/week-navigation-control/week-navigation-control.component';
+import { AiMealPlannerDialogComponent } from '../../ai-meal-planner-dialog/ai-meal-planner-dialog.component';
 
-// CDK Imports
 import { 
   CdkDragDrop, 
   CdkDrag, 
@@ -65,9 +65,8 @@ export class MealsListComponent implements OnInit {
   selectedDay: WeekDayContext | null = null;
   errorLoading: boolean = false;
   
-  // NEW: State to track if the user is currently dragging a card
   isDraggingCard: boolean = false;
-  //
+  
   private mealsMap = new Map<string, Meal>();
   private currentStartDate: Date | null = null;
   private currentEndDate: Date | null = null;
@@ -256,6 +255,24 @@ export class MealsListComponent implements OnInit {
     }
   }
 
+  openAiPlannerDialog(): void {
+    const aiRef = this.dialogService.open(AiMealPlannerDialogComponent, {
+        header: 'Planificateur IA de la semaine',
+        width: '90%',
+        contentStyle: {"max-height": "80vh", "overflow": "auto"},
+        baseZIndex: 10001,
+        data: {
+          startDate: this.currentStartDate 
+        }
+    });
+
+    aiRef.onClose.subscribe((success: boolean) => {
+        if (success) {
+            this.loadMealsForWeek();
+        }
+    });
+  }
+
   private saveAssignedMeal(meal: Meal): void {
     const saveObservable = meal.id
         ? this.mealService.updateMeal(meal)
@@ -323,7 +340,6 @@ export class MealsListComponent implements OnInit {
     });
   }
 
-  // NEW: Drag handlers to trigger UI animations
   onDragStarted() {
     this.isDraggingCard = true;
   }
@@ -333,7 +349,6 @@ export class MealsListComponent implements OnInit {
   }
 
   onDrop(event: CdkDragDrop<any>) {
-    // UPDATED: Check if dropped in the same spot OR dropped in the designated cancel zone
     if (event.previousContainer === event.container || event.container.data === 'cancel') {
       return; 
     }
@@ -346,7 +361,6 @@ export class MealsListComponent implements OnInit {
 
     const targetMeal = this.getMealForDay(targetDay.isoDate);
 
-    // Optimistic UI Update
     this.mealsMap.delete(sourceDay.isoDate);
     if (targetMeal) {
         this.mealsMap.set(sourceDay.isoDate, { ...targetMeal, date: new Date(sourceDay.date) });
@@ -354,8 +368,6 @@ export class MealsListComponent implements OnInit {
     this.mealsMap.set(targetDay.isoDate, { ...sourceMeal, date: new Date(targetDay.date) });
 
     const requestDate = new Date(targetDay.date);
-
-    // Convert date to string to prevent backend 500 parsing errors on swap/move
     const formattedDateString = requestDate.toISOString().split('T')[0];
 
     if (targetMeal) {

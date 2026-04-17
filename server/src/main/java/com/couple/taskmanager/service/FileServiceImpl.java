@@ -2,12 +2,15 @@ package com.couple.taskmanager.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.couple.taskmanager.exception.StorageException;
@@ -19,7 +22,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -67,6 +69,34 @@ public class FileServiceImpl implements IFileService{
         }
     }
 
+    @Override
+    public String storeFromUrl(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.connect();
+
+            if (connection.getResponseCode() != 200) {
+                System.err.println("Failed to download image from URL, HTTP code: " + connection.getResponseCode());
+                return null;
+            }
+
+            String fileName = UUID.randomUUID().toString() + ".jpg";
+            Path destinationFile = this.rootLocation.resolve(Paths.get(fileName)).normalize().toAbsolutePath();
+
+            try (InputStream in = connection.getInputStream()) {
+                Files.copy(in, destinationFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            return fileName;
+        } catch (Exception e) {
+            System.err.println("Failed to download image from URL: " + e.getMessage());
+            return null;
+        }
+    }
 
     @Override
     public Stream<Path> loadAll() {

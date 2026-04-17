@@ -1,11 +1,21 @@
 <div class="flex justify-center gap-6">
-    <div *ngFor="let member of householdMembers" class="cursor-pointer" (click)="clicked(member)">
-        <img [src]="member.imageUrl || 'assets/placeholder.jpg'"
-            class="relative w-16 h-16 rounded-full object-cover border-4 shadow-md hover:border-b-blue-200"
-            [ngClass]="selectedUser?.id === member.id ? 'border-blue-400' : 'border-white'">
+    <div class="cursor-pointer flex flex-col items-center group" (click)="clicked(null)">
+        <div class="relative w-16 h-16 rounded-full flex items-center justify-center border-4 shadow-md bg-surface-100 dark:bg-surface-700 transition-colors"
+            [ngClass]="selectedUser === null ? 'border-blue-400' : 'border-white dark:border-surface-600 hover:border-b-blue-200'">
+            <i class="pi pi-user-minus text-2xl text-surface-400 dark:text-surface-500 group-hover:text-pink-400 transition-colors"></i>
+        </div>
+        <p class="mt-2 text-xs font-semibold text-slate-600 dark:text-surface-300 group-hover:text-pink-600 transition-colors">
+            Aucun
+        </p>
+    </div>
 
-        <p class="mt-2 text-xs font-semibold text-slate-600 group-hover:text-pink-600 transition-colors">
-        {{ member.name }}
+    <div *ngFor="let member of householdMembers" class="cursor-pointer flex flex-col items-center group" (click)="clicked(member)">
+        <img [src]="member.imageUrl || 'assets/placeholder.jpg'"
+            class="relative w-16 h-16 rounded-full object-cover border-4 shadow-md hover:border-b-blue-200 transition-colors"
+            [ngClass]="selectedUser?.id === member.id ? 'border-blue-400' : 'border-white dark:border-surface-600'">
+
+        <p class="mt-2 text-xs font-semibold text-slate-600 dark:text-surface-300 group-hover:text-pink-600 transition-colors">
+            {{ member.name }}
         </p>
     </div>
 </div>

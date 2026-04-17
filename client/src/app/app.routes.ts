@@ -25,6 +25,7 @@ import { LetterDetailComponent } from './letters/letter-detail/letter-detail.com
 import { FoodIntakeTrackingDashboardComponent } from './food-intake-tracking-dashboard/food-intake-tracking-dashboard.component'
 import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard.component';
 import { AdminGuard } from './guard/admin.guard';
+import { ReceiptSplitterComponent } from './recipe-splitter/recipe-splitter.component';
 
 
 export const routes: Routes = [
@@ -77,6 +78,7 @@ export const routes: Routes = [
             { path: 'view/:id', component: LetterDetailComponent }
         ]
     },
+    { path: 'receipt-splitter', component: ReceiptSplitterComponent, canActivate: [authGuard] },
     { 
         path: 'admin/dashboard', 
         component: AdminDashboardComponent, 

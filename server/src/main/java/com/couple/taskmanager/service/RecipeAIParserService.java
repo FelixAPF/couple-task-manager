@@ -184,7 +184,7 @@ public class RecipeAIParserService {
         return recipe;
     }
 
-    private void downloadAndReplaceImageUrls(List<RecipeDto> recipes) {
+    public void downloadAndReplaceImageUrls(List<RecipeDto> recipes) {
         for (RecipeDto recipe : recipes) {
             if (recipe.getImageUrl() != null && recipe.getImageUrl().startsWith("http")) {
                 String localFileName = fileService.storeFromUrl(recipe.getImageUrl());

@@ -9,18 +9,28 @@ import { ReceiptService } from '../service/receipt.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+
+export interface Splitter {
+  id: number;
+  name: string;
+  imageUrl?: string;
+  isExtra?: boolean;
+}
 
 @Component({
   selector: 'app-receipt-splitter',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, ToastModule, TooltipModule],
+  imports: [CommonModule, FormsModule, ButtonModule, ToastModule, TooltipModule, DialogModule, InputTextModule],
   templateUrl: './recipe-splitter.component.html',
   providers: [MessageService]
 })
 export class ReceiptSplitterComponent implements OnInit {
   step: number = 1;
-  householdId: number | undefined;
   members: HouseholdMember[] = [];
+  activeSplitters: Splitter[] = []; // Unified list of household members + extra people
+  
   currentReceipt: Receipt = this.getEmptyReceipt();
   splitPercentages: Record<number, number> = {};
   groceryTotal: number = 0;
@@ -29,59 +39,64 @@ export class ReceiptSplitterComponent implements OnInit {
   pastReceipts: Receipt[] = [];
   receiptTax: number = 0;
 
+  showAddPersonDialog: boolean = false;
+  newPersonName: string = '';
+
   constructor(
     private householdService: HouseholdService,
     private receiptService: ReceiptService,
     private messageService: MessageService
   ) {}
 
-ngOnInit(): void {
+  ngOnInit(): void {
     this.householdService.retrieveHousehold().subscribe((h: Household | null) => {
-      // 1. Check if the household AND its ID exist
-      console.log("Household is ", h);
-      if(h === null) return;
-      
-        
-      // BOOM: Fetch the receipts immediately now that we have the ID!
-      this.loadSavedReceipts();
+      // FIX: We no longer check for h.id so this executes perfectly!
+      if (h) {
+        this.loadSavedReceipts();
 
-      // 2. Handle the members completely separately
-      if (h.members && h.members.length > 0) {
-        this.members = h.members;
-        const defaultSplit: number = 100 / this.members.length;
-        
-        this.members.forEach((m: HouseholdMember) => {
-          if (m.id !== undefined) {
-              this.splitPercentages[m.id] = defaultSplit;
-              this.memberTotals[m.id] = 0;
-          }
-        });
+        if (h.members && h.members.length > 0) {
+          this.members = h.members;
+          this.resetToHouseholdSplitters();
+        }
       }
-      
     });
   }
 
-getEmptyReceipt(): Receipt {
+  getEmptyReceipt(): Receipt {
     return { 
       date: new Date().toISOString(), 
       storeName: '', 
       items: [], 
       totals: {}, 
-      status: 'DRAFT',
-      householdId: this.householdId // <--- Ensure new receipts get the ID
+      status: 'DRAFT'
     };
   }
 
+  resetToHouseholdSplitters(): void {
+    this.activeSplitters = this.members.map(m => ({
+      id: m.id!,
+      name: m.name,
+      imageUrl: m.imageUrl,
+      isExtra: false
+    }));
+    this.recalculateEvenSplits();
+  }
+
+  recalculateEvenSplits(): void {
+    const defaultSplit: number = 100 / this.activeSplitters.length;
+    this.activeSplitters.forEach(s => {
+        this.splitPercentages[s.id] = defaultSplit;
+        this.memberTotals[s.id] = 0;
+    });
+  }
+
   loadSavedReceipts(): void {
-      // Just ask the backend for "my" receipts. The backend handles the security!
-      this.receiptService.getAllReceipts().subscribe({
-        next: (receipts) => {
-          this.pastReceipts = receipts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        },
-        error: (err) => {
-          console.error("Error loading receipts:", err);
-        }
-      });
+    this.receiptService.getAllReceipts().subscribe({
+      next: (receipts) => {
+        this.pastReceipts = receipts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      },
+      error: (err) => console.error("Error loading receipts:", err)
+    });
   }
 
   onFileUpload(event: Event): void {
@@ -129,12 +144,42 @@ getEmptyReceipt(): Receipt {
     }
   }
 
+  // Auto-adjusts the other person if there are exactly 2 people
+  onSplitChange(changedId: number, newValue: number): void {
+    if (newValue === null || newValue === undefined) return;
+    this.splitPercentages[changedId] = newValue;
+    
+    if (this.activeSplitters.length === 2) {
+      const otherPerson = this.activeSplitters.find(s => s.id !== changedId);
+      if (otherPerson) {
+        this.splitPercentages[otherPerson.id] = parseFloat((100 - newValue).toFixed(2));
+      }
+    }
+  }
+
+  openAddPerson(): void {
+    this.newPersonName = '';
+    this.showAddPersonDialog = true;
+  }
+
+  confirmAddPerson(): void {
+    if (this.newPersonName.trim()) {
+      // Create a temporary negative ID for the extra person
+      const newId = -1 * (Math.floor(Math.random() * 100000) + 1);
+      this.activeSplitters.push({
+        id: newId,
+        name: this.newPersonName.trim(),
+        isExtra: true
+      });
+      this.recalculateEvenSplits();
+      this.showAddPersonDialog = false;
+    }
+  }
+
   calculateTotals(): void {
     this.groceryTotal = 0;
-    this.members.forEach((m: HouseholdMember) => {
-        if (m.id !== undefined) {
-            this.memberTotals[m.id] = 0;
-        }
+    this.activeSplitters.forEach(s => {
+        this.memberTotals[s.id] = 0;
     });
 
     const totalTaxableAmount = this.currentReceipt.items
@@ -151,51 +196,90 @@ getEmptyReceipt(): Receipt {
       if (item.assignmentType === 'grocery') {
         this.groceryTotal += finalPrice;
       } else if (item.assignmentType === 'individual' && item.assigneeId !== undefined) {
-        this.memberTotals[item.assigneeId] += finalPrice;
+        if (this.memberTotals[item.assigneeId] !== undefined) {
+            this.memberTotals[item.assigneeId] += finalPrice;
+        }
       } else if (item.assignmentType === 'split') {
-        this.members.forEach((m: HouseholdMember) => {
-          if (m.id !== undefined) {
-              const splitAmount: number = finalPrice * (this.splitPercentages[m.id] / 100);
-              this.memberTotals[m.id] += splitAmount;
-          }
+        this.activeSplitters.forEach(s => {
+            const splitAmount: number = finalPrice * ((this.splitPercentages[s.id] || 0) / 100);
+            this.memberTotals[s.id] += splitAmount;
         });
       }
     });
 
-    this.currentReceipt.totals = {
-      grocery: this.groceryTotal,
-      ...this.memberTotals
-    };
+    this.currentReceipt.totals = { grocery: this.groceryTotal };
+
+    // Save extra people's names and split percentages into the DB
+    this.activeSplitters.forEach(s => {
+      if (s.isExtra) {
+         this.currentReceipt.totals[`EXTRA_${s.id}_${s.name}`] = this.memberTotals[s.id];
+      } else {
+         this.currentReceipt.totals[s.id.toString()] = this.memberTotals[s.id];
+      }
+      
+      // Save the custom percentages so they restore properly
+      this.currentReceipt.totals[`SPLIT_PCT_${s.id}`] = this.splitPercentages[s.id];
+    });
+
     this.step = 4;
   }
 
   getGrandTotal(): number {
     let total = this.groceryTotal;
-    Object.values(this.memberTotals).forEach(val => total += val);
+    this.activeSplitters.forEach(s => total += (this.memberTotals[s.id] || 0));
     return total;
   }
 
-resumeReceipt(receipt: Receipt): void {
-    // Deep copy to prevent mutating the array directly before saving
+  reconstructExtrasFromReceipt(receipt: Receipt): void {
+    this.resetToHouseholdSplitters();
+    if (receipt.totals) {
+      Object.keys(receipt.totals).forEach(key => {
+        if (key.startsWith('EXTRA_')) {
+          const parts = key.split('_'); // EXTRA_-12345_Name
+          const id = parseInt(parts[1], 10);
+          const name = parts.slice(2).join('_');
+          if (!this.activeSplitters.find(s => s.id === id)) {
+            this.activeSplitters.push({ id, name, isExtra: true });
+          }
+        }
+      });
+
+      // Restore any custom split percentages
+      let hasSavedPcts = false;
+      this.activeSplitters.forEach(s => {
+        const savedPct = receipt.totals[`SPLIT_PCT_${s.id}`];
+        if (savedPct !== undefined) {
+           this.splitPercentages[s.id] = savedPct;
+           hasSavedPcts = true;
+        }
+      });
+
+      // Only recalculate evenly if there were no saved percentages
+      if (!hasSavedPcts) {
+        this.recalculateEvenSplits();
+      }
+    }
+  }
+
+  resumeReceipt(receipt: Receipt): void {
     this.currentReceipt = JSON.parse(JSON.stringify(receipt));
+    this.reconstructExtrasFromReceipt(this.currentReceipt);
     this.step = 3; 
   }
 
   viewReceipt(receipt: Receipt): void {
     this.currentReceipt = JSON.parse(JSON.stringify(receipt));
+    this.reconstructExtrasFromReceipt(this.currentReceipt);
     
-    // Restore the grocery total from the database
     this.groceryTotal = this.currentReceipt.totals['grocery'] || 0;
-
-    // Restore each member's total from the database
-    this.members.forEach((m: HouseholdMember) => {
-      if (m.id !== undefined) {
-        // The database stores map keys as strings, so we check both number and string forms
-        this.memberTotals[m.id] = this.currentReceipt.totals[m.id] || this.currentReceipt.totals[m.id.toString()] || 0;
+    this.activeSplitters.forEach(s => {
+      if (s.isExtra) {
+        this.memberTotals[s.id] = this.currentReceipt.totals[`EXTRA_${s.id}_${s.name}`] || 0;
+      } else {
+        this.memberTotals[s.id] = this.currentReceipt.totals[s.id.toString()] || 0;
       }
     });
 
-    // Jump straight to the Summary screen
     this.step = 4; 
   }
 
@@ -209,11 +293,8 @@ resumeReceipt(receipt: Receipt): void {
     this.processSaveRequest('Facture finalisée et assignée!');
   }
 
-private processSaveRequest(successMessage: string): void {
+  private processSaveRequest(successMessage: string): void {
     this.loading = true;
-    
-    // <--- CRITICAL FIX: Force the household ID right before saving
-    this.currentReceipt.householdId = this.householdId; 
 
     const request = this.currentReceipt.id 
       ? this.receiptService.updateReceipt(this.currentReceipt.id, this.currentReceipt)
@@ -225,6 +306,7 @@ private processSaveRequest(successMessage: string): void {
         this.step = 1;
         this.receiptTax = 0;
         this.currentReceipt = this.getEmptyReceipt();
+        this.resetToHouseholdSplitters();
         this.loadSavedReceipts();
         this.loading = false;
       },

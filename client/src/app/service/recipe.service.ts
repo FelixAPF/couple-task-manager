@@ -35,6 +35,11 @@ export class RecipeService {
   randomRecipe(){
     return this.http.get<Recipe>(RecipeService.randomRecipeEndpoint());
   }
+
+  generateSingleAIImage(name: string): Observable<{imageUrl: string}> {
+    let params = new HttpParams().set('name', name);
+    return this.http.get<{imageUrl: string}>(`${this.baseUrl}/ai/generate-single-image`, { params });
+  }
   
 
 generateRandomRecipes(count: number, cuisines: string[] = []): Observable<Recipe[]> {

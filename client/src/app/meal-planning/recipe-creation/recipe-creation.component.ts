@@ -1,102 +1,100 @@
-import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, AbstractControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { MessageService } from 'primeng/api';
 import { SharedModule } from '../../shared.module';
-import { FileUpload } from 'primeng/fileupload'; // Import FileUpload
-import { Subscription, of, throwError } from 'rxjs';
+import { Subscription, throwError } from 'rxjs';
 import { switchMap, catchError, finalize, tap } from 'rxjs/operators';
 
 // --- Import your services and models ---
-import { RecipeService } from '../../service/recipe.service'; // Adjust path as needed
-import { FileService } from '../../service/file-upload.service'; // Adjust path as needed for your FileService
-import { Recipe, Ingredient } from '../../model/recipes'; // Adjust path as needed
-import { RecipeType } from '../../model/recipes';
+import { RecipeService } from '../../service/recipe.service'; 
+import { FileService } from '../../service/file-upload.service'; 
+import { Recipe, Ingredient, RecipeType } from '../../model/recipes'; 
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
-// Import specific PrimeNG form modules needed (many might be in SharedModule)
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { DropdownModule } from 'primeng/dropdown';
 import { TranslateService } from '@ngx-translate/core';
 import { InputNumberModule } from 'primeng/inputnumber';
 
-
-// --- Define Recipe Type options (example) ---
 interface RecipeTypeOption {
   label: string;
   value: string;
 }
 
 interface FileUploadResponse {
-  url?: string;       // Make properties optional if they might not always exist
+  url?: string;       
   fileURL?: string;
-  // Add any other properties your FileService might return
+  imageUrl?: string;
 }
 
 @Component({
   selector: 'app-recipe-creation',
-  imports: [    CommonModule,
-    ReactiveFormsModule, // Essential for Reactive Forms
-    SharedModule, // Provides common PrimeNG modules
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    SharedModule,
     ToastModule,
-    // Explicit imports for clarity or if not fully covered by SharedModule
     InputTextModule,
     InputNumberModule,
     FormsModule,
     TextareaModule,
     DropdownModule,
-    ButtonModule,],
+    ButtonModule
+  ],
   templateUrl: './recipe-creation.component.html',
-  styleUrls: ['./recipe-creation.component.scss'], // Adjust if you have specific styles
-  providers: [MessageService] // Provide MessageService locally for the toast
+  styleUrls: ['./recipe-creation.component.css'], 
+  providers: [MessageService]
 })
 export class RecipeCreationComponent implements OnInit, OnDestroy {
-
-  @ViewChild('fileUploader') fileUploader?: FileUpload; // Reference to the p-fileUpload component  
   readonly maxFileSizeInMb = 100;
 
-
-  constructor(
-    private fb: FormBuilder,
-    private recipeService: RecipeService,
-    private fileService: FileService, // Inject FileService
-    private messageService: MessageService,
-    private translateService: TranslateService,
-    private dialogRef: DynamicDialogRef,
-    private config: DynamicDialogConfig,
-    private cdRef: ChangeDetectorRef // Inject ChangeDetectorRef for preview updates if needed
-  ) {}
   recipeForm!: FormGroup;
   isEditMode = false; 
   recipeToEdit?: Recipe;
-  recipeTypes: RecipeTypeOption[];
+  recipeTypes: RecipeTypeOption[] = [];
 
   isScanning = false;
+  isGeneratingImage: boolean = false; 
 
   importOptions: any[] = [
       { label: 'Image', value: 'image', icon: 'pi pi-image' },
       { label: 'Lien / Vidéo', value: 'url', icon: 'pi pi-link' }
   ];
 
+  importUrl: string = '';
   selectedFile: File | null = null;
   imagePreviewUrl: string | ArrayBuffer | null = null;
-  initialImageUrl: string | null = null; // Store original image URL for comparison/reset
+  initialImageUrl: string | null = null;
   private _importMode: string = 'image';
   private subscriptions = new Subscription();
 
+  constructor(
+    private fb: FormBuilder,
+    private recipeService: RecipeService,
+    private fileService: FileService,
+    private messageService: MessageService,
+    private translateService: TranslateService,
+    private dialogRef: DynamicDialogRef,
+    private config: DynamicDialogConfig,
+    private cdRef: ChangeDetectorRef 
+  ) {}
 
   ngOnInit(): void {
     this.recipeToEdit = this.config.data?.recipe;
     this.isEditMode = !!this.recipeToEdit;
     this.initForm();
-    this.recipeTypes =  Object.keys(RecipeType).map(key => ({ label: this.translateService.instant(`RECIPE_CATEGORY.${key}`), value: key }));
+    this.recipeTypes = Object.keys(RecipeType).map(key => ({ 
+      label: this.translateService.instant(`RECIPE_CATEGORY.${key}`), 
+      value: key 
+    }));
 
     if (this.isEditMode && this.recipeToEdit) {
       this.loadRecipeData(this.recipeToEdit);
     } else {
-      // Add one empty ingredient row by default for new recipes
       this.addIngredient();
     }
   }
@@ -105,21 +103,16 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
+  get importMode(): string {
+      return this._importMode;
+  }
 
+  set importMode(value: string) {
+      if (value) {
+          this._importMode = value;
+      }
+  }
 
-    // Getter: Just gives the value to the UI
-    get importMode(): string {
-        return this._importMode;
-    }
-
-    // Setter: Intercepts changes from the UI
-    set importMode(value: string) {
-        // ONLY update if the new value is not null.
-        // If user clicks the active button, PrimeNG sends 'null', which we ignore.
-        if (value) {
-            this._importMode = value;
-        }
-    }
   // --- Form Initialization and Management ---
 
   private initForm(): void {
@@ -128,12 +121,16 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
       name: ['', Validators.required],
       category: [null, Validators.required],
       description: [''],
-      basePortionRatio: [null as number | null], // Added, not required, initialized to null
+      basePortionRatio: [null as number | null], 
       imageUrl: [null],
       ingredients: this.fb.array([])
     });
   }
-  
+
+  get recipeName(): string {
+    return this.recipeForm.get("name")?.value || '';
+  }
+
   private loadRecipeData(recipe: Recipe): void {
     this.recipeForm.patchValue({
       id: recipe.id, 
@@ -144,19 +141,42 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
       imageUrl: recipe.imageUrl
     });
   
-    this.initialImageUrl = recipe.imageUrl;
+    this.initialImageUrl = recipe.imageUrl || null;
     this.ingredients.clear();
-    recipe.ingredients?.forEach((ingredient: Ingredient) => {
-      this.ingredients.push(this.createIngredientGroup(ingredient));
-    });
-  
-    if (this.ingredients.length === 0) {
+    
+    if (recipe.ingredients && recipe.ingredients.length > 0) {
+      recipe.ingredients.forEach((ingredient: Ingredient) => {
+        this.ingredients.push(this.createIngredientGroup(ingredient));
+      });
+    } else {
       this.addIngredient();
     }
   }
 
-  // ... inside component class
-  importUrl: string = ''; // Add this property
+  // --- AI Image Generation ---
+
+  generateAIImage(): void {
+    if (!this.recipeName || this.recipeName.trim() === '') {
+      this.messageService.add({ severity: 'warn', summary: 'Nom manquant', detail: 'Veuillez entrer le nom de la recette.' });
+      return;
+    }
+    
+    this.isGeneratingImage = true;
+    
+    this.recipeService.generateSingleAIImage(this.recipeName).subscribe({
+      next: (res: any) => {
+        this.recipeForm.get("imageUrl")?.setValue(res.imageUrl); 
+        this.isGeneratingImage = false;
+        this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Image générée et sauvegardée sur le serveur !' });
+      },
+      error: () => {
+        this.isGeneratingImage = false;
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de générer l\'image.' });
+      }
+    });
+  }
+
+  // --- Smart Import ---
 
   onUrlImport() {
     if (!this.importUrl) return;
@@ -169,7 +189,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
         this.populateForm(recipeData);
         this.isScanning = false;
         this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Recette importée !' });
-        this.importUrl = ''; // Reset
+        this.importUrl = ''; 
       },
       error: (err) => {
         console.error(err);
@@ -179,26 +199,20 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     });
   }
 
-  // --- Ingredient FormArray Management ---
-
   onSmartImport(event: any) {
     const file = event.files[0];
     if (!file) return;
 
     this.isScanning = true;
-    // Clear the file upload input if needed to allow re-uploading same file
-    // event.originalEvent.target.value = ''; 
 
     this.recipeService.smartImport(file).subscribe({
       next: (recipeData) => {
         this.populateForm(recipeData);
         this.isScanning = false;
-        // Optional: Show success message
       },
       error: (err) => {
         console.error(err);
         this.isScanning = false;
-        // Optional: Show error message
       }
     });
   }
@@ -210,10 +224,8 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
       basePortionRatio: data.basePortionRatio,
       imageUrl: data.imageUrl,
       category: data.category
-      // map other fields like prepTime, cookTime if they exist in your form
     });
 
-    // Handle Ingredients Array
     const ingredientsArray = this.recipeForm.get('ingredients') as FormArray;
     ingredientsArray.clear();
 
@@ -228,6 +240,8 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     }
   }
 
+  // --- Ingredient Management ---
+
   get ingredients(): FormArray {
     return this.recipeForm.get('ingredients') as FormArray;
   }
@@ -235,7 +249,7 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
   createIngredientGroup(ingredient?: Ingredient): FormGroup {
     return this.fb.group({
       name: [ingredient?.name || '', Validators.required],
-      quantity: [ingredient?.quantity || ''], // Keep as string initially if needed
+      quantity: [ingredient?.quantity || ''], 
       unit: [ingredient?.unit || '']
     });
   }
@@ -248,184 +262,138 @@ export class RecipeCreationComponent implements OnInit, OnDestroy {
     if (this.ingredients.length > 1) {
       this.ingredients.removeAt(index);
     } else {
-        // Optionally show a message that at least one ingredient is needed
         this.messageService.add({ severity: 'warn', summary: 'Attention', detail: 'Une recette doit contenir au moins un ingrédient.' });
     }
   }
 
   // --- Image Upload Handling ---
 
-  onFileSelect(event: any): void {
-    // PrimeNG FileUpload event in basic mode with customUpload=true
-    // The event object itself often contains the files array directly
-    const file = event.files ? event.files[0] : null;
+  onFileSelect(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const file = target.files ? target.files[0] : null;
 
     if (!file) {
-      console.error('No file selected in event:', event);
-      this.removeImage(); // Clear previous selection if any
+      this.removeImage();
       return;
     }
 
-    // Optional: Add client-side validation (type, size)
     if (!file.type.startsWith('image/')) {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Veuillez sélectionner un fichier image valide.' });
-        this.clearFileUploader();
         return;
     }
-    const maxSize = this.maxFileSizeInMb * 1024 * 1024; // 2MB example
+    const maxSize = this.maxFileSizeInMb * 1024 * 1024;
     if (file.size > maxSize) {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `La taille du fichier ne doit pas dépasser ${this.maxFileSizeInMb / 1024 / 1024} Mo.` });
-        this.clearFileUploader();
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: `La taille du fichier ne doit pas dépasser ${this.maxFileSizeInMb} Mo.` });
         return;
     }
 
     this.selectedFile = file;
-    this.imageUrl?.setValue(null); // Clear existing URL when a new file is chosen
+    this.recipeForm.get('imageUrl')?.setValue(null); // Clear form URL
 
-    // Generate preview
     const reader = new FileReader();
     reader.onload = (e: any) => {
       this.imagePreviewUrl = e.target.result;
-      this.cdRef.detectChanges(); // Trigger change detection for preview update
+      this.cdRef.detectChanges();
     };
     reader.readAsDataURL(file);
-
-    // Note: The fileUploader might clear itself visually due to [auto]="true"
-    // If not, you might need: this.fileUploader?.clear();
   }
 
   removeImage(): void {
     this.selectedFile = null;
     this.imagePreviewUrl = null;
-    this.imageUrl?.setValue(null); // Remove URL from form
-    this.clearFileUploader();
-    this.cdRef.detectChanges(); // Ensure UI updates
+    this.recipeForm.get('imageUrl')?.setValue(null); 
+    this.cdRef.detectChanges(); 
   }
-
-  clearFileUploader(): void {
-    // Use ViewChild to access the clear method if needed
-    this.fileUploader?.clear();
-  }
-
 
   // --- Form Submission ---
 
-    // --- Form Submission ---
+  onSubmit(): void {
+    this.recipeForm.markAllAsTouched(); 
 
-    onSubmit(): void {
-      this.recipeForm.markAllAsTouched(); // Mark all fields for validation messages
-  
-      if (this.recipeForm.invalid) {
-        this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Veuillez remplir tous les champs requis.' });
-        return;
-      } 
-  
-      // Determine if an upload is needed
-      const uploadNeeded = !!this.selectedFile;
-      const recipeData = { ...this.recipeForm.value }; // Get current form data
-  
-      // Create an observable chain: Upload (if needed) -> Save/Update Recipe
-      const operation$ = uploadNeeded
-        ? this.fileService.postFile(this.selectedFile!).pipe( // Use non-null assertion as we checked 'uploadNeeded'
-            tap(uploadResponse => {
-              let uploadedUrl: string | undefined;
-  
-              // Check if the response is a string directly
-              if (typeof uploadResponse === 'string') {
-                uploadedUrl = uploadResponse;
-              }
-              // Check if it's an object and try to access known properties
-              else if (typeof uploadResponse === 'object' && uploadResponse !== null) {
-                // Use type assertion if you defined the interface (or just access directly if you skip the interface)
-                const typedResponse = uploadResponse as FileUploadResponse; // Or just uploadResponse
-                uploadedUrl = typedResponse?.url || typedResponse?.fileURL;
-              }
-  
-              // Validate the extracted URL
-              if (!uploadedUrl || typeof uploadedUrl !== 'string') {
-                  console.error("Could not extract a valid URL from upload response:", uploadResponse);
-                  throw new Error("L'URL de l'image n'a pas pu être récupérée après l'upload.");
-              }
-  
-              recipeData.imageUrl = uploadedUrl; // Update recipe data with the NEW URL
-              this.imageUrl?.setValue(uploadedUrl, { emitEvent: false }); // Also update form control silently
-            }),
-            switchMap(() => this.saveOrUpdateRecipe(recipeData)), // Proceed to save/update
-            catchError(uploadError => {
-              console.error('Upload or URL extraction failed:', uploadError);
-              // Use the error message from the thrown error if available
-              const detailMessage = uploadError instanceof Error ? uploadError.message : "Échec de l'envoi ou du traitement de l'image.";
-              this.messageService.add({ severity: 'error', summary: 'Erreur Upload', detail: detailMessage });
-              return throwError(() => uploadError); // Propagate error to stop the chain
-            })
-          )
-        : this.saveOrUpdateRecipe(recipeData); // No upload needed, proceed directly
-  
-      // Execute the operation (rest of the method remains the same)
-      this.subscriptions.add(
-        operation$.pipe(
-          finalize(() => { 
-            this.cdRef.detectChanges(); // Ensure UI updates
-          })
-        ).subscribe({
-          next: (savedRecipe: any) => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: `Recette ${this.isEditMode ? 'mise à jour' : 'créée'} avec succès!`
-            });
-            this.dialogRef.close(savedRecipe); // Close dialog and pass back the result
-          },
-          error: (err: any) => {
-            // Error handling for the save/update part (upload errors handled above)
-            // Avoid showing duplicate error messages if upload failed
-            if (!(err instanceof Error && err.message.includes("L'URL de l'image"))) {
-               console.error('Save/Update failed:', err);
-               this.messageService.add({
-                 severity: 'error',
-                 summary: 'Erreur Sauvegarde',
-                 detail: `Échec de la ${this.isEditMode ? 'mise à jour' : 'création'} de la recette.`
-               });
+    if (this.recipeForm.invalid) {
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Veuillez remplir tous les champs requis.' });
+      return;
+    } 
+
+    const uploadNeeded = !!this.selectedFile;
+    const recipeData = { ...this.recipeForm.value }; 
+
+    const operation$ = uploadNeeded
+      ? this.fileService.postFile(this.selectedFile!).pipe(
+          tap(uploadResponse => {
+            let uploadedUrl: string | undefined;
+
+            if (typeof uploadResponse === 'string') {
+              uploadedUrl = uploadResponse;
+            } else if (typeof uploadResponse === 'object' && uploadResponse !== null) {
+              const typedResponse = uploadResponse as FileUploadResponse; 
+              uploadedUrl = typedResponse?.url || typedResponse?.fileURL || typedResponse?.imageUrl;
             }
-          }
+
+            if (!uploadedUrl || typeof uploadedUrl !== 'string') {
+                throw new Error("L'URL de l'image n'a pas pu être récupérée après l'upload.");
+            }
+
+            recipeData.imageUrl = uploadedUrl; 
+            this.imageUrl?.setValue(uploadedUrl, { emitEvent: false }); 
+          }),
+          switchMap(() => this.saveOrUpdateRecipe(recipeData)), 
+          catchError(uploadError => {
+            console.error('Upload or URL extraction failed:', uploadError);
+            const detailMessage = uploadError instanceof Error ? uploadError.message : "Échec de l'envoi de l'image.";
+            this.messageService.add({ severity: 'error', summary: 'Erreur Upload', detail: detailMessage });
+            return throwError(() => uploadError); 
+          })
+        )
+      : this.saveOrUpdateRecipe(recipeData); 
+
+    this.subscriptions.add(
+      operation$.pipe(
+        finalize(() => { 
+          this.cdRef.detectChanges(); 
         })
-      );
+      ).subscribe({
+        next: (savedRecipe: any) => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: `Recette ${this.isEditMode ? 'mise à jour' : 'créée'} avec succès!`
+          });
+          this.dialogRef.close(savedRecipe); 
+        },
+        error: (err: any) => {
+          if (!(err instanceof Error && err.message.includes("L'URL de l'image"))) {
+             console.error('Save/Update failed:', err);
+             this.messageService.add({
+               severity: 'error',
+               summary: 'Erreur Sauvegarde',
+               detail: `Échec de la ${this.isEditMode ? 'mise à jour' : 'création'} de la recette.`
+             });
+          }
+        }
+      })
+    );
+  }
+
+  private saveOrUpdateRecipe(recipeData: any) {
+    recipeData.ingredients = recipeData.ingredients.filter((ing: Ingredient) => ing.name?.trim());
+    const recipeId = this.recipeToEdit?.id ?? recipeData.id; 
+
+    if (this.isEditMode && recipeId) {
+      return this.recipeService.updateRecipe(recipeData);
+    } else {
+      delete recipeData.id;
+      delete recipeData._id;
+      return this.recipeService.addRecipe(recipeData);
     }
-  
-    // Helper to call the correct RecipeService method (remains the same)
-    private saveOrUpdateRecipe(recipeData: any) {
-      // Clean up ingredients: remove any empty ones (optional)
-      recipeData.ingredients = recipeData.ingredients.filter((ing: Ingredient) => ing.name?.trim());
-  
-      // --- IMPORTANT: ID Check ---
-      // Make sure you are using the correct ID property (_id or id) based on your Recipe model
-      const recipeId = this.recipeToEdit?.id ?? recipeData.id; // Adjust as per your model
-  
-      if (this.isEditMode && recipeId) {
-        // Pass the ID separately if your service expects it like updateRecipe(id, data)
-        // Or ensure recipeData includes the id if service expects updateRecipe(dataWithId)
-        // Assuming service expects updateRecipe(id, data):
-        return this.recipeService.updateRecipe(recipeData);
-        // If service expects updateRecipe(dataWithId):
-        // recipeData.id = recipeId; // or recipeData._id = recipeId;
-        // return this.recipeService.updateRecipe(recipeData);
-      } else {
-        // Ensure ID is not sent for creation if backend assigns it
-        delete recipeData.id;
-        delete recipeData._id;
-        return this.recipeService.addRecipe(recipeData);
-      }
-    }
-  
-    // --- Dialog Actions --- (remains the same)
-    closeDialog(): void {
-      this.dialogRef.close(); // Close without saving
-    }
-  
-    // --- Getters for easy template access --- (remains the same)
-    get name(): AbstractControl { return this.recipeForm.get('name')!; }
-    get category(): AbstractControl { return this.recipeForm.get('category')!; }
-    get basePortionRatio() { return this.recipeForm.get('basePortionRatio'); }
-    get imageUrl(): AbstractControl { return this.recipeForm.get('imageUrl')!; }
-  
+  }
+
+  closeDialog(): void {
+    this.dialogRef.close(); 
+  }
+
+  get name(): AbstractControl { return this.recipeForm.get('name')!; }
+  get category(): AbstractControl { return this.recipeForm.get('category')!; }
+  get basePortionRatio() { return this.recipeForm.get('basePortionRatio'); }
+  get imageUrl(): AbstractControl { return this.recipeForm.get('imageUrl')!; }
 }

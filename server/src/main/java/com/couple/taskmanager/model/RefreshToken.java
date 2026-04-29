@@ -9,7 +9,9 @@ import java.time.Instant;
 
 @Data
 @Entity
-@Table(name = "user_refresh_tokens") // RENAMED TABLE to cleanly bypass the old DB constraint
+@Table(name = "user_refresh_tokens", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "user_id")
+})
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +22,7 @@ public class RefreshToken {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private CTMUser user;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String token;
 
     @Column(nullable = false)

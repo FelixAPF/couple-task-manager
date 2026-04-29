@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,10 +33,25 @@ public class RefreshTokenService {
         CTMUser user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        RefreshToken refreshToken = new RefreshToken();
+        RefreshToken refreshToken;
+
+        // Use a custom repository method to find ALL tokens for the user
+        List<RefreshToken> existingTokens = refreshTokenRepository.findAllByUser(user);
+
+        if (existingTokens.isEmpty()) {
+            refreshToken = new RefreshToken();
+        } else if (existingTokens.size() == 1) {
+            refreshToken = existingTokens.get(0); // Standard rotation
+        } else {
+            // Failsafe: if duplicates exist (e.g., 84 records), delete them all and start fresh
+            refreshTokenRepository.deleteAll(existingTokens);
+            refreshTokenRepository.flush(); // Ensure deletion happens before save
+            refreshToken = new RefreshToken();
+        }
+
         refreshToken.setUser(user);
-        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
+        refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
 
         return refreshTokenRepository.save(refreshToken);
     }

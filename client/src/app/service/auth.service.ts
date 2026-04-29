@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { AuthRequest, RegisterRequest } from '../model/auth';
 import { environment } from '../environment';
-import { BehaviorSubject, Observable, Subscription, tap } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, Subscription, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { HouseholdService } from './household.service';
 
@@ -105,22 +105,23 @@ login(authRequest: AuthRequest): Observable<AuthResponse> {
   }
 
 refreshToken(): Observable<AuthResponse> {
-    const refreshToken = this.getRefreshToken();
-    
-    return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, { refreshToken }).pipe(
-      tap((response: AuthResponse) => {
-        // On sauvegarde le nouvel Access Token
-        localStorage.setItem(this.TOKEN_KEY, response.token);
-        
-        // NOUVEAU : On sauvegarde le nouveau Refresh Token s'il est fourni
-        if (response.refreshToken) {
-          localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-        }
-        
-        this.isLoggedInSubject.next(true);
-      })
-    );
+  const refreshToken = this.getRefreshToken();
+
+  if (!refreshToken) {
+    this.logout(true);
+    return EMPTY as any;
   }
+
+  return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, { refreshToken }).pipe(
+    tap((response: AuthResponse) => {
+      localStorage.setItem(this.TOKEN_KEY, response.token);
+      if (response.refreshToken) {
+        localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+      }
+      this.isLoggedInSubject.next(true);
+    })
+  );
+}
 
   register(registerRequest: RegisterRequest): Observable<RegisterRequest> { 
     return this.http.post<RegisterRequest>(`${this.baseUrl}/register`, registerRequest);

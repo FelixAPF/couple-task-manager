@@ -109,19 +109,24 @@ refreshToken(): Observable<AuthResponse> {
 
   if (!refreshToken) {
     this.logout(true);
-    return EMPTY as any;
+    throw new Error('No refresh token available');
   }
 
+  // Use HttpClient directly with no auth header — bypass the interceptor's token injection
+  // The interceptor already skips /auth/refresh URLs, so this is safe
   return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, { refreshToken }).pipe(
-    tap((response: AuthResponse) => {
-      localStorage.setItem(this.TOKEN_KEY, response.token);
-      if (response.refreshToken) {
+    tap(response => {
+      if (response?.token) {
+        localStorage.setItem(this.TOKEN_KEY, response.token);
+      }
+      if (response?.refreshToken) {
         localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
       }
       this.isLoggedInSubject.next(true);
     })
   );
 }
+
 
   register(registerRequest: RegisterRequest): Observable<RegisterRequest> { 
     return this.http.post<RegisterRequest>(`${this.baseUrl}/register`, registerRequest);

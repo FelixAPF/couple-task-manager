@@ -21,75 +21,91 @@ export class AuthInterceptor implements HttpInterceptor {
     return request;
   }
 
-  private handle401Error(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    if (!this.isRefreshing) {
-      this.isRefreshing = true;
-      this.refreshTokenSubject.next(null); // Block other requests while refreshing
+    // URLs that must NEVER have the interceptor's error handling applied
+  private readonly AUTH_URLS = ['/auth/login', '/auth/refresh', '/auth/register'];
 
-      const refreshToken = this.authService.getRefreshToken();
+  private isAuthUrl(url: string): boolean {
+    return this.AUTH_URLS.some(authUrl => url.includes(authUrl));
+  }
 
-      // If there's no refresh token at all, logout immediately
-      if (!refreshToken) {
-        this.isRefreshing = false;
-        this.authService.logout(true);
-        return EMPTY;
-      }
+  private addToken(request: HttpRequest<any>, token: string): HttpRequest<any> {
+    return request.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
+  }
 
-      return this.authService.refreshToken().pipe(
-        switchMap((response: any) => {
-          this.isRefreshing = false;
-          this.refreshTokenSubject.next(response.token); // Unblock queued requests
-          return next.handle(this.addTokenHeader(request, response.token));
-        }),
-        catchError((err) => {
-          this.isRefreshing = false;
-          this.refreshTokenSubject.next(null);
-          // Only logout if the refresh itself failed (expired refresh token)
-          this.authService.logout(true);
-          return EMPTY;
-        })
-      );
-    } else {
-      // Queue this request — wait until refresh completes, then retry with new token
+  private handle401Error(originalRequest: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    if (this.isRefreshing) {
+      // Queue: wait for the in-progress refresh to complete, then retry
       return this.refreshTokenSubject.pipe(
         filter(token => token !== null),
         take(1),
-        switchMap(token => next.handle(this.addTokenHeader(request, token)))
+        switchMap(token => next.handle(this.addToken(originalRequest, token!)))
       );
     }
+
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
+
+    const storedRefreshToken = this.authService.getRefreshToken();
+
+    if (!storedRefreshToken) {
+      this.isRefreshing = false;
+      this.authService.logout(true);
+      return EMPTY;
+    }
+
+    return this.authService.refreshToken().pipe(
+      switchMap((response) => {
+        this.isRefreshing = false;
+        this.refreshTokenSubject.next(response.token);
+        // Retry the original request with the new access token
+        return next.handle(this.addToken(originalRequest, response.token));
+      }),
+      catchError((refreshError) => {
+        this.isRefreshing = false;
+        this.refreshTokenSubject.next(null);
+        // Refresh token itself is expired or invalid — must login again
+        this.authService.logout(true);
+        return EMPTY;
+      })
+    );
   }
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Skip auth endpoints to avoid infinite loops
-    if (req.url.includes('/auth/login') || req.url.includes('/auth/refresh') || req.url.includes('/auth/register')) {
+ intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // Never intercept auth endpoints — avoids infinite loops
+    if (this.isAuthUrl(req.url)) {
       return next.handle(req);
     }
 
-    const authToken = this.authService.getToken();
-    let authReq = req;
-
-    if (authToken && req.url.startsWith(environment.apiUrl)) {
-      authReq = req.clone({
-        setHeaders: { Authorization: `Bearer ${authToken}` }
-      });
-    }
+    // Add access token if we have one
+    const token = this.authService.getToken();
+    const authReq = token && req.url.startsWith(environment.apiUrl)
+      ? this.addToken(req, token)
+      : req;
 
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
           return this.handle401Error(authReq, next);
-        } else if (error.status === 0) {
-          // Network error (offline/app resume) — don't logout
+        }
+
+        // Network error (offline, app resume from background) — never logout for this
+        if (error.status === 0) {
           console.warn('Network error — device may be offline.');
           return throwError(() => error);
-        } else if (error.status >= 500) {
-          return throwError(() => error);
-        } else if (error.status === 403) {
-          return throwError(() => error);
-        } else {
-          this.router.navigate(['/server-error']);
+        }
+
+        if (error.status === 403) {
           return throwError(() => error);
         }
+
+        if (error.status >= 500) {
+          return throwError(() => error);
+        }
+
+        this.router.navigate(['/server-error']);
+        return throwError(() => error);
       })
     );
   }

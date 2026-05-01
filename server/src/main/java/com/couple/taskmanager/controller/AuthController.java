@@ -60,8 +60,6 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refreshtoken(@RequestBody RefreshTokenRequest request) {
-        String requestRefreshToken = request.getRefreshToken();
-
         return refreshTokenService.findByToken(request)
                 .map(refreshTokenService::verifyExpiration)
                 .map(RefreshToken::getUser)

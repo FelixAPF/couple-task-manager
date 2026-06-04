@@ -31,7 +31,10 @@ public class TaskController extends GenericController<Task, TaskDto, TaskService
         return service.getTaskHistory(taskId, (CTMUser) userDetails);
     }
 
-
+    @GetMapping("/history/today")
+    public List<TaskHistoryDto> getTodayHistory(@AuthenticationPrincipal UserDetails userDetails) {
+        return service.getTodayHistory((CTMUser) userDetails);
+    }
 
     @GetMapping("/dashboard")
     public List<TaskDto> getDashboardTasks(

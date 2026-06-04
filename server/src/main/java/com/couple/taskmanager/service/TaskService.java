@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -93,6 +94,17 @@ public class TaskService implements IGenericService<Task, TaskDto> {
                 user.getHousehold().getId(), user.getId(), maxDueDate);
 
         return tasks.stream().map(TaskDto::new).toList();
+    }
+
+    public List<TaskHistoryDto> getTodayHistory(CTMUser user) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return taskHistoryRepository.findTodayByHousehold(user.getHousehold().getId(), cal.getTime())
+                .stream().map(TaskHistoryDto::new).toList();
     }
 
     @Transactional

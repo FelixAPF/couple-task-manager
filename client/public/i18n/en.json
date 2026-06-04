@@ -90,7 +90,6 @@
   },
   "my-tasks": {
     "start-period": "Start Period",
-    "quick-complete": "Quick Complete",
     "display-tasks": "Display Tasks",
     "my-tasks": "My Tasks - {{ assigneeName }}",
     "no-tasks": "No Tasks to display for {{ assigneeName }} with the current filters.",

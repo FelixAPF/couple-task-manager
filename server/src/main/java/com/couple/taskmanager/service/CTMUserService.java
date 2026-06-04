@@ -31,8 +31,6 @@ public class CTMUserService implements UserDetailsService {
 
     @Autowired
     private TaskRepository taskRepository;
-    @Autowired
-    private TaskAssignmentRepository taskAssignmentRepository;
 
     @Autowired
     private MealRepository mealRepository;
@@ -176,21 +174,6 @@ public class CTMUserService implements UserDetailsService {
             letterRepository.deleteAll(receivedOpened);
         }
 
-
-
-
-        // ---------------------------------------------------------------------
-        // EXISTING CLEANUP LOGIC
-        // ---------------------------------------------------------------------
-
-        // 1. Supprimer les assignations de tâches
-        List<TaskAssignment> assignmentsToDelete = new ArrayList<>(managedUser.getTaskAssignments());
-
-        for (TaskAssignment assignment : assignmentsToDelete) {
-            taskAssignmentRepository.delete(assignment);
-        }
-
-        managedUser.getTaskAssignments().clear();
 
         if (managedUser.getTaskLists() != null && !managedUser.getTaskLists().isEmpty()) {
             List<TaskList> listsToDelete = new ArrayList<>(managedUser.getTaskLists());

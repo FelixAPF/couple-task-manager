@@ -5,7 +5,6 @@ import { TaskList, TaskListRequest } from '../model/task-list';
 import { Assignee, BasicTaskAssignmentRqst } from '../model/task-period';
 import { Observable } from 'rxjs';
 import { Task } from '../model/task';
-import { TaskWithAssignee } from '../create-period-dialog/create-period-dialog.component';
 
 @Injectable({
   providedIn: 'root'

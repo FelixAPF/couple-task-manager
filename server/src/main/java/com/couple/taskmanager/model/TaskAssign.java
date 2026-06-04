@@ -24,8 +24,4 @@ public class TaskAssign {
     @JsonBackReference("user-task-assign")
     private CTMUser assignee;
 
-    @ManyToOne
-    @JsonBackReference("task-list-occasion-task-assign")
-    private TaskListOccasion taskListOccasion;
-
 }

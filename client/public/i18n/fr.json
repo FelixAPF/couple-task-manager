@@ -90,7 +90,6 @@
   },
   "my-tasks": {
     "start-period": "Débuter période",
-    "quick-complete": "Compléter",
     "display-tasks": "Afficher les tâches",
     "my-tasks": "Mes tâches - {{ assigneeName }}",
     "no-tasks": "Aucune tâche à afficher pour {{ assigneeName }} avec les filtres actuels.",

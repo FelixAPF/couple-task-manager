@@ -11,6 +11,7 @@ import java.util.Date;
 public class TaskHistoryDto {
     private Long id;
     private Long taskId;
+    private String taskTitle;
     private Date completedDate;
     private HouseholdMemberDto completedBy;
 
@@ -18,6 +19,7 @@ public class TaskHistoryDto {
         this.id = history.getId();
         this.taskId = history.getTask().getId();
         this.completedDate = history.getCompletedDate();
+        this.taskTitle = history.getTask().getTitle();
 
         if (history.getCompletedBy() != null) {
             this.completedBy = new HouseholdMemberDto(

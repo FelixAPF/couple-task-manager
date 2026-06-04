@@ -7,6 +7,8 @@ import { Task } from '../../model/task';
 import { HouseholdService } from '../../service/household.service';
 import { HouseholdMember } from '../../model/household';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import confetti from 'canvas-confetti';
+import { TaskHistoryDto } from '../../model/task-history';
 
 @Component({
   selector: 'app-my-tasks',
@@ -23,7 +25,7 @@ export class MyTasksComponent implements OnInit {
   householdMembers: HouseholdMember[] = [];
   selectedAssignee: HouseholdMember | null = null;
   today: Date = new Date();
-  
+  todayCompleted: TaskHistoryDto[] = [];
   // Re-added Form variables
   formGroup!: FormGroup;
 
@@ -68,16 +70,20 @@ export class MyTasksComponent implements OnInit {
     });
   }
 
-  loadDashboardTasks() {
+loadDashboardTasks() {
     const horizon = this.formGroup.get('displayDuration')?.value || 'MONTH';
-    localStorage.setItem("myTasksHorizon", horizon); // Save local user filter preference
+    localStorage.setItem("myTasksHorizon", horizon);
 
     this.taskService.getDashboardTasks(horizon).subscribe(tasks => {
-      // Sort tasks ascending by due date (earliest first)
       this.tasks = tasks.sort((a, b) => {
         if (!a.dueDate || !b.dueDate) return 0;
         return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
       });
+    });
+
+    // Fetch today's completed tasks!
+    this.taskService.getTodayHistory().subscribe(history => {
+      this.todayCompleted = history;
     });
   }
 
@@ -85,10 +91,20 @@ export class MyTasksComponent implements OnInit {
     this.loadDashboardTasks();
   }
 
+  
   completeTask(task: Task) {
     if (!task.id) return;
     this.taskService.completeTask(task.id).subscribe(() => {
-      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Tâche complétée!' });
+      
+      // 🎉 FIRE THE CONFETTI!
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899']
+      });
+
+      this.messageService.add({ severity: 'success', summary: 'Bravo!', detail: 'Tâche complétée!' });
       this.loadDashboardTasks(); 
       this.taskCompleteEmitter.emit(task.id);
     });

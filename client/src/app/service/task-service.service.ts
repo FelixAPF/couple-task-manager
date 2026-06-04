@@ -38,17 +38,11 @@ export class TaskService implements OnDestroy {
     return this.http.get<TaskAssignment[]>(`${this.baseUrl}/${taskId}/assignments-by-id`);
   }
 
-  retrieveTasksByDate(date: Date): Observable<Task[]> {
-    return this.http.post<Task[]>(`${this.baseUrl}/by-date`, date);
-  }
 
   retrieveTasksNotDoneInLongTime(): Observable<TaskWithCompletedDate[]> {
     return this.http.get<TaskWithCompletedDate[]>(`${this.baseUrl}/not-completed-in-long-time`);
   }
 
-  retrieveCurrentPeriodDate(){
-    return this.retrieveTasksByDate(new Date());
-  }
 
   saveTask(task: TaskCreationRqst): Observable<void>{
     return this.http.post<void>(`${this.baseUrl}/create`, task);
@@ -88,6 +82,10 @@ getDashboardTasks(horizon: string = 'MONTH'): Observable<Task[]> {
 
   completeTask(taskId: number): Observable<Task> {
     return this.http.post<Task>(`${this.baseUrl}/${taskId}/complete`, {});
+  }
+
+  getTodayHistory(): Observable<TaskHistoryDto[]> {
+    return this.http.get<TaskHistoryDto[]>(`${this.baseUrl}/history/today`);
   }
 
   skipTask(taskId: number): Observable<Task> {

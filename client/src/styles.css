@@ -60,17 +60,6 @@ body {
   display: block;
 }
 
-/* Fix: trigger macro dialog calendar clipping */
-.p-dialog .p-dialog-content {
-    overflow: visible !important;
-}
-
-.p-dialog-content .p-datepicker-inline {
-    width: 100% !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
 .nav-item.active-link {
   /* Use the CSS variable for the primary color */
   color: var(--primary-500);

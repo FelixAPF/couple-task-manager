@@ -1,3 +1,4 @@
+import { HouseholdMember } from "./household";
 import { Assignee, TaskAssignment } from "./task-period";
 
 export interface Task {
@@ -6,8 +7,9 @@ export interface Task {
     description?: string;
     frequency?: Frequency;
     room?: Room;
-    taskAssignments?: TaskAssignment[]; // This line must be present and correctly typed
-
+    startDate?: Date;
+    dueDate?: Date;
+    assignee?: HouseholdMember | null; // null = unassigned
 }
 
 export interface TaskCreationRqst {

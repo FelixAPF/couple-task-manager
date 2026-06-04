@@ -23,8 +23,16 @@ public class TaskList {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @ManyToMany(mappedBy = "taskLists")
+    // --- CHANGED THIS SECTION ---
+    // We removed 'mappedBy' and gave it a direct JoinTable so Hibernate doesn't crash
+    @ManyToMany
+    @JoinTable(
+            name = "task_tasklist",
+            joinColumns = @JoinColumn(name = "tasklist_id"),
+            inverseJoinColumns = @JoinColumn(name = "task_id")
+    )
     private List<Task> tasks = new ArrayList<>();
+    // ----------------------------
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -33,7 +41,7 @@ public class TaskList {
     private CTMUser user;
 
     @ManyToOne
-    @JoinColumn(name = "household_id") // Explicitly specify the column name
+    @JoinColumn(name = "household_id")
     @JsonBackReference("household-task-lists")
     private Household household;
 
@@ -48,17 +56,14 @@ public class TaskList {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : Objects.hash(super.hashCode());
-        // Alternative for transient: return 31;
     }
 
-    // Optional: Add toString manually if needed, excluding collections
     @Override
     public String toString() {
         return "TaskList{" +
                 "id=" + id +
                 ", userId=" + (user != null ? user.getId() : "null") +
                 ", householdId=" + (household != null ? household.getId() : "null") +
-                // Avoid printing collections or complex objects here
                 '}';
     }
 }

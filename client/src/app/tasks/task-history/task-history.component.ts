@@ -1,37 +1,28 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Route } from '@angular/router';
-import { TaskAssignmentService } from '../../service/task-assignment.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { TaskService } from '../../service/task-service.service';
-import { TaskAssignmentDto } from '../../model/task-period';
+import { TaskHistoryDto } from '../../model/task-history';
 import { SharedModule } from '../../shared.module';
-import { Task } from '../../model/task';
-import { HouseholdService } from '../../service/household.service';
-import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-task-history',
-  imports: [SharedModule, TitleCasePipe],
-  templateUrl: './task-history.component.html',
-  styleUrl: './task-history.component.css'
+  standalone: true,
+  imports: [CommonModule, SharedModule],
+  templateUrl: './task-history.component.html'
 })
-export class TaskHistoryComponent implements OnInit, OnDestroy {
-  taskAssignments: TaskAssignmentDto[] = [];
-  task: Task = {} as Task;
+export class TaskHistoryComponent implements OnInit {
+  @Input() taskId!: number;
+  historyLogs: TaskHistoryDto[] = [];
+  loading: boolean = true;
 
-  constructor(private route: ActivatedRoute, private taskService: TaskService, private householdService: HouseholdService) { }
+  constructor(private taskService: TaskService) {}
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const taskId = params['id'];
-      this.taskService.retrieveTaskHistory(taskId).subscribe(({ task, taskAssignments}) => {
-        this.task = task;
-        this.taskAssignments = taskAssignments.sort((a, b) => new Date(b.completedDate).getTime() - new Date(a.completedDate).getTime());
+  ngOnInit() {
+    if (this.taskId) {
+      this.taskService.getTaskHistory(this.taskId).subscribe(logs => {
+        this.historyLogs = logs;
+        this.loading = false;
       });
-      
-    });
-   }
-
-  ngOnDestroy(): void {
+    }
   }
-
 }

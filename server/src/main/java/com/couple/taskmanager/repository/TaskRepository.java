@@ -32,4 +32,16 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("SELECT t FROM Task t WHERE t.id IN :requestedTaskIds AND t.household.id = :householdId")
     List<Task> findAllByIdInAndHouseholdId(@Param("requestedTaskIds") Set<Long> requestedTaskIds, @Param("householdId") Long householdId);
-}
+
+    @Query("SELECT t FROM Task t WHERE t.household.id = :householdId AND (t.assignee.id = :userId OR t.assignee IS NULL)")
+    List<Task> findDashboardTasks(@Param("householdId") Long householdId, @Param("userId") Long userId);
+
+    List<Task> findByHouseholdIdAndAssigneeIdOrAssigneeIsNull(Long id, Long id1);
+
+    @Query("SELECT t FROM Task t WHERE t.household.id = :householdId " +
+            "AND (t.assignee.id = :userId OR t.assignee IS NULL) " +
+            "AND t.dueDate <= :maxDueDate")
+    List<Task> findDashboardTasksWithHorizon(
+            @Param("householdId") Long householdId,
+            @Param("userId") Long userId,
+            @Param("maxDueDate") Date maxDueDate);}

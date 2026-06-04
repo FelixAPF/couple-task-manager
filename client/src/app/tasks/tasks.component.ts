@@ -1,77 +1,27 @@
-// c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\tasks\tasks.component.ts
-import { Component, inject, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
-import { forkJoin, Subject, Subscription } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { Subscription } from 'rxjs';
 
 // PrimeNG Modules
+import { MultiSelectModule } from 'primeng/multiselect';
+import { CalendarModule } from 'primeng/calendar';
+
 import { SharedModule } from '../shared.module';
-
-// Components
-import { AddTaskComponent } from './add-task/add-task.component';
-import { AssigneeTaskListComponent } from './split-task/assignee-task-list/assignee-task-list.component';
-import { TaskAssignmentDialogComponent } from './task-assignment-dialog/task-assignment-dialog.component';
-
-// Services
-import { TaskListService } from '../service/task-list.service';
+import { CreateTaskDialogComponent } from './create-task-dialog/create-task-dialog.component';
 import { TaskService } from '../service/task-service.service';
 import { HouseholdService } from '../service/household.service';
-// Assuming TaskPeriodService, TaskAssignmentService, LoadingService are used/injected if needed
-// For this fix, focusing on what's directly in the provided code for sorting.
-
-// Models
-import { Frequency, Task } from '../model/task';
-import { HouseholdMember } from '../model/household'; // Ensure this path and interface are correct
-import { TaskList } from '../model/task-list';
-import { LoadingService } from '../service/loading/loading.service';
-import { TaskAssignDto, TaskListOccasion } from '../model/task-list-occasion';
-import { TaskListOccasionService } from '../service/task-list-occasion-service.service';
-import { AssignTasksDialogComponent } from './assign-tasks-dialog/assign-tasks-dialog.component';
-import { CreateTaskDialogComponent } from './create-task-dialog/create-task-dialog.component';
+import { TaskGroupService, TaskGroup } from '../service/task-group.service';
+import { Task } from '../model/task';
+import { HouseholdMember } from '../model/household';
 import { FrequencyPipe } from '../shared/pipes/frequency-pipe';
 import { RoomPipe } from '../shared/pipes/room-pipe';
-import { TaskAssignmentDto } from '../model/task-period';
-import { ReassignTaskDialogComponent } from './reassign-task/reassign-task.component';
+import { DialogModule } from 'primeng/dialog';
+import { TaskHistoryComponent } from './task-history/task-history.component';
 
-interface MemberTaskColumn {
-  member: HouseholdMember | null;
-  tasks: Task[];
-}
-
-const frequencyOrder: { [key in Frequency]: number } = {
-  [Frequency.DAILY]: 1,
-  [Frequency.WEEKLY]: 2,
-  [Frequency.BIWEEKLY]: 3,
-  [Frequency.MONTHLY]: 4,
-  [Frequency.QUARTERLY]: 5,
-  [Frequency.BIYEARLY]: 6,
-  [Frequency.YEARLY]: 7,
-};
-const UNKNOWN_FREQUENCY_ORDER = Number.MAX_SAFE_INTEGER;
-
-export function sortArrayByFrequency<T>(
-  items: T[],
-  frequencyExtractor: (item: T) => Frequency | string | undefined | null
-): T[] {
-  const sortedItems = [...items];
-  sortedItems.sort((a, b) => {
-    const freqA = frequencyExtractor(a);
-    const freqB = frequencyExtractor(b);
-    const orderA = (freqA && frequencyOrder[freqA as Frequency] !== undefined)
-                    ? frequencyOrder[freqA as Frequency]
-                    : UNKNOWN_FREQUENCY_ORDER;
-    const orderB = (freqB && frequencyOrder[freqB as Frequency] !== undefined)
-                    ? frequencyOrder[freqB as Frequency]
-                    : UNKNOWN_FREQUENCY_ORDER;
-    return orderA - orderB;
-  });
-  return sortedItems;
-}
-
-interface TaskGroup {
+interface RoomGroup {
   room: string;
   tasks: Task[];
 }
@@ -83,59 +33,73 @@ interface TaskGroup {
     CommonModule,
     SharedModule,
     FormsModule,
-    AssigneeTaskListComponent,
     FrequencyPipe,
-    RoomPipe
+    RoomPipe,
+    MultiSelectModule,
+    CalendarModule,
+    DialogModule,
+    TaskHistoryComponent
   ],
   templateUrl: './tasks.component.html',
   styleUrls: ['./tasks.component.css'],
-  providers: [ConfirmationService, MessageService, DialogService] // Added DialogService
+  providers: [ConfirmationService, MessageService, DialogService]
 })
-export class TasksComponent implements OnInit {
-  // Occasions State
-  taskListOccasions: TaskListOccasion[] = [];
-  selectedOccasion: TaskListOccasion | null = null;
-  newListName: string = '';
-  householdMembers: HouseholdMember[] = [];
-  
-  // Library State (New)
+export class TasksComponent implements OnInit, OnDestroy {
   allTasks: Task[] = [];
-  filteredTasks: Task[] = [];
+  groupedTasks: RoomGroup[] = [];
+  householdMembers: HouseholdMember[] = [];
   taskSearchTerm: string = '';
+  filteredCount: number = 0; 
+
+  // Macros / Task Group State
+  groups: TaskGroup[] = [];
+  showGroupDialog: boolean = false;
+  isEditGroupMode: boolean = false;
+  editingGroupId: number | null = null;
+  newGroupName: string = '';
+  selectedTaskIdsForGroup: number[] = [];
+
+  showHistoryDialog: boolean = false;
+  selectedTaskIdForHistory: number | null = null;
+  selectedTaskTitleForHistory: string = '';
+
+  showTriggerDialog: boolean = false;
+  selectedGroupToTrigger: TaskGroup | null = null;
+  triggerDate: Date = new Date();
 
   ref: DynamicDialogRef | undefined;
   subscription: Subscription = new Subscription();
-  groupedTasks: TaskGroup[] = [];
-  filteredCount: number = 0; 
 
   constructor(
-    private taskListOccasionService: TaskListOccasionService,
-    private taskService: TaskService, // Added
+    private taskService: TaskService,
     private householdService: HouseholdService,
+    private taskGroupService: TaskGroupService,
     public dialogService: DialogService,
     private confirmationService: ConfirmationService,
     private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
-    this.loadData();
     this.subscription.add(this.householdService.household$.subscribe(h => {
         if(h) this.householdMembers = h.members;
     }));
-  }
-
-  loadData() {
-    this.loadOccasions();
     this.loadTasks();
+    this.loadGroups();
   }
 
-  loadOccasions() {
-    this.subscription.add(this.taskListOccasionService.list().subscribe(data => {
-      this.taskListOccasions = data;
-      if (this.selectedOccasion) {
-        this.selectedOccasion = data.find(o => o.id === this.selectedOccasion!.id) || null;
-      }
-    }));
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+    if (this.ref) this.ref.close();
+  }
+
+  // --- Task Library Logic ---
+  openTaskHistory(task: Task, event: Event) {
+    event.stopPropagation(); // Prevents card actions from conflicting
+    if (task.id) {
+      this.selectedTaskIdForHistory = task.id;
+      this.selectedTaskTitleForHistory = task.title || '';
+      this.showHistoryDialog = true;
+    }
   }
 
   loadTasks() {
@@ -145,10 +109,9 @@ export class TasksComponent implements OnInit {
     }));
   }
 
-filterTasks() {
+  filterTasks() {
     let tasksToGroup = this.allTasks;
 
-    // 1. Filter based on search
     if (this.taskSearchTerm) {
       const term = this.taskSearchTerm.toLowerCase();
       tasksToGroup = this.allTasks.filter(t => 
@@ -159,72 +122,36 @@ filterTasks() {
     
     this.filteredCount = tasksToGroup.length;
 
-    // 2. Group by Room
     const groups: { [key: string]: Task[] } = {};
     tasksToGroup.forEach(task => {
-        const roomKey = task.room || 'OTHER'; // Default grouping
+        const roomKey = task.room || 'OTHER';
         if (!groups[roomKey]) {
             groups[roomKey] = [];
         }
         groups[roomKey].push(task);
     });
 
-    // 3. Convert Map to Array and Sort
     this.groupedTasks = Object.keys(groups).map(room => ({
         room,
         tasks: groups[room]
     })).sort((a, b) => a.room.localeCompare(b.room));
   }
 
-  createTaskList() {
-    if (!this.newListName.trim()) return;
-    this.taskListOccasionService.create(this.newListName).subscribe(() => {
-      this.newListName = '';
-      this.loadOccasions();
-    });
-  }
-
-  deleteTaskList(occasion: TaskListOccasion, event: Event) {
-    event.stopPropagation();
-    this.confirmationService.confirm({
-        target: event.target as EventTarget,
-        message: `Are you sure you want to delete "${occasion.name}"?`,
-        header: 'Delete List',
-        icon: 'pi pi-exclamation-triangle',
-        acceptButtonStyleClass: "p-button-danger p-button-text",
-        rejectButtonStyleClass: "p-button-text p-button-text",
-        acceptIcon: "none",
-        rejectIcon: "none",
-        accept: () => {
-            this.taskListOccasionService.delete(occasion.id).subscribe(() => {
-                if (this.selectedOccasion?.id === occasion.id) {
-                    this.selectedOccasion = null;
-                }
-                this.loadOccasions();
-            });
-        }
-    });
-  }
-
-  // --- Task Library Actions ---
-  
   deleteGlobalTask(task: Task, event: Event) {
     event.stopPropagation();
     this.confirmationService.confirm({
         target: event.target as EventTarget,
-        message: `Delete task "${task.title}"? This will remove it from all assignments.`,
-        header: 'Delete Task',
+        message: `Voulez-vous vraiment supprimer "${task.title}"?`,
+        header: 'Supprimer la tâche',
         icon: 'pi pi-exclamation-triangle',
         acceptButtonStyleClass: "p-button-danger p-button-text",
         rejectButtonStyleClass: "p-button-text p-button-text",
-        acceptIcon: "none",
-        rejectIcon: "none",
         accept: () => {
             if (task.id) {
                 this.taskService.deleteTask(task.id).subscribe(() => {
-                    this.loadTasks(); // Reload global list
-                    this.loadOccasions(); // Reload occasions as they might be affected
-                    this.messageService.add({ severity: 'success', summary: 'Deleted', detail: 'Task removed' });
+                    this.loadTasks(); 
+                    this.loadGroups(); 
+                    this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Tâche retirée' });
                 });
             }
         }
@@ -233,7 +160,7 @@ filterTasks() {
 
   openCreateTaskDialog() {
     this.ref = this.dialogService.open(CreateTaskDialogComponent, {
-        header: 'Create New Task',
+        header: 'Créer une nouvelle tâche',
         width: '500px',
         contentStyle: { overflow: 'visible' },
         baseZIndex: 10000
@@ -241,107 +168,93 @@ filterTasks() {
 
     this.ref.onClose.subscribe((task: any) => {
         if (task) {
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Task created successfully' });
-            this.loadTasks(); // Refresh the library
+            this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Tâche créée!' });
+            this.loadTasks(); 
         }
     });
   }
 
   openEditTaskDialog(task: Task, event: Event) {
-    event.stopPropagation(); // Stop card click if necessary
-    
+    event.stopPropagation(); 
     this.ref = this.dialogService.open(CreateTaskDialogComponent, {
-        header: 'Edit Task',
+        header: 'Modifier la tâche',
         width: '500px',
         contentStyle: { overflow: 'visible' },
         baseZIndex: 10000,
-        data: { task: task } // Pass the task to edit
+        data: { task: task } 
     });
 
     this.ref.onClose.subscribe((result: any) => {
         if (result) {
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Task updated successfully' });
-            this.loadTasks(); // Refresh to show changes
-            this.loadOccasions(); // Refresh occasions in case task names/details changed there too
+            this.messageService.add({ severity: 'success', summary: 'Succès', detail: 'Tâche mise à jour!' });
+            this.loadTasks(); 
+            this.loadGroups(); 
         }
     });
   }
 
-  // --- Helpers ---
+  // --- Macro / Task Group Logic ---
 
-  selectOccasion(occasion: TaskListOccasion) {
-    this.selectedOccasion = occasion;
+  loadGroups() {
+    this.taskGroupService.getGroups().subscribe(groups => this.groups = groups);
   }
 
-  backToOverview() {
-    this.selectedOccasion = null;
+  openCreateGroup() {
+    this.isEditGroupMode = false;
+    this.editingGroupId = null;
+    this.newGroupName = '';
+    this.selectedTaskIdsForGroup = [];
+    this.showGroupDialog = true;
   }
 
-  getTasksForUser(userId: number): TaskAssignDto[] {
-    if (!this.selectedOccasion) return [];
-    return this.selectedOccasion.taskAssignments.filter(ta => ta.householdMemberDto.id === userId);
+  openEditGroup(group: TaskGroup) {
+    this.isEditGroupMode = true;
+    this.editingGroupId = group.id!;
+    this.newGroupName = group.name;
+    this.selectedTaskIdsForGroup = group.tasks.map(t => t.id);
+    this.showGroupDialog = true;
   }
 
-  getTaskCountForUserInOccasion(occasion: TaskListOccasion, userId: number): number {
-    return occasion.taskAssignments.filter(ta => ta.householdMemberDto.id === userId).length;
-  }
-
-
-openAssignDialog(member: HouseholdMember) {
-    if (!this.selectedOccasion) return;
-
-    // 1. Get IDs of tasks ALREADY assigned to this user (for pre-selection)
-    const userAssignments = this.getTasksForUser(member.id);
-    const existingTaskIds = userAssignments.map(a => a.task.id!);
-
-    // 2. Map of Task ID -> Member Name (for showing who else has the task)
-    // We iterate over ALL assignments in the occasion
-    const assignedToOthersMap: { [taskId: number]: string } = {};
-    this.selectedOccasion.taskAssignments.forEach(assignment => {
-        // If assigned to someone else, record it
-        if (assignment.householdMemberDto.id !== member.id && assignment.task.id) {
-            assignedToOthersMap[assignment.task.id] = assignment.householdMemberDto.name;
-        }
-    });
-
-    this.ref = this.dialogService.open(AssignTasksDialogComponent, {
-        header: `Assign Tasks to ${member.name}`,
-        width: '500px',
-        contentStyle: { overflow: 'auto' },
-        baseZIndex: 10000,
-        data: { 
-            assigneeName: member.name,
-            currentSelection: existingTaskIds, // Pass existing selection
-            assignedMap: assignedToOthersMap   // Pass info about others
-        }
-    });
-
-    this.ref.onClose.subscribe((resultSelection: number[]) => {
-              if (resultSelection) {
-                  const tasksToAdd = resultSelection.filter(id => !existingTaskIds.includes(id));
-                  const tasksToRemove = existingTaskIds.filter(id => !resultSelection.includes(id));
-                  
-                  const requests: any[] = [];
-                  tasksToAdd.forEach(taskId => {
-                    requests.push(this.taskListOccasionService.addTaskAssignment(this.selectedOccasion!.id, taskId, member.id));
-                  });             
-                  // 2. Build Remove Requests
-                  tasksToRemove.forEach(taskId => {
-                      // We need to find the specific assignment ID to delete it, or call an endpoint that takes occasionId + taskId + userId
-                      // Assuming your service supports removing by task ID for a user in a list
-                      requests.push(this.taskListOccasionService.removeTaskAssignment(this.selectedOccasion!.id, taskId, member.id));
-                  });             
-                  if (requests.length > 0) {
-                      forkJoin(requests).subscribe(() => {
-                        let detailMsg = '';
-                        if(tasksToAdd.length > 0) detailMsg += `Added ${tasksToAdd.length} tasks. `;
-                        if(tasksToRemove.length > 0) detailMsg += `Removed ${tasksToRemove.length} tasks.`;
-                      
-                        this.messageService.add({ severity: 'success', summary: 'Updated', detail: detailMsg });
-                        this.loadOccasions(); 
-                      });
-                  } 
-            }
+  saveGroup() {
+    if (this.isEditGroupMode && this.editingGroupId) {
+        this.taskGroupService.updateGroup(this.editingGroupId, this.newGroupName, this.selectedTaskIdsForGroup).subscribe(() => {
+            this.showGroupDialog = false;
+            this.loadGroups();
+            this.messageService.add({ severity: 'success', summary: 'Mis à jour', detail: 'Macro mise à jour avec succès' });
         });
-      }
+    } else {
+        this.taskGroupService.createGroup(this.newGroupName, this.selectedTaskIdsForGroup).subscribe(() => {
+            this.showGroupDialog = false;
+            this.loadGroups();
+            this.messageService.add({ severity: 'success', summary: 'Créé', detail: 'Macro créée avec succès' });
+        });
+    }
+  }
+
+  deleteGroup(id: number) {
+      this.confirmationService.confirm({
+          message: 'Voulez-vous supprimer cette macro ? (Les tâches ne seront pas supprimées)',
+          header: 'Confirmation',
+          icon: 'pi pi-info-circle',
+          accept: () => {
+              this.taskGroupService.deleteGroup(id).subscribe(() => this.loadGroups());
+          }
+      });
+  }
+
+  openTriggerDialog(group: TaskGroup) {
+      this.selectedGroupToTrigger = group;
+      this.triggerDate = new Date();
+      this.showTriggerDialog = true;
+  }
+
+  triggerGroup() {
+      if (!this.selectedGroupToTrigger || !this.selectedGroupToTrigger.id) return;
+      
+      this.taskGroupService.triggerGroup(this.selectedGroupToTrigger.id, this.triggerDate).subscribe(() => {
+          this.showTriggerDialog = false;
+          this.loadTasks(); 
+          this.messageService.add({ severity: 'success', summary: 'Déclenché!', detail: 'Toutes les tâches ont été reprogrammées.' });
+      });
+  }
 }

@@ -1,15 +1,35 @@
 package com.couple.taskmanager.model.dto;
 
-import com.couple.taskmanager.model.Task;
-import lombok.AllArgsConstructor;
+import com.couple.taskmanager.model.TaskHistory;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Date;
 
 @Data
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
 public class TaskHistoryDto {
-    private TaskDto task;
-    private List<TaskAssignmentDto> taskAssignments;
+    private Long id;
+    private Long taskId;
+    private Date completedDate;
+    private HouseholdMemberDto completedBy;
+
+    public TaskHistoryDto(TaskHistory history) {
+        this.id = history.getId();
+        this.taskId = history.getTask().getId();
+        this.completedDate = history.getCompletedDate();
+
+        if (history.getCompletedBy() != null) {
+            this.completedBy = new HouseholdMemberDto(
+                    history.getCompletedBy().getId(),
+                    history.getCompletedBy().getName(),
+                    history.getCompletedBy().getEmail(),
+                    history.getCompletedBy().getImageUrl(),
+                    history.getCompletedBy().getBirthDay(),
+                    null,
+                    history.getCompletedBy().getRewardColor(),
+                    history.getCompletedBy().getRewardPoints()
+            );
+        }
+    }
 }

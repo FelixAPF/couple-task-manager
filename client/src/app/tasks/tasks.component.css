@@ -19,6 +19,28 @@
     align-items: center;
     margin-bottom: 2rem;
 }
+/* Force the dialog content to not scroll and give calendar full room */
+:host ::ng-deep .p-dialog .p-dialog-content {
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+}
+
+/* Remove the fixed/max height PrimeNG sets on dialog content */
+:host ::ng-deep .p-dialog {
+    max-height: none !important;
+}
+
+/* Make inline calendar fill width and remove its own borders */
+:host ::ng-deep .p-dialog .p-datepicker.p-datepicker-inline {
+    width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+:host ::ng-deep .p-dialog .p-datepicker table {
+    width: 100% !important;
+}
 
 .page-title {
     margin: 0;

@@ -1,107 +1,99 @@
 <div class="container p-4 mx-auto flex flex-col flex-grow">
-
+  <p-toast position="bottom-center"></p-toast>
+  
   <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700" [formGroup]="formGroup">
     <div class="flex flex-wrap justify-center sm:justify-start gap-2">
       <p-button
-        (click)="startNewPeriod()"
-        icon="pi pi-calendar-plus"
-        [label]="'my-tasks.start-period' | translate"
-        styleClass="p-button-raised p-button-info"
-        pTooltip="Démarrer une nouvelle période de tâches assignées"
-        tooltipPosition="bottom"> 
-      </p-button>
-      <p-button
-        (click)="quickComplete()"
         [label]="'my-tasks.quick-complete' | translate"
         icon="pi pi-bolt"
         styleClass="p-button-raised p-button-secondary"
-        pTooltip="Accéder à la complétion rapide (si disponible)"
+        pTooltip="Accéder à la complétion rapide"
         tooltipPosition="bottom">
       </p-button> 
     </div>
 
     <div class="w-full sm:w-auto">
-      <p-select
+      <p-dropdown
         class="w-full"
-        [formControlName]="DISPLAY_DURATION.DISPLAY_DURATION"
+        formControlName="displayDuration"
         (onChange)="onFrequencySelectChange($event)"
         [options]="options"
         optionValue="value"
         optionLabel="label"
         appendTo="body"
-      ></p-select>
+      ></p-dropdown>
     </div>
   </div>
 
   <div class="flex justify-center items-center gap-3 mb-6">
     <h2 class="text-2xl font-semibold text-center text-surface-800 dark:text-surface-100">
-      {{'my-tasks.my-tasks'|translate : { assigneeName : selectedAssignee?.name || "" } }}
+      {{ 'my-tasks.my-tasks' | translate : { assigneeName : selectedAssignee?.name || "" } }}
     </h2>
-    <i
-    *ngIf="householdMembers && householdMembers.length > 1"
-      class="pi pi-users text-primary-500 dark:text-primary-400 cursor-pointer hover:text-primary-700 dark:hover:text-primary-300 transition-colors duration-200"
-      (click)="changeUser()"
-      style="font-size: 2rem"
-      pTooltip="Changer d'utilisateur"
-      tooltipPosition="top"
-    ></i>
   </div>
 
   <div *ngIf="!tasks || tasks.length === 0" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border border-dashed rounded-lg bg-surface-100 dark:bg-surface-800">
     <i class="pi pi-check-square mr-2 text-xl align-middle"></i>
-    <span>{{'my-tasks.no-tasks' | translate: {  assigneeName: selectedAssignee?.name || "" } }}</span>
+    <span>Aucune tâche à faire pour cette période !</span>
   </div>
-
-  <p-contextMenu #cm [model]="menuItems" appendTo="body" [global]="false"></p-contextMenu>
 
   <div class="flex flex-col gap-4 pb-16" *ngIf="tasks && tasks.length > 0">
     <div *ngFor="let task of tasks">
       <p-card 
-        (press)="onTaskMenu($event, task, cm)" 
-        (contextmenu)="onTaskMenu($event, task, cm)"
-        (click)="onCardClick($event)"
-        (pointerup)="onCardPointerUp()"
-        [styleClass]="'task-card shadow-md hover:shadow-lg transition-shadow duration-200 ' + (datePastDeadline(task.dueDate) ? 'border-l-4 border-red-500 dark:border-red-400' : 'border-l-4 border-primary-500 dark:border-primary-400')">
+        [styleClass]="'task-card shadow-md hover:shadow-lg transition-shadow duration-200 border-l-4 ' + (datePastDeadline(task.dueDate) ? 'border-red-500 dark:border-red-400' : 'border-primary-500 dark:border-primary-400')">
         <div class="flex items-center gap-4">
 
           <div class="flex-shrink-0">
             <img
-              [src]="task.householdMemberDto?.imageUrl || 'assets/placeholder.jpg'"
-              [alt]="'Photo de ' + task.householdMemberDto?.name"
+              *ngIf="task.assignee"
+              [src]="task.assignee.imageUrl || 'assets/placeholder.jpg'"
+              [alt]="'Photo de ' + task.assignee.name"
               class="w-12 h-12 rounded-full object-cover border-2 border-primary-500 dark:border-primary-400 shadow-sm"
               onError="this.src='assets/placeholder.jpg'"
-              pTooltip="{{task.householdMemberDto?.name}}"
+              pTooltip="{{task.assignee.name}}"
               tooltipPosition="top"
             />
+            <p-avatar 
+              *ngIf="!task.assignee" 
+              icon="pi pi-users" 
+              styleClass="w-12 h-12 text-xl bg-gray-200 text-gray-600" 
+              shape="circle"
+              pTooltip="Non assignée (Foyer)"
+              tooltipPosition="top">
+            </p-avatar>
           </div>
 
           <div class="flex-shrink-0 w-8 text-center">
              <i *ngIf="datePastDeadline(task.dueDate)"
                 class="pi pi-exclamation-triangle text-red-500 dark:text-red-400 text-2xl animate-pulse"
-                pTooltip="En retard!"
+                pTooltip="En retard !"
                 tooltipPosition="right">
              </i>
           </div>
 
           <div class="flex-grow min-w-0">
-            <p class="text-lg font-semibold text-surface-800 dark:text-surface-100 mb-1" [pTooltip]="task.taskTitle" tooltipPosition="top">{{ task.taskTitle }}</p>
+            <p class="text-lg font-semibold text-surface-800 dark:text-surface-100 mb-1" [pTooltip]="task.title" tooltipPosition="top">
+              {{ task.title }}
+            </p>
             <div class="text-sm text-surface-600 dark:text-surface-400 flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-1">
               <span class="flex items-center gap-1" pTooltip="Date limite" tooltipPosition="bottom">
                 <i class="pi pi-calendar text-primary-500 dark:text-primary-400"></i>
-                <span>{{ task.dueDate | date:'EEEE, dd MMMM yyyy' | titlecase }}</span>
+                <span>{{ task.dueDate | date:'EEEE, dd MMMM yyyy' }}</span>
               </span>
-              <span class="flex items-center gap-1" pTooltip="Pièce" tooltipPosition="bottom">
+              <span class="flex items-center gap-1" pTooltip="Pièce" tooltipPosition="bottom" *ngIf="task.room">
                 <i class="pi pi-map-marker text-primary-500 dark:text-primary-400"></i>
-                <span>{{ task.room | roomPipe }}</span>
-              </span>
-              <span class="flex items-center gap-1" pTooltip="Fréquence" tooltipPosition="bottom">
-                <i class="pi pi-sync text-primary-500 dark:text-primary-400"></i>
-                <span>{{ `FREQUENCY.${task.frequency}` | translate }}</span>
+                <span>{{ task.room }}</span>
               </span>
             </div>
           </div>
 
-          <div class="ml-auto flex-shrink-0">
+          <div class="ml-auto flex-shrink-0 flex gap-2">
+            <button pButton type="button"
+                    icon="pi pi-forward"
+                    class="p-button-rounded p-button-secondary p-button-text text-xl hover:bg-surface-100"
+                    (click)="skipTask(task)"
+                    pTooltip="Ignorer / Reporter"
+                    tooltipPosition="left">
+            </button>
             <button pButton type="button"
                     icon="pi pi-check-circle"
                     class="p-button-rounded p-button-success p-button-text text-2xl hover:bg-green-100 dark:hover:bg-green-900"
@@ -116,9 +108,5 @@
     </div>
   </div>
 
-  <p-confirmDialog [style]="{width: '50vw'}" [breakpoints]="{'1199px': '75vw', '575px': '90vw'}" appendTo="body"></p-confirmDialog>
-  <p-toast position="bottom-center"></p-toast>
-  
   <div class="pb-12"></div>
-
 </div>

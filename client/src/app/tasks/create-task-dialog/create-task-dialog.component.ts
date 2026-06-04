@@ -1,12 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ButtonModule } from 'primeng/button';
-import { DropdownModule } from 'primeng/dropdown';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
-import { InputTextModule } from 'primeng/inputtext';
 import { Task } from '../../model/task';
 import { TaskService } from '../../service/task-service.service';
+import { HouseholdService } from '../../service/household.service';
 import { SharedModule } from '../../shared.module';
 
 @Component({
@@ -19,6 +17,8 @@ import { SharedModule } from '../../shared.module';
 export class CreateTaskDialogComponent implements OnInit {
   task: Task = {};
   isEditMode: boolean = false;
+  assigneeUserId: number | null = null;
+  householdMembers: { label: string, value: number | null }[] = [];
   
   rooms = [
     { label: 'Cuisine', value: 'KITCHEN' },
@@ -46,23 +46,34 @@ export class CreateTaskDialogComponent implements OnInit {
     { label: 'Annuel', value: 'YEARLY' }
   ];
 
-  ngOnInit() {
-    // If a task is passed, we are in Edit Mode
-    if (this.config.data?.task) {
-        this.task = { ...this.config.data.task }; // Clone to avoid mutating parent list
-        this.isEditMode = true;
-    }
-  }
   constructor(
     private taskService: TaskService,
+    private householdService: HouseholdService,
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig
   ) {}
 
+  ngOnInit() {
+    // Load household members for the dropdown
+    this.householdService.retrieveHousehold().subscribe(h => {
+       this.householdMembers = [{ label: 'Non assignée (Tout le monde)', value: null }];
+       if (h && h.members) {
+           h.members.forEach(m => {
+               this.householdMembers.push({ label: m.name, value: m.id });
+           });
+       }
+    });
+
+    if (this.config.data?.task) {
+        this.task = { ...this.config.data.task }; 
+        this.isEditMode = true;
+        this.assigneeUserId = this.task.assignee ? this.task.assignee.id! : null;
+    }
+  }
+
   save() {
     if (this.task.title && this.task.frequency && this.task.room) {
-        // We assume the service handles the basic 'Task' object creation
-        this.taskService.saveTask({ task: this.task, assigneeUserId: null }).subscribe((createdTask) => {
+        this.taskService.saveTask({ task: this.task, assigneeUserId: this.assigneeUserId }).subscribe((createdTask) => {
             this.ref.close(createdTask);
         });
     }

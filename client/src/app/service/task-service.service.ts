@@ -58,12 +58,6 @@ export class TaskService implements OnDestroy {
     return this.http.put<Task>(`${this.baseUrl}/${task.id}`, task);
   }
 
-  completeTask(assignmentId: number): Observable<void>{
-    return this.http.post<void>(`${this.baseUrl}/complete-assignment/${assignmentId}`, {}).pipe(tap(() => {
-      this.confettiService.fireBasicConfetti();
-    }));
-  }
-
   deleteTask(id: number): Observable<void>{
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
@@ -86,5 +80,24 @@ export class TaskService implements OnDestroy {
   
   reassignTask(assignmentId: number, newAssigneeId: number): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/reassign/${assignmentId}`, newAssigneeId);
+  }
+
+getDashboardTasks(horizon: string = 'MONTH'): Observable<Task[]> {
+    return this.http.get<Task[]>(`${this.baseUrl}/dashboard?horizon=${horizon}`);
+  }
+
+  completeTask(taskId: number): Observable<Task> {
+    return this.http.post<Task>(`${this.baseUrl}/${taskId}/complete`, {});
+  }
+
+  skipTask(taskId: number): Observable<Task> {
+    return this.http.post<Task>(`${this.baseUrl}/${taskId}/skip`, {});
+  }
+
+  rescheduleTask(taskId: number, newDueDate: Date): Observable<Task> {
+    return this.http.put<Task>(`${this.baseUrl}/${taskId}/reschedule`, { newDueDate });
+  }
+  getTaskHistory(taskId: number): Observable<TaskHistoryDto[]> {
+    return this.http.get<TaskHistoryDto[]>(`${this.baseUrl}/${taskId}/history`);
   }
 }

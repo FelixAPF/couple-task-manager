@@ -1,7 +1,8 @@
-import { Task } from "./task";
-import { TaskAssignmentDto } from "./task-period";
+import { HouseholdMember } from "./household";
 
 export interface TaskHistoryDto {
-    task: Task;
-    taskAssignments: TaskAssignmentDto[];
+    id: number;
+    taskId: number;
+    completedDate: Date;
+    completedBy: HouseholdMember;
 }

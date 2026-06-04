@@ -15,4 +15,5 @@ public interface TaskHistoryRepository extends JpaRepository<TaskHistory, Long> 
 
     @Query("SELECT th FROM TaskHistory th WHERE th.completedBy.household.id = :householdId AND th.completedDate >= :startOfDay ORDER BY th.completedDate DESC")
     List<TaskHistory> findTodayByHousehold(@Param("householdId") Long householdId, @Param("startOfDay") Date startOfDay);
+    List<TaskHistory> findByCompletedByIdAndIsThankedTrueAndThankYouSeenFalse(Long userId);
 }

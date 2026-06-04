@@ -14,12 +14,14 @@ public class TaskHistoryDto {
     private String taskTitle;
     private Date completedDate;
     private HouseholdMemberDto completedBy;
+    private boolean isThanked;
 
     public TaskHistoryDto(TaskHistory history) {
         this.id = history.getId();
         this.taskId = history.getTask().getId();
         this.completedDate = history.getCompletedDate();
         this.taskTitle = history.getTask().getTitle();
+        this.isThanked = history.isThanked();
 
         if (history.getCompletedBy() != null) {
             this.completedBy = new HouseholdMemberDto(

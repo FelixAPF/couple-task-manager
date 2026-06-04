@@ -56,6 +56,18 @@ export class TaskService implements OnDestroy {
     return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 
+  sendThankYou(historyId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/history/${historyId}/thank`, {});
+  }
+
+  getUnseenThanks(): Observable<TaskHistoryDto[]> {
+    return this.http.get<TaskHistoryDto[]>(`${this.baseUrl}/history/unseen-thanks`);
+  }
+
+  markThanksAsSeen(): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/history/mark-thanks-seen`, {});
+  }
+
   retrieveTaskByAssignee(assigneeId: number, frequency: Frequency): Observable<TaskAssignmentDto[]> {
     const options = { params: new HttpParams().set('frequency', frequency) };
     const dueDate = addTimeToCurrentDate(new Date(), 0, 0, 1);

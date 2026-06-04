@@ -6,4 +6,5 @@ export interface TaskHistoryDto {
     taskTitle: string; // <-- Here is the missing piece!
     completedDate: Date;
     completedBy: HouseholdMember;
+    isThanked?: boolean;
 }

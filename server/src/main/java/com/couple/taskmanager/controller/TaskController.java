@@ -43,6 +43,21 @@ public class TaskController extends GenericController<Task, TaskDto, TaskService
         return service.getDashboardTasks(horizon, (CTMUser) userDetails);
     }
 
+    @PostMapping("/history/{historyId}/thank")
+    public void sendThankYou(@PathVariable Long historyId, @AuthenticationPrincipal UserDetails userDetails) {
+        service.sendThankYou(historyId, (CTMUser) userDetails);
+    }
+
+    @GetMapping("/history/unseen-thanks")
+    public List<TaskHistoryDto> getUnseenThanks(@AuthenticationPrincipal UserDetails userDetails) {
+        return service.getUnseenThanks((CTMUser) userDetails);
+    }
+
+    @PostMapping("/history/mark-thanks-seen")
+    public void markThanksAsSeen(@AuthenticationPrincipal UserDetails userDetails) {
+        service.markThanksAsSeen((CTMUser) userDetails);
+    }
+
     @PostMapping("/{taskId}/complete")
     public TaskDto completeTask(@PathVariable Long taskId, @AuthenticationPrincipal UserDetails userDetails) {
         return service.completeTask(taskId, (CTMUser) userDetails);

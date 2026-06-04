@@ -26,6 +26,12 @@ public class TaskHistory {
     @NonNull
     private Date completedDate;
 
+    @Column(name = "is_thanked")
+    private boolean isThanked = false;
+
+    @Column(name = "thank_you_seen")
+    private boolean thankYouSeen = false;
+
     public TaskHistory(Task task, CTMUser completedBy, @NonNull Date completedDate) {
         this.task = task;
         this.completedBy = completedBy;

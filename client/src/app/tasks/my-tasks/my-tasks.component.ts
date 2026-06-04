@@ -67,6 +67,41 @@ export class MyTasksComponent implements OnInit {
       }
       
       this.loadDashboardTasks();
+      this.checkForSurpriseThanks();
+    });
+  }
+
+
+  checkForSurpriseThanks() {
+    this.taskService.getUnseenThanks().subscribe(thanks => {
+      if (thanks && thanks.length > 0) {
+        // Build a dynamic message based on how many thanks they got
+        const message = thanks.length === 1 
+          ? `Votre partenaire vous remercie pour : ${thanks[0].taskTitle} !` 
+          : `Votre partenaire vous remercie pour ${thanks.length} tâches accomplies !`;
+
+        this.messageService.add({ severity: 'success', summary: '👋 Coucou !', detail: message, life: 5000 });
+
+        // 🎉 FIRE THE SURPRISE CONFETTI!
+        confetti({
+          particleCount: 200,
+          spread: 100,
+          origin: { y: 0.3 }, // Higher origin so it falls down over the screen
+          colors: ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#a855f7']
+        });
+
+        // Tell the server we saw it so it doesn't happen on every refresh
+        this.taskService.markThanksAsSeen().subscribe();
+      }
+    });
+  }
+
+  sendThankYou(log: TaskHistoryDto) {
+    if (log.isThanked) return;
+    
+    this.taskService.sendThankYou(log.id).subscribe(() => {
+      log.isThanked = true;
+      this.messageService.add({ severity: 'success', summary: 'Envoyé!', detail: 'Votre partenaire a été remercié.' });
     });
   }
 

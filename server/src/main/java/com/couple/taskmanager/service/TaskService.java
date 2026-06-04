@@ -24,6 +24,9 @@ public class TaskService implements IGenericService<Task, TaskDto> {
     private TaskHistoryRepository taskHistoryRepository;
 
     @Autowired
+    private FirebaseMessagingService pushNotificationService;
+
+    @Autowired
     private CTMUserService userService;
 
     // --- IGenericService Implementation ---
@@ -33,6 +36,37 @@ public class TaskService implements IGenericService<Task, TaskDto> {
         Task task = taskRepository.findByIdAndHouseholdId(id, householdId)
                 .orElseThrow(() -> new NoSuchElementException("No task with id " + id));
         return new TaskDto(task);
+    }
+
+    @Transactional
+    public void sendThankYou(Long historyId, CTMUser currentUser) {
+        TaskHistory history = taskHistoryRepository.findById(historyId)
+                .orElseThrow(() -> new NoSuchElementException("History log not found"));
+
+        // Prevent thanking yourself
+        if (history.getCompletedBy().getId().equals(currentUser.getId())) return;
+
+        history.setThanked(true);
+        history.setThankYouSeen(false);
+        taskHistoryRepository.save(history);
+
+        // Fire off the Push Notification!
+        String title = "👋 " + currentUser.getName() + " vous remercie !";
+        String body = "Merci beaucoup d'avoir fait : " + history.getTask().getTitle();
+        pushNotificationService.sendNotificationToUser(history.getCompletedBy(), title, body);
+        // Note: adjust the method name above if your PushNotificationService uses a slightly different signature!
+    }
+
+    public List<TaskHistoryDto> getUnseenThanks(CTMUser user) {
+        return taskHistoryRepository.findByCompletedByIdAndIsThankedTrueAndThankYouSeenFalse(user.getId())
+                .stream().map(TaskHistoryDto::new).toList();
+    }
+
+    @Transactional
+    public void markThanksAsSeen(CTMUser user) {
+        List<TaskHistory> unseen = taskHistoryRepository.findByCompletedByIdAndIsThankedTrueAndThankYouSeenFalse(user.getId());
+        unseen.forEach(h -> h.setThankYouSeen(true));
+        taskHistoryRepository.saveAll(unseen);
     }
 
     @Override

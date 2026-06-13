@@ -73,20 +73,40 @@ public class FirebaseMessagingService {
                 .collect(Collectors.toList());
 
         if (tokens.isEmpty()) return;
-
         MulticastMessage message = MulticastMessage.builder()
                 .setNotification(com.google.firebase.messaging.Notification.builder()
                         .setTitle(title)
                         .setBody(body)
                         .build())
-                // We add data payload so the phone can also handle deep linking if needed
+                // Explicitly set Android config for Samsung / Android 13+ devices
+                .setAndroidConfig(AndroidConfig.builder()
+                        .setPriority(AndroidConfig.Priority.HIGH)
+                        .setNotification(AndroidNotification.builder()
+                                .setDefaultSound(true)
+                                .setDefaultVibrateTimings(true)
+                                .build())
+                        .build())
                 .putData("type", type)
                 .putData("referenceId", referenceId != null ? referenceId.toString() : "")
                 .addAllTokens(tokens)
                 .build();
-
         try {
-            FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+
+            // Clean up ghost tokens from uninstalled apps
+            if (response.getFailureCount() > 0) {
+                List<SendResponse> responses = response.getResponses();
+                for (int i = 0; i < responses.size(); i++) {
+                    if (!responses.get(i).isSuccessful()) {
+                        String errorCode = responses.get(i).getException().getMessagingErrorCode().name();
+                        if ("UNREGISTERED".equals(errorCode) || "INVALID_ARGUMENT".equals(errorCode)) {
+                            // Create a deleteByToken method in your DeviceTokenRepository
+                            String deadToken = tokens.get(i);
+                            tokenRepository.deleteByToken(deadToken);
+                        }
+                    }
+                }
+            }
         } catch (FirebaseMessagingException e) {
             e.printStackTrace();
         }

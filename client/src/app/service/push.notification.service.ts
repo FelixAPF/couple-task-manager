@@ -15,12 +15,12 @@ export class PushNotificationService {
 
   public initPush() {
     if (Capacitor.isNativePlatform()) {
-      this.register();
       this.addListeners();
+      this.register();
     }
   }
 
-  private async register() {
+private async register() {
     let permStatus = await PushNotifications.checkPermissions();
 
     if (permStatus.receive === 'prompt') {
@@ -28,6 +28,16 @@ export class PushNotificationService {
     }
 
     if (permStatus.receive === 'granted') {
+      // Explicitly create the channel for modern Android OS to ensure delivery
+      await PushNotifications.createChannel({
+        id: 'default',
+        name: 'Default Notifications',
+        description: 'General app notifications',
+        importance: 5, // 5 = HIGH importance (wakes screen)
+        visibility: 1, // 1 = VISIBLE on lock screen
+        vibration: true
+      });
+
       await PushNotifications.register();
     }
   }

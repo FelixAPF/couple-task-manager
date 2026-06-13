@@ -10,6 +10,7 @@ export interface Task {
     startDate?: Date;
     dueDate?: Date;
     assignee?: HouseholdMember | null; // null = unassigned
+    doNotify?: boolean;
 }
 
 export interface TaskCreationRqst {

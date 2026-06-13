@@ -3,16 +3,19 @@ package com.couple.taskmanager.service;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.*;
 import com.couple.taskmanager.model.dto.*;
+import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.TaskHistoryRepository;
 import com.couple.taskmanager.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 @Service
 public class TaskService implements IGenericService<Task, TaskDto> {
@@ -25,6 +28,9 @@ public class TaskService implements IGenericService<Task, TaskDto> {
 
     @Autowired
     private FirebaseMessagingService pushNotificationService;
+
+    @Autowired
+    private HouseholdRepository householdRepository;
 
     @Autowired
     private CTMUserService userService;
@@ -146,10 +152,32 @@ public class TaskService implements IGenericService<Task, TaskDto> {
         Task task = taskRepository.findByIdAndHouseholdId(taskId, user.getHousehold().getId())
                 .orElseThrow(() -> new NoSuchElementException("Task not found"));
 
+        task.setNotified(false);
+
         taskHistoryRepository.save(new TaskHistory(task, user, new Date()));
 
         task.setDueDate(calculateNextDueDate(new Date(), task.getFrequency()));
         return new TaskDto(taskRepository.save(task));
+    }
+
+    @Scheduled(cron = "0 0 7 * * *", zone = "America/Toronto")
+    public void notifyScheduledTaskDue(){
+        ZoneId torontoZone = ZoneId.of("America/Toronto");
+        ZonedDateTime nowInToronto = ZonedDateTime.now(torontoZone);
+
+        Instant endOfToday = nowInToronto.toLocalDate()
+                .atTime(LocalTime.MAX)
+                .atZone(torontoZone)
+                .toInstant();
+
+        List<Task> allTaskDue = taskRepository.findAllTaskDue(endOfToday);
+        allTaskDue.forEach((task) -> {
+            String title = "Tâche due aujourd'hui";
+            String description = "N'oubliez pas de faire " + task.getTitle() + " aujourd'hui";
+            boolean isAssigned = task.getAssignee() != null;
+            List<CTMUser> assignedUsers = isAssigned ? Collections.singletonList(task.getAssignee()) : householdRepository.findUsersByHouseholdId(task.getHousehold().getId());
+            pushNotificationService.sendNotificationToUsers(assignedUsers, title, description);
+        });
     }
 
     @Transactional

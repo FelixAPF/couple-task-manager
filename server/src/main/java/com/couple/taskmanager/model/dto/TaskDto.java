@@ -26,6 +26,8 @@ public class TaskDto {
     private Date dueDate;
     private HouseholdMemberDto assignee;
 
+    private Boolean doNotify;
+
     public TaskDto(Task task) {
         this.id = task.getId();
         this.title = task.getTitle();
@@ -34,6 +36,7 @@ public class TaskDto {
         this.room = task.getRoom();
         this.startDate = task.getStartDate();
         this.dueDate = task.getDueDate();
+        this.doNotify = task.isDoNotify();
 
         CTMUser user = task.getAssignee();
         if (user != null) {

@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,4 +24,7 @@ public interface HouseholdRepository extends JpaRepository<Household, Long> {
     @Override // Good practice to add Override if redefining a base interface method
     @EntityGraph(attributePaths = {"users"}) // Specify the relationship to fetch
     Optional<Household> findById(Long id);
+
+    @Query("SELECT u FROM CTMUser u WHERE u.household.id = :id")
+    List<CTMUser> findUsersByHouseholdId(Long id);
 }

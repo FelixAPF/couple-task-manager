@@ -25,6 +25,10 @@
             <label class="label-bold">Pièce</label>
             <p-dropdown [options]="rooms" [(ngModel)]="task.room" placeholder="Sélectionner" appendTo="body" styleClass="full-width"></p-dropdown>
         </div>
+        <div class="form-group half-width">
+            <label class="label-bold">Notifier l'assigné</label>
+            <p-checkbox  [(ngModel)]="task.doNotify" [binary]="true" placeholder="Sélectionner" appendTo="body" styleClass="full-width"></p-checkbox>
+        </div>
     </div>
 
     <div class="dialog-footer">

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.*;
 
 @Repository
@@ -17,6 +18,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query("SELECT t FROM Task t WHERE t.id = :taskId AND t.household.id = :householdId")
     Optional<Task> findByIdAndHouseholdId(@Param("taskId")Long taskId,@Param("householdId") Long householdId);
+
+    @Query("SELECT t FROM Task t WHERE t.dueDate <= :now AND t.isNotified = false AND t.doNotify = true")
+    List<Task> findAllTaskDue(@Param("now") Instant now);
 
     @Query("DELETE FROM Task t WHERE t.id = :taskId AND t.household.id = :householdId")
     void deleteByIdAndHouseholdId(@Param("taskId")Long taskId,@Param("householdId") Long householdId);

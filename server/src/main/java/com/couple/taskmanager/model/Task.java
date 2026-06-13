@@ -34,6 +34,14 @@ public class Task {
     private Date startDate;
     private Date dueDate;
 
+    @Column(columnDefinition="BOOLEAN DEFAULT false")
+    @NonNull
+    private boolean isNotified;
+
+    @Column(columnDefinition="BOOLEAN DEFAULT false")
+    @NonNull
+    private boolean doNotify;
+
     @ManyToOne
     @JoinColumn(name = "assignee_id")
     @JsonBackReference("user-assigned-tasks")

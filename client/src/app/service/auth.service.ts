@@ -5,6 +5,7 @@ import { environment } from '../environment';
 import { BehaviorSubject, EMPTY, Observable, Subscription, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { HouseholdService } from './household.service';
+import { PushNotificationService } from './push.notification.service';
 
 interface AuthResponse {
   token: string;
@@ -28,7 +29,7 @@ export class AuthService {
 
   private router = inject(Router); // Inject Router
 
-  constructor(private http: HttpClient, private householdService: HouseholdService) { }
+  constructor(private http: HttpClient, private householdService: HouseholdService,private pushNotificationService: PushNotificationService) { }
 
   // Helper to check if a token exists in localStorage
   private hasToken(): boolean {
@@ -56,6 +57,7 @@ login(authRequest: AuthRequest): Observable<AuthResponse> {
           
           this.subscription.add(this.householdService.retrieveHousehold().subscribe());
           this.isLoggedInSubject.next(true);
+          
         } else {
           this.isLoggedInSubject.next(false);
         }

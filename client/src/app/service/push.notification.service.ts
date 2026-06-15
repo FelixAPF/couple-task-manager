@@ -44,10 +44,13 @@ private async register() {
 
 private addListeners() {
     PushNotifications.addListener('registration', token => {
-      console.log('Push Token Received:', token.value);
-      this.fcmToken = token.value; // Always cache it!
+      console.log('Push Token Received from OS:', token.value);
       
-      // NEW: Only send automatically on app load if an auth token already exists
+      // 1. Save it to local storage so it survives app restarts before login
+      localStorage.setItem('pending_fcm_token', token.value);
+      this.fcmToken = token.value; 
+
+      // 2. ONLY send it now if they are ALREADY logged in (app reload scenario)
       if (localStorage.getItem('authToken')) {
          this.sendTokenToBackend(); 
       }
@@ -57,19 +60,33 @@ private addListeners() {
       console.error('Registration error: ', err.error);
     });
   }
+public sendTokenToBackend() {
+  const tokenToSend = this.fcmToken || localStorage.getItem('pending_fcm_token');
+  const authToken = localStorage.getItem('authToken');
 
-  // Call this method AFTER login
-  public sendTokenToBackend() {
-    if (this.fcmToken) {
-      console.log('Sending cached token to backend...');
-      // Ensure the string is sent as a simple string or JSON depending on your backend
-      // Based on your Controller: public ResponseEntity<Void> registerToken(@RequestBody String token)
-      // You might need to send it as a raw string or wrapper object. 
-      // Let's assume raw string for now based on your previous code.
-      this.http.post(`${environment.apiUrl}api/notifications/token`, this.fcmToken).subscribe({
-        next: () => console.log('Token sent to backend successfully'),
-        error: (err) => console.error('Failed to send token (likely not logged in):', err)
-      });
-    }
+  console.log('sendTokenToBackend called:', { 
+    hasFcmToken: !!this.fcmToken, 
+    hasPendingToken: !!localStorage.getItem('pending_fcm_token'),
+    hasAuthToken: !!authToken,
+    tokenToSend: tokenToSend?.substring(0, 20) + '...'
+  });
+
+  if (!tokenToSend) {
+    console.warn('No FCM token available yet — will retry after registration');
+    return;
   }
+
+  if (!authToken) {
+    console.warn('No auth token — FCM token stored in pending, will send after login');
+    return;
+  }
+
+  this.http.post(`${environment.apiUrl}notifications/token`, tokenToSend).subscribe({
+    next: () => {
+      console.log('✅ FCM token saved to backend');
+      localStorage.removeItem('pending_fcm_token');
+    },
+    error: (err) => console.error('❌ Failed to send FCM token:', err.status, err.message)
+  });
+}
 }

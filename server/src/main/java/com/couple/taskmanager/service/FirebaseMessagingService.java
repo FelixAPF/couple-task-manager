@@ -78,14 +78,17 @@ public class FirebaseMessagingService {
                         .setTitle(title)
                         .setBody(body)
                         .build())
-                // Explicitly set Android config for Samsung / Android 13+ devices
                 .setAndroidConfig(AndroidConfig.builder()
                         .setPriority(AndroidConfig.Priority.HIGH)
+                        .setDirectBootOk(true) // ← deliver even before device unlock
                         .setNotification(AndroidNotification.builder()
+                                .setChannelId("default") // ← MUST match your Capacitor channel id
                                 .setDefaultSound(true)
                                 .setDefaultVibrateTimings(true)
+                                .setPriority(AndroidNotification.Priority.MAX) // ← MAX wakes screen
                                 .build())
                         .build())
+                // Keep data payload small and separate
                 .putData("type", type)
                 .putData("referenceId", referenceId != null ? referenceId.toString() : "")
                 .addAllTokens(tokens)

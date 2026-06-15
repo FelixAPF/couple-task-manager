@@ -42,11 +42,15 @@ private async register() {
     }
   }
 
-  private addListeners() {
+private addListeners() {
     PushNotifications.addListener('registration', token => {
       console.log('Push Token Received:', token.value);
-      this.fcmToken = token.value; // Cache it!
-      this.sendTokenToBackend();   // Try sending it immediately
+      this.fcmToken = token.value; // Always cache it!
+      
+      // NEW: Only send automatically on app load if an auth token already exists
+      if (localStorage.getItem('authToken')) {
+         this.sendTokenToBackend(); 
+      }
     });
 
     PushNotifications.addListener('registrationError', err => {

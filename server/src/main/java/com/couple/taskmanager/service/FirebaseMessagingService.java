@@ -111,10 +111,17 @@ public class FirebaseMessagingService {
             e.printStackTrace();
         }
     }
-
     public void saveToken(CTMUser user, String token) {
         String cleanToken = token.replace("\"", "");
-        if (tokenRepository.findByToken(cleanToken).isEmpty()) {
+        var existingTokenOpt = tokenRepository.findByToken(cleanToken);
+        if (existingTokenOpt.isPresent()) {
+            DeviceToken existingToken = existingTokenOpt.get();
+            if (!existingToken.getUser().getId().equals(user.getId())) {
+                existingToken.setUser(user);
+                tokenRepository.save(existingToken);
+            }
+        } else {
+
             DeviceToken deviceToken = new DeviceToken();
             deviceToken.setUser(user);
             deviceToken.setToken(cleanToken);

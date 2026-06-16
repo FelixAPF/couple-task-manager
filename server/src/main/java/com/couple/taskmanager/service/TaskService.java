@@ -176,7 +176,15 @@ public class TaskService implements IGenericService<Task, TaskDto> {
             String description = "N'oubliez pas de faire " + task.getTitle() + " aujourd'hui";
             boolean isAssigned = task.getAssignee() != null;
             List<CTMUser> assignedUsers = isAssigned ? Collections.singletonList(task.getAssignee()) : householdRepository.findUsersByHouseholdId(task.getHousehold().getId());
-            pushNotificationService.sendNotificationToUsers(assignedUsers, title, description);
+            Household byId = householdRepository.findById(task.getHousehold().getId()).orElse(null);
+            if (byId == null) return;
+            if(isAssigned){
+                System.out.println("PUSHING TO single user" + task.getAssignee().getName());
+                pushNotificationService.sendNotificationToUser(task.getAssignee(),title,description);
+            } else {
+                System.out.println("pushing to multiple users " + byId.getUsers().size());
+                byId.getUsers().forEach((user -> pushNotificationService.sendNotificationToUser(user, title, description)));
+            }
         });
     }
 

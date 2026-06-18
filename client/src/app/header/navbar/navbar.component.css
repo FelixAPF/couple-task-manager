@@ -2,8 +2,7 @@
 
 .navbar-inner-container {
   /* Apply padding ONLY to the top, using the safe area inset */
-  padding-top: env(safe-area-inset-top, 0px);
-
+padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
   /* Ensure it takes full dimensions */
   width: 100%;
   height: 100%;

@@ -1,4 +1,7 @@
 <p-toast></p-toast>
+<div class="mb-4" *ngIf="step > 1">
+   <button pButton pRipple icon="pi pi-arrow-left" class="p-button-rounded p-button-text p-button-secondary" (click)="goBack()" aria-label="Retour"></button>
+</div>
 <div class="flex flex-col gap-4 p-4 max-w-4xl mx-auto pb-24">
   <div *ngIf="loading" class="flex flex-col items-center justify-center p-8 gap-4">
     <i class="pi pi-spin pi-spinner text-4xl text-primary-500"></i>
@@ -95,7 +98,6 @@
             <span class="text-surface-500 font-bold text-sm">%</span>
           </div>
         </div>
-
         <button pButton icon="pi pi-plus" class="p-button-rounded p-button-outlined p-button-sm p-button-secondary" (click)="openAddPerson()" pTooltip="Ajouter une personne"></button>
       </div>
 
@@ -146,6 +148,13 @@
                <input type="number" class="p-inputtext w-24 text-right font-bold text-lg text-primary-700" [(ngModel)]="receiptTax" placeholder="0.00">
            </div>
        </div>
+       
+        <button pButton pRipple 
+            label="Back to Editing" 
+            icon="pi pi-arrow-left" 
+            class="p-button-outlined p-button-secondary"
+            (click)="goBackToEditing()">
+        </button>
        <button pButton label="Calculer les totaux" icon="pi pi-calculator" class="p-button-primary p-button-lg w-full sm:w-auto shadow-md hover:shadow-lg transition-all" (click)="calculateTotals()"></button>
     </div>
 
@@ -187,8 +196,21 @@
       </div>
     </div>
     
-    <div class="flex justify-end gap-3 mt-4">
-      <button pButton [label]="currentReceipt.status === 'COMPLETED' ? 'Mettre à jour la facture' : 'Terminer et Finaliser'" icon="pi pi-check" class="p-button-success p-button-lg shadow-md hover:shadow-lg transition-all" (click)="saveReceipt()"></button>
+    <div class="flex justify-between items-center mt-6">
+        
+        <button pButton pRipple 
+                label="Back to Editing" 
+                icon="pi pi-arrow-left" 
+                class="p-button-outlined p-button-secondary"
+                (click)="goBackToEditing()">
+        </button>
+
+        <button pButton pRipple 
+                label="Save Receipt" 
+                icon="pi pi-check" 
+                class="p-button-primary"
+                (click)="saveReceipt()">
+        </button>
     </div>
   </div>
 </div>

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, NgZone, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { Receipt, ReceiptItem } from '../model/receipt';
@@ -26,10 +26,10 @@ export interface Splitter {
   templateUrl: './recipe-splitter.component.html',
   providers: [MessageService]
 })
-export class ReceiptSplitterComponent implements OnInit {
+export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   step: number = 1;
   members: HouseholdMember[] = [];
-  activeSplitters: Splitter[] = []; // Unified list of household members + extra people
+  activeSplitters: Splitter[] = []; 
   
   currentReceipt: Receipt = this.getEmptyReceipt();
   splitPercentages: Record<number, number> = {};
@@ -42,18 +42,23 @@ export class ReceiptSplitterComponent implements OnInit {
   showAddPersonDialog: boolean = false;
   newPersonName: string = '';
 
+  // --- Browser History Trap Variables ---
+  private trapActive: boolean = false;
+  private isSkippingPop: boolean = false;
+  isViewingPastReceipt: boolean = false;
+
   constructor(
     private householdService: HouseholdService,
     private receiptService: ReceiptService,
-    private messageService: MessageService
+    private messageService: MessageService, 
+    private location: Location,
+    private zone: NgZone
   ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.householdService.retrieveHousehold().subscribe((h: Household | null) => {
-      // FIX: We no longer check for h.id so this executes perfectly!
       if (h) {
         this.loadSavedReceipts();
-
         if (h.members && h.members.length > 0) {
           this.members = h.members;
           this.resetToHouseholdSplitters();
@@ -61,6 +66,79 @@ export class ReceiptSplitterComponent implements OnInit {
       }
     });
   }
+
+  ngOnDestroy() {
+    // Crucial: Clear the browser trap if the user uses the navigation bar to leave the page
+    if (this.trapActive) {
+      this.isSkippingPop = true;
+      history.back(); 
+    }
+  }
+
+  // --- BROWSER HISTORY TRAP LOGIC --- //
+
+  // Pushes a dummy state to browser history to catch swipes/back buttons
+  private trapBrowserBackButton(): void {
+    if (!this.trapActive) {
+      history.pushState({ wizardTrap: true }, '', location.href);
+      this.trapActive = true;
+    }
+  }
+
+  // Silently removes the dummy state when we are done saving
+  private releaseTrap(): void {
+    if (this.trapActive) {
+      this.isSkippingPop = true;
+      history.back(); 
+      this.trapActive = false;
+    }
+  }
+
+  // Listens to Swipes, Chrome Back Arrow, and Android Hardware Back
+  @HostListener('window:popstate', ['$event'])
+  onPopState(event: Event): void {
+    if (this.isSkippingPop) {
+      this.isSkippingPop = false; // Ignore our own manual silent pop
+      return;
+    }
+
+    if (this.trapActive) {
+      this.trapActive = false; // Browser popped it for us
+      
+      this.zone.run(() => {
+        if (this.isViewingPastReceipt) {
+           // If they were just looking at an old receipt, exit straight to step 1
+           this.step = 1;
+           this.isViewingPastReceipt = false;
+        } else if (this.step > 1) {
+           // If in wizard, go back 1 step
+           this.step--;
+           if (this.step > 1) {
+              this.trapBrowserBackButton(); // Re-arm the trap for the next back swipe
+           }
+        }
+      });
+    }
+  }
+
+  // --- UI NAVIGATION METHODS --- //
+
+  goBack(): void {
+    if (this.trapActive) {
+      // Trigger the native back event which executes onPopState flawlessly
+      history.back();
+    } else {
+      this.location.back();
+    }
+  }
+
+  goBackToEditing(): void {
+    this.step = 2; 
+    // Notice we do NOT release the trap here. The user is still in the wizard, 
+    // so if they swipe back from step 2, they correctly go to step 1!
+  }
+
+  // --- EXISTING LOGIC --- //
 
   getEmptyReceipt(): Receipt {
     return { 
@@ -111,6 +189,8 @@ export class ReceiptSplitterComponent implements OnInit {
             assignmentType: 'grocery'
           }));
           this.step = 2;
+          this.isViewingPastReceipt = false;
+          this.trapBrowserBackButton(); // Arm trap
           this.loading = false;
         },
         error: (err) => {
@@ -131,6 +211,7 @@ export class ReceiptSplitterComponent implements OnInit {
 
   nextToCategorization(): void {
     this.step = 3;
+    this.trapBrowserBackButton();
   }
 
   markAllAsGrocery(): void {
@@ -144,7 +225,6 @@ export class ReceiptSplitterComponent implements OnInit {
     }
   }
 
-  // Auto-adjusts the other person if there are exactly 2 people
   onSplitChange(changedId: number, newValue: number): void {
     if (newValue === null || newValue === undefined) return;
     this.splitPercentages[changedId] = newValue;
@@ -164,7 +244,6 @@ export class ReceiptSplitterComponent implements OnInit {
 
   confirmAddPerson(): void {
     if (this.newPersonName.trim()) {
-      // Create a temporary negative ID for the extra person
       const newId = -1 * (Math.floor(Math.random() * 100000) + 1);
       this.activeSplitters.push({
         id: newId,
@@ -209,19 +288,17 @@ export class ReceiptSplitterComponent implements OnInit {
 
     this.currentReceipt.totals = { grocery: this.groceryTotal };
 
-    // Save extra people's names and split percentages into the DB
     this.activeSplitters.forEach(s => {
       if (s.isExtra) {
          this.currentReceipt.totals[`EXTRA_${s.id}_${s.name}`] = this.memberTotals[s.id];
       } else {
          this.currentReceipt.totals[s.id.toString()] = this.memberTotals[s.id];
       }
-      
-      // Save the custom percentages so they restore properly
       this.currentReceipt.totals[`SPLIT_PCT_${s.id}`] = this.splitPercentages[s.id];
     });
 
     this.step = 4;
+    this.trapBrowserBackButton();
   }
 
   getGrandTotal(): number {
@@ -235,7 +312,7 @@ export class ReceiptSplitterComponent implements OnInit {
     if (receipt.totals) {
       Object.keys(receipt.totals).forEach(key => {
         if (key.startsWith('EXTRA_')) {
-          const parts = key.split('_'); // EXTRA_-12345_Name
+          const parts = key.split('_'); 
           const id = parseInt(parts[1], 10);
           const name = parts.slice(2).join('_');
           if (!this.activeSplitters.find(s => s.id === id)) {
@@ -244,7 +321,6 @@ export class ReceiptSplitterComponent implements OnInit {
         }
       });
 
-      // Restore any custom split percentages
       let hasSavedPcts = false;
       this.activeSplitters.forEach(s => {
         const savedPct = receipt.totals[`SPLIT_PCT_${s.id}`];
@@ -254,7 +330,6 @@ export class ReceiptSplitterComponent implements OnInit {
         }
       });
 
-      // Only recalculate evenly if there were no saved percentages
       if (!hasSavedPcts) {
         this.recalculateEvenSplits();
       }
@@ -265,6 +340,8 @@ export class ReceiptSplitterComponent implements OnInit {
     this.currentReceipt = JSON.parse(JSON.stringify(receipt));
     this.reconstructExtrasFromReceipt(this.currentReceipt);
     this.step = 3; 
+    this.isViewingPastReceipt = false;
+    this.trapBrowserBackButton();
   }
 
   viewReceipt(receipt: Receipt): void {
@@ -281,6 +358,8 @@ export class ReceiptSplitterComponent implements OnInit {
     });
 
     this.step = 4; 
+    this.isViewingPastReceipt = true;
+    this.trapBrowserBackButton();
   }
 
   saveDraft(): void {
@@ -302,12 +381,14 @@ export class ReceiptSplitterComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        this.messageService.add({severity:'success', summary:'Succès', detail: successMessage});
+        this.releaseTrap(); // Clear the trap so they can exit naturally now
         this.step = 1;
+        this.isViewingPastReceipt = false;
         this.receiptTax = 0;
         this.currentReceipt = this.getEmptyReceipt();
         this.resetToHouseholdSplitters();
         this.loadSavedReceipts();
+        this.messageService.add({severity:'success', summary:'Succès', detail: successMessage});
         this.loading = false;
       },
       error: () => {

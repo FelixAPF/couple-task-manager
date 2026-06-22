@@ -1,11 +1,13 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { Task } from '../../model/task';
 import { TaskService } from '../../service/task-service.service';
 import { HouseholdService } from '../../service/household.service';
 import { SharedModule } from '../../shared.module';
+import { ProcedureService } from '../../service/procedure.service';
+import { Procedure } from '../../model/procedure';
 
 @Component({
   selector: 'app-create-task-dialog',
@@ -15,10 +17,12 @@ import { SharedModule } from '../../shared.module';
   styleUrls: ['./create-task-dialog.component.css']
 })
 export class CreateTaskDialogComponent implements OnInit {
-  task: Task = {};
+  task: Task = { title: '' };
   isEditMode: boolean = false;
   assigneeUserId: number | null = null;
   householdMembers: { label: string, value: number | null }[] = [];
+  procedures: Procedure[] = [];
+  procedureId: number | null = null;
   
   rooms = [
     { label: 'Cuisine', value: 'KITCHEN' },
@@ -49,12 +53,12 @@ export class CreateTaskDialogComponent implements OnInit {
   constructor(
     private taskService: TaskService,
     private householdService: HouseholdService,
+    private procedureService: ProcedureService,
     public ref: DynamicDialogRef,
     public config: DynamicDialogConfig
   ) {}
 
   ngOnInit() {
-    // Load household members for the dropdown
     this.householdService.retrieveHousehold().subscribe(h => {
        this.householdMembers = [{ label: 'Non assignée (Tout le monde)', value: null }];
        if (h && h.members) {
@@ -62,6 +66,10 @@ export class CreateTaskDialogComponent implements OnInit {
                this.householdMembers.push({ label: m.name, value: m.id });
            });
        }
+    });
+
+    this.procedureService.getProcedures().subscribe(procs => {
+      this.procedures = procs;
     });
 
     if (this.config.data?.task) {
@@ -73,7 +81,8 @@ export class CreateTaskDialogComponent implements OnInit {
 
   save() {
     if (this.task.title && this.task.frequency && this.task.room) {
-        this.taskService.saveTask({ task: this.task, assigneeUserId: this.assigneeUserId }).subscribe((createdTask) => {
+        this.taskService.saveTask({ task: this.task, procedureId: this.procedureId, assigneeUserId: this.assigneeUserId }).subscribe((createdTask) => {
+          console.log("SAVED TASK IS ", this.task);
             this.ref.close(createdTask);
         });
     }

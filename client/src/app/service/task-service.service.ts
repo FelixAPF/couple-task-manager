@@ -17,11 +17,11 @@ export class TaskService implements OnDestroy {
   constructor(private http: HttpClient, private confettiService: ConfettiService) { }
   tasks: Observable<Task[]> = of([]);
 
-  
+
   getTaskAssignmentsByDate(completedDate: Date) {
     return this.http.get<TaskAssignmentDto[]>(`${this.baseUrl}/by-date/${completedDate}`);
   }
-  
+
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
@@ -75,7 +75,7 @@ export class TaskService implements OnDestroy {
   }
 
   quickComplete(taskId: number, assigneeId: number): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/quick-complete/${taskId}`,  ({ taskId, assigneeId })).pipe(tap(() => {
+    return this.http.post<void>(`${this.baseUrl}/${taskId}/complete`,  ({ taskId, assigneeId })).pipe(tap(() => {
       this.confettiService.fireConfetti();
     }));
   }
@@ -83,7 +83,7 @@ export class TaskService implements OnDestroy {
   retrieveTaskHistory(taskId: number): Observable<TaskHistoryDto> {
     return this.http.get<TaskHistoryDto>(`${this.baseUrl}/${taskId}/history`);
   }
-  
+
   reassignTask(assignmentId: number, newAssigneeId: number): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/reassign/${assignmentId}`, newAssigneeId);
   }

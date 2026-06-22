@@ -51,6 +51,10 @@ public class Task {
     @JsonBackReference("household-tasks")
     private Household household;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "procedure_id")
+    private Procedure procedure;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

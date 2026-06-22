@@ -168,6 +168,17 @@
     </ng-container>
  </div>
 
+ <div class="border-t border-b border-surface-200 dark:border-surface-700">
+    <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
+      <a routerLink="/procedures"
+      class="p-button p-button-text text-left w-full justify-start flex items-center gap-2"
+      (click)="toggleMenu()">
+      <i class="pi pi-list"></i>
+      <span>Procedures</span>
+      </a>
+    </ng-container>
+ </div>
+
   <div class="border-t border-b border-surface-200 dark:border-surface-700">
     <ng-container *ngIf="(isLoggedIn$ | async) && (household$ | async) as household">
       <a *ngIf="household && household.enableWaysToCare"

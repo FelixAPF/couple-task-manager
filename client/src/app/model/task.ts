@@ -1,4 +1,5 @@
 import { HouseholdMember } from "./household";
+import { Procedure } from "./procedure";
 import { Assignee, TaskAssignment } from "./task-period";
 
 export interface Task {
@@ -11,11 +12,24 @@ export interface Task {
     dueDate?: Date;
     assignee?: HouseholdMember | null; // null = unassigned
     doNotify?: boolean;
+    procedure?: Procedure; // NEW
+    procedureId?: number | null;  // NEW
+}
+
+export interface CreateTaskV1 {
+    title: string;
+    description?: string;
+    points: number;
+    durationMinutes: number;
+    frequency?: Frequency | null;
+    room?: string;
+    procedureId?: number; // NEW
 }
 
 export interface TaskCreationRqst {
     task: Task;
     assigneeUserId: number | null;
+    procedureId: number | null; // NEW
 }
 
 export interface TaskWithCompletedDate {

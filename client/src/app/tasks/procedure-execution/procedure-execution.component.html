@@ -1,0 +1,70 @@
+<div class="flex flex-col items-center justify-center w-full bg-slate-50 min-h-[300px] p-4 pt-10 rounded-xl relative">
+
+    <button *ngIf="!isFinished" 
+            (click)="cancel()"
+            class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors focus:outline-none z-10"
+            aria-label="Cancel">
+        <i class="pi pi-times text-lg"></i>
+    </button>
+
+    <ng-container *ngIf="!isFinished; else finishedState">
+        <div class="w-full max-w-lg bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-4 relative overflow-hidden transition-all duration-300" 
+             *ngFor="let step of steps; let i = index"
+             [ngClass]="{'opacity-40 pointer-events-none grayscale-[50%]': i !== currentStepIndex, 'hidden': i > currentStepIndex}">
+            
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 shrink-0 flex items-center justify-center relative">
+                    
+                    <div *ngIf="step.state === 'IDLE'" 
+                         class="w-12 h-12 rounded-full border-2 border-slate-200 flex items-center justify-center text-xl font-bold text-slate-400 transition-all duration-300"
+                         [ngClass]="{'border-primary-500 text-primary-600 bg-primary-50 scale-110 shadow-md': i === currentStepIndex}">
+                        {{ i + 1 }}
+                    </div>
+
+                    <div *ngIf="step.state === 'PROCESSING'" 
+                         class="w-12 h-12 rounded-full border-2 border-primary-500 text-primary-600 flex items-center justify-center animate-pulse shadow-md">
+                        <i class="pi pi-spin pi-spinner text-2xl"></i>
+                    </div>
+
+                    <div *ngIf="step.state === 'COMPLETED'" class="absolute inset-0 flex items-center justify-center">
+                        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                          <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="flex-1">
+                    <h3 class="font-bold text-lg text-slate-800 transition-colors"
+                        [ngClass]="{'text-slate-400 line-through': step.state === 'COMPLETED'}">
+                        {{ step.description }}
+                    </h3>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end animate-fade-in-up" *ngIf="i === currentStepIndex && step.state === 'IDLE'">
+                <button pButton pRipple label="Complete Step" icon="pi pi-check" 
+                        class="p-button-rounded p-button-primary shadow-md w-full sm:w-auto font-bold px-6 py-3"
+                        (click)="completeCurrentStep()">
+                </button>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template #finishedState>
+        <div class="flex flex-col items-center justify-center py-10 animate-fade-in-up text-center w-full">
+            <div class="w-24 h-24 mb-6 relative">
+                <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                  <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                  <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold text-slate-800 mb-2 tracking-tight">Task Completed!</h2>
+            <p class="text-slate-500 mb-8 font-medium">You have successfully finished all steps.</p>
+            <button pButton pRipple label="Close" icon="pi pi-times" 
+                    class="p-button-rounded p-button-secondary w-full max-w-xs font-bold shadow-md"
+                    (click)="close()">
+            </button>
+        </div>
+    </ng-template>
+</div>

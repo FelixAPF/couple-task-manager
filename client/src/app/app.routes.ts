@@ -38,6 +38,7 @@ export const routes: Routes = [
     },
     { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
     { path: 'shopping-list', component: ShoppingListComponent, canActivate: [authGuard] },
+    { path: 'procedures', loadComponent: () => import('./procedures/procedures-list/procedures-list.component').then(m => m.ProceduresListComponent), canActivate: [authGuard] },
     {
         path: 'meals', // Matches /meals
         component: MealsSectionComponent, // This component should contain <router-outlet name="meals"></router-outlet>

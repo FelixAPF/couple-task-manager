@@ -9,6 +9,8 @@ import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.HouseholdRepository;
 import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +29,12 @@ public class HouseholdService {
         HouseholdDto householdDto = new HouseholdDto(household);
         householdDto.setCurrentUser(new HouseholdMemberDto(user));
         return householdDto;
+    }
+
+    public Household getCurrentHousehold(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CTMUser currentUser = (CTMUser)authentication.getPrincipal();
+        return repository.findById(currentUser.getHousehold().getId()).orElseThrow(IllegalAccessError::new);
     }
 
     public HouseholdDto joinHousehold(String joinKey, CTMUser user){

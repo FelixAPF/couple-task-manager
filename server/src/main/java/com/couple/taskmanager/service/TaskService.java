@@ -4,6 +4,7 @@ import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.model.*;
 import com.couple.taskmanager.model.dto.*;
 import com.couple.taskmanager.repository.HouseholdRepository;
+import com.couple.taskmanager.repository.ProcedureRepository;
 import com.couple.taskmanager.repository.TaskHistoryRepository;
 import com.couple.taskmanager.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,9 @@ public class TaskService implements IGenericService<Task, TaskDto> {
 
     @Autowired
     private TaskHistoryRepository taskHistoryRepository;
+
+    @Autowired
+    private ProcedureRepository procedureRepository;
 
     @Autowired
     private FirebaseMessagingService pushNotificationService;
@@ -122,6 +126,9 @@ public class TaskService implements IGenericService<Task, TaskDto> {
         if (rqst.getAssigneeUserId() != null) {
             CTMUser assignee = userService.get(rqst.getAssigneeUserId(), user);
             task.setAssignee(assignee);
+        }
+        if(rqst.getProcedureId() != 0){
+            task.setProcedure(procedureRepository.findById(rqst.getProcedureId()).orElse(null));
         }
         return create(task, user);
     }

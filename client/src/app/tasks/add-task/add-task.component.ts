@@ -34,7 +34,7 @@ enum FormControlName {
 })
 export class AddTaskComponent implements OnInit {
   display:boolean = false;
-  
+
   FORM_CONTROL_NAME = FormControlName;
   ROOM = Room;
   ASSIGNEE = Assignee;
@@ -144,7 +144,8 @@ export class AddTaskComponent implements OnInit {
         id: this.idFormControl?.value,
         frequency: this.frequencyFormControl?.value,
         room: this.roomFormControl?.value
-      }
+      },
+      procedureId: null
     }
     this.taskService.saveTask(taskCreateRqst).subscribe(() => this.close(true));
   }

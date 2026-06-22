@@ -1,38 +1,34 @@
-<div class="dialog-content">
-    <div class="form-group">
-        <label for="title" class="label-bold">Titre de la tâche</label>
-        <input pInputText id="title" [(ngModel)]="task.title" placeholder="ex: Passer l'aspirateur" autofocus class="full-width"/>
+<div class="flex flex-col gap-4">
+    
+    <div class="flex flex-col gap-2">
+        <label class="font-semibold text-surface-700 dark:text-surface-300">Titre</label>
+        <input pInputText [(ngModel)]="task.title" placeholder="Titre de la tâche" class="w-full" />
     </div>
 
-    <div class="form-group">
-        <label for="desc" class="label-bold">Description</label>
-        <textarea pInputTextarea id="desc" [(ngModel)]="task.description" rows="3" placeholder="Détails supplémentaires (optionnel)" class="full-width"></textarea>
-    </div>
-
-    <div class="form-row">
-        <div class="form-group full-width">
-            <label class="label-bold">Assignée à</label>
-            <p-dropdown [options]="householdMembers" [(ngModel)]="assigneeUserId" placeholder="Sélectionner une personne" appendTo="body" styleClass="full-width"></p-dropdown>
+    <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold text-surface-700 dark:text-surface-300">Fréquence</label>
+            <p-dropdown [(ngModel)]="task.frequency" [options]="frequencies" optionLabel="label" optionValue="value" placeholder="Sélectionner" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold text-surface-700 dark:text-surface-300">Pièce</label>
+            <p-dropdown [(ngModel)]="task.room" [options]="rooms" optionLabel="label" optionValue="value" placeholder="Sélectionner" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
         </div>
     </div>
 
-    <div class="form-row">
-        <div class="form-group half-width">
-            <label class="label-bold">Fréquence</label>
-            <p-dropdown [options]="frequencies" [(ngModel)]="task.frequency" placeholder="Sélectionner" appendTo="body" styleClass="full-width"></p-dropdown>
-        </div>
-        <div class="form-group half-width">
-            <label class="label-bold">Pièce</label>
-            <p-dropdown [options]="rooms" [(ngModel)]="task.room" placeholder="Sélectionner" appendTo="body" styleClass="full-width"></p-dropdown>
-        </div>
-        <div class="form-group half-width">
-            <label class="label-bold">Notifier l'assigné</label>
-            <p-checkbox  [(ngModel)]="task.doNotify" [binary]="true" placeholder="Sélectionner" appendTo="body" styleClass="full-width"></p-checkbox>
-        </div>
+    <div class="flex flex-col gap-2">
+        <label class="font-semibold text-surface-700 dark:text-surface-300">Assignation (Optionnelle)</label>
+        <p-dropdown [(ngModel)]="assigneeUserId" [options]="householdMembers" optionLabel="label" optionValue="value" placeholder="Assigner à" appendTo="body" styleClass="w-full"></p-dropdown>
     </div>
 
-    <div class="dialog-footer">
-        <p-button label="Annuler" styleClass="p-button-text p-button-secondary" (onClick)="close()"></p-button>
-        <p-button [label]="isEditMode ? 'Sauvegarder' : 'Créer la tâche'" (onClick)="save()" [disabled]="!task.title || !task.frequency || !task.room"></p-button>
+    <div class="flex flex-col gap-2 border-t border-surface-200 dark:border-surface-700 pt-4 mt-2">
+        <label class="font-semibold text-surface-700 dark:text-surface-300">Procédure liée</label>
+        <p class="text-xs text-surface-500 mb-1">Attacher une procédure étape par étape pour cette tâche.</p>
+        <p-dropdown [(ngModel)]="procedureId" [options]="procedures" optionLabel="name" optionValue="id" placeholder="Aucune procédure liée" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
+    </div>
+
+    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+        <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="close()"></button>
+        <button pButton label="Sauvegarder" icon="pi pi-check" class="p-button-primary p-button-rounded px-6" (click)="save()" [disabled]="!task.title || !task.frequency || !task.room"></button>
     </div>
 </div>

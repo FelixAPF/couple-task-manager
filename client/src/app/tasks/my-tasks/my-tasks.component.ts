@@ -9,6 +9,8 @@ import { HouseholdMember } from '../../model/household';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import confetti from 'canvas-confetti';
 import { TaskHistoryDto } from '../../model/task-history';
+import { ProcedureExecutionComponent } from '../procedure-execution/procedure-execution.component';
+import { DialogService } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-my-tasks',
@@ -16,7 +18,7 @@ import { TaskHistoryDto } from '../../model/task-history';
   imports: [SharedModule, CommonModule, ReactiveFormsModule],
   templateUrl: './my-tasks.component.html',
   styleUrl: './my-tasks.component.css',
-  providers: [ConfirmationService, MessageService]
+  providers: [ConfirmationService, MessageService, DialogService]
 })
 export class MyTasksComponent implements OnInit {
   @Output() taskCompleteEmitter: EventEmitter<number> = new EventEmitter<number>();
@@ -26,10 +28,8 @@ export class MyTasksComponent implements OnInit {
   selectedAssignee: HouseholdMember | null = null;
   today: Date = new Date();
   todayCompleted: TaskHistoryDto[] = [];
-  // Re-added Form variables
   formGroup!: FormGroup;
 
-  // New moving date-range horizon options matching your exact specs
   get options() {
     return [
       { label: 'Cette semaine', value: 'WEEK' },
@@ -45,11 +45,11 @@ export class MyTasksComponent implements OnInit {
     private fb: FormBuilder,
     private taskService: TaskService,
     private householdService: HouseholdService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
-    // Initialize the Reactive Form group control tracker
     this.formGroup = this.fb.group({
       displayDuration: ['MONTH']
     });
@@ -71,26 +71,22 @@ export class MyTasksComponent implements OnInit {
     });
   }
 
-
   checkForSurpriseThanks() {
     this.taskService.getUnseenThanks().subscribe(thanks => {
       if (thanks && thanks.length > 0) {
-        // Build a dynamic message based on how many thanks they got
         const message = thanks.length === 1 
           ? `Votre partenaire vous remercie pour : ${thanks[0].taskTitle} !` 
           : `Votre partenaire vous remercie pour ${thanks.length} tâches accomplies !`;
 
         this.messageService.add({ severity: 'success', summary: '👋 Coucou !', detail: message, life: 5000 });
 
-        // 🎉 FIRE THE SURPRISE CONFETTI!
         confetti({
           particleCount: 200,
           spread: 100,
-          origin: { y: 0.3 }, // Higher origin so it falls down over the screen
+          origin: { y: 0.3 },
           colors: ['#22c55e', '#3b82f6', '#f59e0b', '#ec4899', '#a855f7']
         });
 
-        // Tell the server we saw it so it doesn't happen on every refresh
         this.taskService.markThanksAsSeen().subscribe();
       }
     });
@@ -105,7 +101,7 @@ export class MyTasksComponent implements OnInit {
     });
   }
 
-loadDashboardTasks() {
+  loadDashboardTasks() {
     const horizon = this.formGroup.get('displayDuration')?.value || 'MONTH';
     localStorage.setItem("myTasksHorizon", horizon);
 
@@ -116,7 +112,6 @@ loadDashboardTasks() {
       });
     });
 
-    // Fetch today's completed tasks!
     this.taskService.getTodayHistory().subscribe(history => {
       this.todayCompleted = history;
     });
@@ -126,12 +121,9 @@ loadDashboardTasks() {
     this.loadDashboardTasks();
   }
 
-  
   completeTask(task: Task) {
     if (!task.id) return;
     this.taskService.completeTask(task.id).subscribe(() => {
-      
-      // 🎉 FIRE THE CONFETTI!
       confetti({
         particleCount: 150,
         spread: 80,
@@ -155,6 +147,27 @@ loadDashboardTasks() {
 
   datePastDeadline(dueDate: any): boolean {
     if (!dueDate) return false;
-    return new Date(dueDate) < this.today;
+    // Strip time for a fair day-to-day comparison
+    const todayAtMidnight = new Date();
+    todayAtMidnight.setHours(0, 0, 0, 0);
+    return new Date(dueDate) < todayAtMidnight;
+  }
+
+  startProcedure(task: Task): void {
+      const ref = this.dialogService.open(ProcedureExecutionComponent, {
+          header: `Procedure: ${task.procedure?.name}`,
+          width: '95%',
+          data: { task: task },
+          baseZIndex: 10000,
+          closable: false,
+          showHeader: true
+      });
+
+      ref.onClose.subscribe((completed: boolean) => {
+          if (completed) {
+              this.messageService.add({ severity: 'success', summary: 'Procedure Done', detail: 'Task has been completed via procedure.' });
+              this.loadDashboardTasks();
+          }
+      });
   }
 }

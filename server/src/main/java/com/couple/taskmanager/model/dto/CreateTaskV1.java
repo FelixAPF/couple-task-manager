@@ -8,4 +8,5 @@ import lombok.Data;
 public class CreateTaskV1 {
     private Task task;
     private Long assigneeUserId;
+    private Long procedureId;
 }

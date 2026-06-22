@@ -27,6 +27,8 @@ public class TaskDto {
     private HouseholdMemberDto assignee;
 
     private Boolean doNotify;
+    private ProcedureDto procedure;
+    private Long procedureId;
 
     public TaskDto(Task task) {
         this.id = task.getId();
@@ -37,6 +39,9 @@ public class TaskDto {
         this.startDate = task.getStartDate();
         this.dueDate = task.getDueDate();
         this.doNotify = task.isDoNotify();
+        if(task.getProcedure() != null){
+            this.procedure = new ProcedureDto(task.getProcedure());
+        }
 
         CTMUser user = task.getAssignee();
         if (user != null) {

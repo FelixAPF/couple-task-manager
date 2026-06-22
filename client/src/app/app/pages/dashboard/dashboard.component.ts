@@ -32,7 +32,7 @@ export function areTwoDatesEqual(date1: Date, date2: Date): boolean {
   imports: [SharedModule, MyTasksComponent, WarningTasksDueComponent, CompletedTasksComponent, FormsModule, MealCardComponent],
   standalone: true,
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss',
+  styleUrl: './dashboard.component.css',
   providers: [DatePipe]
 })
 export class DashboardComponent {

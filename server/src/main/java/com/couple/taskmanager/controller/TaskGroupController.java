@@ -3,6 +3,7 @@ package com.couple.taskmanager.controller;
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.dto.TaskGroupDto;
 import com.couple.taskmanager.service.TaskGroupService;
+import com.couple.taskmanager.utils.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,7 +28,7 @@ public class TaskGroupController {
     @PostMapping
     public TaskGroupDto createGroup(@RequestBody Map<String, Object> payload, @AuthenticationPrincipal UserDetails user) {
         String name = (String) payload.get("name");
-        List<Long> taskIds = ((List<Integer>) payload.get("taskIds")).stream().map(Integer::longValue).toList();
+        List<Long> taskIds = StreamUtils.mapToList((List<Integer>) payload.get("taskIds"), Integer::longValue);
         return service.createGroup(name, taskIds, (CTMUser) user);
     }
 
@@ -44,7 +45,7 @@ public class TaskGroupController {
     @PutMapping("/{id}")
     public TaskGroupDto updateGroup(@PathVariable Long id, @RequestBody Map<String, Object> payload, @AuthenticationPrincipal UserDetails user) {
         String name = (String) payload.get("name");
-        List<Long> taskIds = ((List<Integer>) payload.get("taskIds")).stream().map(Integer::longValue).toList();
+        List<Long> taskIds = StreamUtils.mapToList((List<Integer>) payload.get("taskIds"), Integer::longValue);
         return service.updateGroup(id, name, taskIds, (CTMUser) user);
     }
 }

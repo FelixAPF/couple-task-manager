@@ -127,7 +127,7 @@ public class TaskService implements IGenericService<Task, TaskDto> {
             CTMUser assignee = userService.get(rqst.getAssigneeUserId(), user);
             task.setAssignee(assignee);
         }
-        if(rqst.getProcedureId() != 0){
+        if(rqst.getProcedureId() != null && rqst.getProcedureId() != 0){
             task.setProcedure(procedureRepository.findById(rqst.getProcedureId()).orElse(null));
         }
         return create(task, user);

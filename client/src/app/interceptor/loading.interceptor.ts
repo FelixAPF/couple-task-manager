@@ -17,20 +17,19 @@ export class LoadingInterceptor implements HttpInterceptor {
 
   private loadingService = inject(LoadingService);
   
-  // Existing exclusions
   excludedLoadEndpoints: string[] =  [ 
     ShoppingService.shoppingListSuggestionsEndPoint(), 
     ShoppingService.shoppingListUpdateQuantityEndpoint(), 
     RecipeService.randomRecipeEndpoint(), 
-    '/travel' 
+    '/travel',
+    '/finance'
   ];
 
   intercept(request: HttpRequest<any>, next: any): Observable<HttpEvent<any>> {
-    // Check if the URL should be excluded from the loading spinner
-    // We added 'notifications/unread-count' to the check
     if(this.excludedLoadEndpoints.includes(request.url) || 
        this.excludedLoadEndpoints.some((endpoint) => request.url.startsWith(endpoint)) || 
        request.url.includes('travel') || 
+       request.url.includes('finance') || 
        request.url.includes('notifications/unread-count')) { 
       
       return next.handle(request);

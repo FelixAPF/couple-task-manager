@@ -11,11 +11,12 @@ import confetti from 'canvas-confetti';
 import { TaskHistoryDto } from '../../model/task-history';
 import { ProcedureExecutionComponent } from '../procedure-execution/procedure-execution.component';
 import { DialogService } from 'primeng/dynamicdialog';
+import { HoldClickDirective } from './hold-click.directive';
 
 @Component({
   selector: 'app-my-tasks',
   standalone: true,
-  imports: [SharedModule, CommonModule, ReactiveFormsModule],
+  imports: [SharedModule, CommonModule, ReactiveFormsModule, HoldClickDirective],
   templateUrl: './my-tasks.component.html',
   styleUrl: './my-tasks.component.css',
   providers: [ConfirmationService, MessageService, DialogService]
@@ -170,4 +171,8 @@ export class MyTasksComponent implements OnInit {
           }
       });
   }
+
+  openCompleteDialog(task: any){
+  }
+  
 }

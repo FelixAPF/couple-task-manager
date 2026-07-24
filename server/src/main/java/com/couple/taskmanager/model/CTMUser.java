@@ -26,10 +26,9 @@ public class CTMUser implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    // Add other user fields as needed (e.g., name, etc.)
-    private String name; // Optional
+    private String name;
 
-    @Enumerated(EnumType.STRING) // Added role enum
+    @Enumerated(EnumType.STRING)
     private UserRole role;
 
     private String imageUrl;
@@ -37,7 +36,9 @@ public class CTMUser implements UserDetails {
     private Date birthDay;
 
     private String rewardColor = "#000000";
-    private Integer  rewardPoints = 0;
+    private Integer rewardPoints = 0;
+
+    private Double proratedPercentage = 50.0;
 
     @ManyToOne
     @JsonBackReference("household-users")
@@ -78,8 +79,9 @@ public class CTMUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email; // Username is email
+        return email;
     }
+
     @Override
     public boolean isAccountNonExpired() {
         return true;

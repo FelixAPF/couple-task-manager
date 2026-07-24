@@ -18,30 +18,49 @@ import { WishListComponent } from './household/wish-list/wish-list.component';
 import { ServerErrorComponent } from './server-error/server-error.component';
 import { ContactsComponent } from './household/contacts/contacts.component';
 import { TravelChecklistComponent } from './service/components/travel/travel-checklist/travel-checklist.component';
-import { PrivacyComponent } from './privacy/privacy.component'
+import { PrivacyComponent } from './privacy/privacy.component';
 import { LetterListComponent } from './letters/letter-list/letter-list.component';
 import { CreateLetterComponent } from './letters/create-letter/create-letter.component';
 import { LetterDetailComponent } from './letters/letter-detail/letter-detail.component';
-import { FoodIntakeTrackingDashboardComponent } from './food-intake-tracking-dashboard/food-intake-tracking-dashboard.component'
+import { FoodIntakeTrackingDashboardComponent } from './food-intake-tracking-dashboard/food-intake-tracking-dashboard.component';
 import { AdminDashboardComponent } from './admin/admin-dashboard/admin-dashboard.component';
 import { AdminGuard } from './guard/admin.guard';
 import { ReceiptSplitterComponent } from './recipe-splitter/recipe-splitter.component';
 
+// Finance Components
+import { FinanceDashboardComponent } from './finance/finance-dashboard/finance-dashboard.component';
+import { PaycheckConfigComponent } from './finance/paycheck-config/paycheck-config.component';
+import { HouseholdExpensesComponent } from './finance/household-expenses/household-expenses.component';
+import { PersonalExpensesComponent } from './finance/personal-expenses/personal-expenses.component';
+import { BankAccountsComponent } from './finance/bank-accounts/bank-accounts.component';
 
 export const routes: Routes = [
-      // --- Public Routes ---
     { path: 'login', component: LoginComponent },
     { path: 'privacy-policy', component: PrivacyComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'server-error', component: ServerErrorComponent }, // Add this route
-    { path: '', pathMatch: 'full', redirectTo: 'dashboard'
-    },
+    { path: 'server-error', component: ServerErrorComponent }, 
+    { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+    
+    // Clean, modular finance routes
+    { 
+        path: 'finance', 
+        canActivate: [authGuard],
+        children: [
+            { path: 'dashboard', component: FinanceDashboardComponent },
+            { path: 'paycheck-config', component: PaycheckConfigComponent },
+            { path: 'household-expenses', component: HouseholdExpensesComponent },
+            { path: 'personal-expenses', component: PersonalExpensesComponent },
+            { path: 'bank-accounts', component: BankAccountsComponent },
+            { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+        ]
+    },
+
     { path: 'shopping-list', component: ShoppingListComponent, canActivate: [authGuard] },
     { path: 'procedures', loadComponent: () => import('./procedures/procedures-list/procedures-list.component').then(m => m.ProceduresListComponent), canActivate: [authGuard] },
     {
-        path: 'meals', // Matches /meals
-        component: MealsSectionComponent, // This component should contain <router-outlet name="meals"></router-outlet>
+        path: 'meals', 
+        component: MealsSectionComponent, 
         children: [
             { path: '', component: MealsListComponent, outlet: 'meals', canActivate: [authGuard] },
             { path: 'recipes', component: RecipesListComponent, outlet: 'meals', canActivate: [authGuard] },
@@ -69,7 +88,6 @@ export const routes: Routes = [
             { path: 'contacts', component: ContactsComponent, canActivate: [authGuard] },
         ]
     },
-    
     {
         path: 'letters',
         canActivate: [authGuard],
@@ -86,5 +104,4 @@ export const routes: Routes = [
         canActivate: [AdminGuard] 
     },
     { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },
-
 ];

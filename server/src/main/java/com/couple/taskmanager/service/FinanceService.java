@@ -28,21 +28,21 @@ public class FinanceService {
     private final HouseholdRepository householdRepository;
     private final FirebaseMessagingService firebaseMessagingService;
 
-    public List<FinanceMemberDto> getHouseholdMembers(Household household) {
+    public List<FinanceMemberDto> getHouseholdMembers(Household household, CTMUser currentUser) {
         return householdRepository.findUsersByHouseholdId(household.getId())
                 .stream()
-                .map(FinanceMemberDto::new)
+                .map(u -> new FinanceMemberDto(u, u.getId().equals(currentUser.getId())))
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public FinanceMemberDto updateMemberRatio(Long userId, Double newRatio, Household household) {
+    public FinanceMemberDto updateMemberRatio(Long userId, Double newRatio, Household household, CTMUser currentUser) {
         CTMUser member = userRepository.findById(userId).orElseThrow(RuntimeException::new);
         if (!member.getHousehold().getId().equals(household.getId())) {
             throw new RuntimeException("User does not belong to your household");
         }
         member.setProratedPercentage(newRatio);
-        return new FinanceMemberDto(userRepository.save(member));
+        return new FinanceMemberDto(userRepository.save(member), member.getId().equals(currentUser.getId()));
     }
 
     public List<CommonExpense> getCommonExpenses(Household household) {

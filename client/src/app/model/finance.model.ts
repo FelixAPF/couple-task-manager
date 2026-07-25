@@ -3,6 +3,7 @@ export interface HouseholdMemberFinance {
   name: string;
   iconUrl: string;
   proratedPercentage: number;
+  isCurrentUser?: boolean;
 }
 
 export interface CommonExpense {

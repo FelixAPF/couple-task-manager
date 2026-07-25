@@ -52,26 +52,26 @@ export class FinanceDashboardComponent implements OnInit {
     const skipped = this.financeService.skippedSetupSteps();
     
     if (this.financeService.bankAccounts().length === 0 && !skipped.includes('banks')) {
-      this.promptSetup('banks', 'Configurer les noms de comptes bancaires?', 'C\'est parti!', '/finance/bank-accounts');
+      this.promptSetup('banks', 'Let\'s configure your bank accounts?', 'Let\'s do it', '/finance/bank-accounts');
       return;
     }
     
     if (!this.financeService.paycheckConfig() && !skipped.includes('paycheck')) {
-      this.promptSetup('paycheck', 'Configurons vos détails de paie', 'C\'est parti!', '/finance/paycheck-config');
+      this.promptSetup('paycheck', 'We need to setup your paycheck amount', 'Let\'s do it', '/finance/paycheck-config');
       return;
     }
     
     if (this.financeService.personalExpenses().length === 0 && !skipped.includes('personal')) {
-      this.promptSetup('personal', 'Configurons vos dépenses personnelles', 'C\'est parti!', '/finance/personal-expenses');
+      this.promptSetup('personal', 'Let\'s setup your personal expenses', 'Let\'s do it', '/finance/personal-expenses');
       return;
     }
     
     if (!skipped.includes('household')) {
       const hasHousehold = this.financeService.commonExpenses().length > 0;
       if (hasHousehold) {
-        this.promptSetup('household', 'Il semble que les dépenses conjointes ne sont pas configurées, devrait-on regarder cela?', 'Sure', '/finance/household-expenses');
+        this.promptSetup('household', 'It appears that the household expenses have already been setup, should we take a look?', 'Sure', '/finance/household-expenses');
       } else {
-        this.promptSetup('household', 'Dernière étape, configurer vos dépenses conjointes, procéder?', 'C\'est parti!', '/finance/household-expenses');
+        this.promptSetup('household', 'The last step is configuring your household expenses, should we go ahead?', 'Let\'s do it', '/finance/household-expenses');
       }
       return;
     }
@@ -136,7 +136,6 @@ export class FinanceDashboardComponent implements OnInit {
     pastPaycheckDate.setHours(0, 0, 0, 0);
     let nextPaycheckDate = new Date(pastPaycheckDate);
 
-    // Fast-forward dates to match current period
     while (nextPaycheckDate <= today) {
       pastPaycheckDate = new Date(nextPaycheckDate);
       if (config.cycle === '14_DAYS') nextPaycheckDate.setDate(nextPaycheckDate.getDate() + 14);
@@ -144,7 +143,6 @@ export class FinanceDashboardComponent implements OnInit {
       else if (config.cycle === 'MONTHLY') nextPaycheckDate.setMonth(nextPaycheckDate.getMonth() + 1);
     }
 
-    // Evaluate if the most recent past/current paycheck needs to be actioned
     let lastActioned = config.lastActionedDate ? new Date(config.lastActionedDate) : new Date(0);
     lastActioned.setHours(0, 0, 0, 0);
 
@@ -153,7 +151,6 @@ export class FinanceDashboardComponent implements OnInit {
       this.pendingPaycheckDate = pastPaycheckDate;
     }
 
-    // Days until the strictly *next* upcoming paycheck
     const diffTime = Math.abs(nextPaycheckDate.getTime() - today.getTime());
     this.daysUntilPaycheck = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
@@ -171,28 +168,79 @@ export class FinanceDashboardComponent implements OnInit {
     const members = this.financeService.householdMembers();
     const banks = this.financeService.bankAccounts();
 
+    let myPercentage = 50;
+    const me = members.find(m => m.isCurrentUser === true);
+    
+    if (me) {
+      myPercentage = me.proratedPercentage;
+    } else if (members.length > 0) {
+      myPercentage = members[0].proratedPercentage;
+    }
+
+    const calculatePaycheckAmount = (amount: number, frequency: string): number => {
+      let multiplier = 1;
+      const freq = (frequency || '').toLowerCase().trim();
+      
+      if (config.cycle === '14_DAYS' || config.cycle === 'TWICE_MONTHLY') {
+        if (freq.includes('hebdo') || (freq.includes('week') && !freq.includes('2') && !freq.includes('bi'))) {
+          multiplier = 2; // Weekly
+        } else if (freq.includes('2 semaines') || freq.includes('bi-week') || freq.includes('biweek')) {
+          multiplier = 1; // Bi-weekly
+        } else if (freq.includes('annuel') || freq.includes('year')) {
+          multiplier = 1 / 24; // Yearly
+        } else {
+          multiplier = 1 / 2; // Monthly / Mensuel / Default
+        }
+      } else if (config.cycle === 'MONTHLY') {
+        if (freq.includes('hebdo') || (freq.includes('week') && !freq.includes('2') && !freq.includes('bi'))) {
+          multiplier = 4; // Weekly
+        } else if (freq.includes('2 semaines') || freq.includes('bi-week') || freq.includes('biweek')) {
+          multiplier = 2; // Bi-weekly
+        } else if (freq.includes('annuel') || freq.includes('year')) {
+          multiplier = 1 / 12; // Yearly
+        } else {
+          multiplier = 1; // Monthly / Mensuel / Default
+        }
+      }
+
+      return amount * multiplier;
+    };
+
     this.jointTransferAmount = 0;
     this.financeService.commonExpenses().forEach(exp => {
-      if (exp.splitType === 'EQUAL') this.jointTransferAmount += exp.amount / 2;
-      else this.jointTransferAmount += exp.amount * (members[0].proratedPercentage / 100);
+      const paycheckAmount = calculatePaycheckAmount(exp.amount, 'Mensuel');
+      
+      if (exp.splitType === 'EQUAL') {
+        this.jointTransferAmount += paycheckAmount / 2;
+      } else {
+        this.jointTransferAmount += paycheckAmount * (myPercentage / 100);
+      }
     });
 
     const transferMap = new Map<string, TransferCompilation>();
     
     this.financeService.personalExpenses().forEach(exp => {
+      const paycheckAmount = calculatePaycheckAmount(exp.amount, exp.frequency);
+      
+      // If targeting the joint account, bundle it with the joint transfer
+      if (exp.targetBankAccountId === 'JOINT_ACCOUNT') {
+        this.jointTransferAmount += paycheckAmount;
+        return;
+      }
+
       const bank = banks.find(b => b.id === exp.targetBankAccountId);
       const sub = bank?.subAccounts.find(s => s.id === exp.targetSubAccountId);
       const key = `${exp.targetBankAccountId}-${exp.targetSubAccountId}`;
       
       if (transferMap.has(key)) {
         const existing = transferMap.get(key)!;
-        existing.amount += exp.amount;
+        existing.amount += paycheckAmount;
         existing.expenses.push(exp.name);
       } else {
         transferMap.set(key, {
           bankName: bank ? bank.name : 'Banque inconnue',
           subAccountName: sub ? sub.name : 'Compte inconnu',
-          amount: exp.amount,
+          amount: paycheckAmount,
           expenses: [exp.name]
         });
       }

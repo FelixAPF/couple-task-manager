@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -18,21 +18,48 @@ import { PersonalExpense } from '../../model/finance.model';
 export class PersonalExpensesComponent {
   public financeService = inject(FinanceService);
 
+  frequencies = [
+    { label: 'Hebdomadaire', value: 'Hebdomadaire' },
+    { label: 'Aux 2 semaines', value: 'Aux 2 semaines' },
+    { label: 'Mensuel', value: 'Mensuel' },
+    { label: 'Annuel', value: 'Annuel' }
+  ];
+
   get expenses() { return this.financeService.personalExpenses(); }
 
-  bankAccountOptions = computed(() => {
-    return this.financeService.bankAccounts().map(bank => ({
-      label: bank.name,
-      value: bank.id,
-      items: bank.subAccounts.map(sub => ({ label: sub.name, value: sub.id }))
-    }));
-  });
+  get bankOptions() {
+    const options = this.financeService.bankAccounts().map(b => ({ label: b.name, value: b.id }));
+    return [{ label: 'Compte Conjoint', value: 'JOINT_ACCOUNT' }, ...options];
+  }
 
-  frequencies = ['Hebdomadaire', 'Aux 2 semaines', 'Mensuel', 'Annuel'];
+  getSubAccountOptions(bankId: string) {
+    if (bankId === 'JOINT_ACCOUNT') {
+        return [{ label: 'Transfert Direct', value: 'JOINT_ACCOUNT_SUB' }];
+    }
+    const bank = this.financeService.bankAccounts().find(b => b.id === bankId);
+    return bank ? bank.subAccounts.map(s => ({ label: s.name, value: s.id })) : [];
+  }
 
   addExpense() {
-    const newExp: PersonalExpense = { id: '', name: 'Nouveau', amount: 0, frequency: 'Mensuel', targetBankAccountId: '', targetSubAccountId: '' };
+    const newExp: PersonalExpense = { 
+        id: '', 
+        name: 'Nouvelle dépense', 
+        amount: 0, 
+        frequency: 'Mensuel', 
+        targetBankAccountId: 'JOINT_ACCOUNT', 
+        targetSubAccountId: 'JOINT_ACCOUNT_SUB' 
+    };
     this.financeService.addPersonalExpense(newExp).subscribe();
+  }
+
+  onBankChange(expense: PersonalExpense) {
+    if (expense.targetBankAccountId === 'JOINT_ACCOUNT') {
+        expense.targetSubAccountId = 'JOINT_ACCOUNT_SUB';
+    } else {
+        const subOptions = this.getSubAccountOptions(expense.targetBankAccountId);
+        expense.targetSubAccountId = subOptions.length > 0 ? subOptions[0].value : '';
+    }
+    this.saveExpense(expense);
   }
 
   saveExpense(expense: PersonalExpense) {
@@ -44,17 +71,6 @@ export class PersonalExpensesComponent {
   removeExpense(id: string) {
     if (id) {
       this.financeService.deletePersonalExpense(id).subscribe();
-    }
-  }
-
-  onSubAccountChange(expense: PersonalExpense, subAccountId: string) {
-    const banks = this.financeService.bankAccounts();
-    for (const bank of banks) {
-      if (bank.subAccounts.some(s => s.id === subAccountId)) {
-        expense.targetBankAccountId = bank.id;
-        this.saveExpense(expense);
-        break;
-      }
     }
   }
 }

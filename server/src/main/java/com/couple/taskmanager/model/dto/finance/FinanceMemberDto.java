@@ -13,11 +13,21 @@ public class FinanceMemberDto {
     private String name;
     private String iconUrl;
     private Double proratedPercentage;
+    private Boolean isCurrentUser;
 
     public FinanceMemberDto(CTMUser user) {
         this.userId = String.valueOf(user.getId());
         this.name = user.getName();
         this.iconUrl = user.getImageUrl();
         this.proratedPercentage = user.getProratedPercentage();
+        this.isCurrentUser = false;
+    }
+
+    public FinanceMemberDto(CTMUser user, Boolean isCurrentUser) {
+        this.userId = String.valueOf(user.getId());
+        this.name = user.getName();
+        this.iconUrl = user.getImageUrl();
+        this.proratedPercentage = user.getProratedPercentage();
+        this.isCurrentUser = isCurrentUser;
     }
 }

@@ -23,14 +23,14 @@ public class FinanceController {
     @GetMapping("/members")
     public ResponseEntity<List<FinanceMemberDto>> getMembers(@AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;
-        return ResponseEntity.ok(financeService.getHouseholdMembers(user.getHousehold()));
+        return ResponseEntity.ok(financeService.getHouseholdMembers(user.getHousehold(), user));
     }
 
     @PutMapping("/members/{userId}")
     public ResponseEntity<FinanceMemberDto> updateMemberRatio(@PathVariable Long userId, @RequestBody Map<String, Double> payload, @AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;
         Double proratedPercentage = payload.get("proratedPercentage");
-        return ResponseEntity.ok(financeService.updateMemberRatio(userId, proratedPercentage, user.getHousehold()));
+        return ResponseEntity.ok(financeService.updateMemberRatio(userId, proratedPercentage, user.getHousehold(), user));
     }
 
     @GetMapping("/common-expenses")

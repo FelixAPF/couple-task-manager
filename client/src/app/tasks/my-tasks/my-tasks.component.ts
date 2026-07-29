@@ -171,8 +171,4 @@ export class MyTasksComponent implements OnInit {
           }
       });
   }
-
-  openCompleteDialog(task: any){
-  }
-  
 }

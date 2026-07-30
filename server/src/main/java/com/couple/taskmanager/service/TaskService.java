@@ -7,15 +7,14 @@ import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.ProcedureRepository;
 import com.couple.taskmanager.repository.TaskHistoryRepository;
 import com.couple.taskmanager.repository.TaskRepository;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -163,11 +162,41 @@ public class TaskService implements IGenericService<Task, TaskDto> {
 
         taskHistoryRepository.save(new TaskHistory(task, user, new Date()));
 
-        task.setDueDate(calculateNextDueDate(new Date(), task.getFrequency()));
+        Date dueDate = task.isFixedDay() ? calculateNextDueDate(new Date(), task.getReferenceDate(), task.getFrequency()) :  calculateNextDueDate(new Date(), task.getFrequency());
+        task.setDueDate(dueDate);
+
         return new TaskDto(taskRepository.save(task));
     }
 
+    private Date calculateNextDueDate(Date completedDate, Date referenceDate, @NonNull Frequency frequency) {
+        if (completedDate == null || referenceDate == null) {
+            return null;
+        }
+
+        // Convert java.util.Date to LocalDate (normalizes away hours/minutes/seconds)
+        ZoneId zoneId = ZoneId.systemDefault();
+        LocalDate completed = completedDate.toInstant().atZone(zoneId).toLocalDate();
+        LocalDate reference = referenceDate.toInstant().atZone(zoneId).toLocalDate();
+
+        // If today is before the reference date, the next due date is the reference date
+        if (completed.isBefore(reference)) {
+            return referenceDate;
+        }
+
+        long daysBetween = ChronoUnit.DAYS.between(reference, completed);
+        int intervalDays = frequency.getDaysAmount();
+
+        // Calculate how many full frequency cycles have passed, then jump to the next cycle
+        long cyclesPassed = daysBetween / intervalDays;
+        long daysToAdd = (cyclesPassed + 1) * intervalDays;
+
+        LocalDate nextDueDate = reference.plusDays(daysToAdd);
+
+        // Convert back to java.util.Date
+        return Date.from(nextDueDate.atStartOfDay(zoneId).toInstant());
+    }
     @Scheduled(cron = "0 0 7 * * *", zone = "America/Toronto")
+    @Transactional
     public void notifyScheduledTaskDue(){
         ZoneId torontoZone = ZoneId.of("America/Toronto");
         ZonedDateTime nowInToronto = ZonedDateTime.now(torontoZone);
@@ -177,7 +206,10 @@ public class TaskService implements IGenericService<Task, TaskDto> {
                 .atZone(torontoZone)
                 .toInstant();
 
-        List<Task> allTaskDue = taskRepository.findAllTaskDue(endOfToday);
+        // Convert Instant to java.util.Date to match Task.dueDate's JPA mapping
+        Date endOfTodayDate = Date.from(endOfToday);
+
+        List<Task> allTaskDue = taskRepository.findAllTaskDue(endOfTodayDate);
         allTaskDue.forEach((task) -> {
             String title = "Tâche due aujourd'hui";
             String description = "N'oubliez pas de faire " + task.getTitle() + " aujourd'hui";

@@ -36,6 +36,12 @@ public class Task {
 
     @Column(columnDefinition="BOOLEAN DEFAULT false")
     @NonNull
+    private boolean isFixedDay;
+
+    private Date referenceDate;
+
+    @Column(columnDefinition="BOOLEAN DEFAULT false")
+    @NonNull
     private boolean isNotified;
 
     @Column(columnDefinition="BOOLEAN DEFAULT false")
@@ -54,6 +60,7 @@ public class Task {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "procedure_id")
     private Procedure procedure;
+
 
     @Override
     public boolean equals(Object o) {

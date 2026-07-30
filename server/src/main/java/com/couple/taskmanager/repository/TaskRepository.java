@@ -20,7 +20,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByIdAndHouseholdId(@Param("taskId")Long taskId,@Param("householdId") Long householdId);
 
     @Query("SELECT t FROM Task t WHERE t.dueDate <= :now AND t.isNotified = false AND t.doNotify = true")
-    List<Task> findAllTaskDue(@Param("now") Instant now);
+    List<Task> findAllTaskDue(@Param("now") Date now);
 
     @Query("DELETE FROM Task t WHERE t.id = :taskId AND t.household.id = :householdId")
     void deleteByIdAndHouseholdId(@Param("taskId")Long taskId,@Param("householdId") Long householdId);
@@ -39,4 +39,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findDashboardTasksWithHorizon(
             @Param("householdId") Long householdId,
             @Param("userId") Long userId,
-            @Param("maxDueDate") Date maxDueDate);}
+            @Param("maxDueDate") Date maxDueDate);
+}

@@ -17,7 +17,7 @@ import { Procedure } from '../../model/procedure';
   styleUrls: ['./create-task-dialog.component.css']
 })
 export class CreateTaskDialogComponent implements OnInit {
-  task: Task = { title: '' };
+  task: Task = { title: '', doNotify: false };
   isEditMode: boolean = false;
   assigneeUserId: number | null = null;
   householdMembers: { label: string, value: number | null }[] = [];
@@ -73,8 +73,12 @@ export class CreateTaskDialogComponent implements OnInit {
     });
 
     if (this.config.data?.task) {
+      console.log("DATA TASK", this.config.data.task)
         this.task = { ...this.config.data.task }; 
         this.isEditMode = true;
+        if(this.task.referenceDate){
+          this.task.referenceDate = new Date(this.task.referenceDate);
+        }
         this.assigneeUserId = this.task.assignee ? this.task.assignee.id! : null;
     }
   }

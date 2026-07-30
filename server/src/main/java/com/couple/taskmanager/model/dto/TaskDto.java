@@ -25,6 +25,8 @@ public class TaskDto {
     private Date startDate;
     private Date dueDate;
     private HouseholdMemberDto assignee;
+    private Boolean isFixedDay;
+    private Date referenceDate;
 
     private Boolean doNotify;
     private ProcedureDto procedure;
@@ -42,6 +44,8 @@ public class TaskDto {
         if(task.getProcedure() != null){
             this.procedure = new ProcedureDto(task.getProcedure());
         }
+        this.isFixedDay = task.isFixedDay();
+        this.referenceDate = task.getReferenceDate();
 
         CTMUser user = task.getAssignee();
         if (user != null) {

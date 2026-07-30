@@ -14,6 +14,7 @@ export interface Task {
     doNotify?: boolean;
     procedure?: Procedure; // NEW
     procedureId?: number | null;  // NEW
+    referenceDate?: Date | null;
 }
 
 export interface CreateTaskV1 {

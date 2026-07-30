@@ -158,12 +158,15 @@ export class TasksComponent implements OnInit, OnDestroy {
     });
   }
 
-  openCreateTaskDialog() {
+openCreateTaskDialog() {
     this.ref = this.dialogService.open(CreateTaskDialogComponent, {
         header: 'Créer une nouvelle tâche',
         width: '500px',
-        contentStyle: { overflow: 'visible' },
-        baseZIndex: 10000
+        breakpoints: { '640px': '95vw' },
+        contentStyle: { 'max-height': '75vh', overflow: 'auto' },
+        baseZIndex: 10000,
+        modal: true,
+        dismissableMask: true
     });
 
     this.ref.onClose.subscribe((task: any) => {
@@ -172,15 +175,18 @@ export class TasksComponent implements OnInit, OnDestroy {
             this.loadTasks(); 
         }
     });
-  }
+}
 
-  openEditTaskDialog(task: Task, event: Event) {
+openEditTaskDialog(task: Task, event: Event) {
     event.stopPropagation(); 
     this.ref = this.dialogService.open(CreateTaskDialogComponent, {
         header: 'Modifier la tâche',
         width: '500px',
-        contentStyle: { overflow: 'visible' },
+        breakpoints: { '640px': '95vw' },
+        contentStyle: { 'max-height': '75vh', overflow: 'auto' },
         baseZIndex: 10000,
+        modal: true,
+        dismissableMask: true,
         data: { task: task } 
     });
 
@@ -191,7 +197,7 @@ export class TasksComponent implements OnInit, OnDestroy {
             this.loadGroups(); 
         }
     });
-  }
+}
 
   // --- Macro / Task Group Logic ---
 

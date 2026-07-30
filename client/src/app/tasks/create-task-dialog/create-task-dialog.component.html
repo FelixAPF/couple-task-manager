@@ -1,41 +1,62 @@
-<div class="flex flex-col gap-4">
-    
-    <div class="flex flex-col gap-2">
-        <label class="font-semibold text-surface-700 dark:text-surface-300">Titre</label>
-        <input pInputText [(ngModel)]="task.title" placeholder="Titre de la tâche" class="w-full" />
-    </div>
+<div class="dialog-wrapper">
+    <div class="dialog-scroll-area">
 
-    <div class="grid grid-cols-2 gap-4">
+        <!-- Title -->
         <div class="flex flex-col gap-2">
-            <label class="font-semibold text-surface-700 dark:text-surface-300">Fréquence</label>
-            <p-dropdown [(ngModel)]="task.frequency" [options]="frequencies" optionLabel="label" optionValue="value" placeholder="Sélectionner" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
+            <label class="font-semibold text-surface-700 dark:text-surface-300">Titre</label>
+            <input pInputText [(ngModel)]="task.title" placeholder="Titre de la tâche" class="w-full" />
         </div>
         <div class="flex flex-col gap-2">
-            <label class="font-semibold text-surface-700 dark:text-surface-300">Pièce</label>
-            <p-dropdown [(ngModel)]="task.room" [options]="rooms" optionLabel="label" optionValue="value" placeholder="Sélectionner" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
+            <label class="font-semibold text-surface-700 dark:text-surface-300">Description</label>
+            <input pInputText [(ngModel)]="task.description" placeholder="Description de la tâche" class="w-full" />
         </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+                <label class="font-semibold text-surface-700 dark:text-surface-300">Fréquence</label>
+                <p-dropdown [(ngModel)]="task.frequency" [options]="frequencies" optionLabel="label" optionValue="value" placeholder="Sélectionner" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
+            </div>
+            <div class="flex flex-col gap-2">
+                <label class="font-semibold text-surface-700 dark:text-surface-300">Pièce</label>
+                <p-dropdown [(ngModel)]="task.room" [options]="rooms" optionLabel="label" optionValue="value" placeholder="Sélectionner" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
+            </div>
+            <div class="flex flex-col gap-2 justify-center">
+                <label class="font-semibold text-surface-700 dark:text-surface-300">Notifier tâche due?</label>
+                <div>
+                    <p-checkbox [binary]="true" [(ngModel)]="task.doNotify"></p-checkbox>
+                </div>
+            </div>
+        </div>
+
         <div class="flex flex-col gap-2">
-            <label class="font-semibold text-surface-700 dark:text-surface-300">Notifier tâche due?</label>
-            <p-checkbox [binary]="true" [(ngModel)]="task.doNotify"></p-checkbox>
+            <label class="font-semibold text-surface-700 dark:text-surface-300">Assignation (Optionnelle)</label>
+            <p-dropdown [(ngModel)]="assigneeUserId" [options]="householdMembers" optionLabel="label" optionValue="value" placeholder="Assigner à" appendTo="body" styleClass="w-full"></p-dropdown>
         </div>
-        <div class="flex flex-col gap-2" *ngIf="task.doNotify">
-            <label class="font-semibold text-surface-700 dark:text-surface-300">Date de référence</label>
-            <p-calendar [(ngModel)]="task.referenceDate"></p-calendar>
+
+        <div class="flex flex-col gap-2 border-t border-surface-200 dark:border-surface-700 pt-4 mt-2">
+            <label class="font-semibold text-surface-700 dark:text-surface-300">Procédure liée</label>
+            <p class="text-xs text-surface-500 mb-1">Attacher une procédure étape par étape pour cette tâche.</p>
+            <p-dropdown [(ngModel)]="procedureId" [options]="procedures" optionLabel="name" optionValue="id" placeholder="Aucune procédure liée" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
         </div>
+
+        <div class="flex flex-col gap-4 border-t border-surface-200 dark:border-surface-700 pt-4 mt-2">
+            <div class="flex flex-col gap-2">
+                <label class="font-semibold text-surface-700 dark:text-surface-300">Date fixe?</label>
+                <div>
+                    <p-checkbox [binary]="true" [(ngModel)]="task.isFixedDay"></p-checkbox>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2" *ngIf="task.isFixedDay">
+                <label class="font-semibold text-surface-700 dark:text-surface-300">Date de référence</label>
+                <p-calendar [(ngModel)]="task.referenceDate" appendTo="body" styleClass="w-full" [showIcon]="true"></p-calendar>
+            </div>
+        </div>
+
     </div>
 
-    <div class="flex flex-col gap-2">
-        <label class="font-semibold text-surface-700 dark:text-surface-300">Assignation (Optionnelle)</label>
-        <p-dropdown [(ngModel)]="assigneeUserId" [options]="householdMembers" optionLabel="label" optionValue="value" placeholder="Assigner à" appendTo="body" styleClass="w-full"></p-dropdown>
-    </div>
-
-    <div class="flex flex-col gap-2 border-t border-surface-200 dark:border-surface-700 pt-4 mt-2">
-        <label class="font-semibold text-surface-700 dark:text-surface-300">Procédure liée</label>
-        <p class="text-xs text-surface-500 mb-1">Attacher une procédure étape par étape pour cette tâche.</p>
-        <p-dropdown [(ngModel)]="procedureId" [options]="procedures" optionLabel="name" optionValue="id" placeholder="Aucune procédure liée" [showClear]="true" appendTo="body" styleClass="w-full"></p-dropdown>
-    </div>
-
-    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-surface-200 dark:border-surface-700">
+    <!-- Footer stays pinned outside the scroll area -->
+    <div class="dialog-footer">
         <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="close()"></button>
         <button pButton label="Sauvegarder" icon="pi pi-check" class="p-button-primary p-button-rounded px-6" (click)="save()" [disabled]="!task.title || !task.frequency || !task.room"></button>
     </div>

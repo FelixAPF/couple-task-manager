@@ -1,14 +1,18 @@
-.dialog-content {
+.dialog-wrapper {
+    display: flex;
+    flex-direction: column;
+    /* Fills the DynamicDialog's content area, which is capped at 75vh via contentStyle */
+    max-height: 70vh;
+}
+
+.dialog-scroll-area {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     padding-top: 0.5rem;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 0.25rem; /* avoid scrollbar overlapping inputs */
 }
 
 .label-bold {
@@ -19,15 +23,6 @@
 
 .full-width {
     width: 100%;
-}
-
-.form-row {
-    display: flex;
-    gap: 1rem;
-}
-
-.half-width {
-    flex: 1;
 }
 
 /* Ensure PrimeNG dropdowns fill their container */
@@ -42,4 +37,5 @@
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid #f3f4f6;
+    flex-shrink: 0; /* never let the footer get squeezed or scrolled away */
 }

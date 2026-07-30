@@ -3,6 +3,7 @@ package com.couple.taskmanager.model;
 import com.couple.taskmanager.enums.Frequency;
 import com.couple.taskmanager.enums.Room;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Date;
@@ -35,6 +36,7 @@ public class Task {
     private Date dueDate;
 
     @Column(columnDefinition="BOOLEAN DEFAULT false")
+    @JsonProperty("isFixedDay")
     @NonNull
     private boolean isFixedDay;
 

@@ -17,7 +17,7 @@ import { Procedure } from '../../model/procedure';
   styleUrls: ['./create-task-dialog.component.css']
 })
 export class CreateTaskDialogComponent implements OnInit {
-  task: Task = { title: '', doNotify: false };
+  task: Task = { title: '', doNotify: false, description: '' };
   isEditMode: boolean = false;
   assigneeUserId: number | null = null;
   householdMembers: { label: string, value: number | null }[] = [];
@@ -86,7 +86,6 @@ export class CreateTaskDialogComponent implements OnInit {
   save() {
     if (this.task.title && this.task.frequency && this.task.room) {
         this.taskService.saveTask({ task: this.task, procedureId: this.procedureId, assigneeUserId: this.assigneeUserId }).subscribe((createdTask) => {
-          console.log("SAVED TASK IS ", this.task);
             this.ref.close(createdTask);
         });
     }

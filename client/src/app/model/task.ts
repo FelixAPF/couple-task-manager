@@ -15,6 +15,7 @@ export interface Task {
     procedure?: Procedure; // NEW
     procedureId?: number | null;  // NEW
     referenceDate?: Date | null;
+    isFixedDay?: boolean;
 }
 
 export interface CreateTaskV1 {

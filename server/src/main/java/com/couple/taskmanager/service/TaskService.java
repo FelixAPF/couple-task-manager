@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @Service
@@ -173,26 +174,19 @@ public class TaskService implements IGenericService<Task, TaskDto> {
             return null;
         }
 
-        // Convert java.util.Date to LocalDate (normalizes away hours/minutes/seconds)
         ZoneId zoneId = ZoneId.systemDefault();
         LocalDate completed = completedDate.toInstant().atZone(zoneId).toLocalDate();
         LocalDate reference = referenceDate.toInstant().atZone(zoneId).toLocalDate();
 
-        // If today is before the reference date, the next due date is the reference date
-        if (completed.isBefore(reference)) {
-            return referenceDate;
-        }
+        // 1. Get the required day of the week from the reference date (e.g. TUESDAY)
+        DayOfWeek targetDayOfWeek = reference.getDayOfWeek();
 
-        long daysBetween = ChronoUnit.DAYS.between(reference, completed);
-        int intervalDays = frequency.getDaysAmount();
+        // 2. Add the base frequency interval to the completion date
+        LocalDate targetDate = completed.plusDays(frequency.getDaysAmount());
 
-        // Calculate how many full frequency cycles have passed, then jump to the next cycle
-        long cyclesPassed = daysBetween / intervalDays;
-        long daysToAdd = (cyclesPassed + 1) * intervalDays;
+        // 3. Snap to the closest target day of the week (or next target day)
+        LocalDate nextDueDate = targetDate.with(TemporalAdjusters.nextOrSame(targetDayOfWeek));
 
-        LocalDate nextDueDate = reference.plusDays(daysToAdd);
-
-        // Convert back to java.util.Date
         return Date.from(nextDueDate.atStartOfDay(zoneId).toInstant());
     }
     @Scheduled(cron = "0 0 7 * * *", zone = "America/Toronto")

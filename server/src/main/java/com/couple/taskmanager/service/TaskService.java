@@ -178,14 +178,9 @@ public class TaskService implements IGenericService<Task, TaskDto> {
         LocalDate completed = completedDate.toInstant().atZone(zoneId).toLocalDate();
         LocalDate reference = referenceDate.toInstant().atZone(zoneId).toLocalDate();
 
-        // 1. Get the required day of the week from the reference date (e.g. TUESDAY)
         DayOfWeek targetDayOfWeek = reference.getDayOfWeek();
-
-        // 2. Add the base frequency interval to the completion date
         LocalDate targetDate = completed.plusDays(frequency.getDaysAmount());
-
-        // 3. Snap to the closest target day of the week (or next target day)
-        LocalDate nextDueDate = targetDate.with(TemporalAdjusters.nextOrSame(targetDayOfWeek));
+        LocalDate nextDueDate = targetDate.with(TemporalAdjusters.previousOrSame(targetDayOfWeek));
 
         return Date.from(nextDueDate.atStartOfDay(zoneId).toInstant());
     }

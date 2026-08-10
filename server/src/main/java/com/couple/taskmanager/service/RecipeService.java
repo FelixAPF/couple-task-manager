@@ -97,6 +97,15 @@ public class RecipeService implements IGenericService<Recipe, RecipeDto> {
         recipeDtoMap.put(householdId, StreamUtils.mapToList(allByHouseholdId, RecipeDto::new));
     }
 
+    /**
+     * Names of recipes the household already has, used to tell the AI generator
+     * what not to repeat when generating new bulk recipe ideas.
+     */
+    public List<String> getExistingRecipeNames(CTMUser user) {
+        Long householdId = user.getHousehold().getId();
+        return repository.findNamesByHouseholdId(householdId);
+    }
+
     public RecipeDto findRandomRecipe(CTMUser user) throws SystemException {
         Long householdId = user.getHousehold().getId();
         if(householdId == null) throw new SystemException("Household is null");

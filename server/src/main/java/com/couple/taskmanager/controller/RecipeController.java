@@ -40,25 +40,11 @@ public class RecipeController extends GenericController<Recipe, RecipeDto, Recip
 
     @GetMapping(value = "/ai/generate-single-image", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> generateSingleImage(@RequestParam("name") String name) {
-        try {
-            // 1. Generate the Pollinations URL
-            String safeName = java.net.URLEncoder.encode(name.trim(), java.nio.charset.StandardCharsets.UTF_8).replace("+", "%20");
-            int randomSeed = (int) (Math.random() * 1000000);
-            String pollUrl = "https://image.pollinations.ai/prompt/" + safeName + "%20plated%20delicious%20food%20photography?width=800&height=600&nologo=true&seed=" + randomSeed;
-
-            // 2. Create a temporary DTO to pass into your existing download service
-            RecipeDto tempRecipe = new RecipeDto();
-            tempRecipe.setImageUrl(pollUrl);
-
-            // 3. Reuse your bulk planner's download logic!
-            aiParserService.downloadAndReplaceImageUrls(java.util.List.of(tempRecipe));
-
-            // 4. The URL is now replaced with your local server path. Return it to Angular.
-            return ResponseEntity.ok(Map.of("imageUrl", tempRecipe.getImageUrl()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        String imageUrl = aiParserService.generateRecipeImage(name);
+        if (imageUrl == null) {
             return ResponseEntity.internalServerError().build();
         }
+        return ResponseEntity.ok(Map.of("imageUrl", imageUrl));
     }
 
     @PostMapping("/smart-import-url")
@@ -74,13 +60,16 @@ public class RecipeController extends GenericController<Recipe, RecipeDto, Recip
             return ResponseEntity.internalServerError().build();
         }
     }
+// In RecipeController.java — replace the existing generateRandomBulk method with this:
 
     @GetMapping("/ai/generate")
     public ResponseEntity<?> generateRandomBulk(
             @RequestParam("count") int count,
-            @RequestParam(value = "cuisines", required = false) List<String> cuisines) { // <--- Changed to List<String>
+            @RequestParam(value = "cuisines", required = false) List<String> cuisines,
+            @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            List<RecipeDto> recipes = aiParserService.generateBulkRecipes(count, cuisines);
+            List<String> existingNames = this.service.getExistingRecipeNames((CTMUser) userDetails);
+            List<RecipeDto> recipes = aiParserService.generateBulkRecipes(count, cuisines, existingNames);
             return ResponseEntity.ok(recipes);
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("429")) {

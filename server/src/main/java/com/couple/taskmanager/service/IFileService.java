@@ -19,5 +19,8 @@ public interface IFileService {
 
     Resource loadAsResource(String filename);
 
+
+    String storeFromBytes(byte[] data, String extension);
+
     void deleteAll();
 }

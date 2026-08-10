@@ -31,4 +31,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Optional<Recipe> findRandomRecipeByHouseholdId_Random(@Param("householdId") Long householdId);
 
     List<Recipe> findByHouseholdId(Long householdId, Pageable pageable);
+
+    // Lightweight projection — used to feed the AI generator a "don't repeat these" list
+    // without pulling full Recipe entities (ingredients, description, etc.) just for names.
+    @Query("SELECT r.name FROM Recipe r WHERE r.household.id = :householdId")
+    List<String> findNamesByHouseholdId(@Param("householdId") Long householdId);
 }

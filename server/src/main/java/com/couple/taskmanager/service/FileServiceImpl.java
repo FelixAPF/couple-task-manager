@@ -99,6 +99,33 @@ public class FileServiceImpl implements IFileService{
     }
 
     @Override
+    public String storeFromBytes(byte[] data, String extension) {
+        try {
+            if (data == null || data.length == 0) {
+                System.err.println("Failed to store image: no data provided.");
+                return null;
+            }
+
+            String safeExtension = (extension == null || extension.trim().isEmpty()) ? "jpg" : extension.trim();
+            String fileName = UUID.randomUUID().toString() + "." + safeExtension;
+            Path destinationFile = this.rootLocation.resolve(Paths.get(fileName)).normalize().toAbsolutePath();
+
+            if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
+                throw new StorageException("Cannot store file outside current directory.");
+            }
+
+            Files.write(destinationFile, data,
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING);
+
+            return fileName;
+        } catch (Exception e) {
+            System.err.println("Failed to store image from bytes: " + e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
     public Stream<Path> loadAll() {
         try {
             return Files.walk(this.rootLocation, 1)

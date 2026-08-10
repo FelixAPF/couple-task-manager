@@ -1,46 +1,38 @@
-/* Target the host element when the highlight class is present */
-:host(.highlight-monday) .p-card { 
-    border: 2px solid #a7f3d0; 
-}
-
-:host(.highlight-wednesday) .p-card { 
-    border: 2px solid #3b82f6; 
-}
-
-:host .p-card {
-    box-sizing: border-box;
-}
-
 :host {
-    display: block; 
-    height: 100%; 
+  display: block; 
+  height: 100%; 
 }
 
 .p-card-content i.pi-image {
-    margin: auto;
+  margin: auto;
 }
 
-.first .p-card {
-    border: 2px solid #a7f3d0 !important;
-    box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
-    border-radius: 0.5rem;
-}  
-
-.last .p-card {
-    border: 2px solid #3d535a !important;
-    box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
-    border-radius: 0.5rem;
+/* Soft UI Highlights instead of harsh solid borders */
+:host(.highlight-monday) ::ng-deep .p-card { 
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.4), 0 8px 30px rgba(0,0,0,0.04) !important; 
 }
 
-.today .p-card {
-    border: 2px solid #feffac !important;
-    box-shadow: 0 0 8px rgba(128, 128, 128, 0.5);
-    border-radius: 0.5rem;
+:host(.highlight-wednesday) ::ng-deep .p-card { 
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4), 0 8px 30px rgba(0,0,0,0.04) !important; 
 }
 
-.selected .p-card {
-    border: 2px solid #3b82f6 !important;
-    box-shadow: 0 0 8px rgba(144, 202, 249, 0.5);
-    background-color:  #b6dcdd !important;
-    border-radius: 0.5rem;
+:host(.first) ::ng-deep .p-card {
+  box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.6), 0 8px 30px rgba(0,0,0,0.04) !important;
+}
+
+:host(.last) ::ng-deep .p-card {
+  box-shadow: 0 0 0 3px rgba(61, 83, 90, 0.4), 0 8px 30px rgba(0,0,0,0.04) !important;
+}
+
+:host(.today) ::ng-deep .p-card {
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.6), 0 8px 30px rgba(0,0,0,0.04) !important;
+}
+
+:host(.selected) ::ng-deep .p-card {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.6), 0 8px 30px rgba(0,0,0,0.08) !important;
+  background-color: #f0f9ff !important;
+}
+
+:host-context(.dark) :host(.selected) ::ng-deep .p-card {
+  background-color: #1e3a8a !important;
 }

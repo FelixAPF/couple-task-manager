@@ -1,49 +1,21 @@
-/* c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\meal-planning\meals-list\meals-list.component.css */
-
-/* REMOVE these styles as they are now in meal-card.component.css */
-/*
-.highlight-monday { ... }
-.highlight-wednesday { ... }
-.day-column { ... }
-*/
-
-/* Keep other general styles for the list container, grid, etc. */
 .meals-list-container {
-    max-width: 1600px;
-    margin: 0 auto;
-  }
-  
-  .week-grid {
-    /* Styles for the grid layout */
-  }
-  
-  .day-column {
-    /* Minimal styles needed now, mostly for structure */
-     display: flex; /* Ensure it behaves correctly as a flex item if parent is flex */
-     flex-direction: column; /* Stack header and card area vertically */
-  }
-  
-  .day-header {
-    /* Styles for the header showing the date */
-    flex-shrink: 0; /* Prevent header from shrinking */
-  }
-  
-  .meal-card-area {
-     flex-grow: 1; /* Allow card area to take remaining space */
-     /* The app-meal-card component should fill this area */
-  }
-  
-  /* Styles for action buttons if needed (already in template?) */
-  .meal-actions button {
-      /* width: 2rem; */
-      /* height: 2rem; */
-  }
-  
-  /* Dark mode styles if applicable */
-  /* .dark .highlight-monday { ... } */ /* Move to meal-card.component.css */
-  /* .dark .highlight-wednesday { ... } */ /* Move to meal-card.component.css */
-  
-  [style*="transform"][style*="translateX"].flex-grow {
-    /* Target the div with the (swipe) binding more specifically */
-    touch-action: pan-y !important; /* Allow vertical scrolling, use !important to increase specificity */
-  }
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.day-column {
+  display: flex; 
+  flex-direction: column; 
+}
+
+.day-header {
+  flex-shrink: 0; 
+}
+
+.meal-card-area {
+  flex-grow: 1; 
+}
+
+[style*="transform"][style*="translateX"].flex-grow {
+  touch-action: pan-y !important; 
+}

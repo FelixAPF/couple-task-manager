@@ -1,84 +1,119 @@
 <p-toast></p-toast>
-<div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
+<div class="container mx-auto px-4 py-6 pb-28 max-w-3xl min-h-screen transition-colors duration-200">
 
-  <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
-    {{'side-menu.shopping-list'|translate}}<i class="pi pi-shopping-cart ml-2" style="font-size: 1.25rem"></i>
-  </h2>
-  <button pButton pRipple type="button" icon="pi pi-calculator" label="Calculatrice / Factures" class="p-button-outlined p-button-sm p-button-secondary" routerLink="/receipt-splitter"></button>
+  <!-- Header & Top Action -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h2 class="text-3xl font-black tracking-tight text-surface-900 dark:text-white m-0 flex items-center gap-2">
+        {{'side-menu.shopping-list'|translate}} <i class="pi pi-shopping-cart text-primary-500"></i>
+      </h2>
+      <p class="text-surface-500 dark:text-surface-400 text-sm m-0 mt-1">Gérez vos courses en un clin d'œil</p>
+    </div>
+    <button pButton pRipple type="button" icon="pi pi-calculator" label="Calculatrice" class="p-button-outlined p-button-secondary p-button-rounded p-button-sm font-bold shrink-0" routerLink="/receipt-splitter"></button>
+  </div>
 
-  <form [formGroup]="addItemForm" (ngSubmit)="handleAddItem()" class="mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-    <div class="flex flex-col md:flex-row items-end gap-3">
-      <div class="flex-grow w-full md:w-auto flex flex-col gap-1">
-        <label for="itemName" class="text-sm font-medium text-surface-700 dark:text-surface-200">Nom de l'article</label>
-        <p-autoComplete inputId="itemName" formControlName="name" [suggestions]="nameSuggestions" (completeMethod)="searchNameSuggestions($event)" placeholder="Rechercher ou saisir..." styleClass="w-full" inputStyleClass="w-full"></p-autoComplete>
-        <div *ngIf="addItemForm.get('name')?.invalid && addItemForm.get('name')?.touched" class="p-error text-xs mt-1">Le nom de l'article est requis.</div>
+  <!-- Sleek Mobile Quick-Add Bar -->
+  <form [formGroup]="addItemForm" (ngSubmit)="handleAddItem()" class="mb-8 bg-white dark:bg-surface-800 p-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+    <div class="flex flex-col gap-3">
+      
+      <!-- Input Field -->
+      <div class="w-full">
+        <p-autoComplete inputId="itemName" formControlName="name" [suggestions]="nameSuggestions" (completeMethod)="searchNameSuggestions($event)" placeholder="Ajouter un article (ex: Lait, Œufs...)" styleClass="w-full" inputStyleClass="w-full !rounded-2xl !py-3 !px-4 !border-surface-200 dark:!border-surface-700"></p-autoComplete>
       </div>
-      <div class="flex flex-col sm:flex-row items-end gap-2 w-full md:w-auto flex-shrink-0">
-        <div class="w-full sm:w-24 flex-shrink-0 flex flex-col gap-1">
-            <label for="itemQuantityAdd" class="text-sm font-medium text-surface-700 dark:text-surface-200">Quantité</label>
-            <p-inputNumber inputId="itemQuantityAdd" formControlName="quantity" [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal" [min]="1" decrementButtonClass="p-button-secondary p-button-outlined p-button-sm !px-1.5" incrementButtonClass="p-button-secondary p-button-outlined p-button-sm !px-1.5" incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" styleClass="w-full" inputStyleClass="w-full p-inputtext-sm text-center" [ngClass]="{'p-invalid': addItemForm.get('quantity')?.invalid && addItemForm.get('quantity')?.touched}"></p-inputNumber>
-            <div *ngIf="addItemForm.get('quantity')?.invalid && addItemForm.get('quantity')?.touched" class="p-error text-xs mt-1">Quantité min. 1.</div>
+
+      <!-- Controls Row: Store + Quantity + Submit -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Store Dropdown -->
+        <div class="flex-grow">
+          <p-dropdown inputId="itemStore" formControlName="store" [options]="storeOptions" optionLabel="label" optionValue="value" styleClass="w-full !rounded-2xl !border-surface-200 dark:!border-surface-700" appendTo="body"></p-dropdown>
         </div>
-        <div class="w-full sm:w-48 flex-shrink-0 flex flex-col gap-1">
-          <label for="itemStore" class="text-sm font-medium text-surface-700 dark:text-surface-200">Magasin</label>
-          <p-dropdown inputId="itemStore" formControlName="store" [options]="storeOptions" placeholder="Choisir" optionLabel="label" optionValue="value" styleClass="w-full" [ngClass]="{'p-invalid': addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched}" appendTo="body"></p-dropdown>
-            <div *ngIf="addItemForm.get('store')?.invalid && addItemForm.get('store')?.touched" class="p-error text-xs mt-1">Le magasin est requis.</div>
+
+        <!-- Quantity Stepper Pill -->
+        <div class="flex items-center bg-surface-100 dark:bg-surface-700/60 rounded-2xl p-1 border border-surface-200 dark:border-surface-700 shrink-0">
+          <button type="button" (click)="decrementQuantityForm()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-200 shadow-sm active:scale-95 transition-transform">
+            <i class="pi pi-minus text-xs"></i>
+          </button>
+          <span class="w-8 text-center font-bold text-sm text-surface-800 dark:text-surface-100 tabular-nums">
+            {{ addItemForm.get('quantity')?.value || 1 }}
+          </span>
+          <button type="button" (click)="incrementQuantityForm()" class="w-8 h-8 flex items-center justify-center rounded-xl bg-white dark:bg-surface-800 text-surface-700 dark:text-surface-200 shadow-sm active:scale-95 transition-transform">
+            <i class="pi pi-plus text-xs"></i>
+          </button>
         </div>
-        <div class="flex-shrink-0 w-full sm:w-auto">
-          <button pButton pRipple type="submit" icon="pi pi-plus" label="Ajouter" aria-label="Ajouter l'article" [loading]="isAdding()" [disabled]="isAdding() || addItemForm.invalid" class="p-button-primary w-full"></button>
-        </div>
+
+        <!-- Submit Button -->
+        <button pButton pRipple type="submit" icon="pi pi-plus" aria-label="Ajouter" [loading]="isAdding()" [disabled]="isAdding() || addItemForm.invalid" class="p-button-primary p-button-rounded !w-12 !h-12 shrink-0 shadow-md shadow-primary-500/20 flex items-center justify-center"></button>
       </div>
+
     </div>
   </form>
 
-  <div *ngIf="groupedShoppingList().length === 0 && !isAdding()" class="text-center py-10 px-4 bg-surface-100 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700">
-    <i class="pi pi-shopping-cart text-4xl text-surface-400 dark:text-surface-500 mb-3"></i>
-    <p class="text-lg font-medium text-surface-600 dark:text-surface-300">Votre liste est vide !</p>
-    <p class="text-sm text-surface-500 dark:text-surface-400">Ajoutez des articles en utilisant le formulaire ci-dessus.</p>
+  <!-- Empty State -->
+  <div *ngIf="groupedShoppingList().length === 0 && !isAdding()" class="flex flex-col items-center justify-center py-16 px-4 bg-white dark:bg-surface-800 rounded-3xl border border-dashed border-surface-300 dark:border-surface-600 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]">
+    <div class="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-full mb-4">
+      <i class="pi pi-shopping-cart text-4xl text-emerald-500"></i>
+    </div>
+    <h3 class="text-xl font-bold text-surface-900 dark:text-surface-100 mb-2 m-0">Votre liste est vide !</h3>
+    <p class="text-surface-500 dark:text-surface-400 text-center text-sm m-0">Ajoutez des articles ci-dessus pour commencer vos courses.</p>
   </div>
 
+  <!-- Shopping List Groups (By Store) -->
   <div *ngIf="groupedShoppingList().length > 0" class="flex flex-col gap-6">
-    <div *ngFor="let group of groupedShoppingList(); trackBy: trackStoreGroup" class="store-group bg-surface-50 dark:bg-surface-800 p-3 md:p-4 rounded-lg shadow-md border border-surface-200 dark:border-surface-700">
-      <div class="flex items-center mb-3 pb-2 border-b border-surface-200 dark:border-surface-600">
-        <p-tag [value]="group.storeDisplayName" [severity]="group.severity" styleClass="text-base md:text-lg"></p-tag>
+    <div *ngFor="let group of groupedShoppingList(); trackBy: trackStoreGroup" class="bg-white dark:bg-surface-800 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-surface-100 dark:border-surface-700 p-5 overflow-hidden">
+      
+      <!-- Store Header Banner -->
+      <div class="flex items-center justify-between mb-4 pb-3 border-b border-surface-100 dark:border-surface-700/60">
+        <p-tag [value]="group.storeDisplayName" [severity]="group.severity" styleClass="text-sm font-extrabold px-3 py-1 rounded-full uppercase tracking-wider"></p-tag>
+        <span class="text-xs font-bold text-surface-400 dark:text-surface-500">{{ group.items.length }} article(s)</span>
       </div>
 
-      <div class="flex flex-col gap-3"> <div *ngFor="let item of group.items; trackBy: trackById"
-             class="item-container p-2.5 bg-surface-0 dark:bg-surface-700 rounded-md shadow-sm border border-surface-100 dark:border-surface-600"
-             [ngClass]="{'opacity-60 dark:opacity-50': item.bought}">
+      <!-- Items Stack -->
+      <div class="flex flex-col gap-2.5"> 
+        <div *ngFor="let item of group.items; trackBy: trackById"
+             class="flex items-center justify-between p-3.5 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-100 dark:border-surface-700/50 transition-all duration-200"
+             [ngClass]="{'opacity-50 bg-surface-100/50 dark:bg-surface-900/20': item.bought}">
 
-          <div class="flex items-center justify-between gap-2">
-            <span class="item-name flex-grow font-medium text-surface-700 dark:text-surface-200 truncate"
-                  [ngClass]="{'line-through text-surface-400 dark:text-surface-500': item.bought}"
-                  [pTooltip]="item.name" tooltipPosition="top" [tooltipOptions]="mainActionTooltipOptions"> {{ item.name }}
+          <!-- Tappable Row Item Name & Checkbox area -->
+          <div class="flex items-center gap-3 flex-grow cursor-pointer select-none min-w-0 pr-2" (click)="toggleBoughtStatus(item)">
+            <!-- Custom Checkbox Bubble -->
+            <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors shrink-0"
+                 [ngClass]="item.bought ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-800'">
+              <i *ngIf="item.bought" class="pi pi-check text-[10px] font-bold"></i>
+            </div>
+
+            <span class="font-bold text-surface-800 dark:text-surface-100 truncate text-base"
+                  [ngClass]="{'line-through text-surface-400 dark:text-surface-500 font-normal': item.bought}"> 
+              {{ item.name }}
             </span>
-            <button pButton type="button"
-                    [icon]="item.bought ? 'pi pi-undo' : 'pi pi-check-circle'"
-                    [pTooltip]="item.bought ? 'Marquer non acheté' : 'Marquer acheté'" tooltipPosition="left"
-                    [tooltipOptions]="mainActionTooltipOptions" (click)="toggleBoughtStatus(item)"
-                    class="p-button-rounded p-button-text flex-shrink-0 !w-8 !h-8"
-                    [ngClass]="item.bought ? 'p-button-warning hover:bg-yellow-500/10 dark:hover:bg-yellow-300/10' : 'p-button-success hover:bg-green-500/10 dark:hover:bg-green-300/10'">
-            </button>
           </div>
 
-<div class="custom-quantity-control flex items-center justify-start gap-1.5 mt-1.5">
-            <button pButton type="button" icon="pi pi-minus"
-                    (click)="decrementQuantity(item)"
-                    [disabled]="((item.quantity ?? 1) <= 1) || item.bought" aria-label="Diminuer la quantité"
-                    pTooltip="Diminuer" tooltipPosition="bottom" [tooltipOptions]="quantityButtonTooltipOptions"
-                    class="p-button-rounded p-button-secondary p-button-outlined p-button-sm !w-7 !h-7 !text-xs">
-            </button>
-            <span class="quantity-display text-sm font-medium text-surface-600 dark:text-surface-300 w-6 text-center tabular-nums">
-              {{ item.quantity ?? 1 }} </span>
-            <button pButton type="button" icon="pi pi-plus"
-                    (click)="incrementQuantity(item)"
-                    [disabled]="item.bought" aria-label="Augmenter la quantité"
-                    pTooltip="Augmenter" tooltipPosition="bottom" [tooltipOptions]="quantityButtonTooltipOptions"
-                    class="p-button-rounded p-button-secondary p-button-outlined p-button-sm !w-7 !h-7 !text-xs">
-            </button>
+          <!-- Quantity Controls & Actions -->
+          <div class="flex items-center gap-2 shrink-0">
+            
+            <!-- Quantity adjustment pills -->
+            <div class="flex items-center bg-white dark:bg-surface-800 rounded-xl px-1.5 py-0.5 border border-surface-200 dark:border-surface-700 shadow-sm" *ngIf="!item.bought">
+              <button type="button" (click)="decrementQuantity(item)" [disabled]="(item.quantity ?? 1) <= 1" class="w-6 h-6 flex items-center justify-center text-surface-500 hover:text-surface-800 disabled:opacity-30">
+                <i class="pi pi-minus text-[10px]"></i>
+              </button>
+              <span class="w-6 text-center font-extrabold text-xs text-surface-700 dark:text-surface-200 tabular-nums">
+                {{ item.quantity ?? 1 }}
+              </span>
+              <button type="button" (click)="incrementQuantity(item)" class="w-6 h-6 flex items-center justify-center text-surface-500 hover:text-surface-800">
+                <i class="pi pi-plus text-[10px]"></i>
+              </button>
+            </div>
+
+            <!-- Static quantity badge if bought -->
+            <span *ngIf="item.bought" class="text-xs font-bold px-2.5 py-1 bg-surface-200/60 dark:bg-surface-700 text-surface-500 dark:text-surface-400 rounded-full tabular-nums">
+              x{{ item.quantity ?? 1 }}
+            </span>
+
           </div>
+
         </div>
       </div>
+
     </div>
   </div>
 </div>

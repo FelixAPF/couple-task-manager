@@ -1,32 +1,29 @@
-/* c:\Users\Felix\Documents\Projects\couple-task-manager\client\src\app\header\navbar\navbar.component.css */
-
 .navbar-inner-container {
-  /* Apply padding ONLY to the top, using the safe area inset */
-padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
-  /* Ensure it takes full dimensions */
+  padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
   width: 100%;
   height: 100%;
-
-  /* Use flex to position children (left/right sections) */
   display: flex;
   justify-content: space-between;
-
-  /* --- ADD THIS LINE BACK --- */
-  /* Vertically center the direct children (left/right sections) */
   align-items: center;
-
-  /* Ensure padding doesn't increase the calculated size */
   box-sizing: border-box;
 }
 
-/* Optional: Explicitly ensure the parent nav has no top padding itself */
 :host nav {
   padding-top: 0 !important;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
 }
 
-/* Ensure the mobile menu panel also respects safe area */
 .mobile-menu-panel {
-  /* Adds to existing p-4 */
-  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
+}
+
+/* Smooth Scrollbar for drawer links */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--surface-300, #cbd5e1);
+  border-radius: 4px;
 }

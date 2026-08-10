@@ -1,13 +1,10 @@
 <div class="h-full w-full relative block" *ngIf="isBirthday else regularTemplate">
-  
   <app-balloon-container 
       class="h-full w-full block"
       [numberOfBalloons]="30" 
       [minDuration]="10" 
       [maxDuration]="20">
-      
       <ng-container *ngTemplateOutlet="template"></ng-container>
-      
   </app-balloon-container>
 </div>
 
@@ -16,19 +13,19 @@
 </ng-template>
 
 <ng-template #template>
-  <p-card [styleClass]="'day-card h-full flex flex-col bg-surface-0 dark:bg-surface-800 shadow-md hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1 rounded-xl overflow-hidden cursor-default'"
+  <p-card [styleClass]="'day-card h-full flex flex-col bg-white dark:bg-surface-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 ease-in-out hover:-translate-y-1 rounded-3xl overflow-hidden cursor-default'"
       [ngClass]="borderHighlightClass">
 
       <ng-template pTemplate="header">
-        <div class="relative p-3 bg-gradient-to-b from-surface-50 to-surface-100 dark:from-surface-700 dark:to-surface-800 border-b border-surface-200 dark:border-surface-600 flex items-center justify-center">
+        <div class="relative p-4 bg-gradient-to-b from-surface-50 to-white dark:from-surface-800/80 dark:to-surface-800 border-b border-surface-100 dark:border-surface-700/50 flex items-center justify-center">
           
-          <h3 class="text-sm uppercase tracking-wider font-bold text-primary-600 dark:text-primary-300 m-0">
+          <h3 class="text-xs uppercase tracking-widest font-black text-surface-400 dark:text-surface-500 m-0">
             {{ title }}
           </h3>
 
-          <div *ngIf="meal" class="absolute right-2 flex items-center">
+          <div *ngIf="meal" class="absolute right-3 flex items-center">
             <button pButton pRipple type="button" icon="pi pi-trash"
-                  class="p-button-rounded p-button-text p-button-sm w-8 h-8 !p-0 text-surface-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                  class="p-button-rounded p-button-text p-button-sm w-8 h-8 !p-0 text-surface-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
                   (click)="onRemoveClick($event)" aria-label="Supprimer le repas"
                   [pTooltip]="'meals.delete' | translate" tooltipPosition="left">
             </button>
@@ -38,30 +35,30 @@
       </ng-template>
 
       <ng-template pTemplate="content">
-        <div class="p-3 flex-grow flex flex-col justify-center items-center text-center min-h-[140px]">
+        <div class="p-4 flex-grow flex flex-col justify-center items-center text-center min-h-[140px]">
           
           <div *ngIf="meal" class="w-full flex flex-col items-center">
             
-            <div (click)="openRecipeView()" class="relative inline-block mb-3 cursor-pointer group rounded-xl"> 
+            <div (click)="openRecipeView()" class="relative inline-block mb-4 cursor-pointer group rounded-2xl"> 
               
-              <div class="overflow-hidden rounded-xl shadow-sm">
+              <div class="overflow-hidden rounded-2xl shadow-sm border border-surface-100 dark:border-surface-700/50">
                 <img *ngIf="meal.recipe.imageUrl"
                      [src]="meal.recipe.imageUrl"
                      [alt]="recipeName"
-                     class="w-24 h-24 object-cover transition-transform duration-500 group-hover:scale-110"> 
+                     class="w-28 h-28 object-cover transition-transform duration-500 group-hover:scale-110"> 
                 <div *ngIf="!meal.recipe.imageUrl" 
-                     class="w-24 h-24 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-600 text-surface-400 dark:text-surface-500 transition-transform duration-500 group-hover:scale-110">
-                  <i class="pi pi-image text-3xl opacity-50"></i>
+                     class="w-28 h-28 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-600 text-surface-400 dark:text-surface-500 transition-transform duration-500 group-hover:scale-110">
+                  <i class="pi pi-image text-4xl opacity-40"></i>
                 </div>
               </div>
 
-              <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none"></div>
+              <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none"></div>
 
                <div *ngIf="meal.isThawingNeeded" 
-                   class="absolute -top-2 -left-2 z-20 flex items-center justify-center w-8 h-8 bg-blue-50 dark:bg-blue-900 text-blue-500 dark:text-blue-300 rounded-full shadow-md border-2 border-white dark:border-surface-800 transition-transform duration-300 hover:scale-110"
+                   class="absolute -top-3 -left-3 z-20 flex items-center justify-center w-8 h-8 bg-blue-50 dark:bg-blue-900/80 text-blue-500 dark:text-blue-300 rounded-full shadow-md border-2 border-white dark:border-surface-800 transition-transform duration-300 hover:scale-110"
                    pTooltip="Décongélation requise" 
                    tooltipPosition="top">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-[15px] h-[15px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="2" y1="12" x2="22" y2="12"></line>
                   <line x1="12" y1="2" x2="12" y2="22"></line>
                   <line x1="20" y1="16" x2="16" y2="12"></line>
@@ -79,7 +76,7 @@
                  <img
                   [src]="assignee.imageUrl || 'assets/placeholder.jpg'"
                   [alt]="'Photo de ' + (assignee.name || 'Membre')"
-                  class="w-9 h-9 rounded-full object-cover border-2 border-white dark:border-surface-800 shadow-md"
+                  class="w-10 h-10 rounded-full object-cover border-[3px] border-white dark:border-surface-800 shadow-md"
                   onError="this.src='assets/placeholder.jpg'"
                   [pTooltip]="assignee.name" 
                   tooltipPosition="bottom"
@@ -88,12 +85,12 @@
 
             </div>
 
-            <p class="text-sm font-semibold text-surface-700 dark:text-surface-100 mb-2 w-full line-clamp-2 leading-tight min-h-[2.5rem] flex items-center justify-center"
+            <p class="text-base font-bold text-surface-800 dark:text-surface-100 mb-2 w-full line-clamp-2 leading-tight min-h-[2.5rem] flex items-center justify-center"
               [pTooltip]="recipeName" tooltipPosition="top">
               {{ recipeName }}
             </p>
             
-            <div *ngIf="meal.location" class="inline-flex items-center gap-1 px-2 py-1 bg-surface-100 dark:bg-surface-700 rounded-md text-xs font-medium text-surface-500 dark:text-surface-300 mb-2">
+            <div *ngIf="meal.location" class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-50 dark:bg-surface-700/50 rounded-full text-xs font-semibold text-surface-500 dark:text-surface-300 border border-surface-100 dark:border-surface-700">
               <i class="pi pi-map-marker text-[10px]"></i>
               <span>{{ meal.location }}</span>
             </div>

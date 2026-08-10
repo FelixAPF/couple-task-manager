@@ -81,6 +81,18 @@ export class ShoppingListComponent implements OnInit {
     this.loadStoreOptions();
   }
 
+  incrementQuantityForm(): void {
+    const current = this.addItemForm.get('quantity')?.value || 1;
+    this.addItemForm.patchValue({ quantity: current + 1 });
+  }
+
+  decrementQuantityForm(): void {
+    const current = this.addItemForm.get('quantity')?.value || 1;
+    if (current > 1) {
+      this.addItemForm.patchValue({ quantity: current - 1 });
+    }
+  }
+
   loadItems(): void {
     this.shoppingService.retrieveShoppingListNotBought()
       .subscribe({
@@ -125,7 +137,7 @@ export class ShoppingListComponent implements OnInit {
           const newItem = { ...addedItem, quantity: Math.max(1, addedItem.quantity || 1) };
           this.shoppingItemsFlat.update(currentItems => [...currentItems, newItem]);
           this.messageService.add({ severity: 'success', summary: 'Ajouté', detail: `"${newItem.name}" ajouté.` });
-          this.addItemForm.reset({ store: Store.AUTRE, name: '', quantity: 1 });
+          this.addItemForm.reset({ store: addedItem.store, name: '', quantity: 1 });
         },
         error: (err) => this.handleError(err, 'Impossible d\'ajouter l\'article.')
       });

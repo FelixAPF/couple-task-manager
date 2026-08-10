@@ -1,12 +1,59 @@
-<div class="container p-4 mx-auto flex flex-col flex-grow pb-12">
+<div class="container mx-auto flex flex-col flex-grow pb-12 pt-4">
   <p-toast position="bottom-center"></p-toast>
   
-  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700" [formGroup]="formGroup">
-    <div class="flex flex-wrap justify-center sm:justify-start gap-2">
+  <!-- "Completed Today" Floating Banner -->
+  <div *ngIf="todayCompleted && todayCompleted.length > 0" 
+       class="mb-8 relative overflow-hidden bg-white dark:bg-surface-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700 p-5 transition-all animate-fadein">
+    <div class="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-400 to-teal-500"></div>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-4">
+      
+      <div class="flex items-center gap-3">
+        <div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-2xl">
+          <i class="pi pi-star-fill text-emerald-600 dark:text-emerald-400 text-xl"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-surface-900 dark:text-surface-100 m-0">Accomplissements du jour</h3>
+          <p class="text-xs text-surface-500 dark:text-surface-400 m-0 mt-1">{{todayCompleted.length}} tâche(s) rayée(s) de la liste !</p>
+        </div>
+      </div>
 
-    <div class="w-full sm:w-auto">
+      <div class="flex flex-wrap gap-2">
+        <div *ngFor="let log of todayCompleted" class="flex items-center gap-2 bg-surface-50 dark:bg-surface-900/50 px-3 py-1.5 rounded-full border border-surface-200 dark:border-surface-700">
+          <img [src]="log.completedBy?.imageUrl || 'assets/placeholder.jpg'" class="w-6 h-6 rounded-full object-cover shadow-sm" [pTooltip]="log.completedBy?.name" tooltipPosition="top">
+          <span class="text-xs font-medium text-surface-700 dark:text-surface-300 max-w-[120px] truncate">
+            <span class="line-through opacity-70">{{log.taskTitle}}</span>
+          </span>
+          
+          <button *ngIf="log.completedBy?.id !== selectedAssignee?.id && !log.isThanked" 
+                  (click)="sendThankYou(log)"
+                  class="ml-1 text-lg hover:scale-110 transition-transform active:scale-95"
+                  pTooltip="Remercier pour cette tâche !" tooltipPosition="top">
+            👋
+          </button>
+          
+          <span *ngIf="log.isThanked" class="ml-1 text-red-500 animate-fadein" pTooltip="Remercié!" tooltipPosition="top">
+            <i class="pi pi-heart-fill text-xs"></i>
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6" [formGroup]="formGroup">
+    <div class="flex items-center gap-3">
+      <h2 class="text-3xl font-black tracking-tight text-surface-900 dark:text-white m-0">
+        Mes Tâches
+      </h2>
+      <span class="bg-surface-200 dark:bg-surface-700 text-surface-600 dark:text-surface-300 font-bold px-3 py-1 rounded-full text-sm">
+        {{ tasks.length }}
+      </span>
+    </div>
+
+    <div class="w-full sm:w-48">
       <p-dropdown
-        class="w-full"
+        styleClass="w-full rounded-2xl border-surface-200 dark:border-surface-700 shadow-sm"
         formControlName="displayDuration"
         (onChange)="onFrequencySelectChange($event)"
         [options]="options"
@@ -16,99 +63,70 @@
       ></p-dropdown>
     </div>
   </div>
-</div>
 
-<div *ngIf="todayCompleted && todayCompleted.length > 0" class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4 shadow-sm animate-fadein">
-    <h3 class="text-sm font-bold text-green-800 dark:text-green-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-      <i class="pi pi-star-fill text-yellow-500"></i> Complétées aujourd'hui
-    </h3>
-    <div class="flex flex-wrap gap-3">
-      <div *ngFor="let log of todayCompleted" class="flex items-center gap-2 bg-white dark:bg-surface-800 px-3 py-2 rounded-full shadow-sm border border-surface-100 dark:border-surface-700 text-sm">
-        <img [src]="log.completedBy?.imageUrl || 'assets/placeholder.jpg'" class="w-6 h-6 rounded-full border border-green-400 object-cover" [pTooltip]="log.completedBy?.name" tooltipPosition="top">
-        <span class="text-surface-600 dark:text-surface-300 flex items-center gap-2">
-          <span>
-            <span class="font-medium text-surface-900 dark:text-surface-100">{{log.completedBy?.name}}</span> 
-            a fait : <span class="line-through decoration-green-500">{{log.taskTitle}}</span>
-          </span>
-          
-          <button *ngIf="log.completedBy?.id !== selectedAssignee?.id && !log.isThanked" 
-                  (click)="sendThankYou(log)"
-                  class="ml-2 hover:bg-surface-200 dark:hover:bg-surface-600 p-1 rounded-full transition-colors"
-                  pTooltip="Remercier pour cette tâche !" tooltipPosition="top">
-            👋
-          </button>
-          
-          <span *ngIf="log.isThanked" class="ml-2 text-xs text-primary-500 font-medium">
-            <i class="pi pi-heart-fill text-red-500"></i> Remercié
-          </span>
-        </span>
-      </div>
+  <!-- Empty State -->
+  <div *ngIf="!tasks || tasks.length === 0" class="flex flex-col items-center justify-center py-16 px-4 bg-white dark:bg-surface-800 rounded-3xl border border-dashed border-surface-300 dark:border-surface-600">
+    <div class="bg-emerald-50 dark:bg-emerald-900/20 p-6 rounded-full mb-4">
+      <i class="pi pi-check text-5xl text-emerald-500"></i>
     </div>
-  </div>
-  <div class="flex justify-center items-center gap-3 mb-6">
-    <h2 class="text-2xl font-semibold text-center text-surface-800 dark:text-surface-100">
-      {{ 'my-tasks.my-tasks' | translate : { assigneeName : selectedAssignee?.name || "" } }}
-    </h2>
+    <h3 class="text-xl font-bold text-surface-900 dark:text-surface-100 mb-2">Tout est propre !</h3>
+    <p class="text-surface-500 dark:text-surface-400 text-center max-w-sm">Aucune tâche assignée pour cette période. Profitez de votre temps libre !</p>
   </div>
 
-  <div *ngIf="!tasks || tasks.length === 0" class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border border-dashed rounded-lg bg-surface-100 dark:bg-surface-800">
-    <i class="pi pi-check-square mr-2 text-xl align-middle"></i>
-    <span>Aucune tâche à faire pour cette période !</span>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div *ngFor="let task of tasks" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex flex-col justify-between hover:shadow-md transition-shadow">
+  <!-- Task Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div *ngFor="let task of tasks" class="bg-white dark:bg-surface-800 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none border border-surface-100 dark:border-surface-700 p-6 flex flex-col justify-between group hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1">
         
         <div>
-            <div class="flex justify-between items-start mb-2">
-                <h3 class="font-bold text-lg text-slate-800">{{ task.title }}</h3>
-            </div>
+            <h3 class="font-bold text-xl text-surface-900 dark:text-white mb-2 leading-tight">{{ task.title }}</h3>
             
-            <p class="text-slate-500 text-sm line-clamp-2 mb-4">
-                {{ task.description || 'No description provided.' }}
+            <p class="text-surface-500 dark:text-surface-400 text-sm line-clamp-2 mb-5 min-h-[2.5rem]">
+                {{ task.description || 'Aucune description fournie.' }}
             </p>
 
-            <div class="flex flex-wrap gap-2 mb-4">
-                
-                <span class="text-xs font-medium px-2 py-1 rounded-md flex items-center border" 
-                      [ngClass]="datePastDeadline(task.dueDate) ? 'bg-red-50 text-red-600 border-red-200' : 'bg-surface-50 text-surface-600 border-surface-200 dark:bg-surface-800 dark:border-surface-700 dark:text-surface-300'" 
+            <div class="flex flex-wrap gap-2 mb-6">
+                <!-- Deadline Pill -->
+                <span class="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5" 
+                      [ngClass]="datePastDeadline(task.dueDate) ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300'" 
                       *ngIf="task.dueDate">
-                    <i class="pi pi-calendar mr-1" [ngClass]="{'text-red-500': datePastDeadline(task.dueDate)}"></i> 
-                    {{ task.dueDate | date:'shortDate' }}
-                    <span *ngIf="datePastDeadline(task.dueDate)" class="ml-1 font-bold">(En retard)</span>
+                    <i class="pi pi-calendar text-[10px]" [ngClass]="{'text-red-500 dark:text-red-400': datePastDeadline(task.dueDate)}"></i> 
+                    {{ task.dueDate | date:'d MMM' }}
+                    <span *ngIf="datePastDeadline(task.dueDate)">(En retard)</span>
                 </span>
 
-                <span class="text-xs font-medium bg-slate-100 text-slate-600 px-2 py-1 rounded-md flex items-center border border-slate-200 dark:bg-surface-800 dark:border-surface-700 dark:text-surface-300" *ngIf="task.room">
-                    <i class="pi pi-map-marker mr-1"></i> {{ task.room }}
+                <!-- Room Pill -->
+                <span class="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400" *ngIf="task.room">
+                    <i class="pi pi-map-marker text-[10px]"></i> 
+                    {{ task.room }}
                 </span>
             </div>
         </div>
 
-        <div class="flex items-center justify-end border-t border-slate-100 pt-4 mt-2">
+        <!-- Actions -->
+        <div class="flex items-center justify-end pt-4 mt-auto border-t border-surface-100 dark:border-surface-700/50">
             
             <ng-container *ngIf="task.procedure; else standardComplete">
                 <button pButton pRipple 
-                        label="Start Procedure" 
+                        label="Démarrer la procédure" 
                         icon="pi pi-play"
-                        class="p-button-rounded p-button-primary shadow-sm font-bold w-full"
+                        class="p-button-rounded p-button-primary w-full font-bold shadow-sm"
                         (click)="startProcedure(task)">
                 </button>
             </ng-container>
 
             <ng-template #standardComplete>
-                <div class="flex w-full gap-2">
+                <div class="flex w-full items-center justify-between gap-3">
                     <button pButton pRipple 
                             label="Ignorer"
-                            icon="pi pi-step-forward"
-                            class="p-button-rounded p-button-secondary p-button-outlined shadow-sm font-bold flex-1"
+                            class="p-button-text p-button-secondary p-button-rounded font-semibold flex-1 hover:bg-surface-100 dark:hover:bg-surface-700"
                             (click)="skipTask(task)">
                     </button>
+                    
                     <button pButton pRipple 
-                            label="Complete"
+                            label="Compléter"
                             icon="pi pi-check"
-                            class="p-button-rounded p-button-success p-button-outlined shadow-sm font-bold flex-1"
-                            (click)="completeTask(task)"
-                            >
+                            class="p-button-rounded p-button-success shadow-md shadow-green-500/20 font-bold flex-1"
+                            (click)="completeTask(task)">
                     </button>
                 </div>
             </ng-template>

@@ -1,21 +1,25 @@
 :host ::ng-deep .recipe-details-accordion .p-accordion-header-link {
-    padding: 0.75rem 1rem; /* Adjust padding */
-    font-size: 0.875rem; /* text-sm */
-  }
+  padding: 1rem 0.5rem; 
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none !important;
+  background: transparent !important;
+}
   
-  :host ::ng-deep .recipe-details-accordion .p-accordion-content {
-    padding: 0.5rem 1rem 1rem 1rem; /* Adjust padding */
-  }
+:host ::ng-deep .recipe-details-accordion .p-accordion-content {
+  padding: 0.5rem 0.5rem 1rem 0.5rem; 
+  border: none !important;
+  background: transparent !important;
+}
   
-  /* Add line-clamp utility if not available via Tailwind plugin */
-  .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-  }
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
 
-  .description-paragraph {
-    white-space: pre-wrap; /* Preserves whitespace (newlines, spaces) and allows text wrapping */
-    word-break: break-word; /* Optional: Helps break long words/URLs if they might overflow */
-  }
+.description-paragraph {
+  white-space: pre-wrap; 
+  word-break: break-word; 
+}

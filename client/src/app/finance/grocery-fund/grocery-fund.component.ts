@@ -12,6 +12,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ChartModule } from 'primeng/chart';
 import { FinanceService } from '../../service/finance.service';
 import { GroceryTransaction } from '../../model/finance.model';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-grocery-fund',
@@ -20,7 +21,7 @@ import { GroceryTransaction } from '../../model/finance.model';
     CommonModule, ReactiveFormsModule, FormsModule, 
     ButtonModule, CardModule, DialogModule, 
     InputTextModule, InputNumberModule, CalendarModule, 
-    SelectButtonModule, AvatarModule, ChartModule
+    SelectButtonModule, AvatarModule, ChartModule, RouterModule
   ],
   templateUrl: './grocery-fund.component.html'
 })

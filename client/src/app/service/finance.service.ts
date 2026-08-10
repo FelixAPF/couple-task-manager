@@ -7,7 +7,9 @@ import {
   BankAccount, 
   PaycheckConfig, 
   PersonalExpense,
-  SubAccount
+  SubAccount,
+  GroceryFund,
+  GroceryTransaction
 } from '../model/finance.model';
 import { tap } from 'rxjs/operators';
 import { of, Observable } from 'rxjs';
@@ -24,6 +26,10 @@ export class FinanceService {
   public bankAccounts = signal<BankAccount[]>([]);
   public personalExpenses = signal<PersonalExpense[]>([]);
   public paycheckConfig = signal<PaycheckConfig | null>(null);
+  
+  // NEW: Grocery signals
+  public groceryFund = signal<GroceryFund | null>(null);
+  public groceryTransactions = signal<GroceryTransaction[]>([]);
 
   public skippedSetupSteps = signal<string[]>(JSON.parse(localStorage.getItem('financeWizardSkipped') || '[]'));
 
@@ -43,7 +49,13 @@ export class FinanceService {
     this.http.get<BankAccount[]>(`${this.apiUrl}/bank-accounts`).subscribe(res => this.bankAccounts.set(res));
     this.http.get<PersonalExpense[]>(`${this.apiUrl}/personal-expenses`).subscribe(res => this.personalExpenses.set(res));
     this.http.get<PaycheckConfig>(`${this.apiUrl}/paycheck-config`).subscribe(res => this.paycheckConfig.set(res));
+    
+    // NEW: Load grocery data
+    this.http.get<GroceryFund>(`${this.apiUrl}/grocery-fund`).subscribe(res => this.groceryFund.set(res));
+    this.http.get<GroceryTransaction[]>(`${this.apiUrl}/grocery-transactions`).subscribe(res => this.groceryTransactions.set(res));
   }
+
+  // --- Existing Methods ---
 
   updateMemberRatio(userId: string, proratedPercentage: number) {
     return this.http.put<HouseholdMemberFinance>(`${this.apiUrl}/members/${userId}`, { proratedPercentage }).pipe(
@@ -130,5 +142,26 @@ export class FinanceService {
       return this.savePaycheckConfig(updatedConfig);
     }
     return of(null);
+  }
+
+  // --- NEW: Grocery Methods ---
+
+  addGroceryTransaction(transaction: GroceryTransaction) {
+    return this.http.post<{ fund: GroceryFund, transaction: GroceryTransaction }>(`${this.apiUrl}/grocery-transactions`, transaction).pipe(
+      tap(res => {
+        this.groceryFund.set(res.fund);
+        // Prepend so the newest shows up first
+        this.groceryTransactions.update(txs => [res.transaction, ...txs]);
+      })
+    );
+  }
+
+  deleteGroceryTransaction(id: string) {
+    return this.http.delete<{ fund: GroceryFund }>(`${this.apiUrl}/grocery-transactions/${id}`).pipe(
+      tap(res => {
+        this.groceryFund.set(res.fund);
+        this.groceryTransactions.update(txs => txs.filter(tx => tx.id !== id));
+      })
+    );
   }
 }

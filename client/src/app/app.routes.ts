@@ -33,18 +33,19 @@ import { PaycheckConfigComponent } from './finance/paycheck-config/paycheck-conf
 import { HouseholdExpensesComponent } from './finance/household-expenses/household-expenses.component';
 import { PersonalExpensesComponent } from './finance/personal-expenses/personal-expenses.component';
 import { BankAccountsComponent } from './finance/bank-accounts/bank-accounts.component';
+import { GroceryFundComponent } from './finance/grocery-fund/grocery-fund.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'privacy-policy', component: PrivacyComponent },
     { path: 'register', component: RegisterComponent },
-    { path: 'server-error', component: ServerErrorComponent }, 
+    { path: 'server-error', component: ServerErrorComponent },
     { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
     { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
-    
+
     // Clean, modular finance routes
-    { 
-        path: 'finance', 
+    {
+        path: 'finance',
         canActivate: [authGuard],
         children: [
             { path: 'dashboard', component: FinanceDashboardComponent },
@@ -52,6 +53,7 @@ export const routes: Routes = [
             { path: 'household-expenses', component: HouseholdExpensesComponent },
             { path: 'personal-expenses', component: PersonalExpensesComponent },
             { path: 'bank-accounts', component: BankAccountsComponent },
+            { path: 'grocery-fund', component: GroceryFundComponent },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]
     },
@@ -59,8 +61,8 @@ export const routes: Routes = [
     { path: 'shopping-list', component: ShoppingListComponent, canActivate: [authGuard] },
     { path: 'procedures', loadComponent: () => import('./procedures/procedures-list/procedures-list.component').then(m => m.ProceduresListComponent), canActivate: [authGuard] },
     {
-        path: 'meals', 
-        component: MealsSectionComponent, 
+        path: 'meals',
+        component: MealsSectionComponent,
         children: [
             { path: '', component: MealsListComponent, outlet: 'meals', canActivate: [authGuard] },
             { path: 'recipes', component: RecipesListComponent, outlet: 'meals', canActivate: [authGuard] },
@@ -98,10 +100,10 @@ export const routes: Routes = [
         ]
     },
     { path: 'receipt-splitter', component: ReceiptSplitterComponent, canActivate: [authGuard] },
-    { 
-        path: 'admin/dashboard', 
-        component: AdminDashboardComponent, 
-        canActivate: [AdminGuard] 
+    {
+        path: 'admin/dashboard',
+        component: AdminDashboardComponent,
+        canActivate: [AdminGuard]
     },
     { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },
 ];

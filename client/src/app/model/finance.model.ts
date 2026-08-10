@@ -52,3 +52,26 @@ export interface TransferCompilation {
   amount: number;
   expenses: string[];
 }
+
+// --- NEW GROCERY MODELS ---
+
+export interface GroceryFund {
+  id?: string;
+  householdId?: string;
+  balance: number;
+}
+
+export interface GroceryTransaction {
+  id?: string;
+  householdId?: string;
+  userId: string;
+  storeName: string;
+  description: string;
+  amount: number; 
+  transactionType: 'ADD' | 'SPEND';
+  date: Date | string;
+  
+  // Optional frontend helper properties mapped from the user list
+  userIconUrl?: string;
+  userName?: string;
+}

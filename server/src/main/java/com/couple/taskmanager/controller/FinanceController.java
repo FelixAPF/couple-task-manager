@@ -134,4 +134,30 @@ public class FinanceController {
         CTMUser user = (CTMUser) userDetails;
         return ResponseEntity.ok(financeService.savePaycheckConfig(config, user));
     }
+
+    // --- NEW: Grocery Fund Endpoints ---
+
+    @GetMapping("/grocery-fund")
+    public ResponseEntity<GroceryFund> getGroceryFund(@AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.getGroceryFund(user.getHousehold()));
+    }
+
+    @GetMapping("/grocery-transactions")
+    public ResponseEntity<List<GroceryTransaction>> getGroceryTransactions(@AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.getGroceryTransactions(user.getHousehold()));
+    }
+
+    @PostMapping("/grocery-transactions")
+    public ResponseEntity<Map<String, Object>> addGroceryTransaction(@RequestBody GroceryTransaction transaction, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.addGroceryTransaction(transaction, user));
+    }
+
+    @DeleteMapping("/grocery-transactions/{id}")
+    public ResponseEntity<Map<String, Object>> deleteGroceryTransaction(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.deleteGroceryTransaction(id, user));
+    }
 }

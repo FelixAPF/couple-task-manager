@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,8 @@ public class FinanceService {
     private final SubAccountRepository subAccountRepository;
     private final PersonalExpenseRepository personalExpenseRepository;
     private final PaycheckConfigRepository paycheckConfigRepository;
+    private final GroceryFundRepository groceryFundRepository;
+    private final GroceryTransactionRepository groceryTransactionRepository;
     private final CTMUserRepository userRepository;
     private final HouseholdRepository householdRepository;
     private final FirebaseMessagingService firebaseMessagingService;
@@ -169,6 +173,72 @@ public class FinanceService {
         existingOpt.ifPresent(existing -> config.setId(existing.getId()));
 
         return paycheckConfigRepository.save(config);
+    }
+
+    // --- NEW: Grocery Fund Methods ---
+
+    public GroceryFund getGroceryFund(Household household) {
+        return groceryFundRepository.findByHouseholdId(household.getId())
+                .orElseGet(() -> {
+                    GroceryFund newFund = new GroceryFund();
+                    newFund.setHousehold(household);
+                    newFund.setBalance(0.0);
+                    return groceryFundRepository.save(newFund);
+                });
+    }
+
+    public List<GroceryTransaction> getGroceryTransactions(Household household) {
+        return groceryTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
+    }
+
+    @Transactional
+    public Map<String, Object> deleteGroceryTransaction(String transactionId, CTMUser user) {
+        Household household = user.getHousehold();
+
+        GroceryTransaction transaction = groceryTransactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        if (!transaction.getHousehold().getId().equals(household.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        GroceryFund fund = getGroceryFund(household);
+
+        // Reverse the balance impact
+        if ("ADD".equalsIgnoreCase(transaction.getTransactionType())) {
+            fund.setBalance(fund.getBalance() - transaction.getAmount());
+        } else if ("SPEND".equalsIgnoreCase(transaction.getTransactionType())) {
+            fund.setBalance(fund.getBalance() + transaction.getAmount());
+        }
+
+        GroceryFund savedFund = groceryFundRepository.save(fund);
+        groceryTransactionRepository.delete(transaction);
+
+        return Map.of("fund", savedFund);
+    }
+    @Transactional
+    public Map<String, Object> addGroceryTransaction(GroceryTransaction transaction, CTMUser user) {
+        Household household = user.getHousehold();
+
+        transaction.setHousehold(household);
+        transaction.setUser(user);
+        if (transaction.getDate() == null) {
+            transaction.setDate(new Date());
+        }
+        GroceryTransaction savedTransaction = groceryTransactionRepository.save(transaction);
+
+        GroceryFund fund = getGroceryFund(household);
+        if ("ADD".equalsIgnoreCase(transaction.getTransactionType())) {
+            fund.setBalance(fund.getBalance() + transaction.getAmount());
+        } else if ("SPEND".equalsIgnoreCase(transaction.getTransactionType())) {
+            fund.setBalance(fund.getBalance() - transaction.getAmount());
+        }
+        GroceryFund savedFund = groceryFundRepository.save(fund);
+
+        return Map.of(
+                "fund", savedFund,
+                "transaction", savedTransaction
+        );
     }
 
     private CTMUser getPartner(CTMUser user) {

@@ -112,7 +112,14 @@
 
     <div class="flex justify-end gap-2 mt-4">
       <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="showTransactionDialog = false"></button>
-      <button pButton label="Sauvegarder" class="p-button-primary" (click)="saveTransaction()" [disabled]="transactionForm.invalid"></button>
+      <button 
+        pButton 
+        label="Sauvegarder" 
+        class="p-button-primary" 
+        (click)="saveTransaction()" 
+        [disabled]="transactionForm.invalid || isSaving"
+        [loading]="isSaving">
+      </button>
     </div>
   </form>
 </p-dialog>

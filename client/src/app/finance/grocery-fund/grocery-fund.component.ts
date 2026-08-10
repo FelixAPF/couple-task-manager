@@ -33,6 +33,7 @@ export class GroceryFundComponent implements OnInit {
   // Chart variables
   chartData: any;
   chartOptions: any;
+  isSaving: boolean = false;
   budgetTarget: number = parseInt(localStorage.getItem('groceryBudgetTarget') || '800', 10);
   
   transactionTypes = [
@@ -151,14 +152,18 @@ export class GroceryFundComponent implements OnInit {
     });
     this.showTransactionDialog = true;
   }
+saveTransaction() {
+    if (this.transactionForm.invalid || this.isSaving) return;
 
-  saveTransaction() {
-    if (this.transactionForm.invalid) return;
+    this.isSaving = true; // Lock the button
 
     const formValue = this.transactionForm.value;
     const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);
 
-    if (!currentUser) return;
+    if (!currentUser) {
+      this.isSaving = false;
+      return;
+    }
 
     const newTx: GroceryTransaction = {
       userId: currentUser.userId,
@@ -169,11 +174,17 @@ export class GroceryFundComponent implements OnInit {
       date: formValue.date!.toISOString()
     };
 
-    this.financeService.addGroceryTransaction(newTx).subscribe(() => {
-      this.showTransactionDialog = false;
+    this.financeService.addGroceryTransaction(newTx).subscribe({
+      next: () => {
+        this.showTransactionDialog = false;
+        this.isSaving = false; // Unlock on success
+      },
+      error: (err) => {
+        console.error('Error saving transaction', err);
+        this.isSaving = false; // Unlock on error
+      }
     });
   }
-
   deleteTransaction(tx: GroceryTransaction) {
     if (tx.id && confirm('Êtes-vous sûr de vouloir supprimer cette transaction ? Le solde sera ajusté.')) {
       this.financeService.deleteGroceryTransaction(tx.id).subscribe();

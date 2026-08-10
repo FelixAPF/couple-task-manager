@@ -191,6 +191,23 @@ public class FinanceService {
         return groceryTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
     }
 
+    private GroceryFund recalculateGroceryFundBalance(Household household) {
+        GroceryFund fund = getGroceryFund(household);
+        List<GroceryTransaction> transactions = groceryTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
+
+        double newBalance = 0.0;
+        for (GroceryTransaction tx : transactions) {
+            if ("ADD".equalsIgnoreCase(tx.getTransactionType())) {
+                newBalance += tx.getAmount();
+            } else if ("SPEND".equalsIgnoreCase(tx.getTransactionType())) {
+                newBalance -= tx.getAmount();
+            }
+        }
+
+        fund.setBalance(newBalance);
+        return groceryFundRepository.save(fund);
+    }
+
     @Transactional
     public Map<String, Object> deleteGroceryTransaction(String transactionId, CTMUser user) {
         Household household = user.getHousehold();
@@ -202,20 +219,14 @@ public class FinanceService {
             throw new RuntimeException("Unauthorized");
         }
 
-        GroceryFund fund = getGroceryFund(household);
-
-        // Reverse the balance impact
-        if ("ADD".equalsIgnoreCase(transaction.getTransactionType())) {
-            fund.setBalance(fund.getBalance() - transaction.getAmount());
-        } else if ("SPEND".equalsIgnoreCase(transaction.getTransactionType())) {
-            fund.setBalance(fund.getBalance() + transaction.getAmount());
-        }
-
-        GroceryFund savedFund = groceryFundRepository.save(fund);
         groceryTransactionRepository.delete(transaction);
+        groceryTransactionRepository.flush(); // Force delete before recalculating
+
+        GroceryFund savedFund = recalculateGroceryFundBalance(household);
 
         return Map.of("fund", savedFund);
     }
+
     @Transactional
     public Map<String, Object> addGroceryTransaction(GroceryTransaction transaction, CTMUser user) {
         Household household = user.getHousehold();
@@ -225,15 +236,11 @@ public class FinanceService {
         if (transaction.getDate() == null) {
             transaction.setDate(new Date());
         }
-        GroceryTransaction savedTransaction = groceryTransactionRepository.save(transaction);
 
-        GroceryFund fund = getGroceryFund(household);
-        if ("ADD".equalsIgnoreCase(transaction.getTransactionType())) {
-            fund.setBalance(fund.getBalance() + transaction.getAmount());
-        } else if ("SPEND".equalsIgnoreCase(transaction.getTransactionType())) {
-            fund.setBalance(fund.getBalance() - transaction.getAmount());
-        }
-        GroceryFund savedFund = groceryFundRepository.save(fund);
+        GroceryTransaction savedTransaction = groceryTransactionRepository.save(transaction);
+        groceryTransactionRepository.flush(); // Force save before recalculating
+
+        GroceryFund savedFund = recalculateGroceryFundBalance(household);
 
         return Map.of(
                 "fund", savedFund,

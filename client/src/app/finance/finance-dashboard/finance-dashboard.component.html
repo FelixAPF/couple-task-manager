@@ -14,11 +14,26 @@
                     <p class="text-surface-600 dark:text-surface-300 mb-4">La paie du <span class="font-bold">{{ pendingPaycheckDate | date:'dd MMM yyyy' }}</span> n'a pas encore été actionnée.</p>
                     <button pButton pRipple label="Initier les transferts" icon="pi pi-play" class="p-button-success p-button-lg w-full sm:w-auto" (click)="initiatePaycheck()"></button>
                 </div>
-                <ng-template #countdownTpl>
-                    <h3 class="text-lg font-medium text-surface-500 dark:text-surface-400 mt-0 mb-2">Prochaine paie dans</h3>
-                    <h1 class="text-6xl font-bold text-primary-500 m-0">{{ daysUntilPaycheck }}</h1>
-                    <p class="text-surface-600 dark:text-surface-300 mt-2 mb-0">Jours</p>
-                </ng-template>
+            <ng-template #countdownTpl>
+                <h3 class="text-lg font-medium text-surface-500 dark:text-surface-400 mt-0 mb-2">Prochaine paie dans</h3>
+                
+                <h1 class="text-6xl font-bold text-primary-500 m-0" *ngIf="daysUntilPaycheck > 0">{{ daysUntilPaycheck }}</h1>
+                <h1 class="text-4xl font-bold text-primary-500 m-0 py-2" *ngIf="daysUntilPaycheck === 0">Aujourd'hui</h1>
+                
+                <p class="text-surface-600 dark:text-surface-300 mt-2 mb-6" *ngIf="daysUntilPaycheck > 0">Jours</p>
+
+                <!-- New Paycheck Details Section -->
+                <div class="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700 w-full">
+                    <div class="flex justify-between items-center mb-2 px-2">
+                        <span class="text-sm text-surface-500 dark:text-surface-400">Paie Nette :</span>
+                        <span class="font-semibold text-surface-800 dark:text-surface-100">{{ config.amount | currency:'CAD':'symbol-narrow':'1.2-2' }}</span>
+                    </div>
+                    <div class="flex justify-between items-center px-2">
+                        <span class="text-sm text-surface-500 dark:text-surface-400">Solde Restant :</span>
+                        <span class="font-bold text-green-500 dark:text-green-400">{{ remainingAmount | currency:'CAD':'symbol-narrow':'1.2-2' }}</span>
+                    </div>
+                </div>
+            </ng-template>
             </ng-container>
             <ng-template #noConfig>
                 <i class="pi pi-calendar-times text-5xl text-surface-400 dark:text-surface-500 mb-4"></i>

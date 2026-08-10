@@ -124,19 +124,31 @@ export class FinanceDashboardComponent implements OnInit {
 
     this.chartOptions = { plugins: { legend: { position: 'bottom' } } };
   }
-
-  calculateNextPaycheck() {
+calculateNextPaycheck() {
     const config = this.financeService.paycheckConfig();
     if (!config || !config.referenceDate) return;
     
+    let pastPaycheckDate: Date;
+
+    // Safely check if it's a string before using .includes()
+    if (typeof config.referenceDate === 'string') {
+      const refDateString = config.referenceDate.includes('T') 
+        ? config.referenceDate 
+        : `${config.referenceDate}T00:00:00`;
+      pastPaycheckDate = new Date(refDateString);
+    } else {
+      // If it's already a Date object, just clone it
+      pastPaycheckDate = new Date(config.referenceDate);
+    }
+
+    pastPaycheckDate.setHours(0, 0, 0, 0);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    let pastPaycheckDate = new Date(config.referenceDate);
-    pastPaycheckDate.setHours(0, 0, 0, 0);
     let nextPaycheckDate = new Date(pastPaycheckDate);
 
-    while (nextPaycheckDate <= today) {
+    while (nextPaycheckDate < today) {
       pastPaycheckDate = new Date(nextPaycheckDate);
       if (config.cycle === '14_DAYS') nextPaycheckDate.setDate(nextPaycheckDate.getDate() + 14);
       else if (config.cycle === 'TWICE_MONTHLY') nextPaycheckDate.setDate(nextPaycheckDate.getDate() + 15);
@@ -147,12 +159,14 @@ export class FinanceDashboardComponent implements OnInit {
     lastActioned.setHours(0, 0, 0, 0);
 
     this.pendingPaycheckDate = null;
-    if (pastPaycheckDate.getTime() > lastActioned.getTime()) {
+    if (pastPaycheckDate.getTime() > lastActioned.getTime() && pastPaycheckDate <= today) {
       this.pendingPaycheckDate = pastPaycheckDate;
     }
 
-    const diffTime = Math.abs(nextPaycheckDate.getTime() - today.getTime());
+    const diffTime = nextPaycheckDate.getTime() - today.getTime();
     this.daysUntilPaycheck = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    this.compileTransfers();
   }
 
   initiatePaycheck() {

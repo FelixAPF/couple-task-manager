@@ -2,7 +2,7 @@ package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.Receipt;
-import com.couple.taskmanager.model.ReceiptItem;
+import com.couple.taskmanager.model.dto.ParsedReceiptDto;
 import com.couple.taskmanager.repository.ReceiptRepository;
 import com.couple.taskmanager.service.ReceiptParserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +25,12 @@ public class ReceiptController {
     @Autowired
     private ReceiptParserService receiptParserService;
 
-    // 1. Keep MULTIPART explicitly for the file upload endpoint
     @PostMapping(value = "/analyze", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> analyzeReceipt(@RequestParam("file") MultipartFile file) {
         try {
-            List<ReceiptItem> items = receiptParserService.parseReceiptImage(file);
-            return ResponseEntity.ok(items);
+            // Update to use ParsedReceiptDto instead of List<ReceiptItem>
+            ParsedReceiptDto parsedData = receiptParserService.parseReceiptImage(file);
+            return ResponseEntity.ok(parsedData);
         } catch (Exception e) {
             if (e.getMessage() != null && e.getMessage().contains("429")) {
                 return ResponseEntity.status(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS)
@@ -41,7 +41,6 @@ public class ReceiptController {
         }
     }
 
-    // 2. Let Spring handle the JSON and charset automatically
     @PostMapping
     public ResponseEntity<Receipt> saveReceipt(@RequestBody Receipt receipt, @AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;
@@ -53,7 +52,6 @@ public class ReceiptController {
         return ResponseEntity.ok(receiptRepository.save(receipt));
     }
 
-    // 3. Let Spring handle the JSON and charset automatically
     @PutMapping("/{id}")
     public ResponseEntity<Receipt> updateReceipt(@PathVariable Long id, @RequestBody Receipt receipt, @AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;

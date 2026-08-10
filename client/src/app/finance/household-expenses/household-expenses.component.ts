@@ -7,13 +7,14 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { AvatarModule } from 'primeng/avatar';
+import { CheckboxModule } from 'primeng/checkbox';
 import { FinanceService } from '../../service/finance.service';
 import { CommonExpense, HouseholdMemberFinance } from '../../model/finance.model';
 
 @Component({
   selector: 'app-household-expenses',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, InputTextModule, InputNumberModule, RadioButtonModule, AvatarModule],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, InputTextModule, InputNumberModule, RadioButtonModule, AvatarModule, CheckboxModule],
   templateUrl: './household-expenses.component.html'
 })
 export class HouseholdExpensesComponent {
@@ -27,7 +28,7 @@ export class HouseholdExpensesComponent {
   }
 
   addExpense() {
-    const newExp: CommonExpense = { id: '', name: 'Nouvelle dépense', amount: 0, splitType: 'EQUAL' };
+    const newExp: CommonExpense = { id: '', name: 'Nouvelle dépense', amount: 0, splitType: 'EQUAL', isGrocery: false };
     this.financeService.addCommonExpense(newExp).subscribe();
   }
 

@@ -1,6 +1,7 @@
 package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.model.ReceiptItem;
+import com.couple.taskmanager.model.dto.ParsedReceiptDto;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -35,40 +35,43 @@ public class ReceiptParserService {
             .configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS, true)
             .configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
-    private static final String RECEIPT_JSON_ARRAY_SCHEMA = """
-            [
-                {
-                    "name": "Item Name",
-                    "price": 10.99,
-                    "taxable": false
-                }
-            ]
-            """;
+    private static final String RECEIPT_JSON_SCHEMA = """
+    {
+      "storeName": "Store Name",
+      "items": [
+        {
+          "name": "Item Name",
+          "price": 10.99,
+          "taxable": false
+        }
+      ]
+    }
+    """;
 
-    public List<ReceiptItem> parseReceiptImage(MultipartFile file) throws IOException {
+    public ParsedReceiptDto parseReceiptImage(MultipartFile file) throws IOException {
         String base64Image = Base64.getEncoder().encodeToString(file.getBytes());
         String mimeType = file.getContentType() != null ? file.getContentType() : "image/jpeg";
 
-        // UPDATED PROMPT: Much more aggressive instructions for spatial alignment, consignes, and rabais
+        // UPDATED PROMPT: Added instruction to extract store name and structure as an object
         String promptText = """
-            Analyze this grocery receipt image line by line. Extract all purchased items and their exact prices. 
-            
-            CRITICAL INSTRUCTIONS FOR ACCURACY:
-            1. Read strictly sequentially. DO NOT skip lines or mix up horizontal rows.
-            2. Watch out for 'CONSIGNE' (bottle deposits) and 'RABAIS' (discounts). These are usually indented below a main item. 
-            3. Treat 'CONSIGNE' and 'RABAIS' as separate, individual items in the JSON array with their own prices (discounts should be negative numbers). DO NOT assign a Consigne or Rabais price to the item below it.
-            4. Double-check that the price you extract perfectly aligns horizontally with the item name on that specific row.
-            5. Determine if each item is taxable based on the receipt indicators (like FP, asterisks, or tax codes next to the price).
-            6. Ignore subtotals, taxes, tips, and the final total at the very bottom.
-            """;
+        Analyze this grocery receipt image line by line. Extract the name of the store and all purchased items with their exact prices.
+        CRITICAL INSTRUCTIONS FOR ACCURACY:
+        1. Identify the store name at the top of the receipt.
+        2. Read strictly sequentially. DO NOT skip lines or mix up horizontal rows.
+        3. Watch out for 'CONSIGNE' (bottle deposits) and 'RABAIS' (discounts). These are usually indented below a main item.
+        4. Treat 'CONSIGNE' and 'RABAIS' as separate, individual items in the JSON array with their own prices (discounts should be negative numbers). DO NOT assign a Consigne or Rabais price to the item below it.
+        5. Double-check that the price you extract perfectly aligns horizontally with the item name on that specific row.
+        6. Determine if each item is taxable based on the receipt indicators (like FP, asterisks, or tax codes next to the price).
+        7. Ignore subtotals, taxes, tips, and the final total at the very bottom.
+        """;
 
-        String finalPrompt = promptText + "\n\nIMPORTANT: Return ONLY raw valid JSON matching this exact structure as an ARRAY:\n" + RECEIPT_JSON_ARRAY_SCHEMA;
+        String finalPrompt = promptText + "\n\nIMPORTANT: Return ONLY raw valid JSON matching this exact structure:\n" + RECEIPT_JSON_SCHEMA;
 
         String jsonResponse = executeGeminiRequest(finalPrompt, mimeType, base64Image);
 
         try {
             String cleanJson = extractJsonPayload(jsonResponse);
-            return Arrays.asList(objectMapper.readValue(cleanJson, ReceiptItem[].class));
+            return objectMapper.readValue(cleanJson, ParsedReceiptDto.class);
         } catch (Exception e) {
             System.err.println("==== GEMINI RECEIPT PARSING ERROR ====");
             System.err.println("Raw Response: " + jsonResponse);
@@ -121,14 +124,10 @@ public class ReceiptParserService {
 
         String cleanJson = rawText.replaceAll("(?i)```json", "").replace("```", "").trim();
 
-        int firstBracket = cleanJson.indexOf("[");
-        int lastBracket = cleanJson.lastIndexOf("]");
         int firstBrace = cleanJson.indexOf("{");
         int lastBrace = cleanJson.lastIndexOf("}");
 
-        if (firstBracket != -1 && lastBracket != -1 && (firstBrace == -1 || firstBracket < firstBrace)) {
-            cleanJson = cleanJson.substring(firstBracket, lastBracket + 1);
-        } else if (firstBrace != -1 && lastBrace != -1) {
+        if (firstBrace != -1 && lastBrace != -1) {
             cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
         }
 

@@ -4,6 +4,7 @@ import com.couple.taskmanager.model.Household;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Data
 @Entity
@@ -26,4 +27,7 @@ public class CommonExpense {
 
     @Column(nullable = false)
     private String splitType;
+
+    @Column(nullable = false, columnDefinition ="BOOLEAN DEFAULT false")
+    private Boolean isGrocery = false;
 }

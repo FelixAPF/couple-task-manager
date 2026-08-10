@@ -6,13 +6,14 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DropdownModule } from 'primeng/dropdown';
+import { CheckboxModule } from 'primeng/checkbox';
 import { FinanceService } from '../../service/finance.service';
 import { PersonalExpense } from '../../model/finance.model';
 
 @Component({
   selector: 'app-personal-expenses',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, InputTextModule, InputNumberModule, DropdownModule],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonModule, InputTextModule, InputNumberModule, DropdownModule, CheckboxModule],
   templateUrl: './personal-expenses.component.html'
 })
 export class PersonalExpensesComponent {
@@ -47,7 +48,8 @@ export class PersonalExpensesComponent {
         amount: 0, 
         frequency: 'Mensuel', 
         targetBankAccountId: 'JOINT_ACCOUNT', 
-        targetSubAccountId: 'JOINT_ACCOUNT_SUB' 
+        targetSubAccountId: 'JOINT_ACCOUNT_SUB',
+        isGrocery: false
     };
     this.financeService.addPersonalExpense(newExp).subscribe();
   }

@@ -29,4 +29,7 @@ public class PersonalExpense {
 
     private String targetBankAccountId;
     private String targetSubAccountId;
+
+    @Column(nullable = false, columnDefinition ="BOOLEAN DEFAULT false")
+    private Boolean isGrocery = false;
 }

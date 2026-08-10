@@ -12,6 +12,7 @@ export interface CommonExpense {
   name: string;
   amount: number;
   splitType: string;
+  isGrocery?: boolean;
 }
 
 export interface SubAccount {
@@ -34,6 +35,7 @@ export interface PersonalExpense {
   frequency: string;
   targetBankAccountId: string;
   targetSubAccountId: string;
+  isGrocery?: boolean;
 }
 
 export interface PaycheckConfig {

@@ -1,7 +1,7 @@
 <div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <div class="flex items-center gap-3">
-        <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" routerLink="/finance"></p-button>
+        <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" routerLink="/finance/dashboard"></p-button>
         <h2 class="text-2xl font-semibold text-surface-800 dark:text-surface-100 m-0">Dépenses Personnelles</h2>
     </div>
     <button pButton icon="pi pi-plus" label="Ajouter" class="p-button-primary w-full sm:w-auto" (click)="addExpense()"></button>
@@ -15,24 +15,29 @@
         <input pInputText [(ngModel)]="exp.name" (blur)="saveExpense(exp)" class="w-full" />
       </div>
 
-      <div class="w-full md:w-40">
+      <div class="w-full md:w-32">
         <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Montant ($)</label>
         <p-inputNumber [(ngModel)]="exp.amount" (onBlur)="saveExpense(exp)" mode="currency" currency="CAD" locale="fr-CA" class="w-full" styleClass="w-full"></p-inputNumber>
       </div>
 
-      <div class="w-full md:w-48">
+      <div class="w-full md:w-40">
         <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Fréquence</label>
         <p-dropdown [options]="frequencies" [(ngModel)]="exp.frequency" (onChange)="saveExpense(exp)" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-dropdown>
       </div>
 
-      <div class="w-full md:w-56">
+      <div class="w-full md:w-48">
         <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Banque cible</label>
         <p-dropdown [options]="bankOptions" [(ngModel)]="exp.targetBankAccountId" (onChange)="onBankChange(exp)" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" placeholder="Sélectionner"></p-dropdown>
       </div>
 
-      <div class="w-full md:w-56" *ngIf="exp.targetBankAccountId !== 'JOINT_ACCOUNT'">
+      <div class="w-full md:w-48" *ngIf="exp.targetBankAccountId !== 'JOINT_ACCOUNT'">
         <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Sous-compte cible</label>
         <p-dropdown [options]="getSubAccountOptions(exp.targetBankAccountId)" [(ngModel)]="exp.targetSubAccountId" (onChange)="saveExpense(exp)" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" placeholder="Sélectionner"></p-dropdown>
+      </div>
+
+      <div class="w-full md:w-28 flex flex-col justify-center">
+        <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-2">Épicerie</label>
+        <p-checkbox [(ngModel)]="exp.isGrocery" [binary]="true" label="Lier" (onChange)="saveExpense(exp)"></p-checkbox>
       </div>
 
       <div class="flex justify-end w-full md:w-auto mt-2 md:mt-0 md:pt-6">

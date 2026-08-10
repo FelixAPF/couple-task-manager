@@ -6,6 +6,7 @@ import { Receipt, ReceiptItem } from '../model/receipt';
 import { HouseholdMember, Household } from '../model/household';
 import { HouseholdService } from '../service/household.service';
 import { ReceiptService } from '../service/receipt.service';
+import { FinanceService } from '../service/finance.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
@@ -29,8 +30,8 @@ export interface Splitter {
 export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   step: number = 1;
   members: HouseholdMember[] = [];
-  activeSplitters: Splitter[] = []; 
-  
+  activeSplitters: Splitter[] = [];
+ 
   currentReceipt: Receipt = this.getEmptyReceipt();
   splitPercentages: Record<number, number> = {};
   groceryTotal: number = 0;
@@ -50,7 +51,8 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   constructor(
     private householdService: HouseholdService,
     private receiptService: ReceiptService,
-    private messageService: MessageService, 
+    private financeService: FinanceService,
+    private messageService: MessageService,
     private location: Location,
     private zone: NgZone
   ) {}
@@ -59,6 +61,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     this.householdService.retrieveHousehold().subscribe((h: Household | null) => {
       if (h) {
         this.loadSavedReceipts();
+        this.financeService.loadFinanceData();
         if (h.members && h.members.length > 0) {
           this.members = h.members;
           this.resetToHouseholdSplitters();
@@ -71,7 +74,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     // Crucial: Clear the browser trap if the user uses the navigation bar to leave the page
     if (this.trapActive) {
       this.isSkippingPop = true;
-      history.back(); 
+      history.back();
     }
   }
 
@@ -89,7 +92,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   private releaseTrap(): void {
     if (this.trapActive) {
       this.isSkippingPop = true;
-      history.back(); 
+      history.back();
       this.trapActive = false;
     }
   }
@@ -133,19 +136,19 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   }
 
   goBackToEditing(): void {
-    this.step = 2; 
-    // Notice we do NOT release the trap here. The user is still in the wizard, 
+    this.step = 2;
+    // Notice we do NOT release the trap here. The user is still in the wizard,
     // so if they swipe back from step 2, they correctly go to step 1!
   }
 
   // --- EXISTING LOGIC --- //
 
   getEmptyReceipt(): Receipt {
-    return { 
-      date: new Date().toISOString(), 
-      storeName: '', 
-      items: [], 
-      totals: {}, 
+    return {
+      date: new Date().toISOString(),
+      storeName: '',
+      items: [],
+      totals: {},
       status: 'DRAFT'
     };
   }
@@ -183,8 +186,9 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     if (file) {
       this.loading = true;
       this.receiptService.analyzeReceipt(file).subscribe({
-        next: (items: ReceiptItem[]) => {
-          this.currentReceipt.items = items.map(item => ({
+        next: (res: any) => {
+          this.currentReceipt.storeName = res.storeName || 'Magasin Inconnu';
+          this.currentReceipt.items = res.items.map((item: any) => ({
             ...item,
             assignmentType: 'grocery'
           }));
@@ -312,7 +316,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     if (receipt.totals) {
       Object.keys(receipt.totals).forEach(key => {
         if (key.startsWith('EXTRA_')) {
-          const parts = key.split('_'); 
+          const parts = key.split('_');
           const id = parseInt(parts[1], 10);
           const name = parts.slice(2).join('_');
           if (!this.activeSplitters.find(s => s.id === id)) {
@@ -339,7 +343,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   resumeReceipt(receipt: Receipt): void {
     this.currentReceipt = JSON.parse(JSON.stringify(receipt));
     this.reconstructExtrasFromReceipt(this.currentReceipt);
-    this.step = 3; 
+    this.step = 3;
     this.isViewingPastReceipt = false;
     this.trapBrowserBackButton();
   }
@@ -357,7 +361,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.step = 4; 
+    this.step = 4;
     this.isViewingPastReceipt = true;
     this.trapBrowserBackButton();
   }
@@ -375,13 +379,27 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   private processSaveRequest(successMessage: string): void {
     this.loading = true;
 
-    const request = this.currentReceipt.id 
+    const request = this.currentReceipt.id
       ? this.receiptService.updateReceipt(this.currentReceipt.id, this.currentReceipt)
       : this.receiptService.saveReceipt(this.currentReceipt);
 
     request.subscribe({
       next: () => {
-        this.releaseTrap(); // Clear the trap so they can exit naturally now
+        if (this.currentReceipt.status === 'COMPLETED' && this.groceryTotal > 0) {
+          const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);
+          if (currentUser) {
+            this.financeService.addGroceryTransaction({
+              userId: currentUser.userId,
+              storeName: this.currentReceipt.storeName || 'Épicerie',
+              description: 'Facture scannée',
+              amount: this.groceryTotal,
+              transactionType: 'SPEND',
+              date: new Date().toISOString()
+            }).subscribe();
+          }
+        }
+
+        this.releaseTrap(); 
         this.step = 1;
         this.isViewingPastReceipt = false;
         this.receiptTax = 0;

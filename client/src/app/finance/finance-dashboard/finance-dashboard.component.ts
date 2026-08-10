@@ -1,16 +1,17 @@
-import { Component, inject, OnInit, effect } from '@angular/core';
+import { Component, inject, OnInit, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { FinanceService } from '../../service/finance.service';
 import { TransferCompilation } from '../../model/finance.model';
 
 @Component({
   selector: 'app-finance-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ChartModule, ButtonModule, DialogModule],
+  imports: [CommonModule, RouterModule, ChartModule, ButtonModule, DialogModule, TooltipModule],
   templateUrl: './finance-dashboard.component.html'
 })
 export class FinanceDashboardComponent implements OnInit {
@@ -27,6 +28,7 @@ export class FinanceDashboardComponent implements OnInit {
   wizardStep: number = 1;
   
   jointTransferAmount: number = 0;
+  groceryTransferAmount: number = 0;
   personalTransfers: TransferCompilation[] = [];
   remainingAmount: number = 0;
 
@@ -35,6 +37,25 @@ export class FinanceDashboardComponent implements OnInit {
   setupConfirmLabel: string = '';
   setupConfirmRoute: string = '';
   currentSetupStepId: string = '';
+
+  // --- NEW: Computed signals for Grocery Summary ---
+  currentGroceryBalance = computed(() => this.financeService.groceryFund()?.balance || 0);
+
+  grocerySpentThisMonth = computed(() => {
+    const txs = this.financeService.groceryTransactions();
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    return txs
+      .filter(tx => {
+        const txDate = new Date(tx.date);
+        return tx.transactionType === 'SPEND' &&
+               txDate.getMonth() === currentMonth &&
+               txDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, tx) => sum + tx.amount, 0);
+  });
 
   constructor() {
     effect(() => {
@@ -124,20 +145,19 @@ export class FinanceDashboardComponent implements OnInit {
 
     this.chartOptions = { plugins: { legend: { position: 'bottom' } } };
   }
-calculateNextPaycheck() {
+
+  calculateNextPaycheck() {
     const config = this.financeService.paycheckConfig();
     if (!config || !config.referenceDate) return;
     
     let pastPaycheckDate: Date;
 
-    // Safely check if it's a string before using .includes()
     if (typeof config.referenceDate === 'string') {
       const refDateString = config.referenceDate.includes('T') 
         ? config.referenceDate 
         : `${config.referenceDate}T00:00:00`;
       pastPaycheckDate = new Date(refDateString);
     } else {
-      // If it's already a Date object, just clone it
       pastPaycheckDate = new Date(config.referenceDate);
     }
 
@@ -221,13 +241,22 @@ calculateNextPaycheck() {
     };
 
     this.jointTransferAmount = 0;
+    this.groceryTransferAmount = 0; 
+
     this.financeService.commonExpenses().forEach(exp => {
       const paycheckAmount = calculatePaycheckAmount(exp.amount, 'Mensuel');
+      let myShare = 0;
       
       if (exp.splitType === 'EQUAL') {
-        this.jointTransferAmount += paycheckAmount / 2;
+        myShare = paycheckAmount / 2;
       } else {
-        this.jointTransferAmount += paycheckAmount * (myPercentage / 100);
+        myShare = paycheckAmount * (myPercentage / 100);
+      }
+      
+      this.jointTransferAmount += myShare;
+      
+      if (exp.isGrocery) {
+        this.groceryTransferAmount += myShare;
       }
     });
 
@@ -236,7 +265,10 @@ calculateNextPaycheck() {
     this.financeService.personalExpenses().forEach(exp => {
       const paycheckAmount = calculatePaycheckAmount(exp.amount, exp.frequency);
       
-      // If targeting the joint account, bundle it with the joint transfer
+      if (exp.isGrocery) {
+        this.groceryTransferAmount += paycheckAmount;
+      }
+
       if (exp.targetBankAccountId === 'JOINT_ACCOUNT') {
         this.jointTransferAmount += paycheckAmount;
         return;
@@ -268,11 +300,33 @@ calculateNextPaycheck() {
   completePaycheckWizard() {
     if (this.pendingPaycheckDate) {
       this.financeService.markPaycheckActioned(this.pendingPaycheckDate).subscribe(() => {
-        this.showPaycheckWizard = false;
+        this.processGroceryTransferAndClose();
       });
     } else {
-      this.showPaycheckWizard = false;
+      this.processGroceryTransferAndClose();
     }
+  }
+
+  processGroceryTransferAndClose() {
+    if (this.groceryTransferAmount > 0) {
+      const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);
+      
+      if (currentUser) {
+        this.financeService.addGroceryTransaction({
+          userId: currentUser.userId,
+          storeName: 'Dépôt de Paie',
+          description: 'Transfert de paie automatisé',
+          amount: this.groceryTransferAmount,
+          transactionType: 'ADD',
+          date: new Date().toISOString()
+        }).subscribe(() => {
+          this.showPaycheckWizard = false;
+        });
+        return;
+      }
+    }
+    
+    this.showPaycheckWizard = false;
   }
 
   navigateTo(path: string) {

@@ -16,7 +16,7 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { routeAnimations } from './animations';
 import { VersionControlService } from './service/version-control.service';
 import { asyncScheduler, delay, observeOn, Subscription } from 'rxjs';
-import * as BackEndVersion from "../../version.json";
+import * as ClientVersion from "../../version.json";
 import { HouseholdService } from './service/household.service';
 import { PushNotificationService } from './service/push.notification.service';
 
@@ -66,7 +66,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.setupBackButtonListener(); // Call helper function
     this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
       if(!this.platform.ANDROID) return;
-      if(parseFloat(BackEndVersion.version).toFixed(4) > parseFloat(version).toFixed(4)) {
+      const serverVersion = parseFloat(version).toFixed(4);
+      const clientVersion = parseFloat(ClientVersion.version).toFixed(4);
+      if(serverVersion > clientVersion) {
         this.outdatedVersion = true;
         this.showUpdateDialog = true; // <--- Trigger the popup here
       }

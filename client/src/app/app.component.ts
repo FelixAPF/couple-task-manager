@@ -20,6 +20,7 @@ import * as ClientVersion from "../../version.json";
 import { HouseholdService } from './service/household.service';
 import { PushNotificationService } from './service/push.notification.service';
 import { SharedVideoImportService } from './service/shared-video-import.service';
+import { TikTokClipboardImportService } from './service/tiktok-clipboard-import.service';
 
 
 @Component({
@@ -45,7 +46,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   constructor(private translate: TranslateService, private loadingService: LoadingService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
   private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private pushNotificationService: PushNotificationService, private householdService: HouseholdService,
-  private sharedVideoImportService: SharedVideoImportService) {
+  private sharedVideoImportService: SharedVideoImportService, private tiktokClipboardImportService: TikTokClipboardImportService) {
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');

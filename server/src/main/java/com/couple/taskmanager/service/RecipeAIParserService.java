@@ -105,6 +105,10 @@ public class RecipeAIParserService {
     }
 
     public RecipeDto parseRecipeFromUrl(String urlString) {
+        if (isTikTokUrl(urlString)) {
+            return parseRecipeFromTikTokVideo(urlString);
+        }
+
         try {
             String pageText = fetchPageTextWithImages(urlString);
 
@@ -203,6 +207,82 @@ public class RecipeAIParserService {
         List<RecipeDto> recipes = callGeminiList(prompt);
         generateAndAttachImages(recipes);
         return recipes;
+    }
+
+    private boolean isTikTokUrl(String urlString) {
+        if (urlString == null) return false;
+        return urlString.toLowerCase().contains("tiktok.com");
+    }
+
+    /**
+     * TikTok pages are a JS-rendered SPA — Jsoup/text-scraping returns nothing useful, and the
+     * video content isn't reliably indexed by search either. Instead, we download the actual
+     * video file server-side with yt-dlp, then feed it to Gemini the same way parseRecipe()
+     * already handles a directly-uploaded video file.
+     *
+     * REQUIRES: yt-dlp must be installed and on PATH in the deployment environment (see Dockerfile).
+     *
+     * NOTE ON TERMS OF SERVICE: downloading video content from TikTok server-side like this sits
+     * in a legal gray area under TikTok's ToS. This is a personal/household recipe app, not a
+     * public redistribution service, but worth being aware of before relying on this in production.
+     */
+    private RecipeDto parseRecipeFromTikTokVideo(String urlString) {
+        java.nio.file.Path tempVideoFile = null;
+        try {
+            tempVideoFile = java.nio.file.Files.createTempFile("tiktok_", ".mp4");
+
+            ProcessBuilder pb = new ProcessBuilder(
+                    "yt-dlp",
+                    "-f", "mp4/best",
+                    "--no-playlist",
+                    "-o", tempVideoFile.toAbsolutePath().toString(),
+                    urlString
+            );
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            String processOutput;
+            try (java.io.InputStream is = process.getInputStream()) {
+                processOutput = new String(is.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            }
+
+            boolean finished = process.waitFor(90, java.util.concurrent.TimeUnit.SECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                throw new RuntimeException("Timed out downloading TikTok video.");
+            }
+            if (process.exitValue() != 0) {
+                System.err.println("==== yt-dlp FAILED ====\n" + processOutput);
+                throw new RuntimeException("Failed to download TikTok video (yt-dlp exit code " + process.exitValue() + ").");
+            }
+
+            long fileSize = java.nio.file.Files.size(tempVideoFile);
+            if (fileSize == 0) {
+                throw new RuntimeException("Downloaded TikTok video was empty.");
+            }
+
+            byte[] videoBytes = java.nio.file.Files.readAllBytes(tempVideoFile);
+            String base64Video = Base64.getEncoder().encodeToString(videoBytes);
+
+            String promptText = "WATCH this video. Extract the recipe. Translate to French. Output STRICT JSON. " +
+                    "Extract the preparation guide and add it in the description. Make sure to estimate how many " +
+                    "people this recipe will feed. Try to extract a valid imageUrl if visible, otherwise set to null.";
+
+            return processSingleRecipeImage(callGeminiSingle(promptText, "video/mp4", base64Video, null));
+
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("TikTok import failed: " + e.getMessage(), e);
+        } finally {
+            if (tempVideoFile != null) {
+                try {
+                    java.nio.file.Files.deleteIfExists(tempVideoFile);
+                } catch (java.io.IOException ignored) {
+                    // best-effort cleanup
+                }
+            }
+        }
     }
 
     private RecipeDto processSingleRecipeImage(RecipeDto recipe) {

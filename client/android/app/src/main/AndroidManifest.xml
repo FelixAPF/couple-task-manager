@@ -30,6 +30,13 @@
               <data android:scheme="@string/custom_url_scheme" />
             </intent-filter>
 
+            <!-- Registers the app as a share target when a video is shared from another app -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="video/*" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -49,4 +56,3 @@
 	<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
 </manifest>
-

@@ -19,6 +19,7 @@ import { asyncScheduler, delay, observeOn, Subscription } from 'rxjs';
 import * as ClientVersion from "../../version.json";
 import { HouseholdService } from './service/household.service';
 import { PushNotificationService } from './service/push.notification.service';
+import { SharedVideoImportService } from './service/shared-video-import.service';
 
 
 @Component({
@@ -40,10 +41,11 @@ export class AppComponent implements OnInit, OnDestroy {
   outdatedVersion: boolean = false;
   acknowledgeUpdate: boolean = false;
   showUpdateDialog: boolean = false;
-  
+
 
   constructor(private translate: TranslateService, private loadingService: LoadingService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
-  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private pushNotificationService: PushNotificationService, private householdService: HouseholdService) {
+  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private pushNotificationService: PushNotificationService, private householdService: HouseholdService,
+  private sharedVideoImportService: SharedVideoImportService) {
     translate.setDefaultLang('fr');
     translate.addLangs(['fr', 'en']);
     translate.use('fr');
@@ -54,7 +56,7 @@ export class AppComponent implements OnInit, OnDestroy {
     return this.platform;
   }
 
-  backButtonListener: PluginListenerHandle; 
+  backButtonListener: PluginListenerHandle;
 
   public async openAppStore(): Promise<void> {
     await AppUpdate.openAppStore();
@@ -148,7 +150,7 @@ export class AppComponent implements OnInit, OnDestroy {
   checkScreenWidth() {
     this.isMobile = window.innerWidth < 640; // Tailwind 'sm' breakpoint (640px)
   }
-  
+
   public closeUpdateDialog(): void {
     this.acknowledgeUpdate = true;
   }
@@ -163,7 +165,7 @@ export class AppComponent implements OnInit, OnDestroy {
   async setStatusBarBackgroundColor() {
     // Set your desired background color here (hexadecimal or CSS color name)
     await StatusBar.setBackgroundColor({ color: '#f0f0f0' }); // Example: Light gray
-    
+
   }
-  
+
 }

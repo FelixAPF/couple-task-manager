@@ -19,6 +19,7 @@ import { RecipeCreationComponent } from '../recipe-creation/recipe-creation.comp
 import { RecipeCardComponent } from '../recipe-card/recipe-card.component';
 import { RecipeRandomDialogComponent } from '../recipe-random-dialog/recipe-random-dialog.component';
 import { FormsModule } from '@angular/forms';
+import { PendingSharedRecipeService } from '../../service/pending-shared-recipe.service';
 export type TagSeverity = 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined;
 
 @Component({
@@ -54,11 +55,39 @@ export class RecipesListComponent implements OnInit {
     private confirmationService: ConfirmationService, // Inject confirmation service
     private messageService: MessageService ,
     private dialogService: DialogService,
-    private cdRef: ChangeDetectorRef 
+    private cdRef: ChangeDetectorRef,
+    private pendingSharedRecipeService: PendingSharedRecipeService
   ) {}
 
   ngOnInit(): void {
     this.loadRecipes();
+
+    // If a video was just shared into the app from another app (e.g. TikTok),
+    // the parsed recipe is waiting here — open the creation dialog prefilled with it.
+    const sharedRecipe = this.pendingSharedRecipeService.consume();
+    if (sharedRecipe) {
+      this.openPrefilledRecipeDialog(sharedRecipe);
+    }
+  }
+
+  // Opens the creation dialog prefilled with data parsed from a shared video/link,
+  // but as a NEW recipe (no id), unlike openEditRecipeDialog which edits an existing one.
+  openPrefilledRecipeDialog(recipe: Recipe): void {
+    this.ref = this.dialogService.open(RecipeCreationComponent, {
+        header: 'Recette importée',
+        width: '90%',
+        contentStyle: {"max-height": "80vh", "overflow": "auto"},
+        baseZIndex: 10000,
+        data: {
+          recipe: { ...recipe, id: undefined }
+        }
+    });
+
+    this.ref.onClose.subscribe((savedRecipe?: Recipe) => {
+        if (savedRecipe) {
+            this.loadRecipes();
+        }
+    });
   }
 
   loadRecipes(): void {

@@ -33,22 +33,21 @@ export class NavbarComponent implements OnInit {
   notifications: AppNotification[] = [];
   unreadCount$: Observable<number> = this.notificationService.unreadCount$;
 
-
-
   isLoggedIn$ = this.authService.isLoggedIn$; // Make public for template access
   household$ = this.householdService.household$; // <-- Expose household observable
   currentUser$: Observable<HouseholdMember | null> = this.householdService.currentUser$;
   subscription: Subscription = new Subscription();
   household: Household | null = null;
 
-  constructor(private router: Router, private translate: TranslateService, private messageService: MessageService, private eRef: ElementRef){}
+  // `translate` is now public so the template can read `translate.currentLang`
+  // to correctly highlight the active language pill.
+  constructor(private router: Router, public translate: TranslateService, private messageService: MessageService, private eRef: ElementRef){}
 
   ngOnInit(): void {
     setInterval(() => {
       if (this.authService.isLoggedIn$.subscribe(isLoggedIn => {
         if(isLoggedIn){
           this.notificationService.refreshUnreadCount();
-
         }
       })) {
       }
@@ -66,9 +65,11 @@ export class NavbarComponent implements OnInit {
     localStorage.setItem('language', language);
   }
 
-toggleMenu(): void {
-  this.isMenuOpen = !this.isMenuOpen;
-}
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+    // Lock background scroll while the drawer is open (mainly helps on mobile/Capacitor)
+    document.body.style.overflow = this.isMenuOpen ? 'hidden' : '';
+  }
 
   switchStyle(){
     StatusBar.setStyle({ style: this.nextBackgroundTheme, });
@@ -77,6 +78,7 @@ toggleMenu(): void {
 
   logout(): void {
     this.isMenuOpen = false; // Close menu if open
+    document.body.style.overflow = '';
     this.authService.logout();
   }
 
@@ -91,6 +93,7 @@ toggleMenu(): void {
 
   openJoinHouseholdDialog(): void {
     this.isMenuOpen = false; // Close the navbar menu first
+    document.body.style.overflow = '';
     const joinDialogRef = this.dialogService.open(JoinHouseholdComponent, {
         header: 'Rejoindre un foyer existant',
         width: '90%', // Responsive width
@@ -100,9 +103,8 @@ toggleMenu(): void {
         baseZIndex: 10000
     });
 
-    // Optional: Handle dialog close if needed (e.g., refresh something specific)
       joinDialogRef.onClose.subscribe((joinedSuccessfully?: boolean) => {
-        
+
     });
   }
 
@@ -113,20 +115,18 @@ toggleMenu(): void {
   // Toggle the notification panel
   toggleNotifications() {
     this.showNotifications = !this.showNotifications;
-    
+
     if (this.showNotifications) {
-      // 1. Load the list
       this.notificationService.getNotifications().subscribe(data => {
         this.notifications = data;
       });
-      // 2. Mark as read immediately (as requested)
       this.notificationService.markAllAsRead().subscribe();
     }
   }
 
   // Handle clicking a specific notification
   handleNotificationClick(notification: AppNotification) {
-    this.showNotifications = false; // Close panel
+    this.showNotifications = false;
 
     if (notification.type === 'LETTER' && notification.referenceId) {
       this.router.navigate(['/letters/view', notification.referenceId]);
@@ -135,16 +135,23 @@ toggleMenu(): void {
     } else if (notification.type === 'MEAL') {
       this.router.navigate(['/meals']);
     } else {
-      // Generic fallback
       this.router.navigate(['/dashboard']);
     }
   }
 
-  // Close dropdown if clicked outside
+  // Close dropdown / menu when clicking outside, or pressing Escape
   @HostListener('document:click', ['$event'])
   clickout(event: any) {
     if (!this.eRef.nativeElement.contains(event.target)) {
       this.showNotifications = false;
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape() {
+    this.showNotifications = false;
+    if (this.isMenuOpen) {
+      this.toggleMenu();
     }
   }
 

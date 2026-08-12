@@ -10,7 +10,13 @@
 
 :host nav {
   padding-top: 0 !important;
-  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.06);
+}
+
+:host-context(.dark) nav {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
 }
 
 .mobile-menu-panel {
@@ -19,11 +25,60 @@
   box-sizing: border-box;
 }
 
-/* Smooth Scrollbar for drawer links */
+/* Smooth Scrollbar for drawer + notification list */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--surface-300, #cbd5e1);
   border-radius: 4px;
+}
+
+/* Dropdown + backdrop entrance */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.18s ease-out;
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fadein {
+  animation: fadein 0.2s ease-out;
+}
+
+/* Staggered entrance for drawer links */
+.menu-item {
+  opacity: 0;
+  animation: menu-item-in 0.35s ease-out forwards;
+}
+.menu-item:nth-child(1) { animation-delay: 0.02s; }
+.menu-item:nth-child(2) { animation-delay: 0.05s; }
+.menu-item:nth-child(3) { animation-delay: 0.08s; }
+.menu-item:nth-child(4) { animation-delay: 0.11s; }
+.menu-item:nth-child(5) { animation-delay: 0.14s; }
+.menu-item:nth-child(6) { animation-delay: 0.17s; }
+.menu-item:nth-child(7) { animation-delay: 0.2s; }
+.menu-item:nth-child(8) { animation-delay: 0.23s; }
+.menu-item:nth-child(9) { animation-delay: 0.26s; }
+.menu-item:nth-child(10) { animation-delay: 0.29s; }
+
+@keyframes menu-item-in {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up,
+  .animate-fadein,
+  .menu-item {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

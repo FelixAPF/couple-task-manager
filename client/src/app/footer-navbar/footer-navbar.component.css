@@ -1,17 +1,21 @@
 :host {
-    display: block;
+  display: block;
 }
 
-/* Ensures the bottom navigation bar is pushed up by the exact height   of the Android/iOS safe area (e.g., navigation buttons or gesture bar)*/
-.footer-container,
-[class*="fixed bottom-0"] {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+/* Floats the dock above the bottom edge with the exact safe-area gap on
+   Android/iOS (gesture bar / home indicator), and a sensible default gap
+   on devices with no safe area. */
+.footer-navbar-safe-area {
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
 }
 
-/* If the height of the navbar is fixed (like h-16),   you may also need to increase the overall height to account for the padding.  Using min-height or adding the safe area to the height variable ensures it scales properly.*/
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-    [class*="fixed bottom-0"] {
-        height: calc(4rem + env(safe-area-inset-bottom, 0px));
-        /* 4rem = h-16 in Tailwind */
-    }
+/* Hide the scrollbar on the horizontally-scrolling tab dock while keeping
+   it scrollable — needed since the number of visible tabs is dynamic
+   (household feature flags) and can exceed what fits on a narrow screen. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

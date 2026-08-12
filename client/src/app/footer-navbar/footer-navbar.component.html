@@ -1,92 +1,70 @@
-<div *ngIf="isLoggedIn$ | async" class="fixed bottom-0 left-0 right-0 z-50 h-16
-  bg-surface-0 dark:bg-surface-900
-  border-t border-surface-200 dark:border-surface-700
-  shadow-[0_-2px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_5px_rgba(0,0,0,0.3)] lg:hidden">
+<div *ngIf="isLoggedIn$ | async" class="fixed bottom-0 inset-x-0 z-50 lg:hidden pointer-events-none">
+  <div class="footer-navbar-safe-area px-3 pointer-events-auto">
 
-<!-- Flex container for navigation items -->
-<div class="fixed bottom-0 left-0 right-0 z-50 h-16
-            bg-surface-0 dark:bg-surface-900
-            border-t border-surface-200 dark:border-surface-700
-            shadow-[0_-2px_5px_rgba(0,0,0,0.1)] dark:shadow-[0_-2px_5px_rgba(0,0,0,0.3)]">
+    <nav class="flex items-center gap-0.5 min-h-[64px] px-2 py-2 overflow-x-auto no-scrollbar snap-x snap-mandatory
+                rounded-[28px] bg-white/95 dark:bg-surface-900/95 backdrop-blur-xl
+                border border-surface-200/70 dark:border-surface-700/60
+                shadow-[0_-8px_30px_-8px_rgba(0,0,0,0.15)] dark:shadow-[0_-8px_30px_-8px_rgba(0,0,0,0.55)]">
 
-  <!-- Flex container for navigation items -->
-  <div class="flex justify-around items-center h-full px-1 sm:px-2"> <!-- Reduced padding slightly -->
+      <a routerLink="/dashboard" routerLinkActive #rlaDash="routerLinkActive" [routerLinkActiveOptions]="{exact:true}"
+         class="nav-item shrink-0 snap-center min-w-[62px] flex items-center justify-center p-1 rounded-2xl active:scale-90 transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+        <ng-container *ngTemplateOutlet="navItem; context: { icon: 'pi-home', label: 'Dashboard', active: rlaDash.isActive }"></ng-container>
+      </a>
 
-    <!-- Dashboard Link -->
-    <a routerLink="/dashboard"
-       routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
-      <i class="pi pi-home text-xl mb-1"></i>
-      <span class="text-xs font-medium">Dashboard</span>
-    </a>
+      <a routerLink="/tasks" *ngIf="household && household.enableTasks"
+         routerLinkActive #rlaTasks="routerLinkActive"
+         class="nav-item shrink-0 snap-center min-w-[62px] flex items-center justify-center p-1 rounded-2xl active:scale-90 transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+        <ng-container *ngTemplateOutlet="navItem; context: { icon: 'pi-list', label: 'Tâches', active: rlaTasks.isActive }"></ng-container>
+      </a>
 
-    <a routerLink="/tasks"
-        *ngIf="household && household.enableTasks"
-       routerLinkActive="active-link"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5">
-      <i class="pi pi-list text-xl mb-1"></i>
-      <span class="text-xs font-medium">Tâches</span>
-    </a>
-    <a routerLink="/finance/dashboard"
-        *ngIf="household && household.enableTasks"
-       routerLinkActive="active-link"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5">
-      <i class="pi pi-money-bill text-xl mb-1"></i>
-      <span class="text-xs font-medium">Finances</span>
-    </a>
-    <!-- Recipes Link -->
-    <a routerLink="/meals"
-        *ngIf="household && household.enableMeal"
-       routerLinkActive="active-link"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
-      <i class="fa-regular fa-lemon text-xl mb-1"></i>
-      <span class="text-xs font-medium">Repas</span>
-    </a>
-    <a routerLink="/household/contacts"
-       routerLinkActive="active-link"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5">
-      <i class="pi pi-address-book text-xl mb-1"></i>
-      <span class="text-xs font-medium">Contacts</span>
-    </a>
+      <a routerLink="/finance/dashboard" *ngIf="household && household.enableTasks"
+         routerLinkActive #rlaFinance="routerLinkActive"
+         class="nav-item shrink-0 snap-center min-w-[62px] flex items-center justify-center p-1 rounded-2xl active:scale-90 transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+        <ng-container *ngTemplateOutlet="navItem; context: { icon: 'pi-money-bill', label: 'Finances', active: rlaFinance.isActive }"></ng-container>
+      </a>
 
-    <!-- Shopping List Link -->
-    <a routerLink="/shopping-list"
-        *ngIf="household && household.enableShoppingList"
-       routerLinkActive="active-link"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
-      <i class="pi pi-shopping-cart text-xl mb-1"></i>
-      <span class="text-xs font-medium">Courses</span>
-    </a>
+      <a routerLink="/meals" *ngIf="household && household.enableMeal"
+         routerLinkActive #rlaMeals="routerLinkActive"
+         class="nav-item shrink-0 snap-center min-w-[62px] flex items-center justify-center p-1 rounded-2xl active:scale-90 transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+        <ng-container *ngTemplateOutlet="navItem; context: { faIcon: 'fa-regular fa-lemon', label: 'Repas', active: rlaMeals.isActive }"></ng-container>
+      </a>
 
-    <!-- Shopping List Link -->
-    <a routerLink="/food-tracking"
-      *ngIf="household && household.enableFoodIntakeTracking"
-       routerLinkActive="active-link"
-       class="nav-item flex flex-col items-center justify-center p-2 rounded-md
-              text-surface-600 dark:text-surface-300
-              hover:text-primary-500 dark:hover:text-primary-400
-              transition-colors duration-150 w-1/5"> <!-- Changed to w-1/5 -->
-      <i class="fa fa-cutlery text-xl mb-1"></i>
-      <span class="text-xs font-medium">{{'footer-navbar.food-intake-tracking'|translate}}</span>
-    </a>
+      <a routerLink="/household/contacts"
+         routerLinkActive #rlaContacts="routerLinkActive"
+         class="nav-item shrink-0 snap-center min-w-[62px] flex items-center justify-center p-1 rounded-2xl active:scale-90 transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+        <ng-container *ngTemplateOutlet="navItem; context: { icon: 'pi-address-book', label: 'Contacts', active: rlaContacts.isActive }"></ng-container>
+      </a>
 
+      <a routerLink="/shopping-list" *ngIf="household && household.enableShoppingList"
+         routerLinkActive #rlaShopping="routerLinkActive"
+         class="nav-item shrink-0 snap-center min-w-[62px] flex items-center justify-center p-1 rounded-2xl active:scale-90 transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+        <ng-container *ngTemplateOutlet="navItem; context: { icon: 'pi-shopping-cart', label: 'Courses', active: rlaShopping.isActive }"></ng-container>
+      </a>
+
+      <a routerLink="/food-tracking" *ngIf="household && household.enableFoodIntakeTracking"
+         routerLinkActive #rlaFood="routerLinkActive"
+         class="nav-item shrink-0 snap-center min-w-[62px] flex items-center justify-center p-1 rounded-2xl active:scale-90 transition-transform duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-400">
+        <ng-container *ngTemplateOutlet="navItem; context: { faIcon: 'fa fa-cutlery', label: ('footer-navbar.food-intake-tracking' | translate), active: rlaFood.isActive }"></ng-container>
+      </a>
+
+    </nav>
   </div>
 </div>
+
+<!-- Shared visual template for a single tab: icon capsule + label, styled from the `active` flag -->
+<ng-template #navItem let-icon="icon" let-faIcon="faIcon" let-label="label" let-active="active">
+  <div class="flex flex-col items-center justify-center gap-1 transition-transform duration-200 w-full"
+       [class.-translate-y-0.5]="active">
+    <div class="w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200"
+         [ngClass]="active
+           ? 'bg-gradient-to-br from-primary-500 to-pink-500 shadow-md shadow-primary-500/30 text-white'
+           : 'text-surface-400 dark:text-surface-500'">
+      <i *ngIf="icon" class="pi text-lg" [ngClass]="icon"></i>
+      <i *ngIf="faIcon" class="text-base" [ngClass]="faIcon"></i>
+    </div>
+    <span class="text-[10px] font-bold leading-none whitespace-nowrap transition-colors duration-200"
+          [ngClass]="active ? 'text-primary-600 dark:text-primary-400' : 'text-surface-400 dark:text-surface-500'">
+      {{ label }}
+    </span>
+  </div>
+</ng-template>

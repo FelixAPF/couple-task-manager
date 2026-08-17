@@ -14,8 +14,13 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOriginPatterns("https://coupletaskmanager.com", "http://localhost:4200")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        .allowedOriginPatterns(
+                                "https://coupletaskmanager.com",
+                                "http://localhost:4200",
+                                "http://*:4200",          // Allows live reload from any local network IP
+                                "capacitor://localhost",  // Native Capacitor scheme (iOS / modern Android)
+                                "http://localhost"        // Native Capacitor Android scheme
+                        )                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true)
                         .allowedHeaders("*");
             }

@@ -8,6 +8,10 @@ import { AuthRequest } from '../../model/auth';
 import { SharedModule } from '../../shared.module';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 import { PushNotificationService } from '../../service/push.notification.service';
+import { Capacitor } from '@capacitor/core';
+import { AUTH_SERVER_KEY } from '../../service/auth.service';
+import { TranslateService } from '@ngx-translate/core';
+
 
 @Component({
   selector: 'app-login',
@@ -24,6 +28,7 @@ export class LoginComponent implements OnInit {
   private messageService = inject(MessageService); // Inject MessageService
   private route = inject(ActivatedRoute); // Inject ActivatedRoute 
   private pushService = inject(PushNotificationService);
+  private translate = inject(TranslateService); 
 
   // --- Form Definition ---
   loginForm = this.fb.group({
@@ -34,9 +39,14 @@ export class LoginComponent implements OnInit {
   // --- Getters for easier template access ---
   get email() { return this.loginForm.get('email'); }
   get password() { return this.loginForm.get('password'); }
-  isBiometricAvailable = signal(false);
+  isBiometricAvailable: boolean = false;
+  hasSavedCredentials: boolean = false;
 
-  ngOnInit(): void {
+  get currentLang(){
+    return this.translate.currentLang;
+  }
+
+  async ngOnInit() {
 this.route.queryParams.subscribe((params) => {
       if (params['sessionExpired']) {
         this.messageService.add({
@@ -50,27 +60,25 @@ this.route.queryParams.subscribe((params) => {
     });
 
     // Check if biometric login is configured and available
-    this.checkBiometricAvailability();
-  }
-  // --- Methods ---
-
-  async checkBiometricAvailability() {
-    try {
-      const result = await NativeBiometric.isAvailable();
-      if (result.isAvailable) {
-        // Only show the biometric button if credentials were saved previously
-        const credentials = await NativeBiometric.getCredentials({
-          server: 'com.couple.taskmanager'
-        });
-        if (credentials) {
-          this.isBiometricAvailable.set(true);
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const result = await NativeBiometric.isAvailable();
+        this.isBiometricAvailable = result.isAvailable;
+        
+        if (this.isBiometricAvailable) {
+          // Check if there's a stored fingerprint login available
+          const creds = await NativeBiometric.getCredentials({ server: AUTH_SERVER_KEY });
+          if (creds && creds.username) {
+            this.hasSavedCredentials = true;
+          }
         }
+      } catch (e) {
+        // No saved credentials or biometrics disabled
+        this.hasSavedCredentials = false;
       }
-    } catch (error) {
-      // Biometrics not available or no credentials saved yet
-      console.log('Biometrics not available or not configured', error);
     }
   }
+  // --- Methods ---
 
  async loginWithBiometrics() {
     try {
@@ -132,6 +140,14 @@ this.route.queryParams.subscribe((params) => {
           this.messageService.add({ /* ... success message ... */ });
           this.pushService.sendTokenToBackend();
 
+          if (this.isBiometricAvailable) {
+            NativeBiometric.setCredentials({
+              username: this.loginForm.value.email!,
+              password: this.loginForm.value.password!,
+              server: AUTH_SERVER_KEY
+            }).catch(err => console.error('Failed to save biometric creds', err));
+          }
+
           // Check for returnUrl query parameter
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard'; // Default to dashboard
           this.router.navigateByUrl(returnUrl); // Use navigateByUrl for potentially complex URLs
@@ -141,6 +157,31 @@ this.route.queryParams.subscribe((params) => {
           // ... (error handling) ...
         }
       });
+  }
+
+  
+async loginWithBiometric() {
+    try {
+      // Prompt the native OS fingerprint/FaceID scanner overlay
+      await NativeBiometric.verifyIdentity({
+        reason: this.currentLang === 'fr' ? "Connectez-vous" : "Log in",
+        title: this.currentLang === 'fr' ? "Connexion Rapide" : "Quick Login",
+        subtitle: this.currentLang === 'fr' ? "Utilisez votre biométrie" : "Use your biometrics",
+      });
+
+      
+      
+      // Retrieve the securely stored password from the native Keystore
+      const creds = await NativeBiometric.getCredentials({ server: AUTH_SERVER_KEY });
+      
+      // Patch the form and trigger your standard backend auth
+      this.loginForm.patchValue({ email: creds.username, password: creds.password });
+      this.onSubmit();
+      
+    } catch (error) {
+      // 👇 If it fails, is cancelled, or errors out, it jumps immediately here.
+      console.log('Biometric verification failed or cancelled by user', error);
+    }
   }
 
   private executeLogin(authRequest: AuthRequest, saveCredentials = false) {
@@ -153,15 +194,13 @@ this.route.queryParams.subscribe((params) => {
             detail: 'Connexion réussie' 
           });
           this.pushService.sendTokenToBackend();
-
-          // Save credentials for future biometric logins
-          if (saveCredentials) {
+          
+          if (this.isBiometricAvailable) {
             NativeBiometric.setCredentials({
-              username: authRequest.email,
-              password: authRequest.password,
-              server: 'com.couple.taskmanager'
-            }).then(() => this.isBiometricAvailable.set(true))
-              .catch(err => console.error('Failed to save biometric credentials', err));
+              username: this.loginForm.value.email!,
+              password: this.loginForm.value.password!,
+              server: AUTH_SERVER_KEY
+            }).catch(err => console.error('Failed to save biometric creds', err));
           }
 
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';

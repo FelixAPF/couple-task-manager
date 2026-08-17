@@ -12,6 +12,7 @@ import { Observable, Subscription } from 'rxjs';
 import { Household, HouseholdMember, UserRole } from '../../model/household';
 import { AppNotification } from '../../model/notification';
 import { NotificationService } from '../../service/notification.service';
+import { UiStateService } from '../../service/ui-state.service';
 
 @Component({
   selector: 'app-navbar',
@@ -27,6 +28,7 @@ export class NavbarComponent implements OnInit {
   private householdService = inject(HouseholdService);
   private dialogService = inject(DialogService); // <-- Inject DialogService
   private notificationService = inject(NotificationService);
+  private uiState = inject(UiStateService);
   USER_ROLE = UserRole;
 
   showNotifications = false;
@@ -67,9 +69,10 @@ export class NavbarComponent implements OnInit {
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
-    // Lock background scroll while the drawer is open (mainly helps on mobile/Capacitor)
     document.body.style.overflow = this.isMenuOpen ? 'hidden' : '';
+    this.uiState.setMobileMenuOpen(this.isMenuOpen);
   }
+
 
   switchStyle(){
     StatusBar.setStyle({ style: this.nextBackgroundTheme, });
@@ -79,7 +82,9 @@ export class NavbarComponent implements OnInit {
   logout(): void {
     this.isMenuOpen = false; // Close menu if open
     document.body.style.overflow = '';
+    this.uiState.setMobileMenuOpen(false);
     this.authService.logout();
+    this.authService.invalidateBiometricsCredentials();
   }
 
   onCopySuccess(): void {
@@ -94,6 +99,7 @@ export class NavbarComponent implements OnInit {
   openJoinHouseholdDialog(): void {
     this.isMenuOpen = false; // Close the navbar menu first
     document.body.style.overflow = '';
+    this.uiState.setMobileMenuOpen(false);
     const joinDialogRef = this.dialogService.open(JoinHouseholdComponent, {
         header: 'Rejoindre un foyer existant',
         width: '90%', // Responsive width

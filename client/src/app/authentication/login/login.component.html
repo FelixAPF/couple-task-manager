@@ -62,6 +62,23 @@
         class="w-full mt-3"  >
       </button>
 
+      @if(isBiometricAvailable && hasSavedCredentials) {
+        <div class="relative flex py-2 items-center">
+          <div class="flex-grow border-t border-slate-200"></div>
+          <span class="flex-shrink-0 mx-4 text-slate-400 text-sm font-semibold uppercase tracking-wider">
+            {{ currentLang === 'fr' ? 'OU' : 'OR' }}
+          </span>
+          <div class="flex-grow border-t border-slate-200"></div>
+        </div>
+        
+        <p-button 
+          [label]="currentLang === 'fr' ? 'Connexion biométrique' : 'Sign in with Biometrics'" 
+          icon="fa-solid fa-fingerprint"
+          styleClass="w-full p-4 text-lg font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm" 
+          (onClick)="loginWithBiometric()">
+        </p-button>
+      }
+
       <!-- Registration Link -->
       <div class="text-center mt-3">
         <span class="text-surface-600 dark:text-surface-400 text-sm">{{'login.no-account'|translate}} </span>

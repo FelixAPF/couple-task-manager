@@ -7,6 +7,7 @@ import { AuthService } from '../service/auth.service';
 import { SharedModule } from '../shared.module';
 import { HouseholdService } from '../service/household.service';
 import { Household } from '../model/household';
+import { UiStateService } from '../service/ui-state.service';
 
 @Component({
   selector: 'app-footer-navbar',
@@ -17,11 +18,14 @@ import { Household } from '../model/household';
 export class FooterNavbarComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private householdService = inject(HouseholdService);
+  private uiState = inject(UiStateService);
   household: Household | null = null;
 
   private subscription = new Subscription();
 
   isLoggedIn$ = this.authService.isLoggedIn$; // Make public for template access
+  isMobileMenuOpen$ = this.uiState.isMobileMenuOpen$;
+
 
   ngOnInit(): void {
     this.subscription.add(

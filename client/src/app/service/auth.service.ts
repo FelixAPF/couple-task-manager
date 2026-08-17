@@ -6,11 +6,14 @@ import { BehaviorSubject, EMPTY, Observable, Subscription, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { HouseholdService } from './household.service';
 import { PushNotificationService } from './push.notification.service';
+import { NativeBiometric } from '@capgo/capacitor-native-biometric';
 
 interface AuthResponse {
   token: string;
   refreshToken: string;
 }
+
+export const AUTH_SERVER_KEY = 'coupletasks.app.auth';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +21,7 @@ interface AuthResponse {
 export class AuthService {
   readonly baseUrl: string = `${environment.apiUrl}auth`;
   private readonly TOKEN_KEY = 'authToken'; // Key for localStorage
+  
   private readonly REFRESH_TOKEN_KEY = 'refreshToken'; 
   private subscription = new Subscription(); // Subscription to manage observables
 
@@ -140,6 +144,10 @@ refreshToken(): Observable<AuthResponse> {
     this.isLoggedInSubject.next(false);
     this.householdService.setHousehold(null); // Clear household data on logout
     this.router.navigate(['/login'], { queryParams: { sessionExpired: expiredToken } });
+  }
+
+  invalidateBiometricsCredentials(){
+    NativeBiometric.deleteCredentials({ server: AUTH_SERVER_KEY });
   }
 
   deleteAccount(): Observable<void> {

@@ -2,12 +2,12 @@
 
   <app-navbar></app-navbar>
 
-  <p-progressSpinner *ngIf="isLoading"
+  <p-progressSpinner *ngIf="false"
     class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-8 h-8" strokeWidth="4"
     animationDuration=".5s">
   </p-progressSpinner>
 
-  <main class="relative flex flex-col flex-grow pt-16 sm:pt-20 pb-20 lg:pb-0 z-0 w-full" [hidden]="isLoading"
+  <main class="relative flex flex-col flex-grow pt-16 sm:pt-20 pb-20 lg:pb-0 z-0 w-full"
       [@routeAnimations]="prepareRoute(outlet)"> 
       
       <div *ngIf="outdatedVersion && !acknowledgeUpdate"

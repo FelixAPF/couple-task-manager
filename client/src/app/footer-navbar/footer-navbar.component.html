@@ -1,4 +1,7 @@
-<div *ngIf="isLoggedIn$ | async" class="fixed bottom-0 inset-x-0 z-50 lg:hidden pointer-events-none">
+<div *ngIf="isLoggedIn$ | async"
+     class="fixed bottom-0 inset-x-0 z-50 lg:hidden pointer-events-none transition-opacity duration-200"
+     [class.opacity-0]="(isMobileMenuOpen$ | async)"
+     [class.invisible]="(isMobileMenuOpen$ | async)">
   <div class="footer-navbar-safe-area px-3 pointer-events-auto">
 
     <nav class="flex items-center gap-0.5 min-h-[64px] px-2 py-2 overflow-x-auto no-scrollbar snap-x snap-mandatory

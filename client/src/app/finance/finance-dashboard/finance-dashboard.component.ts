@@ -38,6 +38,10 @@ export class FinanceDashboardComponent implements OnInit {
   setupConfirmRoute: string = '';
   currentSetupStepId: string = '';
 
+  get userCarBrand(){ return 'tesla';}
+  get carBrandSlug(): string {
+    return this.userCarBrand ? this.userCarBrand.toLowerCase().trim() : 'tesla';
+  }
   // --- NEW: Computed signals for Grocery Summary ---
   currentGroceryBalance = computed(() => this.financeService.groceryFund()?.balance || 0);
 

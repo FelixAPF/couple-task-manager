@@ -77,3 +77,46 @@ export interface GroceryTransaction {
   userIconUrl?: string;
   userName?: string;
 }
+// --- NEW GROCERY MODELS ---
+
+export interface HouseholdFund {
+  id?: string;
+  householdId?: string;
+  balance: number;
+}
+
+export interface HouseholdTransaction {
+  id?: string;
+  householdId?: string;
+  userId: string;
+  storeName: string;
+  description: string;
+  amount: number; 
+  transactionType: 'ADD' | 'SPEND';
+  date: Date | string;
+  
+  // Optional frontend helper properties mapped from the user list
+  userIconUrl?: string;
+  userName?: string;
+}
+// --- NEW GROCERY MODELS ---
+
+export interface ElectricityFund {
+  id?: string;
+  householdId?: string;
+  balance: number;
+}
+
+export interface ElectricityTransaction {
+  id?: string;
+  householdId?: string;
+  userId: string;
+  description: string;
+  amount: number; 
+  transactionType: 'ADD' | 'SPEND';
+  date: Date | string;
+  
+  // Optional frontend helper properties mapped from the user list
+  userIconUrl?: string;
+  userName?: string;
+}

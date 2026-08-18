@@ -27,7 +27,11 @@ public class FinanceService {
     private final PersonalExpenseRepository personalExpenseRepository;
     private final PaycheckConfigRepository paycheckConfigRepository;
     private final GroceryFundRepository groceryFundRepository;
+    private final ElectricityFundRepository electricityFundRepository;
+    private final HouseholdFundRepository householdFundRepository;
     private final GroceryTransactionRepository groceryTransactionRepository;
+    private final HouseholdTransactionRepository householdTransactionRepository;
+    private final ElectricityTransactionRepository electricityTransactionRepository;
     private final CTMUserRepository userRepository;
     private final HouseholdRepository householdRepository;
     private final FirebaseMessagingService firebaseMessagingService;
@@ -241,6 +245,152 @@ public class FinanceService {
         groceryTransactionRepository.flush(); // Force save before recalculating
 
         GroceryFund savedFund = recalculateGroceryFundBalance(household);
+
+        return Map.of(
+                "fund", savedFund,
+                "transaction", savedTransaction
+        );
+    }
+
+    // --- NEW: Electricity Fund Methods ---
+
+    public ElectricityFund getElectricityFund(Household household) {
+        return electricityFundRepository.findByHouseholdId(household.getId())
+                .orElseGet(() -> {
+                    ElectricityFund newFund = new ElectricityFund();
+                    newFund.setHousehold(household);
+                    newFund.setBalance(0.0);
+                    return electricityFundRepository.save(newFund);
+                });
+    }
+
+    public List<ElectricityTransaction> getElectricityTransactions(Household household) {
+        return electricityTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
+    }
+
+    private ElectricityFund recalculateElectricityFundBalance(Household household) {
+        ElectricityFund fund = getElectricityFund(household);
+        List<ElectricityTransaction> transactions = electricityTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
+
+        double newBalance = 0.0;
+        for (ElectricityTransaction tx : transactions) {
+            if ("ADD".equalsIgnoreCase(tx.getTransactionType())) {
+                newBalance += tx.getAmount();
+            } else if ("SPEND".equalsIgnoreCase(tx.getTransactionType())) {
+                newBalance -= tx.getAmount();
+            }
+        }
+
+        fund.setBalance(newBalance);
+        return electricityFundRepository.save(fund);
+    }
+
+    @Transactional
+    public Map<String, Object> deleteElectricityTransaction(String transactionId, CTMUser user) {
+        Household household = user.getHousehold();
+
+        ElectricityTransaction transaction = electricityTransactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        if (!transaction.getHousehold().getId().equals(household.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        electricityTransactionRepository.delete(transaction);
+        electricityTransactionRepository.flush(); // Force delete before recalculating
+
+        ElectricityFund savedFund = recalculateElectricityFundBalance(household);
+
+        return Map.of("fund", savedFund);
+    }
+
+    @Transactional
+    public Map<String, Object> addElectricityTransaction(ElectricityTransaction transaction, CTMUser user) {
+        Household household = user.getHousehold();
+
+        transaction.setHousehold(household);
+        transaction.setUser(user);
+        if (transaction.getDate() == null) {
+            transaction.setDate(new Date());
+        }
+
+        ElectricityTransaction savedTransaction = electricityTransactionRepository.save(transaction);
+        electricityTransactionRepository.flush(); // Force save before recalculating
+
+        ElectricityFund savedFund = recalculateElectricityFundBalance(household);
+
+        return Map.of(
+                "fund", savedFund,
+                "transaction", savedTransaction
+        );
+    }
+
+    // --- NEW: Grocery Fund Methods ---
+
+    public HouseholdFund getHouseholdFund(Household household) {
+        return householdFundRepository.findByHouseholdId(household.getId())
+                .orElseGet(() -> {
+                    HouseholdFund newFund = new HouseholdFund();
+                    newFund.setHousehold(household);
+                    newFund.setBalance(0.0);
+                    return householdFundRepository.save(newFund);
+                });
+    }
+
+    public List<HouseholdTransaction> getHouseholdTransactions(Household household) {
+        return householdTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
+    }
+
+    private HouseholdFund recalculateHouseholdFundBalance(Household household) {
+        HouseholdFund fund = getHouseholdFund(household);
+        List<HouseholdTransaction> transactions = householdTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
+
+        double newBalance = 0.0;
+        for (HouseholdTransaction tx : transactions) {
+            if ("ADD".equalsIgnoreCase(tx.getTransactionType())) {
+                newBalance += tx.getAmount();
+            } else if ("SPEND".equalsIgnoreCase(tx.getTransactionType())) {
+                newBalance -= tx.getAmount();
+            }
+        }
+
+        fund.setBalance(newBalance);
+        return householdFundRepository.save(fund);
+    }
+
+    @Transactional
+    public Map<String, Object> deleteHouseholdTransaction(String transactionId, CTMUser user) {
+        Household household = user.getHousehold();
+
+        HouseholdTransaction transaction = householdTransactionRepository.findById(transactionId)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        if (!transaction.getHousehold().getId().equals(household.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        householdTransactionRepository.delete(transaction);
+        householdTransactionRepository.flush(); // Force delete before recalculating
+
+        HouseholdFund savedFund = recalculateHouseholdFundBalance(household);
+
+        return Map.of("fund", savedFund);
+    }
+
+    @Transactional
+    public Map<String, Object> addHouseholdTransaction(HouseholdTransaction transaction, CTMUser user) {
+        Household household = user.getHousehold();
+
+        transaction.setHousehold(household);
+        transaction.setUser(user);
+        if (transaction.getDate() == null) {
+            transaction.setDate(new Date());
+        }
+
+        HouseholdTransaction savedTransaction = householdTransactionRepository.save(transaction);
+        householdTransactionRepository.flush(); // Force save before recalculating
+
+        HouseholdFund savedFund = recalculateHouseholdFundBalance(household);
 
         return Map.of(
                 "fund", savedFund,

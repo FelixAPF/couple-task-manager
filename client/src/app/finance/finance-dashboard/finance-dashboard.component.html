@@ -106,6 +106,41 @@
             <p class="text-sm text-surface-500 dark:text-surface-400 m-0">Gérez le budget et l'historique d'épicerie</p>
         </div>
 
+        <div class="bg-surface-0 dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors flex flex-col items-center justify-center text-center gap-3" (click)="navigateTo('/finance/household-fund')">
+            <i class="fa-solid fa-house  text-stone-500"></i>
+            <h3 class="text-lg font-semibold text-surface-800 dark:text-surface-100 m-0">Fonds conjoint</h3>
+            <p class="text-sm text-surface-500 dark:text-surface-400 m-0">Gérez le budget et l'historique du compte conjoint</p>
+        </div>
+
+        <!-- Fonds électricité avec intégration dynamique de la voiture -->
+<!-- Fonds électricité avec intégration dynamique de la voiture -->
+<!-- Fonds électricité avec intégration dynamique de la voiture -->
+<div class="bg-surface-0 dark:bg-surface-800 p-0 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-yellow-400 dark:hover:border-yellow-400 hover:shadow-md transition-all flex flex-col overflow-hidden group" (click)="navigateTo('/finance/electricity-fund')">
+    
+    <!-- En-tête avec API Image 2D -->
+    <div class="h-32 w-full bg-gradient-to-b from-surface-50 to-surface-0 dark:from-surface-700 dark:to-surface-800 flex items-center justify-center relative overflow-hidden border-b border-surface-100 dark:border-surface-700">
+        <!-- Icône d'éclair de fond -->
+        <i class="fa-solid fa-bolt absolute top-3 right-3 text-yellow-400/80 text-xl drop-shadow-sm z-10"></i>
+        
+        <img [src]="carBrandSlug === 'tesla' 
+                ? 'https://static-assets.tesla.com/v1/compositor/?model=m3&view=STUD_3QTR&size=800&bkba_opt=1&options=$APF2,$APBS,$DV4W,$IPB1,$PBSB,$PRM31,$SC04,$MDL3,$W40B,$MT328,$CPF1,$FM3U,$RSF1,$CW03' 
+                : 'assets/images/generic-car.svg'" 
+            [alt]="userCarBrand" 
+            class="h-[120%] w-full object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-xl z-0"
+            loading="lazy"
+            onerror="this.src='assets/images/generic-car.svg'; this.onerror=null;">
+    </div>
+
+    <!-- Contenu de la carte -->
+    <div class="p-4 flex flex-col items-center text-center gap-2">
+        <span class="text-xs font-bold text-yellow-500 dark:text-yellow-400 uppercase tracking-widest flex items-center gap-1">
+            {{ userCarBrand }}
+        </span>
+        <h3 class="text-lg font-semibold text-surface-800 dark:text-surface-100 m-0">Fonds électricité</h3>
+        <p class="text-sm text-surface-500 dark:text-surface-400 m-0">Gérez le budget et l'historique de recharge</p>
+    </div>
+</div>
+
         <div class="bg-surface-0 dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors flex flex-col items-center justify-center text-center gap-3" (click)="navigateTo('/receipt-splitter')">
             <i class="pi pi-receipt text-4xl text-teal-500"></i>
             <h3 class="text-lg font-semibold text-surface-800 dark:text-surface-100 m-0">Calculatrice / Factures</h3>

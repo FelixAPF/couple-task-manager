@@ -160,4 +160,56 @@ public class FinanceController {
         CTMUser user = (CTMUser) userDetails;
         return ResponseEntity.ok(financeService.deleteGroceryTransaction(id, user));
     }
+
+    // --- NEW: Electricity Fund Endpoints ---
+
+    @GetMapping("/electricity-fund")
+    public ResponseEntity<ElectricityFund> getElectricityFund(@AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.getElectricityFund(user.getHousehold()));
+    }
+
+    @GetMapping("/electricity-transactions")
+    public ResponseEntity<List<ElectricityTransaction>> getElectricityTransactions(@AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.getElectricityTransactions(user.getHousehold()));
+    }
+
+    @PostMapping("/electricity-transactions")
+    public ResponseEntity<Map<String, Object>> addElectricityTransaction(@RequestBody ElectricityTransaction transaction, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.addElectricityTransaction(transaction, user));
+    }
+
+    @DeleteMapping("/electricity-transactions/{id}")
+    public ResponseEntity<Map<String, Object>> deleteElectricityTransaction(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.deleteElectricityTransaction(id, user));
+    }
+
+    // --- NEW: Household Fund Endpoints ---
+
+    @GetMapping("/household-fund")
+    public ResponseEntity<HouseholdFund> getHouseholdFund(@AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.getHouseholdFund(user.getHousehold()));
+    }
+
+    @GetMapping("/household-transactions")
+    public ResponseEntity<List<HouseholdTransaction>> getHouseholdTransactions(@AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.getHouseholdTransactions(user.getHousehold()));
+    }
+
+    @PostMapping("/household-transactions")
+    public ResponseEntity<Map<String, Object>> addHouseholdTransaction(@RequestBody HouseholdTransaction transaction, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.addHouseholdTransaction(transaction, user));
+    }
+
+    @DeleteMapping("/household-transactions/{id}")
+    public ResponseEntity<Map<String, Object>> deleteHouseholdTransaction(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.deleteHouseholdTransaction(id, user));
+    }
 }

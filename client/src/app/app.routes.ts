@@ -34,6 +34,8 @@ import { HouseholdExpensesComponent } from './finance/household-expenses/househo
 import { PersonalExpensesComponent } from './finance/personal-expenses/personal-expenses.component';
 import { BankAccountsComponent } from './finance/bank-accounts/bank-accounts.component';
 import { GroceryFundComponent } from './finance/grocery-fund/grocery-fund.component';
+import { HouseholdFundComponent } from './finance/household-fund/household-fund.component';
+import { ElectricityFundComponent } from './finance/electricity-fund/electricity-fund.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -54,6 +56,8 @@ export const routes: Routes = [
             { path: 'personal-expenses', component: PersonalExpensesComponent },
             { path: 'bank-accounts', component: BankAccountsComponent },
             { path: 'grocery-fund', component: GroceryFundComponent },
+            { path: 'household-fund', component: HouseholdFundComponent },
+            { path: 'electricity-fund', component: ElectricityFundComponent },
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
         ]
     },

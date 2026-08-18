@@ -41,13 +41,25 @@
             
             <div (click)="openRecipeView()" class="relative inline-block mb-4 cursor-pointer group rounded-2xl"> 
               
-              <div class="overflow-hidden rounded-2xl shadow-sm border border-surface-100 dark:border-surface-700/50">
+              <div class="overflow-hidden rounded-2xl shadow-sm border border-surface-100 dark:border-surface-700/50 relative w-28 h-28">
+                
+                <!-- Skeleton, shown until the image fires (load) -->
+                <div *ngIf="meal.recipe.imageUrl && !recipeImageLoaded"
+                    class="absolute inset-0 w-28 h-28 bg-surface-100 dark:bg-surface-700 animate-pulse flex items-center justify-center">
+                  <i class="pi pi-image text-3xl text-surface-300 dark:text-surface-500 opacity-50"></i>
+                </div>
+
                 <img *ngIf="meal.recipe.imageUrl"
-                     [src]="meal.recipe.imageUrl"
-                     [alt]="recipeName"
-                     class="w-28 h-28 object-cover transition-transform duration-500 group-hover:scale-110"> 
+                    [src]="meal.recipe.imageUrl"
+                    [alt]="recipeName"
+                    (load)="recipeImageLoaded = true"
+                    (error)="recipeImageLoaded = true"
+                    class="w-28 h-28 object-cover transition-all duration-500 ease-out group-hover:scale-110"
+                    [class.opacity-0]="!recipeImageLoaded"
+                    [class.opacity-100]="recipeImageLoaded">
+
                 <div *ngIf="!meal.recipe.imageUrl" 
-                     class="w-28 h-28 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-600 text-surface-400 dark:text-surface-500 transition-transform duration-500 group-hover:scale-110">
+                    class="w-28 h-28 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-600 text-surface-400 dark:text-surface-500 transition-transform duration-500 group-hover:scale-110">
                   <i class="pi pi-image text-4xl opacity-40"></i>
                 </div>
               </div>

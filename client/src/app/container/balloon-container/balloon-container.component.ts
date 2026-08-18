@@ -21,16 +21,9 @@ export class BalloonContainerComponent {
 
   balloons: Balloon[] = [];
   
-  // Cinematic, vibrant color palette
   private colors = [
-    '#ff3b30', // Vibrant Red
-    '#ff9500', // Deep Orange
-    '#ffcc00', // Bright Yellow
-    '#34c759', // Vivid Green
-    '#007aff', // Modern Blue
-    '#5856d6', // Deep Purple
-    '#ff2d55', // Hot Pink
-    '#00c7be'  // Teal
+    '#ff3b30', '#ff9500', '#ffcc00', '#34c759',
+    '#007aff', '#5856d6', '#ff2d55', '#00c7be'
   ];
 
   constructor(private el: ElementRef) {}
@@ -66,7 +59,7 @@ export class BalloonContainerComponent {
     const balloonBaseWidth = 50;
     const balloonBaseHeight = 65;
 
-for (let i = 0; i < this.numberOfBalloons; i++) {
+    for (let i = 0; i < this.numberOfBalloons; i++) {
       const duration = this.getRandomNumber(this.minDuration, this.maxDuration);
       const floatDelay = this.getRandomNumber(0, this.maxDuration * 0.7); 
       const bobDelay = this.getRandomNumber(0, 3); 
@@ -74,14 +67,12 @@ for (let i = 0; i < this.numberOfBalloons; i++) {
       const sizeFactor = this.getRandomNumber(0.6, 1.4); 
       const sway = this.getRandomNumber(-80, 80); 
       
-      // Calculate explicit dimensions like your original version
       const currentWidth = balloonBaseWidth * sizeFactor;
       const currentHeight = balloonBaseHeight * sizeFactor;
 
       const blurAmount = sizeFactor < 0.8 ? '2px' : sizeFactor < 0.95 ? '1px' : '0px';
       const zIndex = Math.floor(sizeFactor * 10); 
 
-      // Apply explicit width and height
       const balloonStyle: { [key: string]: string } = {
         'width': `${currentWidth}px`,
         'height': `${currentHeight}px`,
@@ -91,13 +82,13 @@ for (let i = 0; i < this.numberOfBalloons; i++) {
         '--sway': `${sway}px`,
         '--balloon-color': color,
         '--balloon-blur': blurAmount,
+        '--rise-distance': `${hostHeight * 1.4}px`, // scales float distance to the actual container, not the viewport
         'z-index': `${zIndex}`
       };
 
       const edge = Math.floor(Math.random() * 4);
       let randomLeft, randomTop;
 
-      // Revert to your original edge placement logic to avoid container stretching
       switch (edge) {
         case 0:
           balloonStyle['bottom'] = `-${currentHeight}px`;

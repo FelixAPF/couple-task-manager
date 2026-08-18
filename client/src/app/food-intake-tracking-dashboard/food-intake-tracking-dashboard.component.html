@@ -52,6 +52,13 @@
                         <span class="text-xs opacity-75 mt-0.5 font-medium">Snack</span>
                     </a>
                 </div>
+
+                <div class="flex justify-center" *ngIf="canEditGoal()">
+                    <a href="#" (click)="openGoalDialog($event)" class="group flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-xl hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-all duration-200 border border-primary-100 dark:border-primary-800/30">
+                        <i class="pi pi-flag text-sm"></i>
+                        <span class="font-bold text-sm">Objectifs de {{ selectedMember.name }}</span>
+                    </a>
+                </div>
             </div>
         </p-card>
 
@@ -80,20 +87,44 @@
                                     <span class="text-xs italic">Rien de prévu</span>
                                 </div>
 
-                                <div *ngIf="meals.length > 0" class="flex flex-wrap gap-2 justify-center pb-3 border-b border-surface-200 dark:border-surface-700">
+                                <div class="flex flex-wrap gap-2 justify-center pb-3 border-b border-surface-200 dark:border-surface-700" *ngIf="meals.length > 0">
                                     <ng-container *ngIf="getDailyTotals(meals) as totals">
-                                        <div class="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Protéines'" tooltipPosition="top">
-                                            <i class="fa-solid fa-drumstick-bite text-[10px]"></i> {{ totals.protein | number:'1.1-1' }}
-                                        </div>
-                                        <div class="flex items-center gap-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Légumes'" tooltipPosition="top">
-                                            <i class="fa-solid fa-carrot text-[10px]"></i> {{ totals.vegetable | number:'1.1-1' }}
-                                        </div>
-                                        <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Glucides'" tooltipPosition="top">
-                                            <i class="fa-solid fa-wheat-awn text-[10px]"></i> {{ totals.carbohydrate | number:'1.1-1' }}
-                                        </div>
-                                        <div class="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Lipides'" tooltipPosition="top">
-                                            <i class="fa-solid fa-droplet text-[10px]"></i> {{ totals.fat | number:'1.1-1' }}
-                                        </div>
+                                        <ng-container *ngIf="getGoalForDay(day.isoDate) as goal; else plainTotals">
+                                            <div class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold shadow-sm"
+                                                 [ngClass]="totals.protein >= (goal.proteinTarget || 0) ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'"
+                                                 [pTooltip]="'Protéines'" tooltipPosition="top">
+                                                <i class="fa-solid fa-drumstick-bite text-[10px]"></i> {{ totals.protein | number:'1.1-1' }} / {{ (goal.proteinTarget ?? 0) | number:'1.1-1' }}
+                                            </div>
+                                            <div class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold shadow-sm"
+                                                 [ngClass]="totals.vegetable >= (goal.vegetableTarget || 0) ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400'"
+                                                 [pTooltip]="'Légumes'" tooltipPosition="top">
+                                                <i class="fa-solid fa-carrot text-[10px]"></i> {{ totals.vegetable | number:'1.1-1' }} / {{ (goal.vegetableTarget ?? 0) | number:'1.1-1' }}
+                                            </div>
+                                            <div class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold shadow-sm"
+                                                 [ngClass]="totals.carbohydrate >= (goal.carbohydrateTarget || 0) ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400'"
+                                                 [pTooltip]="'Glucides'" tooltipPosition="top">
+                                                <i class="fa-solid fa-wheat-awn text-[10px]"></i> {{ totals.carbohydrate | number:'1.1-1' }} / {{ (goal.carbohydrateTarget ?? 0) | number:'1.1-1' }}
+                                            </div>
+                                            <div class="flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold shadow-sm"
+                                                 [ngClass]="totals.fat >= (goal.fatTarget || 0) ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'"
+                                                 [pTooltip]="'Lipides'" tooltipPosition="top">
+                                                <i class="fa-solid fa-droplet text-[10px]"></i> {{ totals.fat | number:'1.1-1' }} / {{ (goal.fatTarget ?? 0) | number:'1.1-1' }}
+                                            </div>
+                                        </ng-container>
+                                        <ng-template #plainTotals>
+                                            <div class="flex items-center gap-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Protéines'" tooltipPosition="top">
+                                                <i class="fa-solid fa-drumstick-bite text-[10px]"></i> {{ totals.protein | number:'1.1-1' }}
+                                            </div>
+                                            <div class="flex items-center gap-1 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Légumes'" tooltipPosition="top">
+                                                <i class="fa-solid fa-carrot text-[10px]"></i> {{ totals.vegetable | number:'1.1-1' }}
+                                            </div>
+                                            <div class="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Glucides'" tooltipPosition="top">
+                                                <i class="fa-solid fa-wheat-awn text-[10px]"></i> {{ totals.carbohydrate | number:'1.1-1' }}
+                                            </div>
+                                            <div class="flex items-center gap-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-md text-xs font-bold shadow-sm" [pTooltip]="'Lipides'" tooltipPosition="top">
+                                                <i class="fa-solid fa-droplet text-[10px]"></i> {{ totals.fat | number:'1.1-1' }}
+                                            </div>
+                                        </ng-template>
                                     </ng-container>
                                 </div>
 
@@ -226,6 +257,62 @@
                 <button pButton pRipple label="Annuler" class="p-button-text p-button-secondary" (click)="displayMealDialog = false"></button>
                 <button pButton pRipple label="Sauvegarder" icon="pi pi-check" class="p-button-primary rounded-lg" (click)="saveMeal()"></button>
             </div>
+        </div>
+    </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="displayGoalDialog" [modal]="true" header="Objectifs quotidiens" [draggable]="false" [resizable]="false" [style]="{width: '95vw', maxWidth: '450px'}">
+
+    <div class="flex flex-col gap-6 py-2">
+        <p class="text-sm text-center text-surface-500 dark:text-surface-400">
+            Ces objectifs s'appliqueront à partir d'aujourd'hui pour {{ selectedMember?.name }}.
+        </p>
+
+        <div class="grid grid-cols-2 gap-4">
+
+            <div class="flex flex-col gap-2 p-3 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/30">
+                <span class="text-xs font-bold text-red-600 flex items-center gap-1"><i class="fa-solid fa-drumstick-bite"></i> Protéines</span>
+                <div class="flex justify-between items-center bg-white dark:bg-surface-800 rounded-lg p-1 shadow-sm border border-surface-200 dark:border-surface-700">
+                    <button pButton pRipple icon="pi pi-minus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('proteinTarget', -0.5)"></button>
+                    <span class="font-bold text-lg w-8 text-center">{{ editingGoal.proteinTarget | number:'1.1-1' }}</span>
+                    <button pButton pRipple icon="pi pi-plus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('proteinTarget', 0.5)"></button>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 p-3 bg-green-50 dark:bg-green-900/10 rounded-xl border border-green-100 dark:border-green-900/30">
+                <span class="text-xs font-bold text-green-600 flex items-center gap-1"><i class="fa-solid fa-carrot"></i> Légumes</span>
+                <div class="flex justify-between items-center bg-white dark:bg-surface-800 rounded-lg p-1 shadow-sm border border-surface-200 dark:border-surface-700">
+                    <button pButton pRipple icon="pi pi-minus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('vegetableTarget', -0.5)"></button>
+                    <span class="font-bold text-lg w-8 text-center">{{ editingGoal.vegetableTarget | number:'1.1-1' }}</span>
+                    <button pButton pRipple icon="pi pi-plus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('vegetableTarget', 0.5)"></button>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                <span class="text-xs font-bold text-amber-600 flex items-center gap-1"><i class="fa-solid fa-wheat-awn"></i> Glucides</span>
+                <div class="flex justify-between items-center bg-white dark:bg-surface-800 rounded-lg p-1 shadow-sm border border-surface-200 dark:border-surface-700">
+                    <button pButton pRipple icon="pi pi-minus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('carbohydrateTarget', -0.5)"></button>
+                    <span class="font-bold text-lg w-8 text-center">{{ editingGoal.carbohydrateTarget | number:'1.1-1' }}</span>
+                    <button pButton pRipple icon="pi pi-plus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('carbohydrateTarget', 0.5)"></button>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                <span class="text-xs font-bold text-blue-600 flex items-center gap-1"><i class="fa-solid fa-droplet"></i> Lipides</span>
+                <div class="flex justify-between items-center bg-white dark:bg-surface-800 rounded-lg p-1 shadow-sm border border-surface-200 dark:border-surface-700">
+                    <button pButton pRipple icon="pi pi-minus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('fatTarget', -0.5)"></button>
+                    <span class="font-bold text-lg w-8 text-center">{{ editingGoal.fatTarget | number:'1.1-1' }}</span>
+                    <button pButton pRipple icon="pi pi-plus" class="p-button-rounded p-button-text p-button-sm !w-8 !h-8 text-surface-500" (click)="adjustGoal('fatTarget', 0.5)"></button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <div class="flex w-full items-center justify-end gap-2 mt-4">
+            <button pButton pRipple label="Annuler" class="p-button-text p-button-secondary" (click)="displayGoalDialog = false"></button>
+            <button pButton pRipple label="Sauvegarder" icon="pi pi-check" class="p-button-primary rounded-lg" (click)="saveGoal()"></button>
         </div>
     </ng-template>
 </p-dialog>

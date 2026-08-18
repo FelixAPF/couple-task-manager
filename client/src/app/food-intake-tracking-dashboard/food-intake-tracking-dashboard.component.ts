@@ -14,35 +14,45 @@ import { ButtonModule } from 'primeng/button';
 import { RippleModule } from 'primeng/ripple';
 
 export enum FoodIntakeMealType {
-  BREAKFAST = "breakfast", 
-  LUNCH = "lunch", 
-  DINNER = "dinner", 
+  BREAKFAST = "breakfast",
+  LUNCH = "lunch",
+  DINNER = "dinner",
   SNACK = "snack"
 }
 
 export interface FoodIntakeUnit {
-  id?: number; 
-  date: string; 
-  assigneeId: number; 
+  id?: number;
+  date: string;
+  assigneeId: number;
   description: string;
   mealType: FoodIntakeMealType;
   porteinPortion: number;
   vegetablePortion: number;
   carbohydratePortion: number;
   fatPortion: number;
-  imageUrl?: string | null; 
+  imageUrl?: string | null;
+}
+
+export interface FoodIntakeUnitGoal {
+  id?: number;
+  assigneeId: number;
+  date?: string; // resolved date on reads; ignored by the server on writes (always applies from today)
+  proteinTarget: number | null;
+  vegetableTarget: number | null;
+  carbohydrateTarget: number | null;
+  fatTarget: number | null;
 }
 
 @Component({
   selector: 'app-food-intake-tracking-dashboard',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
     FormsModule,
-    ChartModule, 
-    HouseholdMemberSelectorComponent, 
-    SharedModule, 
-    WeekNavigationControlComponent, 
+    ChartModule,
+    HouseholdMemberSelectorComponent,
+    SharedModule,
+    WeekNavigationControlComponent,
     TooltipModule,
     DialogModule,
     ButtonModule,
@@ -64,7 +74,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   formatedTodayDate: string = "";
   householdMembers: HouseholdMember[] = [];
   householdMembersBirthdays: Date[] = [];
-  selectedMember: HouseholdMember | null = null; 
+  selectedMember: HouseholdMember | null = null;
   options: any;
   currentStartDate: Date | null = null;
   currentEndDate: Date | null = null;
@@ -72,17 +82,24 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   intakeData: FoodIntakeUnit[] = [];
   chartData: any;
 
-  // Add/Edit Dialog State
+  // Goals: keyed by ISO date string for the currently viewed week + selected member
+  goalsData: Record<string, FoodIntakeUnitGoal> = {};
+
+  // Add/Edit Meal Dialog State
   displayMealDialog: boolean = false;
   isEditMode: boolean = false;
   editingMeal: Partial<FoodIntakeUnit> = {};
 
+  // Add/Edit Goal Dialog State
+  displayGoalDialog: boolean = false;
+  editingGoal: Partial<FoodIntakeUnitGoal> = {};
+
   // Photo Viewer State
   displayImageViewer: boolean = false;
   viewerImageUrl: string = '';
-  
+
   constructor(private datePipe: DatePipe, @Inject(LOCALE_ID) private locale: string) {}
-  
+
   get filteredIntakeData() {
     if (!this.selectedMember || !this.selectedMember.id) return [];
     return this.intakeData.filter(m => m.assigneeId === this.selectedMember!.id);
@@ -92,7 +109,14 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   get vegetableCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.vegetablePortion, 0); }
   get carbohydrateCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.carbohydratePortion, 0); }
   get fatCount() { return this.filteredIntakeData.reduce((prev, current) => prev + current.fatPortion, 0); }
-  
+
+  /** Goal that applies to the currently selected day, for the selected member. Falls back to today's goal if no day is selected yet. */
+  get selectedDayGoal(): FoodIntakeUnitGoal | null {
+    const iso = this.selectedDay?.isoDate;
+    if (!iso) return null;
+    return this.goalsData[iso] ?? null;
+  }
+
   ngOnInit(): void {
     if(this.initialSelectedDay){
       this.selectedDay = {
@@ -103,7 +127,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
         isBirthday: false,
         isToday: false
       };
-    }  
+    }
 
     this.formatedTodayDate = this.datePipe.transform(new Date(), 'EEEE d MMMM', this.locale) || '';
 
@@ -118,17 +142,17 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
             try {
               const birthday = new Date(member.birthDay);
               if (isNaN(birthday.getTime())) return null;
-              birthday.setFullYear(new Date().getFullYear()); 
-              birthday.setHours(0, 0, 0, 0); 
+              birthday.setFullYear(new Date().getFullYear());
+              birthday.setHours(0, 0, 0, 0);
               return birthday;
             } catch (error) {
                 return null;
             }
           })
           .filter((date): date is Date => date !== null);
-          
+
         this.updateChartData();
-      } else { 
+      } else {
         this.householdMembersBirthdays = [];
       }
     });
@@ -136,16 +160,27 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
 
   loadMeals(): void {
     if (!this.currentStartDate || !this.currentEndDate) return;
-    
+
     const startStr = this.datePipe.transform(this.currentStartDate, 'yyyy-MM-dd')!;
     const endStr = this.datePipe.transform(this.currentEndDate, 'yyyy-MM-dd')!;
 
     this.foodIntakeService.getIntakeUnits(startStr, endStr).subscribe({
-      next: (data) => {
+      next: (data:any) => {
         this.intakeData = data;
         this.updateChartData();
       },
-      error: (err) => console.error('Failed to load intake data', err)
+      error: (err:any) => console.error('Failed to load intake data', err)
+    });
+
+    this.loadGoals(startStr, endStr);
+  }
+
+  loadGoals(startStr: string, endStr: string): void {
+    if (!this.selectedMember?.id) return;
+
+    this.foodIntakeService.getGoals(this.selectedMember.id, startStr, endStr).subscribe({
+      next: (data:any) => this.goalsData = data,
+      error: (err:any) => console.error('Failed to load goals', err)
     });
   }
 
@@ -163,16 +198,16 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
       ],
       datasets: [{
           data: [
-            this.proteinCount, 
-            this.vegetableCount, 
-            this.carbohydrateCount, 
+            this.proteinCount,
+            this.vegetableCount,
+            this.carbohydrateCount,
             this.fatCount
           ],
           backgroundColor: [
-              'rgba(239, 68, 68, 0.7)',   // Red-500
-              'rgba(34, 197, 94, 0.7)',   // Green-500
-              'rgba(245, 158, 11, 0.7)',  // Amber-500
-              'rgba(59, 130, 246, 0.7)'   // Blue-500
+              'rgba(239, 68, 68, 0.7)',
+              'rgba(34, 197, 94, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(59, 130, 246, 0.7)'
           ],
           borderColor: [
               'rgb(239, 68, 68)',
@@ -200,10 +235,16 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
   onDaySelectFromCalendar(day: WeekDayContext): void {
     this.selectedDay = day;
   }
-    
+
   onHouseholdMemberSelected(householdMember: HouseholdMember | null){
     this.selectedMember = householdMember;
-    this.updateChartData(); 
+    this.updateChartData();
+
+    if (this.currentStartDate && this.currentEndDate) {
+      const startStr = this.datePipe.transform(this.currentStartDate, 'yyyy-MM-dd')!;
+      const endStr = this.datePipe.transform(this.currentEndDate, 'yyyy-MM-dd')!;
+      this.loadGoals(startStr, endStr);
+    }
   }
 
   // --- Photo Viewer Logic ---
@@ -214,7 +255,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     this.displayImageViewer = true;
   }
 
-  // --- Dialog & Form Logic ---
+  // --- Meal Dialog & Form Logic ---
 
   openAddMealDialog(mealType: FoodIntakeMealType, event: Event) {
     event.preventDefault();
@@ -225,7 +266,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
 
     this.editingMeal = {
       date: targetDate,
-      assigneeId: this.selectedMember.id, 
+      assigneeId: this.selectedMember.id,
       mealType: mealType,
       description: '',
       porteinPortion: 0.0,
@@ -239,7 +280,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
 
   openEditMealDialog(meal: FoodIntakeUnit) {
     this.isEditMode = true;
-    this.editingMeal = { ...meal }; 
+    this.editingMeal = { ...meal };
     this.displayMealDialog = true;
   }
 
@@ -273,7 +314,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
         this.displayMealDialog = false;
         this.loadMeals();
       },
-      error: (err) => console.error("Error saving meal:", err)
+      error: (err:any) => console.error("Error saving meal:", err)
     });
   }
 
@@ -284,9 +325,53 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
           this.displayMealDialog = false;
           this.loadMeals();
         },
-        error: (err) => console.error("Error deleting meal:", err)
+        error: (err:any) => console.error("Error deleting meal:", err)
       });
     }
+  }
+
+  // --- Goal Dialog & Form Logic ---
+
+  /** Objectives are only editable for the current day — editing "today" always shifts the global goal forward. */
+  canEditGoal(): boolean {
+    return !!this.selectedDay?.isToday;
+  }
+
+  openGoalDialog(event: Event) {
+    event.preventDefault();
+    if (!this.selectedMember?.id) return;
+
+    const existing = this.selectedDayGoal;
+    this.editingGoal = {
+      assigneeId: this.selectedMember.id,
+      proteinTarget: existing?.proteinTarget ?? 0,
+      vegetableTarget: existing?.vegetableTarget ?? 0,
+      carbohydrateTarget: existing?.carbohydrateTarget ?? 0,
+      fatTarget: existing?.fatTarget ?? 0
+    };
+    this.displayGoalDialog = true;
+  }
+
+  adjustGoal(macro: 'proteinTarget' | 'vegetableTarget' | 'carbohydrateTarget' | 'fatTarget', delta: number) {
+    const currentValue = this.editingGoal[macro] || 0;
+    const newValue = currentValue + delta;
+    if (newValue >= 0) {
+      this.editingGoal[macro] = newValue;
+    }
+  }
+
+  saveGoal() {
+    this.foodIntakeService.upsertGoal(this.editingGoal as FoodIntakeUnitGoal).subscribe({
+      next: () => {
+        this.displayGoalDialog = false;
+        if (this.currentStartDate && this.currentEndDate) {
+          const startStr = this.datePipe.transform(this.currentStartDate, 'yyyy-MM-dd')!;
+          const endStr = this.datePipe.transform(this.currentEndDate, 'yyyy-MM-dd')!;
+          this.loadGoals(startStr, endStr);
+        }
+      },
+      error: (err:any) => console.error("Error saving goal:", err)
+    });
   }
 
   // --- Helper Methods for Template Display ---
@@ -305,6 +390,10 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
     }, { protein: 0, vegetable: 0, carbohydrate: 0, fat: 0 });
   }
 
+  getGoalForDay(isoDate: string): FoodIntakeUnitGoal | null {
+    return this.goalsData[isoDate] ?? null;
+  }
+
   getMealIcon(mealType: FoodIntakeMealType): string {
     switch(mealType) {
       case FoodIntakeMealType.BREAKFAST: return 'pi-sun text-orange-500';
@@ -314,7 +403,7 @@ export class FoodIntakeTrackingDashboardComponent implements OnInit {
       default: return 'pi-calendar text-surface-500';
     }
   }
-  
+
   getMealName(mealType: FoodIntakeMealType): string {
     switch(mealType) {
       case FoodIntakeMealType.BREAKFAST: return 'Déjeuner';

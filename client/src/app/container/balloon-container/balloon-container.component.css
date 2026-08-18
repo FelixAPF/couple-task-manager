@@ -8,117 +8,107 @@
 .balloon-wrapper {
   position: relative;
   width: 100%;
-  height: 100%; /* Force to fill host */
+  height: 100%;
   overflow: visible;
+  pointer-events: none;
 }
 
 .content-projection {
   position: relative;
   z-index: 1;
   width: 100%;
-  height: 100%; /* Force to pass height to your p-card */
+  height: 100%;
 }
 
-/* 1. VERTICAL MOVEMENT */
+/* Vertical float + fade, distance driven by --rise-distance (set from actual host height in .ts) */
 .balloon-float {
   position: absolute;
   pointer-events: none;
-  /* Apply scale and blur for depth of field */
-  transform: scale(var(--balloon-scale));
   filter: blur(var(--balloon-blur));
-  /* Floating animation */
   opacity: 0;
   animation: floatAway var(--duration) cubic-bezier(0.35, 0.1, 0.25, 1) var(--delay) infinite;
 }
 
-/* 2. HORIZONTAL MOVEMENT & PHYSICS */
+/* Sway + tilt, independent of the vertical float */
 .balloon-sway {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  height: 100%;
   transform-origin: bottom center;
-  /* Bobbing/swaying animation independent of vertical floating */
-  animation: gentleBob 4s ease-in-out var(--bob-delay) infinite alternate;
+  animation: gentleBob calc(var(--duration) / 4.5) ease-in-out var(--bob-delay) infinite alternate;
 }
 
-/* 3. 3D GLOSSY BALLOON MATERIAL */
+/* Glossy latex balloon body */
 .balloon-body {
-  width: 50px;
-  height: 65px;
+  position: relative;
+  width: 100%;
+  height: 78%;
   background-color: var(--balloon-color);
-  
-  /* Create glossy latex effect using dual radial gradients */
   background-image: 
     radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.2) 20%, transparent 40%),
     radial-gradient(circle at 70% 70%, transparent 40%, rgba(0, 0, 0, 0.2) 100%);
-    
-  /* Tear-drop shape */
   border-radius: 50% 50% 50% 50% / 45% 45% 55% 55%;
-  
-  /* Inner shadows for edge volume */
   box-shadow: 
     inset -4px -4px 12px rgba(0, 0, 0, 0.2), 
     inset 4px 4px 8px rgba(255, 255, 255, 0.3),
-    0 10px 15px rgba(0, 0, 0, 0.1); /* Subtle drop shadow onto environment */
-    
-  position: relative;
+    0 10px 15px rgba(0, 0, 0, 0.1);
 }
 
-/* The Tied Knot */
+/* Tied knot at the base */
 .balloon-body::after {
   content: '';
   position: absolute;
-  bottom: -6px;
+  bottom: -6%;
   left: 50%;
   transform: translateX(-50%);
-  /* CSS Triangle */
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
   border-bottom: 7px solid var(--balloon-color);
-  /* Darken the knot slightly for realism */
-  filter: brightness(80%); 
+  filter: brightness(80%);
 }
 
-/* Curved, delicate string */
+/* Delicate curved string, fades toward the bottom */
 .balloon-string {
   width: 1px;
-  height: 55px;
-  /* Fades out at the bottom */
+  height: 30%;
   background: linear-gradient(to bottom, rgba(200, 200, 200, 0.8), transparent);
-  margin-top: 5px;
-  position: relative;
-  /* Slight natural curve to the string */
+  margin-top: 5%;
   border-radius: 50% / 10%;
-  box-shadow: -1px 0 2px rgba(0,0,0,0.05);
+  box-shadow: -1px 0 2px rgba(0, 0, 0, 0.05);
 }
 
-/* -- ANIMATIONS -- */
-
-/* Float vertically across the screen */
 @keyframes floatAway {
   0% {
-    transform: scale(var(--balloon-scale)) translateY(0);
+    transform: translateY(0);
     opacity: 0;
   }
-  5% {
-    opacity: 1; /* Fade in smoothly */
+  6% {
+    opacity: 1;
   }
-  95% {
+  93% {
     opacity: 1;
   }
   100% {
-    /* Travel upwards. Calculates distance dynamically. */
-    transform: scale(var(--balloon-scale)) translateY(calc(-120vh - 200px));
-    opacity: 0; 
+    /* scales to the container's real height instead of the viewport */
+    transform: translateY(calc(var(--rise-distance) * -1));
+    opacity: 0;
   }
 }
 
-/* Sway side-to-side and tilt naturally */
 @keyframes gentleBob {
   0% {
     transform: translateX(calc(var(--sway) * -0.5)) rotateZ(-4deg);
   }
   100% {
     transform: translateX(var(--sway)) rotateZ(4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balloon-float,
+  .balloon-sway {
+    animation: none !important;
   }
 }

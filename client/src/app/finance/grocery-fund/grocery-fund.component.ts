@@ -50,19 +50,19 @@ export class GroceryFundComponent implements OnInit {
     date: [new Date(), Validators.required]
   });
 
-  enrichedTransactions = computed(() => {
-    const txs = this.financeService.groceryTransactions();
-    const members = this.financeService.householdMembers();
-    
-    return txs.map(tx => {
-      const user = members.find(m => String(m.userId) === String(tx.userId));
-      return {
-        ...tx,
-        userIconUrl: user?.iconUrl || '',
-        userName: user?.name || 'Inconnu'
-      };
-    });
+enrichedTransactions = computed(() => {
+  const txs = this.financeService.groceryTransactions();
+  const members = this.financeService.householdMembers();
+
+  return txs.map(tx => {
+    const user = members.find(m => String(m.userId) === String(tx.userId));
+    return {
+      ...tx,
+      userIconUrl: user?.iconUrl, // undefined instead of '' when not found yet
+      userName: user?.name || 'Inconnu'
+    };
   });
+});
 
   constructor() {
     effect(() => {

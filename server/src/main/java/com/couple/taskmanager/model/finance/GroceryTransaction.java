@@ -28,6 +28,9 @@ public class GroceryTransaction {
     @Transient
     private Long userId; // Mapped to frontend UI without exposing the full CTMUser object
 
+    @Transient
+    private String userImageUrl;
+
     @Column(nullable = false)
     private String storeName;
 
@@ -48,6 +51,7 @@ public class GroceryTransaction {
     public void populateUserId() {
         if (user != null) {
             this.userId = user.getId();
+            this.userImageUrl = user.getImageUrl();
         }
     }
 }

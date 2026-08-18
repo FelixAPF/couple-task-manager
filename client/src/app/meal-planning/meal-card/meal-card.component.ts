@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, LOCALE_ID, Inject, TemplateRef, AfterViewInit, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter, Input, Output, LOCALE_ID, Inject, TemplateRef, AfterViewInit, ViewEncapsulation, SimpleChanges } from '@angular/core';
 import { Meal } from '../../model/meals';
 import { SharedModule } from '../../shared.module';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -21,6 +21,7 @@ export class MealCardComponent {
   @Input() public isBirthday: boolean | undefined = false;
   recipeDialogRef: DynamicDialogRef | undefined;
   @Input() borderHighlightClass: string = ''; // Input to receive the border class
+  recipeImageLoaded = false;
 
   isHouseholdMemberBirthday: boolean = false;
 
@@ -28,6 +29,15 @@ export class MealCardComponent {
   @Output() removeMealClick: EventEmitter<Event> = new EventEmitter<Event>();
 
 
+  ngOnChanges(changes: SimpleChanges) {
+  if (changes['meal']) {
+    const prevUrl = changes['meal'].previousValue?.recipe?.imageUrl;
+    const currUrl = changes['meal'].currentValue?.recipe?.imageUrl;
+    if (prevUrl !== currUrl) {
+      this.recipeImageLoaded = false;
+    }
+  }
+}
   get recipeName(){
     return this.meal?.recipe?.name || 'Recette inconnue';
   }

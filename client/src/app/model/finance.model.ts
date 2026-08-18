@@ -12,7 +12,8 @@ export interface CommonExpense {
   name: string;
   amount: number;
   splitType: string;
-  isGrocery?: boolean;
+  targetFund?: 'GROCERY' | 'HOUSEHOLD' | 'ELECTRICITY' | 'NONE'; 
+  isGrocery?: boolean; // Kept for backwards compatibility if needed
 }
 
 export interface SubAccount {
@@ -55,8 +56,6 @@ export interface TransferCompilation {
   expenses: string[];
 }
 
-// --- NEW GROCERY MODELS ---
-
 export interface GroceryFund {
   id?: string;
   householdId?: string;
@@ -72,12 +71,9 @@ export interface GroceryTransaction {
   amount: number; 
   transactionType: 'ADD' | 'SPEND';
   date: Date | string;
-  
-  // Optional frontend helper properties mapped from the user list
   userIconUrl?: string;
   userName?: string;
 }
-// --- NEW GROCERY MODELS ---
 
 export interface HouseholdFund {
   id?: string;
@@ -94,17 +90,16 @@ export interface HouseholdTransaction {
   amount: number; 
   transactionType: 'ADD' | 'SPEND';
   date: Date | string;
-  
-  // Optional frontend helper properties mapped from the user list
   userIconUrl?: string;
   userName?: string;
 }
-// --- NEW GROCERY MODELS ---
 
 export interface ElectricityFund {
   id?: string;
   householdId?: string;
   balance: number;
+  cycleStartDate?: Date | string;
+  cycleEndDate?: Date | string;
 }
 
 export interface ElectricityTransaction {
@@ -115,8 +110,16 @@ export interface ElectricityTransaction {
   amount: number; 
   transactionType: 'ADD' | 'SPEND';
   date: Date | string;
-  
-  // Optional frontend helper properties mapped from the user list
   userIconUrl?: string;
   userName?: string;
+}
+
+// NEW: Hydro Bill Model
+export interface HydroBill {
+  id?: string;
+  householdId?: string;
+  periodStart: Date | string;
+  periodEnd: Date | string;
+  amount: number; 
+  kwhConsumed?: number; 
 }

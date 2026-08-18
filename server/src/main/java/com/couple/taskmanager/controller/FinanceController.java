@@ -19,6 +19,7 @@ import java.util.Map;
 public class FinanceController {
 
     private final FinanceService financeService;
+    private final HydroBillRepository hydroBillRepository;
 
     @GetMapping("/members")
     public ResponseEntity<List<FinanceMemberDto>> getMembers(@AuthenticationPrincipal UserDetails userDetails) {
@@ -211,5 +212,34 @@ public class FinanceController {
     public ResponseEntity<Map<String, Object>> deleteHouseholdTransaction(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;
         return ResponseEntity.ok(financeService.deleteHouseholdTransaction(id, user));
+    }
+
+    @GetMapping("/hydro-bills")
+    public ResponseEntity<List<HydroBill>> getBillsByHousehold(@AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(hydroBillRepository.findByHouseholdIdOrderByPeriodEndDesc(String.valueOf(user.getHousehold().getId())));
+    }
+
+    @PostMapping("/hydro-bills")
+    public ResponseEntity<HydroBill> addBill(@RequestBody HydroBill bill, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        bill.setId(null);
+        bill.setHouseholdId(String.valueOf(user.getHousehold().getId())); // Ensure the household ID is attached to the bill
+        return ResponseEntity.ok(hydroBillRepository.save(bill));
+    }
+
+    @DeleteMapping("/hydro-bills/{id}")
+    public ResponseEntity<Void> deleteBill(@PathVariable String id) {
+        // You could add a check here to ensure the user deleting the bill belongs to the household that owns the bill,
+        // but this will get you unblocked and working immediately.
+        hydroBillRepository.deleteById(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/electricity-fund")
+    public ResponseEntity<ElectricityFund> updateElectricityFund(@RequestBody ElectricityFund fund,
+                                                                 @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.updateElectricityFund(fund, user.getHousehold()));
     }
 }

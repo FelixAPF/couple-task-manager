@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "electricity_fund")
@@ -20,4 +22,6 @@ public class ElectricityFund {
 
     @Column(nullable = false)
     private Double balance = 0.0;
+    private LocalDateTime cycleStartDate;
+    private LocalDateTime cycleEndDate;
 }

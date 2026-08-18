@@ -7,6 +7,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { FinanceService } from '../../service/finance.service';
 import { TransferCompilation } from '../../model/finance.model';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-finance-dashboard',
@@ -29,6 +30,8 @@ export class FinanceDashboardComponent implements OnInit {
   
   jointTransferAmount: number = 0;
   groceryTransferAmount: number = 0;
+  electricityTransferAmount: number = 0;
+  householdTransferAmount: number = 0;
   personalTransfers: TransferCompilation[] = [];
   remainingAmount: number = 0;
 
@@ -39,10 +42,17 @@ export class FinanceDashboardComponent implements OnInit {
   currentSetupStepId: string = '';
 
   get userCarBrand(){ return 'tesla';}
-  get carBrandSlug(): string {
-    return this.userCarBrand ? this.userCarBrand.toLowerCase().trim() : 'tesla';
+  get userCarModel(){ return 'model 3'; }
+  get userCarYear(){ return '2023'; }
+
+  get carModelSlug(): string {
+    return this.userCarModel ? this.userCarModel.toLowerCase().trim().replace(/[-\s]+/g, '') : 'model3';
   }
-  // --- NEW: Computed signals for Grocery Summary ---
+
+  get carBrandSlug(): string {
+    return this.userCarBrand ? this.userCarBrand.toLowerCase().trim().replace(/[-\s]+/g, '') : 'tesla';
+  }
+
   currentGroceryBalance = computed(() => this.financeService.groceryFund()?.balance || 0);
 
   grocerySpentThisMonth = computed(() => {
@@ -246,21 +256,29 @@ export class FinanceDashboardComponent implements OnInit {
 
     this.jointTransferAmount = 0;
     this.groceryTransferAmount = 0; 
+    this.electricityTransferAmount = 0;
+    this.householdTransferAmount = 0;
 
-    this.financeService.commonExpenses().forEach(exp => {
+        this.financeService.commonExpenses().forEach(exp => {
       const paycheckAmount = calculatePaycheckAmount(exp.amount, 'Mensuel');
       let myShare = 0;
-      
+
       if (exp.splitType === 'EQUAL') {
         myShare = paycheckAmount / 2;
       } else {
         myShare = paycheckAmount * (myPercentage / 100);
       }
-      
+
+      myShare = this.roundUpToCents(myShare); // <-- added
+
       this.jointTransferAmount += myShare;
-      
-      if (exp.isGrocery) {
+
+      if (exp.targetFund === 'GROCERY') {
         this.groceryTransferAmount += myShare;
+      } else if (exp.targetFund === 'ELECTRICITY') {
+        this.electricityTransferAmount += myShare;
+      } else if (exp.targetFund === 'HOUSEHOLD') {
+        this.householdTransferAmount += myShare;
       }
     });
 
@@ -269,10 +287,6 @@ export class FinanceDashboardComponent implements OnInit {
     this.financeService.personalExpenses().forEach(exp => {
       const paycheckAmount = calculatePaycheckAmount(exp.amount, exp.frequency);
       
-      if (exp.isGrocery) {
-        this.groceryTransferAmount += paycheckAmount;
-      }
-
       if (exp.targetBankAccountId === 'JOINT_ACCOUNT') {
         this.jointTransferAmount += paycheckAmount;
         return;
@@ -304,33 +318,73 @@ export class FinanceDashboardComponent implements OnInit {
   completePaycheckWizard() {
     if (this.pendingPaycheckDate) {
       this.financeService.markPaycheckActioned(this.pendingPaycheckDate).subscribe(() => {
-        this.processGroceryTransferAndClose();
+        this.processFundTransfersAndClose();
       });
     } else {
-      this.processGroceryTransferAndClose();
+      this.processFundTransfersAndClose();
     }
   }
 
-  processGroceryTransferAndClose() {
-    if (this.groceryTransferAmount > 0) {
-      const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);
-      
-      if (currentUser) {
-        this.financeService.addGroceryTransaction({
-          userId: currentUser.userId,
-          storeName: 'Dépôt de Paie',
-          description: 'Transfert de paie automatisé',
-          amount: this.groceryTransferAmount,
-          transactionType: 'ADD',
-          date: new Date().toISOString()
-        }).subscribe(() => {
-          this.showPaycheckWizard = false;
-        });
-        return;
-      }
-    }
+  private roundUpToCents(amount: number): number {
+  return Math.ceil(amount * 100) / 100;
+}
+
+  processFundTransfersAndClose() {
+    const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);
     
-    this.showPaycheckWizard = false;
+    if (!currentUser) {
+      this.showPaycheckWizard = false;
+      return;
+    }
+
+    const txDate = new Date().toISOString();
+    const observables = [];
+
+    // Push automated deposits to the specific fund arrays if amounts exist
+    if (this.groceryTransferAmount > 0) {
+      observables.push(this.financeService.addGroceryTransaction({
+        userId: currentUser.userId,
+        storeName: 'Dépôt de Paie',
+        description: 'Transfert de paie automatisé',
+        amount: this.groceryTransferAmount,
+        transactionType: 'ADD',
+        date: txDate
+      }));
+    }
+
+    if (this.electricityTransferAmount > 0) {
+      observables.push(this.financeService.addElectricityTransaction({
+        userId: currentUser.userId,
+        description: 'Transfert de paie automatisé',
+        amount: this.electricityTransferAmount,
+        transactionType: 'ADD',
+        date: txDate
+      }));
+    }
+
+    if (this.householdTransferAmount > 0) {
+      observables.push(this.financeService.addHouseholdTransaction({
+        userId: currentUser.userId,
+        storeName: 'Dépôt de Paie',
+        description: 'Transfert de paie automatisé',
+        amount: this.householdTransferAmount,
+        transactionType: 'ADD',
+        date: txDate
+      }));
+    }
+
+    // Use forkJoin to wait for all API calls to resolve before closing
+    if (observables.length > 0) {
+      forkJoin(observables).subscribe({
+        next: () => this.showPaycheckWizard = false,
+        error: (err) => {
+          console.error('Erreur lors du transfert automatique', err);
+          this.showPaycheckWizard = false;
+        }
+      });
+    } else {
+      this.showPaycheckWizard = false;
+    }
   }
 
   navigateTo(path: string) {

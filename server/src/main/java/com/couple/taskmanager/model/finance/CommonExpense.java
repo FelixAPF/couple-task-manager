@@ -28,6 +28,6 @@ public class CommonExpense {
     @Column(nullable = false)
     private String splitType;
 
-    @Column(nullable = false, columnDefinition ="BOOLEAN DEFAULT false")
-    private Boolean isGrocery = false;
+    @Enumerated(EnumType.STRING)
+    private TargetFund targetFund;
 }

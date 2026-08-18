@@ -53,6 +53,17 @@ public class FinanceService {
         return new FinanceMemberDto(userRepository.save(member), member.getId().equals(currentUser.getId()));
     }
 
+    public ElectricityFund updateElectricityFund(ElectricityFund updatedFund, Household household) {
+        ElectricityFund existingFund = electricityFundRepository.findByHouseholdId(household.getId())
+                .orElseThrow(() -> new RuntimeException("Fonds non trouvé"));
+
+        // Mise à jour des dates de cycle configurables
+        existingFund.setCycleStartDate(updatedFund.getCycleStartDate());
+        existingFund.setCycleEndDate(updatedFund.getCycleEndDate());
+
+        return electricityFundRepository.save(existingFund);
+    }
+
     public List<CommonExpense> getCommonExpenses(Household household) {
         return commonExpenseRepository.findByHouseholdId(household.getId());
     }

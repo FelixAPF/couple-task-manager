@@ -2,18 +2,9 @@ import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environment';
 import { 
-  HouseholdMemberFinance, 
-  CommonExpense, 
-  BankAccount, 
-  PaycheckConfig, 
-  PersonalExpense,
-  SubAccount,
-  GroceryFund,
-  GroceryTransaction,
-  HouseholdFund,
-  ElectricityFund,
-  ElectricityTransaction,
-  HouseholdTransaction
+  HouseholdMemberFinance, CommonExpense, BankAccount, PaycheckConfig, 
+  PersonalExpense, SubAccount, GroceryFund, GroceryTransaction,
+  HouseholdFund, ElectricityFund, ElectricityTransaction, HouseholdTransaction, HydroBill
 } from '../model/finance.model';
 import { tap } from 'rxjs/operators';
 import { of, Observable } from 'rxjs';
@@ -31,15 +22,16 @@ export class FinanceService {
   public personalExpenses = signal<PersonalExpense[]>([]);
   public paycheckConfig = signal<PaycheckConfig | null>(null);
   
-  // NEW: Grocery signals
   public groceryFund = signal<GroceryFund | null>(null);
   public groceryTransactions = signal<GroceryTransaction[]>([]);
-  // NEW: Grocery signals
+  
   public householdFund = signal<HouseholdFund | null>(null);
   public householdTransactions = signal<HouseholdTransaction[]>([]);
-  // NEW: Grocery signals
-  public electricityFund = signal<GroceryFund | null>(null);
+  
+  public electricityFund = signal<ElectricityFund | null>(null);
   public electricityTransactions = signal<ElectricityTransaction[]>([]);
+
+  public hydroBills = signal<HydroBill[]>([]);
 
   public skippedSetupSteps = signal<string[]>(JSON.parse(localStorage.getItem('financeWizardSkipped') || '[]'));
 
@@ -60,20 +52,18 @@ export class FinanceService {
     this.http.get<PersonalExpense[]>(`${this.apiUrl}/personal-expenses`).subscribe(res => this.personalExpenses.set(res));
     this.http.get<PaycheckConfig>(`${this.apiUrl}/paycheck-config`).subscribe(res => this.paycheckConfig.set(res));
     
-    // NEW: Load grocery data
     this.http.get<GroceryFund>(`${this.apiUrl}/grocery-fund`).subscribe(res => this.groceryFund.set(res));
     this.http.get<GroceryTransaction[]>(`${this.apiUrl}/grocery-transactions`).subscribe(res => this.groceryTransactions.set(res));
 
-    // NEW: Load household data
     this.http.get<HouseholdFund>(`${this.apiUrl}/household-fund`).subscribe(res => this.householdFund.set(res));
     this.http.get<HouseholdTransaction[]>(`${this.apiUrl}/household-transactions`).subscribe(res => this.householdTransactions.set(res));
     
-    // NEW: Load electricity data
     this.http.get<ElectricityFund>(`${this.apiUrl}/electricity-fund`).subscribe(res => this.electricityFund.set(res));
     this.http.get<ElectricityTransaction[]>(`${this.apiUrl}/electricity-transactions`).subscribe(res => this.electricityTransactions.set(res));
-  }
 
-  // --- Existing Methods ---
+    // NEW: Load Hydro Bills
+    this.http.get<HydroBill[]>(`${this.apiUrl}/hydro-bills`).subscribe(res => this.hydroBills.set(res));
+  }
 
   updateMemberRatio(userId: string, proratedPercentage: number) {
     return this.http.put<HouseholdMemberFinance>(`${this.apiUrl}/members/${userId}`, { proratedPercentage }).pipe(
@@ -96,6 +86,13 @@ export class FinanceService {
   deleteCommonExpense(id: string) {
     return this.http.delete(`${this.apiUrl}/common-expenses/${id}`).pipe(
       tap(() => this.commonExpenses.update(exps => exps.filter(e => e.id !== id)))
+    );
+  }
+
+  
+  updateElectricityFund(updatedFund: ElectricityFund) {
+    return this.http.put<ElectricityFund>(`${this.apiUrl}/electricity-fund`, updatedFund).pipe(
+      tap(saved => this.electricityFund.set(saved))
     );
   }
 
@@ -162,13 +159,10 @@ export class FinanceService {
     return of(null);
   }
 
-  // --- NEW: Grocery Methods ---
-
   addGroceryTransaction(transaction: GroceryTransaction) {
     return this.http.post<{ fund: GroceryFund, transaction: GroceryTransaction }>(`${this.apiUrl}/grocery-transactions`, transaction).pipe(
       tap(res => {
         this.groceryFund.set(res.fund);
-        // Prepend so the newest shows up first
         this.groceryTransactions.update(txs => [res.transaction, ...txs]);
       })
     );
@@ -183,13 +177,10 @@ export class FinanceService {
     );
   }
 
-  // --- NEW: Grocery Methods ---
-
   addElectricityTransaction(transaction: ElectricityTransaction) {
     return this.http.post<{ fund: ElectricityFund, transaction: ElectricityTransaction }>(`${this.apiUrl}/electricity-transactions`, transaction).pipe(
       tap(res => {
         this.electricityFund.set(res.fund);
-        // Prepend so the newest shows up first
         this.electricityTransactions.update(txs => [res.transaction, ...txs]);
       })
     );
@@ -204,13 +195,10 @@ export class FinanceService {
     );
   }
 
-  // --- NEW: Grocery Methods ---
-
   addHouseholdTransaction(transaction: HouseholdTransaction) {
     return this.http.post<{ fund: HouseholdFund, transaction: HouseholdTransaction }>(`${this.apiUrl}/household-transactions`, transaction).pipe(
       tap(res => {
         this.householdFund.set(res.fund);
-        // Prepend so the newest shows up first
         this.householdTransactions.update(txs => [res.transaction, ...txs]);
       })
     );
@@ -222,6 +210,19 @@ export class FinanceService {
         this.householdFund.set(res.fund);
         this.householdTransactions.update(txs => txs.filter(tx => tx.id !== id));
       })
+    );
+  }
+
+  // --- NEW: Hydro Bills API ---
+  addHydroBill(bill: HydroBill) {
+    return this.http.post<HydroBill>(`${this.apiUrl}/hydro-bills`, bill).pipe(
+      tap(res => this.hydroBills.update(bills => [res, ...bills]))
+    );
+  }
+
+  deleteHydroBill(id: string) {
+    return this.http.delete(`${this.apiUrl}/hydro-bills/${id}`).pipe(
+      tap(() => this.hydroBills.update(bills => bills.filter(b => b.id !== id)))
     );
   }
 }

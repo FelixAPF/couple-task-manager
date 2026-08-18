@@ -27,17 +27,20 @@
 
             <div class="flex flex-col gap-4">
                 <div *ngFor="let expense of expenses" class="bg-surface-50 dark:bg-surface-900 p-4 rounded-lg border border-surface-200 dark:border-surface-700 flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                    
                     <div class="w-full sm:w-1/4 flex flex-col gap-1">
                         <label class="text-xs font-medium text-surface-500">Nom de la dépense</label>
                         <input pInputText [(ngModel)]="expense.name" (blur)="saveExpense(expense)" class="w-full" placeholder="Ex: Hypothèque" />
                     </div>
+                    
                     <div class="w-full sm:w-1/4 flex flex-col gap-1">
                         <label class="text-xs font-medium text-surface-500">Montant</label>
                         <p-inputNumber [(ngModel)]="expense.amount" (onBlur)="saveExpense(expense)" mode="currency" currency="CAD" styleClass="w-full" inputStyleClass="w-full"></p-inputNumber>
                     </div>
+                    
                     <div class="w-full sm:w-1/4 flex flex-col gap-2">
                         <label class="text-xs font-medium text-surface-500">Séparation</label>
-                        <div class="flex items-center gap-4">
+                        <div class="flex flex-col gap-2">
                             <div class="flex items-center">
                                 <p-radioButton [name]="'splitType' + expense.id" value="EQUAL" [(ngModel)]="expense.splitType" [inputId]="'eq' + expense.id" (onClick)="saveExpense(expense)"></p-radioButton>
                                 <label [for]="'eq' + expense.id" class="ml-2 text-sm text-surface-700 dark:text-surface-200">50/50</label>
@@ -48,12 +51,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-full sm:w-1/4 flex flex-col gap-2">
-                        <label class="text-xs font-medium text-surface-500">Épicerie</label>
-                        <div class="flex items-center h-full">
-                            <p-checkbox [(ngModel)]="expense.isGrocery" [binary]="true" label="Lier à l'épicerie" (onChange)="saveExpense(expense)"></p-checkbox>
-                        </div>
+
+                    <div class="w-full sm:w-1/4 flex flex-col gap-1">
+                        <label class="text-xs font-medium text-surface-500">Fonds Cible (Transfert Paie)</label>
+                        <p-dropdown 
+                            [options]="fundOptions" 
+                            [(ngModel)]="expense.targetFund" 
+                            (onChange)="saveExpense(expense)"
+                            optionLabel="label" 
+                            optionValue="value" 
+                            styleClass="w-full text-sm">
+                        </p-dropdown>
                     </div>
+
                     <div class="flex-shrink-0 self-end sm:self-center mt-2 sm:mt-0">
                         <button pButton pRipple icon="pi pi-trash" class="p-button-danger p-button-text p-button-rounded" (click)="removeExpense(expense.id)"></button>
                     </div>

@@ -114,17 +114,22 @@ export class ElectricityFundComponent implements OnInit {
   });
 
   /** The ordered list of (year, month) slots that make up the currently browsed cycle. Normally 12, but derived from the actual configured cycle length so odd cycle lengths still work. */
+/** The ordered list of (year, month) slots that make up the currently browsed cycle. */
   cycleMonthSlots = computed<CycleMonthSlot[]>(() => {
     const start = this.selectedCycleStart();
     const end = this.selectedCycleEnd();
+    
+    // Calculate the exact month span without adding '+ 1' at the end. 
+    // For a cycle from Sept 2025 to Sept 2026, this gives exactly 12 months.
     const count = Math.max(
       1,
-      (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()) + 1
+      (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
     );
 
     const slots: CycleMonthSlot[] = [];
     for (let i = 0; i < count; i++) {
-      const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+      // Offset the month by +1 to skip the starting month (e.g., skip Sep 25, start at Oct 25)
+      const d = new Date(start.getFullYear(), start.getMonth() + 1 + i, 1);
       slots.push({
         year: d.getFullYear(),
         monthIndex: d.getMonth(),

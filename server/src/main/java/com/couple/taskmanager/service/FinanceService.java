@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
@@ -416,5 +417,40 @@ public class FinanceService {
                 .filter(u -> !u.getId().equals(user.getId()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Transactional
+    public void deductMonthlyElectricityExpense(Household household) {
+        List<CommonExpense> expenses = commonExpenseRepository.findByHouseholdId(household.getId());
+        CommonExpense electricityExpense = expenses.stream()
+                .filter(e -> "ELECTRICITY".equals(e.getTargetFund()))
+                .findFirst()
+                .orElse(null);
+
+        if (electricityExpense == null || electricityExpense.getAmount() == null || electricityExpense.getAmount() <= 0) {
+            return; // Nothing configured for this household — skip silently
+        }
+
+        // ElectricityTransaction requires a user; there's no "system" actor concept yet,
+        // so we attribute the automated entry to a household member. Verify against your
+        // actual entity — if `user` is non-nullable this is required, if nullable you can
+        // drop it and leave the description as the sole indicator this was automated.
+        CTMUser attributedUser = householdRepository.findUsersByHouseholdId(household.getId())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        ElectricityTransaction tx = new ElectricityTransaction();
+        tx.setHousehold(household);
+        tx.setUser(attributedUser);
+        tx.setDescription("Paiement mensuel automatique (Hydro-Québec)");
+        tx.setAmount(electricityExpense.getAmount());
+        tx.setTransactionType("SPEND");
+        tx.setDate(new Date());
+
+        electricityTransactionRepository.save(tx);
+        electricityTransactionRepository.flush();
+
+        recalculateElectricityFundBalance(household);
     }
 }

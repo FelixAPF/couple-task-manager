@@ -1,0 +1,21 @@
+:host ::ng-deep .custom-tabs .p-tabview-nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+:host ::ng-deep .custom-tabs .p-tabview-nav li {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    flex: 1 1 auto;
+}
+
+:host ::ng-deep .custom-tabs .p-tabview-nav li:last-child {
+    margin-left: 0 !important;
+}
+
+:host ::ng-deep .custom-tabs .p-tabview-nav li .p-tabview-nav-link {
+    width: 100%;
+    justify-content: center;
+}

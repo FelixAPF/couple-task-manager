@@ -2,20 +2,26 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 
-/* You can add global styles */
-/* Global fix to ensure PrimeNG dialogs do not get obscured by the fixed bottom footer */
-.p-dialog .p-dialog-content {
+/* Ensure all elements account for padding in their width/height to prevent overflow */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Global fix to ensure PrimeNG dialogs strictly stay within mobile bounds */
+.p-dialog-mask {
+  box-sizing: border-box !important;
+  position: fixed !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  padding-top: calc(4rem + env(safe-area-inset-top, 0px)) !important;
   padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-/* Ensure the dialog is positioned exactly between the top and bottom navbars */
 .p-dialog {
-  /* Pushes the modal below the top navbar and device notch */
-  margin-top: calc(4rem + env(safe-area-inset-top, 0px)) !important;
-  /* Pushes the modal above the bottom footer and gesture bar */
-  margin-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)) !important;
-  /* Ensures the modal automatically shrinks to fit the exact visible space without overflowing */
-  max-height: calc(100% - 8rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)) !important;
+  max-height: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
 }
 
 html,
@@ -23,6 +29,9 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important; /* Force prevent horizontal scrolling */
 
   /* Prevent rubber-band scrolling (bounce effect) on mobile browsers */
   overscroll-behavior-y: none;
@@ -36,38 +45,38 @@ body {
 
   /* Prevent callout menu on long press */
   -webkit-touch-callout: none;
+  
+  font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-html,
-body {
-  height: 100%;
+/* PREVENT PrimeNG from shifting the layout when dialogs open */
+body.p-overflow-hidden {
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px) !important;
+  margin: 0 !important;
 }
 
+/* Allow normal interaction inside inputs */
 input,
 textarea {
   -webkit-user-select: auto;
   user-select: auto;
 }
 
-
+/* Base body safe area adjustments */
 body {
-  margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px) !important;
 }
 
+/* Utility classes */
 .d-block {
   display: block;
 }
 
 .nav-item.active-link {
-  /* Use the CSS variable for the primary color */
   color: var(--primary-500);
 }
 
-/* Apply dark mode color when .dark class is present on a parent (usually html or body) */
 .dark .nav-item.active-link {
-  /* Use the CSS variable for the dark mode primary color */
   color: var(--primary-400);
 }
 
@@ -83,7 +92,6 @@ body {
   margin-left: 8px;
 }
 
-
 .text-center {
   text-align: center;
 }
@@ -98,17 +106,16 @@ table>thead {
 }
 
 .mat-mdc-row:nth-child(odd) {
-  background-color: white
+  background-color: white;
 }
 
 .mat-mdc-row:nth-child(even) {
-  background-color: white
+  background-color: white;
 }
 
 .float-right {
   float: right;
 }
-
 
 .flex {
   display: flex;

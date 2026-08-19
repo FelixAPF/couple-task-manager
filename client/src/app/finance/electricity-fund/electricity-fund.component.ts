@@ -1,4 +1,4 @@
-import { Component, inject, computed, OnInit, effect, OnChanges } from '@angular/core';
+import { Component, inject, computed, OnInit, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -12,39 +12,56 @@ import { TableModule } from 'primeng/table';
 import { TabViewModule } from 'primeng/tabview';
 import { ChartModule } from 'primeng/chart';
 import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
 import { FinanceService } from '../../service/finance.service';
 import { ElectricityTransaction, HydroBill, ElectricityFund } from '../../model/finance.model';
 import { RouterModule } from '@angular/router';
+
+export interface MonthlySummaryRow {
+  month: string;
+  monthIndex: number;
+  actualCost: number | null;
+  kwh: number | null;
+  paid: number;
+  displayCost: number | null;
+  isProjected: boolean;
+  diff: number; // displayCost - paid. Positive = still owed, negative = credit.
+}
+
+const MONTH_LABELS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
 
 @Component({
   selector: 'app-electricity-fund',
   standalone: true,
   imports: [
-    CommonModule, ReactiveFormsModule, FormsModule, 
-    ButtonModule, DialogModule, InputTextModule, 
-    InputNumberModule, CalendarModule, SelectButtonModule, 
-    AvatarModule, TableModule, TabViewModule, ChartModule, RouterModule, TooltipModule
+    CommonModule, ReactiveFormsModule, FormsModule,
+    ButtonModule, DialogModule, InputTextModule,
+    InputNumberModule, CalendarModule, SelectButtonModule,
+    AvatarModule, TableModule, TabViewModule, ChartModule, RouterModule, TooltipModule, TagModule
   ],
-  templateUrl: './electricity-fund.component.html'
+  templateUrl: './electricity-fund.component.html',
+  styleUrl: './electricity-fund.component.css'
 })
 export class ElectricityFundComponent implements OnInit {
   public financeService = inject(FinanceService);
   private fb = inject(FormBuilder);
-  Math = Math; 
+  Math = Math;
 
   showTransactionDialog = false;
   showBillDialog = false;
   showCycleDialog = false;
   isSaving = false;
-  
-  // Wizard variables
+  isProjecting = false;
+
   forceCycleSetup = false;
   private hasCheckedCycleValidity = false;
 
   selectedYear = new Date().getFullYear();
   availableYears: number[] = [];
 
-  // --- Gestion du Cycle Hydro via Base de Données ---
+  // month index (0-11) -> projected cost, only for the currently selected year
+  projectedByMonth = signal<(number | null)[]>(new Array(12).fill(null));
+
   tempCycleDate: Date | null = null;
   tempCycleEndDate: Date | null = null;
 
@@ -61,13 +78,11 @@ export class ElectricityFundComponent implements OnInit {
     if (fund && fund.cycleEndDate) {
       return new Date(fund.cycleEndDate);
     }
-    // Par défaut, 1 an après la date de début si non configuré
     const d = new Date(this.cycleStartDate());
     d.setFullYear(d.getFullYear() + 1);
     return d;
   });
 
-  // Formulaires
   transactionTypes = [
     { label: 'Paiement (Sortie)', value: 'SPEND' },
     { label: 'Dépôt (Entrée)', value: 'ADD' }
@@ -87,7 +102,6 @@ export class ElectricityFundComponent implements OnInit {
     kwhConsumed: [null as number | null]
   });
 
-  // --- Calculs de Données ---
   enrichedTransactions = computed(() => {
     const txs = this.financeService.electricityTransactions();
     const members = this.financeService.householdMembers();
@@ -103,11 +117,52 @@ export class ElectricityFundComponent implements OnInit {
       .sort((a, b) => new Date(b.periodEnd).getTime() - new Date(a.periodEnd).getTime());
   });
 
-  // --- Métriques Ajustées au Cycle ---
+  /** Month-by-month breakdown for the selected year: real bill cost (or projected estimate), kWh, amount paid, and the diff. */
+  monthlySummary = computed<MonthlySummaryRow[]>(() => {
+    const bills = this.financeService.hydroBills()
+      .filter(b => new Date(b.periodEnd).getFullYear() === this.selectedYear);
+    const paidTxs = this.financeService.electricityTransactions()
+      .filter(t => t.transactionType === 'SPEND' && new Date(t.date).getFullYear() === this.selectedYear);
+    const projected = this.projectedByMonth();
+
+    return MONTH_LABELS.map((label, i) => {
+      const bill = bills.find(b => new Date(b.periodEnd).getMonth() === i);
+      const paid = paidTxs
+        .filter(t => new Date(t.date).getMonth() === i)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const actualCost = bill ? bill.amount : null;
+      const projectedCost = actualCost === null ? projected[i] : null;
+      const displayCost = actualCost ?? projectedCost;
+
+      return {
+        month: label,
+        monthIndex: i,
+        actualCost,
+        kwh: bill?.kwhConsumed ?? null,
+        paid,
+        displayCost,
+        isProjected: actualCost === null && projectedCost !== null,
+        diff: (displayCost ?? 0) - paid
+      };
+    });
+  });
+
+  yearTotals = computed(() => {
+    const rows = this.monthlySummary();
+    return {
+      totalCost: rows.reduce((s, r) => s + (r.displayCost || 0), 0),
+      totalPaid: rows.reduce((s, r) => s + r.paid, 0),
+      totalDiff: rows.reduce((s, r) => s + r.diff, 0),
+      hasProjection: rows.some(r => r.isProjected)
+    };
+  });
+
+  // --- Métriques Ajustées au Cycle (Hydro billing cycle, independent from calendar year) ---
   totalPaidToHydro = computed(() => {
     const start = this.cycleStartDate().getTime();
     const end = this.cycleEndDate().getTime();
-    
+
     return this.financeService.electricityTransactions()
       .filter(tx => {
         const txDate = new Date(tx.date).getTime();
@@ -137,16 +192,20 @@ export class ElectricityFundComponent implements OnInit {
     return exp ? exp.amount : 0;
   });
 
-  projectionData: any;
+  projectionChartData: any;
 
   constructor() {
-    // Vérifier la validité du cycle dès que les données du fonds sont chargées
     effect(() => {
       const fund = this.financeService.electricityFund();
       if (fund && !this.hasCheckedCycleValidity) {
         this.hasCheckedCycleValidity = true;
         this.verifyCurrentDateInCycle();
       }
+    });
+
+    // Keep the chart in sync with the monthly summary / projection state automatically.
+    effect(() => {
+      this.buildProjectionChart(this.monthlySummary());
     });
   }
 
@@ -155,7 +214,6 @@ export class ElectricityFundComponent implements OnInit {
       this.financeService.loadFinanceData();
     }
     this.generateAvailableYears();
-    setTimeout(() => this.calculateProjections(), 500); 
   }
 
   verifyCurrentDateInCycle() {
@@ -163,7 +221,6 @@ export class ElectricityFundComponent implements OnInit {
     const start = this.cycleStartDate().getTime();
     const end = this.cycleEndDate().getTime();
 
-    // Si aujourd'hui n'est pas dans le cycle, forcer le wizard
     if (now < start || now > end) {
       this.forceCycleSetup = true;
       this.openCycleDialog();
@@ -177,10 +234,10 @@ export class ElectricityFundComponent implements OnInit {
 
   changeYear(offset: number) {
     this.selectedYear += offset;
-    this.calculateProjections();
+    this.projectedByMonth.set(new Array(12).fill(null)); // projections don't carry across years
   }
 
-  // --- Sauvegarde API du Cycle ---
+  // --- Cycle (billing period) configuration ---
   openCycleDialog() {
     this.tempCycleDate = new Date(this.cycleStartDate());
     this.tempCycleEndDate = new Date(this.cycleEndDate());
@@ -190,15 +247,14 @@ export class ElectricityFundComponent implements OnInit {
   saveCycle() {
     const currentFund = this.financeService.electricityFund();
     if (this.tempCycleDate && this.tempCycleEndDate && currentFund) {
-      
-      // Validation basique
+
       if (this.tempCycleDate.getTime() >= this.tempCycleEndDate.getTime()) {
         alert("La date de fin doit être ultérieure à la date de début.");
         return;
       }
 
       this.isSaving = true;
-      
+
       const updatedFund: ElectricityFund = {
         ...currentFund,
         cycleStartDate: this.tempCycleDate.toISOString(),
@@ -211,14 +267,13 @@ export class ElectricityFundComponent implements OnInit {
           this.forceCycleSetup = false;
           this.isSaving = false;
         },
-        error: (err:any) => {
+        error: (err: any) => {
           console.error('Erreur lors de la sauvegarde du cycle', err);
           this.isSaving = false;
         }
       });
     }
   }
-
 
   // --- Transactions ---
   openTransactionDialog() {
@@ -237,7 +292,7 @@ export class ElectricityFundComponent implements OnInit {
       alert("Aucun montant fixe configuré dans les Dépenses Communes pour l'Électricité.");
       return;
     }
-    
+
     this.transactionForm.reset({
       transactionType: 'SPEND',
       description: `Paiement mensuel automatisé`,
@@ -277,7 +332,7 @@ export class ElectricityFundComponent implements OnInit {
     }
   }
 
-  // --- Factures (Bills) ---
+  // --- Bills ---
   openBillDialog() {
     this.billForm.reset();
     this.showBillDialog = true;
@@ -299,7 +354,7 @@ export class ElectricityFundComponent implements OnInit {
       next: () => {
         this.showBillDialog = false;
         this.isSaving = false;
-        this.calculateProjections();
+        this.projectedByMonth.set(new Array(12).fill(null)); // stale projections after new real data
       },
       error: () => this.isSaving = false
     });
@@ -307,54 +362,69 @@ export class ElectricityFundComponent implements OnInit {
 
   deleteBill(id?: string) {
     if (id && confirm('Supprimer cette facture de consommation ?')) {
-      this.financeService.deleteHydroBill(id).subscribe(() => this.calculateProjections());
+      this.financeService.deleteHydroBill(id).subscribe();
     }
   }
 
-  // --- Projections ---
-  calculateProjections() {
-    const allBills = this.financeService.hydroBills();
-    const monthlyAverages = new Map<number, number[]>();
+  // --- Projection: estimate the remainder of the selected year from historical same-month averages ---
+  canProject(): boolean {
+    const now = new Date();
+    return this.selectedYear >= now.getFullYear();
+  }
 
-    allBills.forEach(bill => {
-      const month = new Date(bill.periodEnd).getMonth();
-      if (!monthlyAverages.has(month)) monthlyAverages.set(month, []);
-      monthlyAverages.get(month)!.push(bill.amount);
+  projectRemainderOfYear() {
+    this.isProjecting = true;
+
+    const now = new Date();
+    const isCurrentYear = this.selectedYear === now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    const historyByMonth = new Map<number, number[]>();
+    this.financeService.hydroBills().forEach(bill => {
+      const d = new Date(bill.periodEnd);
+      if (d.getFullYear() === this.selectedYear) return; // only use OTHER years as history
+      const m = d.getMonth();
+      if (!historyByMonth.has(m)) historyByMonth.set(m, []);
+      historyByMonth.get(m)!.push(bill.amount);
     });
 
-    const labels = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
-    const actualData: (number | null)[] = new Array(12).fill(null);
-    const projectedData: (number | null)[] = new Array(12).fill(null);
+    const rows = this.monthlySummary();
+    const result: (number | null)[] = new Array(12).fill(null);
 
-    this.billsForSelectedYear().forEach(bill => {
-      const month = new Date(bill.periodEnd).getMonth();
-      actualData[month] = bill.amount;
-    });
+    for (let m = 0; m < 12; m++) {
+      const hasActual = rows[m].actualCost !== null;
+      if (hasActual) continue;
+      if (isCurrentYear && m < currentMonth) continue; // don't fabricate months that already passed with no bill entered
 
-    for (let i = 0; i < 12; i++) {
-      if (actualData[i] === null) {
-        const history = monthlyAverages.get(i);
-        if (history && history.length > 0) {
-          const avg = history.reduce((a, b) => a + b, 0) / history.length;
-          projectedData[i] = Math.round(avg * 100) / 100;
-        }
+      const history = historyByMonth.get(m);
+      if (history && history.length > 0) {
+        const avg = history.reduce((a, b) => a + b, 0) / history.length;
+        result[m] = Math.round(avg * 100) / 100;
       }
     }
 
-    this.projectionData = {
-      labels: labels,
+    this.projectedByMonth.set(result);
+    this.isProjecting = false;
+  }
+
+  clearProjection() {
+    this.projectedByMonth.set(new Array(12).fill(null));
+  }
+
+  private buildProjectionChart(rows: MonthlySummaryRow[]) {
+    this.projectionChartData = {
+      labels: rows.map(r => r.month),
       datasets: [
         {
           label: 'Consommation Réelle',
-          data: actualData,
-          backgroundColor: '#3b82f6', 
+          data: rows.map(r => r.actualCost),
+          backgroundColor: '#3b82f6',
           borderRadius: 4
         },
         {
           label: 'Projection Estimée',
-          data: projectedData,
-          backgroundColor: '#9ca3af', 
-          borderDash: [5, 5],
+          data: rows.map(r => r.isProjected ? r.displayCost : null),
+          backgroundColor: '#9ca3af',
           borderRadius: 4
         }
       ]

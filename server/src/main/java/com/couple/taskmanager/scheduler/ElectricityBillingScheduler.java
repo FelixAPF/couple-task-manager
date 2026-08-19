@@ -35,6 +35,7 @@ public class ElectricityBillingScheduler {
 
         for (Household household : households) {
             try {
+                financeService.deductMonthlyElectricityExpense(household);
             } catch (Exception e) {
                 log.error("Failed to run monthly electricity deduction for household {}", household.getId(), e);
             }

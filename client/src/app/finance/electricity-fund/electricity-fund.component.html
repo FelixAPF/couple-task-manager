@@ -74,9 +74,9 @@
       <div class="bg-surface-0 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700 p-4 shadow-sm">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
           <div class="flex justify-between items-center bg-surface-50 dark:bg-surface-900 p-2 rounded-lg w-full sm:w-64 border border-surface-200 dark:border-surface-700">
-            <button pButton icon="pi pi-chevron-left" class="p-button-text p-button-sm" (click)="changeYear(-1)"></button>
-            <span class="font-bold text-lg">{{ selectedYear }}</span>
-            <button pButton icon="pi pi-chevron-right" class="p-button-text p-button-sm" (click)="changeYear(1)"></button>
+            <button pButton icon="pi pi-chevron-left" class="p-button-text p-button-sm" (click)="changeCycle(-1)"></button>
+            <span class="font-bold text-lg">{{ cycleLabel() }}</span>
+            <button pButton icon="pi pi-chevron-right" class="p-button-text p-button-sm" (click)="changeCycle(1)"></button>
           </div>
 
           <div class="flex gap-2 w-full sm:w-auto">
@@ -118,7 +118,7 @@
           </ng-template>
           <ng-template pTemplate="footer">
             <tr class="font-bold bg-surface-50 dark:bg-surface-900">
-              <td colspan="2">Total {{ selectedYear }}</td>
+              <td colspan="2">Total {{ cycleLabel() }}</td>
               <td class="text-right">{{ yearTotals().totalCost | currency:'CAD':'symbol-narrow':'1.2-2' }}</td>
               <td class="text-right">{{ yearTotals().totalPaid | currency:'CAD':'symbol-narrow':'1.2-2' }}</td>
               <td class="text-right" [ngClass]="yearTotals().totalDiff > 0 ? 'text-orange-500' : 'text-green-500'">
@@ -129,7 +129,7 @@
         </p-table>
 
         <div class="mt-8 border-t border-surface-200 dark:border-surface-700 pt-6">
-          <h3 class="m-0 mb-4 text-lg font-semibold">Aperçu {{ selectedYear }}</h3>
+          <h3 class="m-0 mb-4 text-lg font-semibold">Aperçu {{ cycleLabel() }}</h3>
           <p-chart type="bar" [data]="projectionChartData" height="250px"></p-chart>
         </div>
       </div>
@@ -186,7 +186,7 @@
         <i class="pi pi-receipt text-red-500"></i> Factures
       </h3>
       <div class="bg-surface-0 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700 p-4 shadow-sm">
-        <p-table [value]="billsForSelectedYear()" responsiveLayout="scroll">
+        <p-table [value]="billsForSelectedCycle()" responsiveLayout="scroll">
           <ng-template pTemplate="header">
             <tr>
               <th>Période</th>
@@ -206,7 +206,7 @@
             </tr>
           </ng-template>
           <ng-template pTemplate="emptymessage">
-            <tr><td colspan="4" class="text-center p-6 text-surface-500">Aucune facture enregistrée pour {{ selectedYear }}.</td></tr>
+            <tr><td colspan="4" class="text-center p-6 text-surface-500">Aucune facture enregistrée pour {{ cycleLabel() }}.</td></tr>
           </ng-template>
         </p-table>
       </div>

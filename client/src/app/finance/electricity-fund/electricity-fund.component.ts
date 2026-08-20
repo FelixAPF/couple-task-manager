@@ -35,7 +35,52 @@ interface CycleMonthSlot {
   label: string;
 }
 
+/** A slice of a (possibly multi-month) bill's cost attributed to one specific calendar month, prorated by day overlap. */
+interface BillMonthSegment {
+  year: number;
+  monthIndex: number;
+  amount: number;
+}
+
 const MONTH_LABELS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+/** Assumed annual inflation applied to historical monthly-attributed amounts when projecting forward to the target cycle's year. */
+const PROJECTION_INFLATION_RATE = 0.02;
+
+/**
+ * Splits a bill's amount across every calendar month its billing period touches,
+ * prorated by how many days of the period fall in each month (using a flat $/day rate
+ * derived from the bill's own total period length).
+ *
+ * Needed because multi-month billing periods (e.g. Hydro-Québec's bimonthly cycle) would
+ * otherwise attribute their entire cost to a single month, leaving every other month in the
+ * cycle with zero historical data to project from.
+ */
+function distributeBillAcrossMonths(periodStart: Date, periodEnd: Date, amount: number): BillMonthSegment[] {
+  const totalDays = Math.max(1, (periodEnd.getTime() - periodStart.getTime()) / 86400000);
+  const ratePerDay = amount / totalDays;
+  const segments: BillMonthSegment[] = [];
+
+  let cursor = new Date(periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate());
+
+  while (cursor.getTime() < periodEnd.getTime()) {
+    const nextMonthStart = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+    const segmentEnd = nextMonthStart.getTime() < periodEnd.getTime() ? nextMonthStart : periodEnd;
+    const overlapDays = Math.max(0, (segmentEnd.getTime() - cursor.getTime()) / 86400000);
+
+    if (overlapDays > 0) {
+      segments.push({
+        year: cursor.getFullYear(),
+        monthIndex: cursor.getMonth(),
+        amount: ratePerDay * overlapDays
+      });
+    }
+
+    cursor = nextMonthStart;
+  }
+
+  return segments;
+}
 
 @Component({
   selector: 'app-electricity-fund',
@@ -113,13 +158,12 @@ export class ElectricityFundComponent implements OnInit {
     return startY === endY ? `${startY}` : `${startY}-${endY}`;
   });
 
-  /** The ordered list of (year, month) slots that make up the currently browsed cycle. Normally 12, but derived from the actual configured cycle length so odd cycle lengths still work. */
-/** The ordered list of (year, month) slots that make up the currently browsed cycle. */
+  /** The ordered list of (year, month) slots that make up the currently browsed cycle. */
   cycleMonthSlots = computed<CycleMonthSlot[]>(() => {
     const start = this.selectedCycleStart();
     const end = this.selectedCycleEnd();
-    
-    // Calculate the exact month span without adding '+ 1' at the end. 
+
+    // Calculate the exact month span without adding '+ 1' at the end.
     // For a cycle from Sept 2025 to Sept 2026, this gives exactly 12 months.
     const count = Math.max(
       1,
@@ -445,7 +489,7 @@ export class ElectricityFundComponent implements OnInit {
     }
   }
 
-  // --- Projection: estimate the remainder of the browsed cycle from historical same-month averages ---
+  // --- Projection: estimate the remainder of the browsed cycle from inflation-adjusted, month-prorated historical bills ---
   canProject(): boolean {
     const now = new Date();
     const currentSlotStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
@@ -461,14 +505,28 @@ export class ElectricityFundComponent implements OnInit {
     const cycleStart = this.selectedCycleStart().getTime();
     const cycleEnd = this.selectedCycleEnd().getTime();
 
-    // History = same calendar month across all OTHER cycles (i.e. bills outside the browsed cycle window)
-    const historyByMonth = new Map<number, number[]>();
+    // History = every OTHER cycle's bills, prorated across every calendar month each bill's
+    // period actually spans (not just the month it happened to end in). This matters for
+    // multi-month billing periods (e.g. Hydro-Québec's bimonthly cycle): without prorating,
+    // only the months a bill happens to END in would ever accumulate history, leaving the
+    // alternating months with nothing to project from.
+    //
+    // monthIndex -> year -> summed prorated amount attributed to that (year, month)
+    const historyByMonth = new Map<number, Map<number, number>>();
+
     this.financeService.hydroBills().forEach(bill => {
-      const t = new Date(bill.periodEnd).getTime();
+      const periodEndDate = new Date(bill.periodEnd);
+      const t = periodEndDate.getTime();
       if (t >= cycleStart && t <= cycleEnd) return; // exclude the cycle being projected
-      const m = new Date(bill.periodEnd).getMonth();
-      if (!historyByMonth.has(m)) historyByMonth.set(m, []);
-      historyByMonth.get(m)!.push(bill.amount);
+
+      const periodStartDate = new Date(bill.periodStart);
+      const segments = distributeBillAcrossMonths(periodStartDate, periodEndDate, bill.amount);
+
+      segments.forEach(seg => {
+        if (!historyByMonth.has(seg.monthIndex)) historyByMonth.set(seg.monthIndex, new Map());
+        const yearMap = historyByMonth.get(seg.monthIndex)!;
+        yearMap.set(seg.year, (yearMap.get(seg.year) || 0) + seg.amount);
+      });
     });
 
     const slots = this.cycleMonthSlots();
@@ -482,10 +540,16 @@ export class ElectricityFundComponent implements OnInit {
       const slotYearMonth = slot.year * 12 + slot.monthIndex;
       if (slotYearMonth < nowYearMonth) return; // don't fabricate months that already passed with no bill entered
 
-      const history = historyByMonth.get(slot.monthIndex);
-      if (history && history.length > 0) {
-        const avg = history.reduce((a, b) => a + b, 0) / history.length;
-        result[i] = Math.round(avg * 100) / 100;
+      const yearMap = historyByMonth.get(slot.monthIndex);
+      if (yearMap && yearMap.size > 0) {
+        // Inflate each historical year's prorated amount forward (or back) to the target
+        // slot's year at 2%/yr, compounded over the number of years of difference.
+        const inflatedAmounts: number[] = [];
+        yearMap.forEach((amount, year) => {
+          inflatedAmounts.push(amount * Math.pow(1 + PROJECTION_INFLATION_RATE, slot.year - year));
+        });
+        const avgAdjustedAmount = inflatedAmounts.reduce((a, b) => a + b, 0) / inflatedAmounts.length;
+        result[i] = Math.round(avgAdjustedAmount * 100) / 100;
       }
     });
 

@@ -171,4 +171,20 @@ export class MyTasksComponent implements OnInit {
           }
       });
   }
+
+  claimTask(task: Task) {
+    if (!task.id) return;
+    this.taskService.claimTask(task.id).subscribe(() => {
+      this.messageService.add({ severity: 'success', summary: 'Réclamée', detail: 'Vous avez pris en charge cette tâche pour cette fois !' });
+      this.loadDashboardTasks();
+    });
+  }
+
+  unclaimTask(task: Task) {
+    if (!task.id) return;
+    this.taskService.unclaimTask(task.id).subscribe(() => {
+      this.messageService.add({ severity: 'info', summary: 'Relâchée', detail: 'La tâche est de nouveau disponible pour tous.' });
+      this.loadDashboardTasks();
+    });
+  }
 }

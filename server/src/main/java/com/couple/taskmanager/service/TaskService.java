@@ -160,6 +160,7 @@ public class TaskService implements IGenericService<Task, TaskDto> {
                 .orElseThrow(() -> new NoSuchElementException("Task not found"));
 
         task.setNotified(false);
+        task.setClaimedBy(null);
 
         taskHistoryRepository.save(new TaskHistory(task, user, new Date()));
 
@@ -223,6 +224,7 @@ public class TaskService implements IGenericService<Task, TaskDto> {
 
         // Changed task.getDueDate() to new Date() right here!
         task.setDueDate(calculateNextDueDate(new Date(), task.getFrequency()));
+        task.setClaimedBy(null);
         return new TaskDto(taskRepository.save(task));
     }
 
@@ -252,6 +254,46 @@ public class TaskService implements IGenericService<Task, TaskDto> {
                 .map(TaskHistoryDto::new)
                 .sorted((a, b) -> b.getCompletedDate().compareTo(a.getCompletedDate()))
                 .toList();
+    }
+    @Transactional
+    public TaskDto claimTask(Long taskId, CTMUser user) {
+        Task task = taskRepository.findByIdAndHouseholdId(taskId, user.getHousehold().getId())
+                .orElseThrow(() -> new NoSuchElementException("Task not found"));
+
+        if (task.getAssignee() != null) {
+            throw new IllegalArgumentException("Task is already permanently assigned");
+        }
+
+        task.setClaimedBy(user);
+        Task savedTask = taskRepository.save(task);
+
+        // --- NEW: Notify the rest of the household ---
+        Household household = householdRepository.findById(user.getHousehold().getId()).orElse(null);
+        if (household != null && household.getUsers() != null) {
+            String title = "Tâche prise en charge 🙋";
+            String body = user.getName() + " s'occupe de : " + task.getTitle();
+
+            // Loop through users, filter out the person who claimed it, and notify the rest
+            household.getUsers().stream()
+                    .filter(member -> !member.getId().equals(user.getId()))
+                    .forEach(member -> {
+                        // Using your existing pushNotificationService
+                        pushNotificationService.sendNotificationToUser(member, title, body);
+                    });
+        }
+
+        return new TaskDto(savedTask);
+    }
+
+    @Transactional
+    public TaskDto unclaimTask(Long taskId, CTMUser user) {
+        Task task = taskRepository.findByIdAndHouseholdId(taskId, user.getHousehold().getId())
+                .orElseThrow(() -> new NoSuchElementException("Task not found"));
+
+        if (task.getClaimedBy() != null && task.getClaimedBy().getId().equals(user.getId())) {
+            task.setClaimedBy(null);
+        }
+        return new TaskDto(taskRepository.save(task));
     }
 
     private Date calculateMaxDueDateFromHorizon(String horizon) {

@@ -11,6 +11,7 @@ export interface Task {
     startDate?: Date;
     dueDate?: Date;
     assignee?: HouseholdMember | null; // null = unassigned
+    claimedBy?: HouseholdMember | null;
     doNotify?: boolean;
     procedure?: Procedure; // NEW
     procedureId?: number | null;  // NEW

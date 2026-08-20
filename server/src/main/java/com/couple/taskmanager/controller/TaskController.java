@@ -48,6 +48,16 @@ public class TaskController extends GenericController<Task, TaskDto, TaskService
         service.sendThankYou(historyId, (CTMUser) userDetails);
     }
 
+    @PostMapping("/{taskId}/claim")
+    public TaskDto claimTask(@PathVariable Long taskId, @AuthenticationPrincipal UserDetails userDetails) {
+        return service.claimTask(taskId, (CTMUser) userDetails);
+    }
+
+    @PostMapping("/{taskId}/unclaim")
+    public TaskDto unclaimTask(@PathVariable Long taskId, @AuthenticationPrincipal UserDetails userDetails) {
+        return service.unclaimTask(taskId, (CTMUser) userDetails);
+    }
+
     @GetMapping("/history/unseen-thanks")
     public List<TaskHistoryDto> getUnseenThanks(@AuthenticationPrincipal UserDetails userDetails) {
         return service.getUnseenThanks((CTMUser) userDetails);

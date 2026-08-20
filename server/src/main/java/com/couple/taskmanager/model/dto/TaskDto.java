@@ -25,6 +25,7 @@ public class TaskDto {
     private Date startDate;
     private Date dueDate;
     private HouseholdMemberDto assignee;
+    private HouseholdMemberDto claimedBy;
     private Boolean isFixedDay;
     private Date referenceDate;
 
@@ -58,6 +59,14 @@ public class TaskDto {
                     user.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList(),
                     user.getRewardColor(),
                     user.getRewardPoints()
+            );
+        }
+        CTMUser claimer = task.getClaimedBy();
+        if (claimer != null) {
+            this.claimedBy = new HouseholdMemberDto(
+                    claimer.getId(), claimer.getName(), claimer.getEmail(), claimer.getImageUrl(), claimer.getBirthDay(),
+                    claimer.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList(),
+                    claimer.getRewardColor(), claimer.getRewardPoints()
             );
         }
     }

@@ -1,12 +1,12 @@
 <div class="container mx-auto flex flex-col flex-grow pb-12 pt-4">
   <p-toast position="bottom-center"></p-toast>
-  
+
   <!-- "Completed Today" Floating Banner -->
-  <div *ngIf="todayCompleted && todayCompleted.length > 0" 
-       class="mb-8 relative overflow-hidden bg-white dark:bg-surface-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700 p-5 transition-all animate-fadein">
+  <div *ngIf="todayCompleted && todayCompleted.length > 0"
+        class="mb-8 relative overflow-hidden bg-white dark:bg-surface-800 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700 p-5 transition-all animate-fadein">
     <div class="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-400 to-teal-500"></div>
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pl-4">
-      
+        
       <div class="flex items-center gap-3">
         <div class="bg-emerald-100 dark:bg-emerald-900/30 p-2 rounded-2xl">
           <i class="pi pi-star-fill text-emerald-600 dark:text-emerald-400 text-xl"></i>
@@ -24,19 +24,18 @@
             <span class="line-through opacity-70">{{log.taskTitle}}</span>
           </span>
           
-          <button *ngIf="log.completedBy?.id !== selectedAssignee?.id && !log.isThanked" 
+          <button *ngIf="log.completedBy?.id !== selectedAssignee?.id && !log.isThanked"
                   (click)="sendThankYou(log)"
                   class="ml-1 text-lg hover:scale-110 transition-transform active:scale-95"
                   pTooltip="Remercier pour cette tâche !" tooltipPosition="top">
-            👋
+            👏
           </button>
           
-          <span *ngIf="log.isThanked" class="ml-1 text-red-500 animate-fadein" pTooltip="Remercié!" tooltipPosition="top">
+          <span *ngIf="log.isThanked" class="ml-1 text-red-500 animate-fadein" pTooltip="Remercié !" tooltipPosition="top">
             <i class="pi pi-heart-fill text-xs"></i>
           </span>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -78,7 +77,42 @@
     <div *ngFor="let task of tasks" class="bg-white dark:bg-surface-800 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] dark:shadow-none border border-surface-100 dark:border-surface-700 p-6 flex flex-col justify-between group hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 hover:-translate-y-1">
         
         <div>
-            <h3 class="font-bold text-xl text-surface-900 dark:text-white mb-2 leading-tight">{{ task.title }}</h3>
+            <!-- Title and Assignee/Claimer Avatars -->
+            <div class="flex justify-between items-start mb-2 gap-2">
+                <h3 class="font-bold text-xl text-surface-900 dark:text-white leading-tight m-0">{{ task.title }}</h3>
+                
+                <div class="shrink-0 flex items-center">
+                    <!-- 1. Permanently Assigned -->
+                    <img *ngIf="task.assignee" 
+                         [src]="task.assignee.imageUrl || 'assets/placeholder.jpg'" 
+                         class="w-8 h-8 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-surface-800" 
+                         [pTooltip]="'Assignée à ' + task.assignee.name" 
+                         tooltipPosition="left"
+                         onError="this.src='assets/placeholder.jpg'">
+                         
+                    <!-- 2. Temporarily Claimed -->
+                    <div *ngIf="!task.assignee && task.claimedBy" class="relative">
+                        <img [src]="task.claimedBy.imageUrl || 'assets/placeholder.jpg'" 
+                             class="w-8 h-8 rounded-full object-cover shadow-sm ring-2 ring-purple-400 dark:ring-purple-500" 
+                             [pTooltip]="'Réclamée par ' + task.claimedBy.name" 
+                             tooltipPosition="left"
+                             onError="this.src='assets/placeholder.jpg'">
+                        <!-- Small badge indicator -->
+                        <div class="absolute -bottom-1 -right-1 bg-purple-500 rounded-full w-4 h-4 flex items-center justify-center ring-2 ring-white dark:ring-surface-800"
+                             pTooltip="Prise en charge temporaire" tooltipPosition="bottom">
+                            <i class="pi pi-hand-paper text-[8px] text-white"></i>
+                        </div>
+                    </div>
+
+                    <!-- 3. Unassigned / Available -->
+                    <div *ngIf="!task.assignee && !task.claimedBy" 
+                         class="w-8 h-8 rounded-full bg-surface-100 dark:bg-surface-700 flex items-center justify-center shadow-sm ring-2 ring-white dark:ring-surface-800" 
+                         pTooltip="Disponible" 
+                         tooltipPosition="left">
+                        <i class="pi pi-users text-surface-400 text-sm"></i>
+                    </div>
+                </div>
+            </div>
             
             <p class="text-surface-500 dark:text-surface-400 text-sm line-clamp-2 mb-5 min-h-[2.5rem]">
                 {{ task.description || 'Aucune description fournie.' }}
@@ -86,8 +120,8 @@
 
             <div class="flex flex-wrap gap-2 mb-6">
                 <!-- Deadline Pill -->
-                <span class="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5" 
-                      [ngClass]="datePastDeadline(task.dueDate) ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300'" 
+                <span class="text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5"
+                      [ngClass]="datePastDeadline(task.dueDate) ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' : 'bg-surface-100 text-surface-600 dark:bg-surface-700 dark:text-surface-300'"
                       *ngIf="task.dueDate">
                     <i class="pi pi-calendar text-[10px]" [ngClass]="{'text-red-500 dark:text-red-400': datePastDeadline(task.dueDate)}"></i> 
                     {{ task.dueDate | date:'d MMM' }}
@@ -106,8 +140,8 @@
         <div class="flex items-center justify-end pt-4 mt-auto border-t border-surface-100 dark:border-surface-700/50">
             
             <ng-container *ngIf="task.procedure; else standardComplete">
-                <button pButton pRipple 
-                        label="Démarrer la procédure" 
+                <button pButton pRipple
+                        label="Démarrer la procédure"
                         icon="pi pi-play"
                         class="p-button-rounded p-button-primary w-full font-bold shadow-sm"
                         (click)="startProcedure(task)">
@@ -115,24 +149,42 @@
             </ng-container>
 
             <ng-template #standardComplete>
-                <div class="flex w-full items-center justify-between gap-3">
+                <div class="flex w-full items-center justify-between gap-2">
                     <button pButton pRipple 
-                            label="Ignorer"
-                            class="p-button-text p-button-secondary p-button-rounded font-semibold flex-1 hover:bg-surface-100 dark:hover:bg-surface-700"
+                            label="Ignorer" 
+                            class="p-button-text p-button-secondary p-button-rounded font-semibold flex-1 hover:bg-surface-100 dark:hover:bg-surface-700 px-2" 
                             (click)="skipTask(task)">
+                    </button>
+
+                    <!-- CLAIM BUTTON (Only shows if completely unassigned & unclaimed) -->
+                    <button *ngIf="!task.assignee && !task.claimedBy" pButton pRipple 
+                            label="Je la prends" 
+                            icon="pi pi-hand-paper" 
+                            class="p-button-rounded p-button-info p-button-outlined font-bold flex-1 px-2" 
+                            (click)="claimTask(task)"
+                            pTooltip="Prendre en charge pour cette fois">
+                    </button>
+
+                    <!-- UNCLAIM BUTTON (Only shows if claimed by the current user) -->
+                    <button *ngIf="!task.assignee && task.claimedBy?.id === selectedAssignee?.id" pButton pRipple 
+                            label="Relâcher" 
+                            icon="pi pi-times" 
+                            class="p-button-rounded p-button-warning p-button-outlined font-bold flex-1 px-2" 
+                            (click)="unclaimTask(task)"
+                            pTooltip="Remettre la tâche disponible">
                     </button>
                     
                     <button pButton pRipple 
-                            label="Compléter"
-                            icon="pi pi-check"
-                            class="p-button-rounded p-button-success shadow-md shadow-green-500/20 font-bold flex-1"
+                            label="Compléter" 
+                            icon="pi pi-check" 
+                            class="p-button-rounded p-button-success shadow-md shadow-green-500/20 font-bold flex-1 px-2" 
                             (click)="completeTask(task)">
                     </button>
                 </div>
             </ng-template>
-
         </div>
 
     </div>
   </div>
+
 </div>

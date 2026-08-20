@@ -51,6 +51,13 @@ export class TaskService implements OnDestroy {
   update(task: Task): Observable<Task> {
     return this.http.put<Task>(`${this.baseUrl}/${task.id}`, task);
   }
+  claimTask(taskId: number): Observable<Task> {
+    return this.http.post<Task>(`${this.baseUrl}/${taskId}/claim`, {});
+  }
+
+  unclaimTask(taskId: number): Observable<Task> {
+    return this.http.post<Task>(`${this.baseUrl}/${taskId}/unclaim`, {});
+  }
 
   deleteTask(id: number): Observable<void>{
     return this.http.delete<void>(`${this.baseUrl}/${id}`);

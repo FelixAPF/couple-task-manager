@@ -56,6 +56,11 @@ public class Task {
     private CTMUser assignee; // Null means unassigned (household pool)
 
     @ManyToOne
+    @JoinColumn(name = "claimed_by_id")
+    @JsonBackReference("user-claimed-tasks")
+    private CTMUser claimedBy; // Null means unclaimed
+
+    @ManyToOne
     @JsonBackReference("household-tasks")
     private Household household;
 

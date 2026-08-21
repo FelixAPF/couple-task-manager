@@ -2,11 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { AuthRequest, RegisterRequest } from '../model/auth';
 import { environment } from '../environment';
-import { BehaviorSubject, EMPTY, Observable, Subscription, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, tap, from, switchMap, catchError, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { HouseholdService } from './household.service';
 import { PushNotificationService } from './push.notification.service';
 import { NativeBiometric } from '@capgo/capacitor-native-biometric';
+import { Preferences } from '@capacitor/preferences';
 
 interface AuthResponse {
   token: string;
@@ -20,129 +21,126 @@ export const AUTH_SERVER_KEY = 'coupletasks.app.auth';
 })
 export class AuthService {
   readonly baseUrl: string = `${environment.apiUrl}auth`;
-  private readonly TOKEN_KEY = 'authToken'; // Key for localStorage
-  
   private readonly REFRESH_TOKEN_KEY = 'refreshToken'; 
-  private subscription = new Subscription(); // Subscription to manage observables
 
-  // Use BehaviorSubject to hold the current login state
-  // Initialize based on token presence during construction
-  private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
-  // Expose the login state as an observable
+  // SUPER SAFE: The access token lives ONLY in memory. 
+  // It is never written to localStorage.
+  private inMemoryAccessToken: string | null = null; 
+
+  private subscription = new Subscription();
+  private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$: Observable<boolean> = this.isLoggedInSubject.asObservable();
+  
+  private router = inject(Router);
 
-  private router = inject(Router); // Inject Router
-
-  constructor(private http: HttpClient, private householdService: HouseholdService,private pushNotificationService: PushNotificationService) { }
-
-  // Helper to check if a token exists in localStorage
-  private hasToken(): boolean {
-    return !!localStorage.getItem(this.TOKEN_KEY);
+  constructor(
+    private http: HttpClient, 
+    private householdService: HouseholdService,
+    private pushNotificationService: PushNotificationService
+  ) { 
+    
   }
 
-  // Method to get the current token (useful for interceptors)
+  public attemptSilentLogin(): Observable<any> {
+    return from(this.getRefreshToken()).pipe(
+      switchMap(refreshToken => {
+        if (refreshToken) {
+          return this.refreshToken().pipe(
+            catchError(() => {
+              // If the refresh token is expired/invalid on boot, just log them out quietly
+              this.logout(true);
+              return of(null);
+            })
+          );
+        }
+        return of(null); // No token found, proceed as logged out
+      })
+    );
+  }
+
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return this.inMemoryAccessToken;
   }
 
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  async getRefreshToken(): Promise<string | null> {
+    const { value } = await Preferences.get({ key: this.REFRESH_TOKEN_KEY });
+    return value;
   }
 
 login(authRequest: AuthRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, authRequest).pipe(
-      tap(response => {
+      tap(async response => {
         if (response && response.token) {
-          localStorage.setItem(this.TOKEN_KEY, response.token);
-          // Store the refresh token securely
-          if (response.refreshToken) {
-            localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-          }
+          this.inMemoryAccessToken = response.token;
           
+          if (response.refreshToken) {
+            await Preferences.set({ key: this.REFRESH_TOKEN_KEY, value: response.refreshToken });
+          }
           this.subscription.add(this.householdService.retrieveHousehold().subscribe());
           this.isLoggedInSubject.next(true);
-          
-        } else {
-          this.isLoggedInSubject.next(false);
+
+          // NEW: Send the push token now that we have an active session!
+          this.pushNotificationService.sendTokenToBackend();
         }
       })
     );
   }
 
   getCurrentUser(): any {
-    const token = localStorage.getItem('authToken'); // Adjust this key if your app uses 'jwt' or 'accessToken'
-    console.log("GETTING TOKEN ", token)
-    if (token) {
-      try {
-        const payload = token.split('.')[1];
-        const decoded = JSON.parse(atob(payload));
-        
-        // Map the role based on Spring Boot JWT claims
-        let userRole = decoded.role;
-        console.log("USER ROLE IS ", userRole);
-        if (!userRole && decoded.roles && decoded.roles.length > 0) {
-          // If roles is an array like ["ROLE_ADMIN"]
-          userRole = decoded.roles[0].replace('ROLE_', '');
-        } else if (!userRole && decoded.authorities && decoded.authorities.length > 0) {
-          // If authorities is an array of objects
-          userRole = decoded.authorities[0].authority.replace('ROLE_', '');
-        }
-
-        return {
-          ...decoded,
-          role: userRole
-        };
-      } catch (e) {
-        console.error('Error decoding JWT token', e);
+    if (!this.inMemoryAccessToken) return null;
+    try {
+      const payload = this.inMemoryAccessToken.split('.')[1];
+      const decoded = JSON.parse(atob(payload));
+      let userRole = decoded.role;
+      
+      if (!userRole && decoded.roles && decoded.roles.length > 0) {
+        userRole = decoded.roles[0].replace('ROLE_', '');
+      } else if (!userRole && decoded.authorities && decoded.authorities.length > 0) {
+        userRole = decoded.authorities[0].authority.replace('ROLE_', '');
       }
+      
+      return {
+        ...decoded,
+        role: userRole
+      };
+    } catch (e) {
+      console.error('Error decoding JWT token', e);
     }
-    
-    // Fallback if you store the user object directly in localStorage during login
-    const userStr = localStorage.getItem('user'); 
-    if (userStr) {
-      try {
-        return JSON.parse(userStr);
-      } catch (e) {
-        return null;
-      }
-    }
-    
-    return null;
   }
 
 refreshToken(): Observable<AuthResponse> {
-  const refreshToken = this.getRefreshToken();
+    return from(this.getRefreshToken()).pipe(
+      switchMap(refreshToken => {
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+        return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, { refreshToken });
+      }),
+      tap(async response => {
+        if (response?.token) {
+          this.inMemoryAccessToken = response.token; 
+        }
+        if (response?.refreshToken) {
+          await Preferences.set({ key: this.REFRESH_TOKEN_KEY, value: response.refreshToken });
+        }
+        this.isLoggedInSubject.next(true);
 
-  if (!refreshToken) {
-    this.logout(true);
-    throw new Error('No refresh token available');
+        // NEW: Ensure push token is synced on app reload
+        this.pushNotificationService.sendTokenToBackend();
+      })
+    );
   }
 
-  // Use HttpClient directly with no auth header — bypass the interceptor's token injection
-  // The interceptor already skips /auth/refresh URLs, so this is safe
-  return this.http.post<AuthResponse>(`${this.baseUrl}/refresh`, { refreshToken }).pipe(
-    tap(response => {
-      if (response?.token) {
-        localStorage.setItem(this.TOKEN_KEY, response.token);
-      }
-      if (response?.refreshToken) {
-        localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
-      }
-      this.isLoggedInSubject.next(true);
-    })
-  );
-}
-
-
-  register(registerRequest: RegisterRequest): Observable<RegisterRequest> { 
-    return this.http.post<RegisterRequest>(`${this.baseUrl}/register`, registerRequest);
+  register(registerRequest: RegisterRequest): Observable<RegisterRequest> {
+     return this.http.post<RegisterRequest>(`${this.baseUrl}/register`, registerRequest);
   }
 
-  logout(expiredToken: boolean = false): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+  async logout(expiredToken: boolean = false): Promise<void> {
+    this.inMemoryAccessToken = null; // Wipe memory
+    await Preferences.remove({ key: this.REFRESH_TOKEN_KEY }); // Wipe disk
+    
     this.isLoggedInSubject.next(false);
-    this.householdService.setHousehold(null); // Clear household data on logout
+    this.householdService.setHousehold(null); 
     this.router.navigate(['/login'], { queryParams: { sessionExpired: expiredToken } });
   }
 

@@ -1,4 +1,4 @@
-import { ApplicationConfig, importProvidersFrom, LOCALE_ID, provideZoneChangeDetection } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, importProvidersFrom, LOCALE_ID, provideZoneChangeDetection } from '@angular/core';
 import { InMemoryScrollingFeature, InMemoryScrollingOptions, provideRouter, withInMemoryScrolling } from '@angular/router';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
@@ -20,6 +20,7 @@ import { registerLocaleData } from '@angular/common';
 import localeFrCA from '@angular/common/locales/fr-CA'; // <-- Import locale data
 import { LoadingInterceptor } from './interceptor/loading.interceptor';
 import { ConfirmationService, MessageService } from 'primeng/api';
+import { AuthService } from './service/auth.service';
 
 registerLocaleData(localeFrCA, 'fr-CA'); // <-- Register with the correct ID 'fr-CA'
 
@@ -34,6 +35,10 @@ export class MyHammerConfig extends HammerGestureConfig {
        touchAction: 'pan-y' // *** ADD THIS LINE: Allow vertical scrolling ***
     },
   }
+}
+
+export function initializeAuth(authService: AuthService) {
+  return () => authService.attemptSilentLogin();
 }
 
 const scrollConfig: InMemoryScrollingOptions = {
@@ -54,6 +59,12 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     DialogService,
     { provide: LOCALE_ID, useValue: 'fr-CA' },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuth,
+      deps: [AuthService],
+      multi: true
+    },
 
     providePrimeNG({
       theme: {

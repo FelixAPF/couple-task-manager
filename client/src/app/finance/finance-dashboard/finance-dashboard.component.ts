@@ -182,7 +182,7 @@ export class FinanceDashboardComponent implements OnInit {
     
     let nextPaycheckDate = new Date(pastPaycheckDate);
 
-    while (nextPaycheckDate < today) {
+    while (nextPaycheckDate <= today) {
       pastPaycheckDate = new Date(nextPaycheckDate);
       if (config.cycle === '14_DAYS') nextPaycheckDate.setDate(nextPaycheckDate.getDate() + 14);
       else if (config.cycle === 'TWICE_MONTHLY') nextPaycheckDate.setDate(nextPaycheckDate.getDate() + 15);

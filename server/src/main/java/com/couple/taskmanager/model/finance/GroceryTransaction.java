@@ -5,12 +5,15 @@ import com.couple.taskmanager.model.Household;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
 @Entity
 @Table(name = "grocery_transactions")
 public class GroceryTransaction {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
@@ -26,7 +29,7 @@ public class GroceryTransaction {
     private CTMUser user;
 
     @Transient
-    private Long userId; // Mapped to frontend UI without exposing the full CTMUser object
+    private Long userId;
 
     @Transient
     private String userImageUrl;
@@ -45,6 +48,9 @@ public class GroceryTransaction {
 
     @Column(nullable = false)
     private Date date;
+
+    @Column(name = "target_cycle_date")
+    private LocalDate targetCycleDate;
 
     @PostLoad
     @PostPersist

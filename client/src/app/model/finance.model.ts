@@ -60,6 +60,8 @@ export interface GroceryFund {
   id?: string;
   householdId?: string;
   balance: number;
+  cycleAnchorDate?: string;
+  cycleLengthDays?: number;
 }
 
 export interface GroceryTransaction {
@@ -68,11 +70,12 @@ export interface GroceryTransaction {
   userId: string;
   storeName: string;
   description: string;
-  amount: number; 
+  amount: number;
   transactionType: 'ADD' | 'SPEND';
   date: Date | string;
   userIconUrl?: string;
   userName?: string;
+  targetCycleDate?: string;
 }
 
 export interface HouseholdFund {

@@ -145,20 +145,40 @@ export class FinanceService {
   }
 
   savePaycheckConfig(config: PaycheckConfig) {
+    // Intercept and fix the timezone shift before it hits the backend
+    if (config.referenceDate && config.referenceDate instanceof Date) {
+        const offset = config.referenceDate.getTimezoneOffset() * 60000;
+        config.referenceDate = new Date(config.referenceDate.getTime() - offset).toISOString().split('T')[0];
+    }
+
     return this.http.post<PaycheckConfig>(`${this.apiUrl}/paycheck-config`, config).pipe(
       tap(saved => this.paycheckConfig.set(saved))
     );
   }
-
-  markPaycheckActioned(date: Date): Observable<PaycheckConfig | null> {
+  
+  markPaycheckActioned(date: Date | string): Observable<PaycheckConfig | null> {
     const config = this.paycheckConfig();
     if (config) {
-      const updatedConfig = { ...config, lastActionedDate: date };
+      let localDateString: string;
+      
+      if (typeof date === 'string') {
+        localDateString = date.split('T')[0];
+      } else {
+        const offset = date.getTimezoneOffset() * 60000;
+        localDateString = new Date(date.getTime() - offset).toISOString().split('T')[0];
+      }
+      
+      const updatedConfig = { ...config, lastActionedDate: localDateString };
       return this.savePaycheckConfig(updatedConfig);
     }
     return of(null);
   }
 
+  updateGroceryFund(updatedFund: GroceryFund) {
+    return this.http.put<GroceryFund>(`${this.apiUrl}/grocery-fund`, updatedFund).pipe(
+      tap(saved => this.groceryFund.set(saved))
+    );
+  }
   addGroceryTransaction(transaction: GroceryTransaction) {
     return this.http.post<{ fund: GroceryFund, transaction: GroceryTransaction }>(`${this.apiUrl}/grocery-transactions`, transaction).pipe(
       tap(res => {

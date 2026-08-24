@@ -30,6 +30,9 @@ export class GroceryFundComponent implements OnInit {
   private fb = inject(FormBuilder);
 
   showTransactionDialog = false;
+  showConfigDialog = false;
+  configAnchorDate: Date = new Date();
+  configCycleLength: number = 14;
   
   // Chart variables
   chartData: any;
@@ -64,6 +67,16 @@ enrichedTransactions = computed(() => {
   });
 });
 
+parseLocalDate(dateString: string | Date | null | undefined): Date {
+    if (!dateString) return new Date();
+    // If it's already a Date object, return it
+    if (dateString instanceof Date) return dateString;
+    
+    // Split the string and force it into local time at midnight
+    const [year, month, day] = dateString.split('T')[0].split('-');
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+
   constructor() {
     effect(() => {
       this.updateChartData();
@@ -74,6 +87,52 @@ enrichedTransactions = computed(() => {
     if (!this.financeService.groceryFund()) {
       this.financeService.loadFinanceData();
     }
+  }
+openConfig() {
+    const currentFund = this.financeService.groceryFund();
+    if (currentFund) {
+      if (currentFund.cycleAnchorDate) {
+        // Split the YYYY-MM-DD string and build a local date to prevent timezone shifting
+        const [year, month, day] = currentFund.cycleAnchorDate.split('-');
+        this.configAnchorDate = new Date(Number(year), Number(month) - 1, Number(day));
+      } else {
+        this.configAnchorDate = new Date();
+      }
+      
+      this.configCycleLength = currentFund.cycleLengthDays || 14;
+    }
+    this.showConfigDialog = true;
+  }
+saveConfig() {
+    console.log("Sauvegarder clicked! Preparing to send to backend...");
+
+    // 1. Calculate date string (YYYY-MM-DD) safely
+    const offset = this.configAnchorDate.getTimezoneOffset() * 60000;
+    const localDateString = new Date(this.configAnchorDate.getTime() - offset).toISOString().split('T')[0];
+
+    // 2. Build the payload (fallback to empty object if currentFund is missing)
+    const currentFund = this.financeService.groceryFund() || {};
+    const updatedFund: any = {
+      ...currentFund,
+      cycleAnchorDate: localDateString,
+      cycleLengthDays: this.configCycleLength
+    };
+
+    console.log("Sending payload:", updatedFund);
+
+    // 3. Send and handle errors
+    this.financeService.updateGroceryFund(updatedFund).subscribe({
+      next: (res) => {
+        console.log("Success! Backend responded with:", res);
+        this.showConfigDialog = false;
+        // Force reload transactions to reflect the new cycle
+        this.financeService.loadFinanceData();
+      },
+      error: (err) => {
+        console.error("Backend Error:", err);
+        alert("Erreur lors de la sauvegarde. Vérifiez la console (F12) pour les détails.");
+      }
+    });
   }
 
   updateBudgetTarget() {

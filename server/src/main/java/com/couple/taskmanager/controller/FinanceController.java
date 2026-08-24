@@ -144,6 +144,12 @@ public class FinanceController {
         return ResponseEntity.ok(financeService.getGroceryFund(user.getHousehold()));
     }
 
+    @PutMapping("/grocery-fund")
+    public ResponseEntity<GroceryFund> updateGroceryFund(@RequestBody GroceryFund fund, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.updateGroceryFund(fund, user.getHousehold()));
+    }
+
     @GetMapping("/grocery-transactions")
     public ResponseEntity<List<GroceryTransaction>> getGroceryTransactions(@AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;

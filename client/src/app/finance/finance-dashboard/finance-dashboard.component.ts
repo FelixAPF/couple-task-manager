@@ -159,8 +159,7 @@ export class FinanceDashboardComponent implements OnInit {
 
     this.chartOptions = { plugins: { legend: { position: 'bottom' } } };
   }
-
-  calculateNextPaycheck() {
+calculateNextPaycheck() {
     const config = this.financeService.paycheckConfig();
     if (!config || !config.referenceDate) return;
     
@@ -189,7 +188,18 @@ export class FinanceDashboardComponent implements OnInit {
       else if (config.cycle === 'MONTHLY') nextPaycheckDate.setMonth(nextPaycheckDate.getMonth() + 1);
     }
 
-    let lastActioned = config.lastActionedDate ? new Date(config.lastActionedDate) : new Date(0);
+    let lastActioned: Date;
+    if (config.lastActionedDate) {
+      const lastActionedStr = typeof config.lastActionedDate === 'string'
+        ? config.lastActionedDate
+        : (config.lastActionedDate as Date).toISOString();
+      const laDateString = lastActionedStr.includes('T')
+        ? lastActionedStr
+        : `${lastActionedStr}T00:00:00`;
+      lastActioned = new Date(laDateString);
+    } else {
+      lastActioned = new Date(0);
+    }
     lastActioned.setHours(0, 0, 0, 0);
 
     this.pendingPaycheckDate = null;
@@ -201,7 +211,7 @@ export class FinanceDashboardComponent implements OnInit {
     this.daysUntilPaycheck = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     this.compileTransfers();
-  }
+}
 
   initiatePaycheck() {
     this.showPaycheckWizard = true;
@@ -259,7 +269,7 @@ export class FinanceDashboardComponent implements OnInit {
     this.electricityTransferAmount = 0;
     this.householdTransferAmount = 0;
 
-        this.financeService.commonExpenses().forEach(exp => {
+    this.financeService.commonExpenses().forEach(exp => {
       const paycheckAmount = calculatePaycheckAmount(exp.amount, 'Mensuel');
       let myShare = 0;
 
@@ -317,8 +327,12 @@ export class FinanceDashboardComponent implements OnInit {
 
   completePaycheckWizard() {
     if (this.pendingPaycheckDate) {
-      this.financeService.markPaycheckActioned(this.pendingPaycheckDate).subscribe(() => {
-        this.processFundTransfersAndClose();
+      this.financeService.markPaycheckActioned(this.pendingPaycheckDate).subscribe({
+        next: () => this.processFundTransfersAndClose(),
+        error: (err) => {
+          console.error('Échec de la confirmation de paie', err);
+          alert('Erreur lors de la confirmation de paie. Vérifiez la console (F12) pour les détails.');
+        }
       });
     } else {
       this.processFundTransfersAndClose();
@@ -326,8 +340,8 @@ export class FinanceDashboardComponent implements OnInit {
   }
 
   private roundUpToCents(amount: number): number {
-  return Math.ceil(amount * 100) / 100;
-}
+    return Math.ceil(amount * 100) / 100;
+  }
 
   processFundTransfersAndClose() {
     const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);

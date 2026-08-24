@@ -11,6 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +66,13 @@ public class FinanceService {
         existingFund.setCycleEndDate(updatedFund.getCycleEndDate());
 
         return electricityFundRepository.save(existingFund);
+    }
+
+    private LocalDate getCycleStartDate(LocalDate anchorDate, int cycleLengthDays, LocalDate referenceDate) {
+        if (anchorDate == null || cycleLengthDays <= 0) return referenceDate;
+        long daysBetween = ChronoUnit.DAYS.between(anchorDate, referenceDate);
+        long cyclesPassed = Math.floorDiv(daysBetween, cycleLengthDays);
+        return anchorDate.plusDays(cyclesPassed * cycleLengthDays);
     }
 
     public List<CommonExpense> getCommonExpenses(Household household) {
@@ -178,45 +188,108 @@ public class FinanceService {
     public PaycheckConfig getPaycheckConfig(CTMUser user) {
         return paycheckConfigRepository.findByUserId(user.getId()).orElse(null);
     }
-
     public PaycheckConfig savePaycheckConfig(PaycheckConfig config, CTMUser user) {
-        if (config.getId() != null && config.getId().isEmpty()) {
+        Optional<PaycheckConfig> existingOpt = paycheckConfigRepository.findByUserId(user.getId());
+
+        if (existingOpt.isPresent()) {
+            PaycheckConfig existing = existingOpt.get();
+            config.setId(existing.getId());
+            // Merge: preserve any field the caller didn't send (e.g. a partial
+            // payload from an older client that only carries lastActionedDate).
+            // lastActionedDate is intentionally NOT merged here — the frontend
+            // now always sends its real intended value (including an explicit
+            // null to clear it when referenceDate changes), so trusting it
+            // verbatim is correct.
+            if (config.getCycle() == null) config.setCycle(existing.getCycle());
+            if (config.getAmount() == null) config.setAmount(existing.getAmount());
+            if (config.getReferenceDate() == null) config.setReferenceDate(existing.getReferenceDate());
+            if (config.getDefaultBankAccountId() == null) config.setDefaultBankAccountId(existing.getDefaultBankAccountId());
+        } else if (config.getId() != null && config.getId().isEmpty()) {
             config.setId(null);
         }
+
         config.setUser(user);
 
-        Optional<PaycheckConfig> existingOpt = paycheckConfigRepository.findByUserId(user.getId());
-        existingOpt.ifPresent(existing -> config.setId(existing.getId()));
+        // --- THE MAGIC SNAP: Auto-correct early or timezone-shifted clicks ---
+        if (config.getLastActionedDate() != null && config.getReferenceDate() != null) {
+            int cycleDays = 14; // Default
+            if ("WEEKLY".equalsIgnoreCase(config.getCycle())) cycleDays = 7;
+            if ("MONTHLY".equalsIgnoreCase(config.getCycle())) cycleDays = 30;
+
+            LocalDate actioned = config.getLastActionedDate();
+            long daysBetween = ChronoUnit.DAYS.between(config.getReferenceDate(), actioned);
+            long cyclesPassed = Math.floorDiv(daysBetween, cycleDays);
+            LocalDate currentCycle = config.getReferenceDate().plusDays(cyclesPassed * cycleDays);
+            LocalDate nextCycle = currentCycle.plusDays(cycleDays);
+
+            if (!actioned.isBefore(nextCycle.minusDays(4)) && actioned.isBefore(nextCycle)) {
+                config.setLastActionedDate(nextCycle);
+            }
+        }
+        // ---------------------------------------------------------------------
 
         return paycheckConfigRepository.save(config);
     }
-
-    // --- NEW: Grocery Fund Methods ---
-
     public GroceryFund getGroceryFund(Household household) {
         return groceryFundRepository.findByHouseholdId(household.getId())
                 .orElseGet(() -> {
                     GroceryFund newFund = new GroceryFund();
                     newFund.setHousehold(household);
                     newFund.setBalance(0.0);
+                    newFund.setCycleAnchorDate(LocalDate.now());
+                    newFund.setCycleLengthDays(14);
                     return groceryFundRepository.save(newFund);
                 });
+    }
+
+    @Transactional
+    public GroceryFund updateGroceryFund(GroceryFund updatedFund, Household household) {
+        GroceryFund existingFund = getGroceryFund(household);
+        existingFund.setCycleAnchorDate(updatedFund.getCycleAnchorDate());
+        if (updatedFund.getCycleLengthDays() != null && updatedFund.getCycleLengthDays() > 0) {
+            existingFund.setCycleLengthDays(updatedFund.getCycleLengthDays());
+        }
+        groceryFundRepository.save(existingFund);
+        return recalculateGroceryFundBalance(household);
     }
 
     public List<GroceryTransaction> getGroceryTransactions(Household household) {
         return groceryTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
     }
-
     private GroceryFund recalculateGroceryFundBalance(Household household) {
         GroceryFund fund = getGroceryFund(household);
         List<GroceryTransaction> transactions = groceryTransactionRepository.findByHouseholdIdOrderByDateDesc(household.getId());
 
+        LocalDate activeAnchor = getActiveAnchor(household, fund);
+        LocalDate today = LocalDate.now();
+        LocalDate currentCycleStartDate = getCycleStartDate(activeAnchor, fund.getCycleLengthDays(), today);
+
         double newBalance = 0.0;
+
         for (GroceryTransaction tx : transactions) {
-            if ("ADD".equalsIgnoreCase(tx.getTransactionType())) {
-                newBalance += tx.getAmount();
-            } else if ("SPEND".equalsIgnoreCase(tx.getTransactionType())) {
-                newBalance -= tx.getAmount();
+            LocalDate txTargetDate = tx.getTargetCycleDate();
+
+            if (txTargetDate == null) {
+                LocalDate txLocalDate = tx.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                txTargetDate = getCycleStartDate(activeAnchor, fund.getCycleLengthDays(), txLocalDate);
+
+                if ("ADD".equalsIgnoreCase(tx.getTransactionType())) {
+                    LocalDate nextCycleStart = txTargetDate.plusDays(fund.getCycleLengthDays());
+                    if (ChronoUnit.DAYS.between(txLocalDate, nextCycleStart) <= 4) {
+                        txTargetDate = nextCycleStart;
+                    }
+                }
+                tx.setTargetCycleDate(txTargetDate);
+                groceryTransactionRepository.save(tx);
+            }
+
+            // Sum transactions for current cycle AND early deposits
+            if (!txTargetDate.isBefore(currentCycleStartDate)) {
+                if ("ADD".equalsIgnoreCase(tx.getTransactionType())) {
+                    newBalance += tx.getAmount();
+                } else if ("SPEND".equalsIgnoreCase(tx.getTransactionType())) {
+                    newBalance -= tx.getAmount();
+                }
             }
         }
 
@@ -224,6 +297,19 @@ public class FinanceService {
         return groceryFundRepository.save(fund);
     }
 
+    private LocalDate getActiveAnchor(Household household, GroceryFund fund) {
+        // Use Grocery anchor if set, otherwise fallback to the Paycheck anchor
+        if (fund.getCycleAnchorDate() != null) return fund.getCycleAnchorDate();
+
+        CTMUser user = household.getUsers().isEmpty() ? null : household.getUsers().get(0);
+        if (user != null) {
+            PaycheckConfig pConfig = paycheckConfigRepository.findByUserId(user.getId()).orElse(null);
+            if (pConfig != null && pConfig.getReferenceDate() != null) {
+                return pConfig.getReferenceDate();
+            }
+        }
+        return null;
+    }
     @Transactional
     public Map<String, Object> deleteGroceryTransaction(String transactionId, CTMUser user) {
         Household household = user.getHousehold();
@@ -246,16 +332,31 @@ public class FinanceService {
     @Transactional
     public Map<String, Object> addGroceryTransaction(GroceryTransaction transaction, CTMUser user) {
         Household household = user.getHousehold();
-
         transaction.setHousehold(household);
         transaction.setUser(user);
+
         if (transaction.getDate() == null) {
             transaction.setDate(new Date());
         }
 
-        GroceryTransaction savedTransaction = groceryTransactionRepository.save(transaction);
-        groceryTransactionRepository.flush(); // Force save before recalculating
+        GroceryFund fund = getGroceryFund(household);
+        LocalDate activeAnchor = getActiveAnchor(household, fund);
 
+        LocalDate txLocalDate = transaction.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate txCycleStart = getCycleStartDate(activeAnchor, fund.getCycleLengthDays(), txLocalDate);
+
+        if ("ADD".equalsIgnoreCase(transaction.getTransactionType())) {
+            LocalDate nextCycleStart = txCycleStart.plusDays(fund.getCycleLengthDays());
+            long daysUntilNextCycle = ChronoUnit.DAYS.between(txLocalDate, nextCycleStart);
+            if (daysUntilNextCycle <= 4) {
+                txCycleStart = nextCycleStart;
+            }
+        }
+
+        transaction.setTargetCycleDate(txCycleStart);
+
+        GroceryTransaction savedTransaction = groceryTransactionRepository.save(transaction);
+        groceryTransactionRepository.flush();
         GroceryFund savedFund = recalculateGroceryFundBalance(household);
 
         return Map.of(
@@ -263,7 +364,6 @@ public class FinanceService {
                 "transaction", savedTransaction
         );
     }
-
     // --- NEW: Electricity Fund Methods ---
 
     public ElectricityFund getElectricityFund(Household household) {
@@ -431,10 +531,6 @@ public class FinanceService {
             return; // Nothing configured for this household — skip silently
         }
 
-        // ElectricityTransaction requires a user; there's no "system" actor concept yet,
-        // so we attribute the automated entry to a household member. Verify against your
-        // actual entity — if `user` is non-nullable this is required, if nullable you can
-        // drop it and leave the description as the sole indicator this was automated.
         CTMUser attributedUser = householdRepository.findUsersByHouseholdId(household.getId())
                 .stream()
                 .findFirst()

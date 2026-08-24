@@ -3,6 +3,7 @@
     <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" routerLink="/finance/dashboard"></p-button>
     <h2 class="text-2xl font-semibold text-surface-800 dark:text-surface-100 m-0">
       Fonds d'Épicerie <i class="pi pi-shopping-cart ml-2" style="font-size: 1.25rem"></i>
+      <button pButton pRipple icon="pi pi-cog" class="p-button-rounded p-button-text p-button-secondary" (click)="openConfig()" pTooltip="Configurer le cycle"></button>
     </h2>
   </div>
 
@@ -68,6 +69,9 @@
             <span class="font-bold text-surface-800 dark:text-surface-100">{{ tx.storeName }}</span>
             <span class="text-sm text-surface-500 dark:text-surface-400">{{ tx.description || 'Aucune description' }}</span>
             <span class="text-xs text-surface-400 mt-1">{{ tx.date | date:'short' }} par {{ tx.userName }}</span>
+          <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full mt-1 w-max">
+            Cycle: {{ parseLocalDate(tx.targetCycleDate) | date:'dd MMM' }}
+          </span>
           </div>
         </div>
         
@@ -130,4 +134,38 @@
       </button>
     </div>
   </form>
+</p-dialog>
+
+<p-dialog header="Configuration du cycle d'épicerie" 
+          [(visible)]="showConfigDialog" 
+          [modal]="true" 
+          [style]="{width: '380px'}" 
+          [draggable]="false" 
+          [resizable]="false"
+          appendTo="body">
+    <div class="flex flex-col gap-5 mt-2">
+        <div class="flex flex-col gap-2">
+            <label class="font-bold text-surface-700 dark:text-surface-300">Date de début (Ancrage)</label>
+            <p-calendar [(ngModel)]="configAnchorDate" 
+                        appendTo="body" 
+                        styleClass="w-full" 
+                        [showIcon]="true" 
+                        dateFormat="dd/mm/yy">
+            </p-calendar>
+            <small class="text-surface-500">Sélectionnez la date du premier jour de votre cycle (ex: Jour de paie).</small>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-bold text-surface-700 dark:text-surface-300">Durée du cycle (jours)</label>
+            <p-inputNumber [(ngModel)]="configCycleLength" 
+                           [min]="1" 
+                           [max]="365" 
+                           [showButtons]="true" 
+                           styleClass="w-full">
+            </p-inputNumber>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Annuler" styleClass="p-button-text p-button-secondary p-button-rounded font-bold" (onClick)="showConfigDialog = false"></p-button>
+        <p-button label="Sauvegarder" icon="pi pi-check" styleClass="p-button-primary p-button-rounded font-bold" (onClick)="saveConfig()"></p-button>
+    </ng-template>
 </p-dialog>

@@ -62,17 +62,32 @@ export class PaycheckConfigComponent implements OnInit {
   }
 
   saveConfig() {
+    const original = this.financeService.paycheckConfig();
+
+    // If referenceDate is being changed, the previously-actioned paycheck no
+    // longer corresponds to the new schedule — clear lastActionedDate so the
+    // dashboard doesn't treat a stale action as covering the new date.
+    const newReferenceDateString = this.config.referenceDate
+      ? this.toDateOnlyString(this.config.referenceDate as Date)
+      : null;
+    const originalReferenceDateString = original?.referenceDate
+      ? this.toDateOnlyStringFromExisting(original.referenceDate)
+      : null;
+    const referenceDateChanged = newReferenceDateString !== originalReferenceDateString;
+
     // Send the date as a plain yyyy-MM-dd string rather than letting HttpClient
     // JSON.stringify the Date object (which calls toISOString() and serializes
     // in UTC). This keeps what's saved unambiguous and matches what the backend
     // expects to read back as a LocalDate.
     const payload: PaycheckConfig = {
       ...this.config,
-      referenceDate: this.config.referenceDate ? this.toDateOnlyString(this.config.referenceDate as Date) : null
+      referenceDate: newReferenceDateString,
+      lastActionedDate: referenceDateChanged ? null : this.config.lastActionedDate
     };
 
-    this.financeService.savePaycheckConfig(payload).subscribe(() => {
-      this.router.navigate(['/finance/dashboard']);
+    this.financeService.savePaycheckConfig(payload).subscribe({
+      next: () => this.router.navigate(['/finance/dashboard']),
+      error: (err) => console.error('Erreur lors de la sauvegarde de la configuration', err)
     });
   }
 
@@ -81,5 +96,19 @@ export class PaycheckConfigComponent implements OnInit {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  /**
+   * Same normalization as toDateOnlyString, but for the value as it comes back
+   * from FinanceService.paycheckConfig() — which may be a Date or a raw
+   * "yyyy-MM-dd"/ISO string depending on how it was last set. Used only to
+   * compare against the new value the user picked, so we can detect whether
+   * referenceDate actually changed.
+   */
+  private toDateOnlyStringFromExisting(value: Date | string): string {
+    if (value instanceof Date) {
+      return this.toDateOnlyString(value);
+    }
+    return value.includes('T') ? value.split('T')[0] : value;
   }
 }

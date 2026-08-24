@@ -1,6 +1,7 @@
 package com.couple.taskmanager.model.finance;
 
 import com.couple.taskmanager.model.CTMUser;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +16,7 @@ import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -33,14 +35,16 @@ public class PaycheckConfig {
     @Column(nullable = false)
     private String cycle;
 
-    @Temporal(TemporalType.DATE)
-    private Date referenceDate;
-
     @Column(nullable = false)
     private Double amount;
 
     private String defaultBankAccountId;
 
-    @Temporal(TemporalType.DATE)
-    private Date lastActionedDate;
+    @Column(name = "reference_date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate referenceDate;
+
+    @Column(name = "last_actioned_date")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate lastActionedDate;
 }

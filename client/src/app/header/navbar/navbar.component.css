@@ -25,60 +25,49 @@
   box-sizing: border-box;
 }
 
-/* Smooth Scrollbar for drawer + notification list */
+/* Custom smooth scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--surface-300, #cbd5e1);
-  border-radius: 4px;
+  width: 5px;
 }
 
-/* Dropdown + backdrop entrance */
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--surface-300, #cbd5e1);
+  border-radius: 6px;
 }
+
+:host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--surface-700, #334155);
+}
+
+/* Smooth popover entrance */
+@keyframes fade-in-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(-8px) scale(0.96); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
 .animate-fade-in-up {
-  animation: fade-in-up 0.18s ease-out;
+  animation: fade-in-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fadein {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
 .animate-fadein {
   animation: fadein 0.2s ease-out;
 }
 
-/* Staggered entrance for drawer links */
-.menu-item {
-  opacity: 0;
-  animation: menu-item-in 0.35s ease-out forwards;
-}
-.menu-item:nth-child(1) { animation-delay: 0.02s; }
-.menu-item:nth-child(2) { animation-delay: 0.05s; }
-.menu-item:nth-child(3) { animation-delay: 0.08s; }
-.menu-item:nth-child(4) { animation-delay: 0.11s; }
-.menu-item:nth-child(5) { animation-delay: 0.14s; }
-.menu-item:nth-child(6) { animation-delay: 0.17s; }
-.menu-item:nth-child(7) { animation-delay: 0.2s; }
-.menu-item:nth-child(8) { animation-delay: 0.23s; }
-.menu-item:nth-child(9) { animation-delay: 0.26s; }
-.menu-item:nth-child(10) { animation-delay: 0.29s; }
-
-@keyframes menu-item-in {
-  from { opacity: 0; transform: translateX(10px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-/* Respect reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in-up,
-  .animate-fadein,
-  .menu-item {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
+/* Line clamping helper */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }

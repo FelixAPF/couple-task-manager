@@ -1,178 +1,403 @@
-<!-- Toast for feedback -->
 <p-toast></p-toast>
-
-<div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6 flex flex-col min-h-screen">
-  
+<div class="container p-4 md:p-6 mx-auto pb-24 lg:pb-8 flex flex-col min-h-screen max-w-6xl">
   <div class="flex-grow">
-    <h2 class="text-2xl font-semibold mb-6 text-center text-surface-800 dark:text-surface-100">
-      {{'manage-household.settings.title' | translate}}
-    </h2>
-
+    
     <div *ngIf="(household$ | async) as household; else noHousehold">
 
-      <!-- Settings Card -->
-      <div class="mb-6 p-4 bg-surface-0 dark:bg-surface-800 rounded-lg shadow-md border border-surface-200 dark:border-surface-700">
-          <div class="flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableTasks"
-                  [ngModel]="household.enableTasks"
-                  (onChange)="toggleNewSetting($event, household, SETTING_NAMES.TASKS)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableWaysToCare" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-tasks' | translate }}
-              </label>
+      <!-- Hero Header -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+        <div class="flex items-center gap-4">
+          <div class="bg-gradient-to-br from-primary-500 to-pink-500 w-14 h-14 rounded-2xl flex items-center justify-center shadow-md shadow-primary-500/20 text-white shrink-0">
+            <i class="pi pi-chart-bar text-2xl"></i>
           </div>
-          <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
-                  {{ 'manage-household.settings.enable-tasks-description' | translate }}
-          </small>   
-          <div class="flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableMeal"
-                  [ngModel]="household.enableMeal"
-                  (onChange)="toggleNewSetting($event, household, SETTING_NAMES.MEALS)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableMeal" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-meals' | translate }}
-              </label>
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-surface-900 dark:text-white m-0">
+              {{ household.name || 'Gestion du Foyer' }}
+            </h1>
+            <p class="text-surface-500 dark:text-surface-400 font-medium mt-1 text-sm m-0">
+              Statistiques globales & configuration du foyer
+            </p>
           </div>
-          <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
-                  {{ 'manage-household.settings.enable-meals-description' | translate }}
-          </small>   
-          <div class="flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableShoppingList"
-                  [ngModel]="household.enableShoppingList"
-                  (onChange)="toggleNewSetting($event, household, SETTING_NAMES.SHOPPING_LIST)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableShoppingList" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-shopping-list' | translate }}
-              </label>
-          </div>
-          <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
-                  {{ 'manage-household.settings.enable-shopping-list-description' | translate }}
-          </small>   
-          <div class="flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableWaysToCare"
-                  [ngModel]="household.enableWaysToCare"
-                  (onChange)="toggleWaysToCare($event, household)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableWaysToCare" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-ways-to-care' | translate }}
-              </label>
-          </div>
-          <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
-              {{ 'manage-household.settings.enable-ways-to-care-description' | translate }}
-          </small>        
-          <div class="pt-2 flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableToDoList"
-                  [ngModel]="household.enableToDoList"
-                  (onChange)="togglToDoList($event, household)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableToDoList" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-to-do-list' | translate }}
-              </label>
-          </div>
-          <div class="pt-2 flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableTravelChecklist"
-                  [ngModel]="household.enableTravelChecklist"
-                  (onChange)="toggleNewSetting($event, household, SETTING_NAMES.TRAVEL_CHECKLIST)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableTravelChecklist" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-travel-checklist' | translate }}
-              </label>
-          </div>
-          <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
-              {{ 'manage-household.settings.enable-to-do-list-description' | translate }}
-          </small>
-
-          <!-- New Feature -->
-          <div class="pt-2 flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableFoodIntakeTracking"
-                  [ngModel]="household.enableFoodIntakeTracking"
-                  (onChange)="toggleNewSetting($event, household, SETTING_NAMES.FOOD_INTAKE)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableFoodIntakeTracking" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-food-intake-tracking' | translate }}
-              </label>
-          </div>
-          <!-- End new feature -->
-
-          <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
-              {{ 'manage-household.settings.enable-to-do-list-description' | translate }}
-          </small>
-          <div class="pt-2 flex items-center gap-3 relative">
-              <p-checkbox
-                  [binary]="true"
-                  inputId="enableWishList"
-                  [ngModel]="household.enableWishList"
-                  (onChange)="toggleNewSetting($event, household, SETTING_NAMES.WISH_LIST)"
-                  [disabled]="isUpdatingSettings()">
-              </p-checkbox>
-              <label for="enableWishList" class="text-surface-700 dark:text-surface-200 cursor-pointer">
-                  {{ 'manage-household.settings.enable-wish-list' | translate }}
-              </label>
-              <!-- Spinner shown during settings update -->
-              <p-progressSpinner *ngIf="isUpdatingSettings()"
-                                 styleClass="w-5 h-5 absolute right-0"
-                                 strokeWidth="6">
-              </p-progressSpinner>
-          </div>
-          <small class="block mt-2 text-[0.625rem] text-surface-500 dark:text-surface-400">
-              {{ 'manage-household.settings.enable-to-do-list-description' | translate }}
-          </small>
+        </div>
+        <div class="flex items-center gap-2 bg-surface-100 dark:bg-surface-700/60 text-surface-800 dark:text-surface-100 px-4 py-2 rounded-2xl border border-surface-200 dark:border-surface-600 font-bold text-sm shadow-sm">
+          <i class="pi pi-calendar text-primary-500"></i>
+          <span>Année en cours : <strong>{{ currentYear }}</strong></span>
+        </div>
       </div>
-      <!-- End Settings Card -->
 
+      <!-- ========================================================= -->
+      <!-- SECTION 1: HOUSEHOLD STATS (KPI CARDS GRID)               -->
+      <!-- ========================================================= -->
+      <div class="mb-10">
+        <div class="flex items-center justify-between mb-5 px-1">
+          <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2.5 text-surface-900 dark:text-white m-0">
+            <i class="pi pi-bolt text-yellow-500"></i>
+            Bilan annuel du foyer
+          </h2>
+          <span class="text-xs font-bold text-surface-400 dark:text-surface-500 uppercase tracking-widest">
+            Janvier - Décembre {{ currentYear }}
+          </span>
+        </div>
 
-      <!-- Household Members List -->
-      <div *ngIf="household.members && household.members.length > 0; else noMembers"
-           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          
+          <!-- Metric 1: Tasks Done This Year -->
+          <div class="bg-white dark:bg-surface-800 rounded-3xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-surface-100 dark:border-surface-700 flex flex-col justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
+            <div>
+              <div class="flex justify-between items-start mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-surface-400 dark:text-surface-500">Tâches</span>
+                <div class="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm">
+                  <i class="pi pi-check-circle text-xl"></i>
+                </div>
+              </div>
+              <h3 class="text-3xl sm:text-4xl font-black text-surface-900 dark:text-white m-0 tracking-tight">
+                {{ tasksDoneThisYear() }}
+              </h3>
+              <p class="text-sm font-semibold text-surface-600 dark:text-surface-300 mt-1 mb-0">Tâches accomplies</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-surface-100 dark:border-surface-700/60 flex items-center justify-between text-xs text-surface-400">
+              <span>Dans le foyer en {{ currentYear }}</span>
+              <span *ngIf="totalRegisteredTasks() > 0" class="font-bold text-primary-500">{{ totalRegisteredTasks() }} actives</span>
+            </div>
+          </div>
 
-        <!-- Member Card (Existing Code) -->
-        <div *ngFor="let member of household.members; trackBy: trackByMemberId"
-             class="p-4 bg-surface-0 dark:bg-surface-800 rounded-lg shadow-md border border-surface-200 dark:border-surface-700 flex flex-col items-center text-center">
+          <!-- Metric 2: Grocery Spent This Year -->
+          <div class="bg-white dark:bg-surface-800 rounded-3xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-surface-100 dark:border-surface-700 flex flex-col justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
+            <div>
+              <div class="flex justify-between items-start mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-surface-400 dark:text-surface-500">Épicerie</span>
+                <div class="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm">
+                  <i class="pi pi-shopping-cart text-xl"></i>
+                </div>
+              </div>
+              <h3 class="text-3xl sm:text-4xl font-black text-emerald-600 dark:text-emerald-400 m-0 tracking-tight">
+                {{ grocerySpentThisYear() | currency:'CAD':'symbol-narrow':'1.0-2' }}
+              </h3>
+              <p class="text-sm font-semibold text-surface-600 dark:text-surface-300 mt-1 mb-0">Dépenses d'épicerie</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-surface-100 dark:border-surface-700/60 flex items-center justify-between text-xs text-surface-400">
+              <span>Cumul annuel {{ currentYear }}</span>
+              <a routerLink="/finance/grocery-fund" class="text-emerald-600 dark:text-emerald-400 font-bold hover:underline">Registre →</a>
+            </div>
+          </div>
 
-          <!-- Avatar -->
-          <p-avatar
-            [image]="member.imageUrl || 'assets/placeholder-user.png'"
-            size="xlarge"
-            shape="circle"
-            class="mb-3 border-2 border-primary-500 dark:border-primary-400 shadow-sm">
-          </p-avatar>
+          <!-- Metric 3: Saved in Household Fund -->
+          <div class="bg-white dark:bg-surface-800 rounded-3xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-surface-100 dark:border-surface-700 flex flex-col justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
+            <div>
+              <div class="flex justify-between items-start mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-surface-400 dark:text-surface-500">Fonds Conjoint</span>
+                <div class="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm">
+                  <i class="pi pi-wallet text-xl"></i>
+                </div>
+              </div>
+              <h3 class="text-3xl sm:text-4xl font-black text-purple-600 dark:text-purple-400 m-0 tracking-tight">
+                {{ householdFundSavedThisYear() | currency:'CAD':'symbol-narrow':'1.0-2' }}
+              </h3>
+              <p class="text-sm font-semibold text-surface-600 dark:text-surface-300 mt-1 mb-0">Total versé / épargné</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-surface-100 dark:border-surface-700/60 flex items-center justify-between text-xs text-surface-400">
+              <span>Solde : <strong class="text-surface-700 dark:text-surface-200">{{ householdFundCurrentBalance() | currency:'CAD':'symbol-narrow':'1.0-2' }}</strong></span>
+              <a routerLink="/finance/household-fund" class="text-purple-600 dark:text-purple-400 font-bold hover:underline">Gérer →</a>
+            </div>
+          </div>
 
-          <!-- Member Name -->
-          <p class="text-lg font-medium text-surface-800 dark:text-surface-100 mb-4">
-            {{ member.name }}
-          </p>
+          <!-- Metric 4: Total Hydro-Québec Cost (Consumed) -->
+          <div class="bg-white dark:bg-surface-800 rounded-3xl p-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-surface-100 dark:border-surface-700 flex flex-col justify-between hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300">
+            <div>
+              <div class="flex justify-between items-start mb-4">
+                <span class="text-xs font-bold uppercase tracking-wider text-surface-400 dark:text-surface-500">Électricité</span>
+                <div class="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 w-11 h-11 rounded-2xl flex items-center justify-center shadow-sm">
+                  <i class="fa-solid fa-bolt text-xl"></i>
+                </div>
+              </div>
+              <h3 class="text-3xl sm:text-4xl font-black text-yellow-600 dark:text-yellow-400 m-0 tracking-tight">
+                {{ totalHydroCost() | currency:'CAD':'symbol-narrow':'1.0-2' }}
+              </h3>
+              <p class="text-sm font-semibold text-surface-600 dark:text-surface-300 mt-1 mb-0">Consommation Hydro</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-surface-100 dark:border-surface-700/60 flex items-center justify-between text-xs text-surface-400">
+              <span *ngIf="totalHydroKwh() > 0"><strong>{{ totalHydroKwh() | number:'1.0-0' }}</strong> kWh</span>
+              <span *ngIf="totalHydroKwh() === 0">Factures réelles</span>
+              <a routerLink="/finance/electricity-fund" class="text-yellow-600 dark:text-yellow-400 font-bold hover:underline">Bilan →</a>
+            </div>
+          </div>
 
-          <!-- File Upload Section (Existing Code) -->
-          <div class="w-full flex flex-col items-center gap-2 relative">
-             <!-- Spinner shown during upload for this member -->
-             <p-progressSpinner *ngIf="uploadingMemberId() === member.id"
-                                styleClass="w-6 h-6 absolute -top-8 z-10"
-                                strokeWidth="6">
-             </p-progressSpinner>
+        </div>
+      </div>
 
-             <!-- FileUpload for SELECTION only -->
-             <p-fileUpload
+      <!-- ========================================================= -->
+      <!-- SECTION 2: TOP CHEF & COOKING DISTRIBUTION                -->
+      <!-- ========================================================= -->
+      <div *ngIf="memberChefStats().length > 0" class="mb-10 bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-surface-100 dark:border-surface-700">
+          <div class="flex items-center gap-3">
+            <div class="bg-orange-100 dark:bg-orange-900/30 w-10 h-10 rounded-xl flex items-center justify-center text-orange-600 dark:text-orange-400">
+              <i class="fa-solid fa-utensils text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-surface-900 dark:text-white m-0">Chef du foyer & Répartition des repas</h3>
+              <p class="text-surface-500 dark:text-surface-400 text-sm mt-0.5 m-0">Qui cuisine le plus au foyer en {{ currentYear }}.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div *ngFor="let stat of memberChefStats()" class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-center gap-4">
+            <p-avatar 
+              [image]="stat.imageUrl || 'assets/placeholder-user.png'" 
+              size="large" 
+              shape="circle"
+              styleClass="border-2 border-orange-500 shadow-sm shrink-0">
+            </p-avatar>
+            <div class="flex-grow min-w-0">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-base text-surface-900 dark:text-surface-100 truncate">{{ stat.name }}</span>
+                <span class="font-black text-sm text-orange-600 dark:text-orange-400">{{ stat.count }} repas ({{ stat.percentage }}%)</span>
+              </div>
+              <div class="w-full bg-surface-200 dark:bg-surface-700 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-gradient-to-r from-orange-400 to-amber-500 h-2.5 rounded-full transition-all duration-500" [style.width.%]="stat.percentage"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- SECTION 3: TOP 3 MEALS EATEN IN THE YEAR IN PROGRESS      -->
+      <!-- ========================================================= -->
+      <div class="mb-10 bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6 pb-4 border-b border-surface-100 dark:border-surface-700">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-3 text-surface-900 dark:text-white m-0">
+              <div class="bg-amber-100 dark:bg-amber-900/30 w-10 h-10 rounded-xl flex items-center justify-center">
+                <i class="pi pi-trophy text-amber-600 dark:text-amber-400 text-lg"></i>
+              </div>
+              Top 3 des repas les plus mangés
+            </h2>
+            <p class="text-surface-500 dark:text-surface-400 text-sm mt-1 m-0">
+              Vos recettes favorites les plus cuisinées et appréciées au foyer en {{ currentYear }}.
+            </p>
+          </div>
+          <button pButton pRipple type="button" icon="pi pi-book" label="Toutes les recettes" class="p-button-outlined p-button-secondary p-button-rounded p-button-sm font-bold" routerLink="/meals/recipes"></button>
+        </div>
+
+        <!-- Top Meals Grid / Podium -->
+        <div *ngIf="topMealsThisYear().length > 0; else noTopMeals" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div *ngFor="let meal of topMealsThisYear(); let idx = index" 
+               class="relative bg-surface-50 dark:bg-surface-900/60 rounded-3xl border border-surface-200/80 dark:border-surface-700 p-5 flex flex-col justify-between hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden group">
+            
+            <!-- Podium Rank Badge -->
+            <div class="absolute top-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black shadow-md backdrop-blur-md"
+                 [ngClass]="{
+                   'bg-amber-400 text-amber-950 ring-2 ring-amber-200': idx === 0,
+                   'bg-slate-300 text-slate-900 ring-2 ring-slate-100': idx === 1,
+                   'bg-amber-700 text-white ring-2 ring-amber-600': idx === 2
+                 }">
+              <span>#{{ idx + 1 }}</span>
+              <span>{{ idx === 0 ? '🏆 1er' : idx === 1 ? '🥈 2e' : '🥉 3e' }}</span>
+            </div>
+
+            <!-- Recipe Image -->
+            <div class="relative w-full h-44 rounded-2xl overflow-hidden mb-4 bg-surface-200 dark:bg-surface-800 shadow-inner">
+              <img *ngIf="meal.imageUrl; else mealPlaceholder" 
+                   [src]="meal.imageUrl" 
+                   [alt]="meal.recipeName" 
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+              <ng-template #mealPlaceholder>
+                <div class="w-full h-full flex items-center justify-center text-surface-400">
+                  <i class="pi pi-image text-4xl opacity-50"></i>
+                </div>
+              </ng-template>
+            </div>
+
+            <!-- Recipe Details -->
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span *ngIf="meal.category" class="text-[11px] font-extrabold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2.5 py-1 rounded-lg">
+                  {{ meal.category }}
+                </span>
+                <span *ngIf="meal.lastEaten" class="text-[11px] font-medium text-surface-400">
+                  Dernier : {{ meal.lastEaten | date:'d MMM' }}
+                </span>
+              </div>
+              <h3 class="font-bold text-lg text-surface-900 dark:text-white m-0 leading-snug line-clamp-2" [pTooltip]="meal.recipeName">
+                {{ meal.recipeName }}
+              </h3>
+            </div>
+
+            <!-- Times Prepared Banner -->
+            <div class="mt-5 pt-3 border-t border-surface-200 dark:border-surface-700 flex items-center justify-between">
+              <span class="text-xs font-semibold text-surface-500 dark:text-surface-400">Fréquence :</span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-surface-800 text-surface-900 dark:text-white font-extrabold text-sm rounded-full shadow-sm border border-surface-200 dark:border-surface-700">
+                <i class="pi pi-sparkles text-amber-500 text-xs"></i>
+                {{ meal.count }} fois
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+        <ng-template #noTopMeals>
+          <div class="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <div class="bg-amber-50 dark:bg-amber-900/20 p-5 rounded-full mb-3 text-amber-500">
+              <i class="pi pi-calendar-plus text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-surface-800 dark:text-surface-100 m-0 mb-1">Aucun repas répertorié cette année</h3>
+            <p class="text-sm text-surface-500 dark:text-surface-400 m-0 max-w-md">
+              Commencez à planifier vos repas dans le calendrier pour voir apparaître vos recettes préférées.
+            </p>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- SECTION 4: TASK COMPLETION BY HOUSEHOLD MEMBER            -->
+      <!-- ========================================================= -->
+      <div *ngIf="memberTaskStats().length > 0" class="mb-10 bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-surface-100 dark:border-surface-700">
+          <div class="bg-blue-100 dark:bg-blue-900/30 w-10 h-10 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
+            <i class="pi pi-users text-lg"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-surface-900 dark:text-white m-0">Répartition des tâches par membre</h3>
+            <p class="text-surface-500 dark:text-surface-400 text-sm mt-0.5 m-0">Participation aux corvées et tâches pour {{ currentYear }}.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div *ngFor="let stat of memberTaskStats()" class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-center gap-4">
+            <p-avatar 
+              [image]="stat.imageUrl || 'assets/placeholder-user.png'" 
+              size="large" 
+              shape="circle"
+              styleClass="border-2 border-primary-500 shadow-sm shrink-0">
+            </p-avatar>
+            <div class="flex-grow min-w-0">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-base text-surface-900 dark:text-surface-100 truncate">{{ stat.name }}</span>
+                <span class="font-black text-sm text-primary-600 dark:text-primary-400">{{ stat.count }} tâches ({{ stat.percentage }}%)</span>
+              </div>
+              <div class="w-full bg-surface-200 dark:bg-surface-700 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-gradient-to-r from-primary-500 to-pink-500 h-2.5 rounded-full transition-all duration-500" [style.width.%]="stat.percentage"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- SECTION 5: HOUSEHOLD MODULE SETTINGS                      -->
+      <!-- ========================================================= -->
+      <div class="mb-10 bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-surface-100 dark:border-surface-700">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2.5 text-surface-900 dark:text-white m-0">
+              <i class="pi pi-sliders-h text-primary-500"></i>
+              {{ 'manage-household.settings.title' | translate }}
+            </h2>
+            <p class="text-surface-500 dark:text-surface-400 text-sm mt-1 m-0">
+              Activez ou désactivez les fonctionnalités selon vos besoins.
+            </p>
+          </div>
+          <p-progressSpinner *ngIf="isUpdatingSettings()" styleClass="w-6 h-6" strokeWidth="6"></p-progressSpinner>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableTasks" [ngModel]="household.enableTasks" (onChange)="toggleNewSetting($event, household, SETTING_NAMES.TASKS)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableTasks" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-tasks' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">{{ 'manage-household.settings.enable-tasks-description' | translate }}</small>
+            </div>
+          </div>
+
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableMeal" [ngModel]="household.enableMeal" (onChange)="toggleNewSetting($event, household, SETTING_NAMES.MEALS)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableMeal" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-meals' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">{{ 'manage-household.settings.enable-meals-description' | translate }}</small>
+            </div>
+          </div>
+
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableShoppingList" [ngModel]="household.enableShoppingList" (onChange)="toggleNewSetting($event, household, SETTING_NAMES.SHOPPING_LIST)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableShoppingList" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-shopping-list' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">{{ 'manage-household.settings.enable-shopping-list-description' | translate }}</small>
+            </div>
+          </div>
+
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableWaysToCare" [ngModel]="household.enableWaysToCare" (onChange)="toggleWaysToCare($event, household)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableWaysToCare" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-ways-to-care' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">{{ 'manage-household.settings.enable-ways-to-care-description' | translate }}</small>
+            </div>
+          </div>
+
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableToDoList" [ngModel]="household.enableToDoList" (onChange)="togglToDoList($event, household)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableToDoList" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-to-do-list' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">{{ 'manage-household.settings.enable-to-do-list-description' | translate }}</small>
+            </div>
+          </div>
+
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableTravelChecklist" [ngModel]="household.enableTravelChecklist" (onChange)="toggleNewSetting($event, household, SETTING_NAMES.TRAVEL_CHECKLIST)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableTravelChecklist" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-travel-checklist' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">Gérez vos listes et valises de voyage.</small>
+            </div>
+          </div>
+
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableFoodIntakeTracking" [ngModel]="household.enableFoodIntakeTracking" (onChange)="toggleNewSetting($event, household, SETTING_NAMES.FOOD_INTAKE)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableFoodIntakeTracking" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-food-intake-tracking' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">Suivi macro-nutritionnel et portions quotidiennes.</small>
+            </div>
+          </div>
+
+          <div class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-start gap-3.5">
+            <p-checkbox [binary]="true" inputId="enableWishList" [ngModel]="household.enableWishList" (onChange)="toggleNewSetting($event, household, SETTING_NAMES.WISH_LIST)" [disabled]="isUpdatingSettings()"></p-checkbox>
+            <div class="flex flex-col">
+              <label for="enableWishList" class="font-bold text-surface-800 dark:text-surface-100 cursor-pointer">{{ 'manage-household.settings.enable-wish-list' | translate }}</label>
+              <small class="text-surface-500 dark:text-surface-400 text-xs mt-1">Partagez vos idées cadeaux et souhaits.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- SECTION 6: HOUSEHOLD MEMBERS                              -->
+      <!-- ========================================================= -->
+      <div class="mb-10 bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+        <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2.5 text-surface-900 dark:text-white m-0 mb-6 pb-4 border-b border-surface-100 dark:border-surface-700">
+          <i class="pi pi-users text-primary-500"></i>
+          Membres du foyer
+        </h2>
+
+        <div *ngIf="household.members && household.members.length > 0; else noMembers"
+             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div *ngFor="let member of household.members; trackBy: trackByMemberId"
+               class="p-6 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex flex-col items-center text-center">
+            
+            <p-avatar
+              [image]="member.imageUrl || 'assets/placeholder-user.png'"
+              size="xlarge"
+              shape="circle"
+              class="mb-3 border-4 border-white dark:border-surface-800 shadow-md">
+            </p-avatar>
+
+            <p class="text-lg font-bold text-surface-900 dark:text-surface-100 mb-4">
+              {{ member.name }}
+            </p>
+
+            <div class="w-full flex flex-col items-center gap-2 relative">
+              <p-progressSpinner *ngIf="uploadingMemberId() === member.id" styleClass="w-6 h-6 absolute -top-8 z-10" strokeWidth="6"></p-progressSpinner>
+              
+              <p-fileUpload
                 #uploader
                 mode="basic"
                 name="imageFile"
@@ -184,55 +409,50 @@
                 [customUpload]="false"
                 (onSelect)="onFileSelect($event, member.id)"
                 [disabled]="uploadingMemberId() !== null"
-                styleClass="p-button-sm p-button-outlined w-full max-w-[200px]"
-                invalidFileSizeMessageSummary="{0}: Fichier trop volumineux,"
-                invalidFileSizeMessageDetail="La taille max est {0}."
-                invalidFileTypeMessageSummary="{0}: Type de fichier invalide,"
-                invalidFileTypeMessageDetail="Seules les images {0} sont autorisées.">
-             </p-fileUpload>
+                styleClass="p-button-sm p-button-outlined w-full max-w-[200px]">
+              </p-fileUpload>
 
-             <!-- Separate Save Button -->
-             <button pButton pRipple
-                     type="button"
-                     [label]="'manage-household.settings.save-image'|translate"
-                     icon="pi pi-save"
-                     class="p-button-sm w-full max-w-[200px]"
-                     [disabled]="!selectedFiles[member.id] || uploadingMemberId() !== null"
-                     [loading]="uploadingMemberId() === member.id"
-                     (click)="triggerImageUpload(member.id, uploader)">
-             </button>
+              <button pButton pRipple
+                      type="button"
+                      [label]="'manage-household.settings.save-image'|translate"
+                      icon="pi pi-save"
+                      class="p-button-sm p-button-primary w-full max-w-[200px]"
+                      [disabled]="!selectedFiles[member.id] || uploadingMemberId() !== null"
+                      [loading]="uploadingMemberId() === member.id"
+                      (click)="triggerImageUpload(member.id, uploader)">
+              </button>
+            </div>
           </div>
-
-        </div> <!-- End Member Card -->
-
-      </div> <!-- End Members Grid -->
-
-      <div class="mt-8 border-t border-red-200 pt-6 mb-6">
-          <h3 class="text-lg font-medium text-red-600">Danger Zone</h3>
-          <p class="text-sm text-gray-500 mb-4">
-              Once you delete your account, there is no going back. Please be certain.
-          </p>
-          <button 
-              (click)="confirmDeleteAccount()" 
-              class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition">
-              Delete My Account
-          </button>
+        </div>
       </div>
 
-    </div> <!-- End Household Data Container -->
+      <!-- Danger Zone -->
+      <div class="mt-8 bg-red-50/50 dark:bg-red-900/10 border border-red-200 dark:border-red-800/50 rounded-3xl p-6 mb-6">
+        <h3 class="text-lg font-bold text-red-600 dark:text-red-400 m-0 mb-1">Zone Dangereuse</h3>
+        <p class="text-sm text-surface-600 dark:text-surface-400 mb-4">
+          Une fois votre compte supprimé, toutes vos données associées seront définitivement effacées.
+        </p>
+        <button pButton pRipple
+                label="Supprimer mon compte"
+                icon="pi pi-trash"
+                class="p-button-danger p-button-rounded font-bold"
+                (click)="confirmDeleteAccount()">
+        </button>
+      </div>
 
-    <!-- Template for No Household Loaded -->
+    </div>
+
+    <!-- Empty States -->
     <ng-template #noHousehold>
-      <div class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border rounded-lg bg-surface-100 dark:bg-surface-800">
-        <i class="pi pi-info-circle mr-2"></i>
+      <div class="text-center text-surface-500 dark:text-surface-400 mt-8 p-8 border rounded-3xl bg-white dark:bg-surface-800 shadow-sm">
+        <i class="pi pi-info-circle mr-2 text-2xl text-primary-500"></i>
         {{ 'manage-household.settings.no-household' | translate }}
       </div>
     </ng-template>
 
-    <!-- Template for No Members in Household -->
     <ng-template #noMembers>
-      <div class="text-center text-surface-500 dark:text-surface-400 mt-8 p-6 border rounded-lg bg-surface-100 dark:bg-surface-800">
-        <i class="pi pi-users mr-2"></i>
+      <div class="text-center text-surface-500 dark:text-surface-400 mt-8 p-8 border rounded-3xl bg-white dark:bg-surface-800 shadow-sm">
+        <i class="pi pi-users mr-2 text-2xl text-primary-500"></i>
         {{ 'manage-household.settings.no-members' | translate }}
       </div>
     </ng-template>
@@ -240,15 +460,14 @@
   </div>
 
   <!-- App & Server Version Footer -->
-  <div class="mt-auto pt-6 text-center text-surface-400 dark:text-surface-500 text-sm flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6">
-      <div class="flex items-center gap-2">
-          <i class="pi pi-mobile"></i>
-          <span>Version Client : <strong>{{ appVersion }}</strong></span>
-      </div>
-      <div class="flex items-center gap-2">
-          <i class="pi pi-server"></i>
-          <span>Version Serveur : <strong>{{ serverVersion() }}</strong></span>
-      </div>
+  <div class="mt-auto pt-6 text-center text-surface-400 dark:text-surface-500 text-sm flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 border-t border-surface-100 dark:border-surface-800">
+    <div class="flex items-center gap-2">
+      <i class="pi pi-mobile"></i>
+      <span>Version Client : <strong>{{ appVersion }}</strong></span>
+    </div>
+    <div class="flex items-center gap-2">
+      <i class="pi pi-server"></i>
+      <span>Version Serveur : <strong>{{ serverVersion() }}</strong></span>
+    </div>
   </div>
-
 </div>

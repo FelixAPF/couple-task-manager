@@ -73,3 +73,46 @@ export enum UserRole {
     USER = "USER"
 }
 
+
+
+// In src/app/model/household.ts (or at top of household.service.ts)
+export interface TopMealDto {
+  recipeId?: number;
+  recipeName: string;
+  category?: string;
+  imageUrl?: string;
+  count: number;
+  lastEaten?: Date | string;
+}
+
+export interface MemberTaskStatDto {
+  memberId: number;
+  name: string;
+  imageUrl?: string;
+  count: number;
+  percentage: number;
+}
+
+export interface MemberChefStatDto {
+  memberId: number;
+  name: string;
+  imageUrl?: string;
+  count: number;
+  percentage: number;
+}
+
+export interface HouseholdStatsDto {
+  year: number;
+  totalTasksDone: number;
+  totalActiveTasks: number;
+  totalGrocerySpent: number;
+  totalHouseholdFundSaved: number;
+  householdFundBalance: number;
+  totalHydroCost: number;
+  totalHydroKwh: number;
+  totalMealsCount: number;
+  topMeals: TopMealDto[];
+  memberTaskStats: MemberTaskStatDto[];
+  memberChefStats: MemberChefStatDto[];
+  topChef: MemberChefStatDto | null;
+}

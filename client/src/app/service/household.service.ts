@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environment';
-import { Household, HouseholdMember, UpdateHouseholdSettings } from '../model/household';
+import { Household, HouseholdMember, HouseholdStatsDto, UpdateHouseholdSettings } from '../model/household';
 import { BehaviorSubject, map, Observable, of, tap } from 'rxjs';
 
 @Injectable({
@@ -40,6 +40,11 @@ export class HouseholdService {
       })
     );;
   }
+
+  getHouseholdStats(year?: number): Observable<HouseholdStatsDto> {
+   const url = year ? `${this.baseUrl}/stats?year=${year}` : `${this.baseUrl}/stats`;
+    return this.http.get<HouseholdStatsDto>(url);
+}
 
   getCurrentHousehold(){
     return this.householdSubject.value;

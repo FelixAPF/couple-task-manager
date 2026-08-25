@@ -1,6 +1,6 @@
-import { Component, ElementRef, HostListener, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, OnInit, ViewChild } from '@angular/core';
 import { SharedModule } from '../../shared.module';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { AuthService } from '../../service/auth.service';
@@ -13,53 +13,58 @@ import { Household, HouseholdMember, UserRole } from '../../model/household';
 import { AppNotification } from '../../model/notification';
 import { NotificationService } from '../../service/notification.service';
 import { UiStateService } from '../../service/ui-state.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
-  imports: [SharedModule],
+  standalone: true,
+  imports: [SharedModule, CommonModule, RouterModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css',
   providers: [MessageService]
 })
 export class NavbarComponent implements OnInit {
+  @ViewChild('notificationContainer') notificationContainerRef!: ElementRef;
+
   isMenuOpen = false;
   nextBackgroundTheme = Style.Dark;
+
   private authService = inject(AuthService);
   private householdService = inject(HouseholdService);
-  private dialogService = inject(DialogService); // <-- Inject DialogService
+  private dialogService = inject(DialogService);
   private notificationService = inject(NotificationService);
   private uiState = inject(UiStateService);
-  USER_ROLE = UserRole;
 
+  USER_ROLE = UserRole;
   showNotifications = false;
   notifications: AppNotification[] = [];
   unreadCount$: Observable<number> = this.notificationService.unreadCount$;
-
-  isLoggedIn$ = this.authService.isLoggedIn$; // Make public for template access
-  household$ = this.householdService.household$; // <-- Expose household observable
+  isLoggedIn$ = this.authService.isLoggedIn$;
+  household$ = this.householdService.household$;
   currentUser$: Observable<HouseholdMember | null> = this.householdService.currentUser$;
   subscription: Subscription = new Subscription();
   household: Household | null = null;
 
-  // `translate` is now public so the template can read `translate.currentLang`
-  // to correctly highlight the active language pill.
-  constructor(private router: Router, public translate: TranslateService, private messageService: MessageService, private eRef: ElementRef){}
+  constructor(
+    private router: Router, 
+    public translate: TranslateService, 
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     setInterval(() => {
-      if (this.authService.isLoggedIn$.subscribe(isLoggedIn => {
-        if(isLoggedIn){
+      this.authService.isLoggedIn$.subscribe(isLoggedIn => {
+        if (isLoggedIn) {
           this.notificationService.refreshUnreadCount();
         }
-      })) {
-      }
+      });
     }, 60000);
 
     this.subscription.add(
       this.householdService.retrieveHousehold().subscribe((household) => {
         this.household = household;
       })
-    )
+    );
   }
 
   useLanguage(language: string): void {
@@ -73,14 +78,8 @@ export class NavbarComponent implements OnInit {
     this.uiState.setMobileMenuOpen(this.isMenuOpen);
   }
 
-
-  switchStyle(){
-    StatusBar.setStyle({ style: this.nextBackgroundTheme, });
-    this.nextBackgroundTheme = this.nextBackgroundTheme === Style.Dark ? Style.Light : Style.Dark;
-  }
-
   logout(): void {
-    this.isMenuOpen = false; // Close menu if open
+    this.isMenuOpen = false;
     document.body.style.overflow = '';
     this.uiState.setMobileMenuOpen(false);
     this.authService.logout();
@@ -89,39 +88,35 @@ export class NavbarComponent implements OnInit {
 
   onCopySuccess(): void {
     this.messageService.add({
-        severity: 'success',
-        summary: 'Copié',
-        detail: 'Code de foyer copié dans le presse-papiers!',
-        life: 2000 // Shorter duration for copy confirmation
+      severity: 'success',
+      summary: 'Copié',
+      detail: 'Code de foyer copié dans le presse-papiers!',
+      life: 2000
     });
   }
 
   openJoinHouseholdDialog(): void {
-    this.isMenuOpen = false; // Close the navbar menu first
+    this.isMenuOpen = false;
     document.body.style.overflow = '';
     this.uiState.setMobileMenuOpen(false);
     const joinDialogRef = this.dialogService.open(JoinHouseholdComponent, {
-        header: 'Rejoindre un foyer existant',
-        width: '90%', // Responsive width
-        modal: true,
-        dismissableMask: true,
-        contentStyle: {"overflow": "auto"}, // Basic overflow
-        baseZIndex: 10000
+      header: 'Rejoindre un foyer existant',
+      width: '90%',
+      modal: true,
+      dismissableMask: true,
+      contentStyle: { "overflow": "auto" },
+      baseZIndex: 10000
     });
 
-      joinDialogRef.onClose.subscribe((joinedSuccessfully?: boolean) => {
-
-    });
+    joinDialogRef.onClose.subscribe(() => {});
   }
 
-  toggleAdminMode(event: any){
-
-  }
-
-  // Toggle the notification panel
-  toggleNotifications() {
+  // --- Notification Center Methods ---
+  toggleNotifications(event?: MouseEvent): void {
+    if (event) {
+      event.stopPropagation();
+    }
     this.showNotifications = !this.showNotifications;
-
     if (this.showNotifications) {
       this.notificationService.getNotifications().subscribe(data => {
         this.notifications = data;
@@ -130,31 +125,39 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  // Handle clicking a specific notification
-  handleNotificationClick(notification: AppNotification) {
+  closeNotifications(): void {
     this.showNotifications = false;
+  }
 
+  handleNotificationClick(notification: AppNotification): void {
+    this.showNotifications = false;
     if (notification.type === 'LETTER' && notification.referenceId) {
       this.router.navigate(['/letters/view', notification.referenceId]);
     } else if (notification.type === 'TASK') {
       this.router.navigate(['/tasks']);
     } else if (notification.type === 'MEAL') {
       this.router.navigate(['/meals']);
+    } else if (notification.type === 'FINANCE') {
+      this.router.navigate(['/finance/dashboard']);
     } else {
       this.router.navigate(['/dashboard']);
     }
   }
 
-  // Close dropdown / menu when clicking outside, or pressing Escape
+  // Closes notifications whenever clicking anywhere outside the container
   @HostListener('document:click', ['$event'])
-  clickout(event: any) {
-    if (!this.eRef.nativeElement.contains(event.target)) {
-      this.showNotifications = false;
+  onDocumentClick(event: MouseEvent): void {
+    if (this.showNotifications && this.notificationContainerRef) {
+      const clickedInside = this.notificationContainerRef.nativeElement.contains(event.target);
+      if (!clickedInside) {
+        this.showNotifications = false;
+      }
     }
   }
 
+  // Closes notifications on Escape key
   @HostListener('document:keydown.escape')
-  onEscape() {
+  onEscape(): void {
     this.showNotifications = false;
     if (this.isMenuOpen) {
       this.toggleMenu();
@@ -165,5 +168,4 @@ export class NavbarComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     return user && user.role === 'ADMIN';
   }
-
 }

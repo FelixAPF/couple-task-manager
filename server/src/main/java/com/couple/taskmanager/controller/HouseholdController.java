@@ -1,30 +1,35 @@
 package com.couple.taskmanager.controller;
 
 import com.couple.taskmanager.model.CTMUser;
-import com.couple.taskmanager.model.Household;
-import com.couple.taskmanager.model.Recipe;
 import com.couple.taskmanager.model.dto.HouseholdDto;
-import com.couple.taskmanager.model.dto.HouseholdMemberDto;
+import com.couple.taskmanager.model.dto.HouseholdStatsDto;
 import com.couple.taskmanager.model.dto.UpdateHouseholdSettingsDto;
 import com.couple.taskmanager.service.HouseholdService;
-import com.couple.taskmanager.service.RecipeService;
 import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/household")
 public class HouseholdController {
+
     @Autowired
-    HouseholdService householdService;
+    private HouseholdService householdService;
+
+    @GetMapping("/stats")
+    public ResponseEntity<HouseholdStatsDto> getHouseholdStats(
+            @RequestParam(value = "year", required = false) Integer year,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(householdService.getHouseholdStats(user, year));
+    }
 
     @GetMapping
     public HouseholdDto getHousehold(@AuthenticationPrincipal UserDetails userDetails){
-        CTMUser user = (CTMUser)userDetails;
+        CTMUser user = (CTMUser) userDetails;
         return householdService.getMemberHousehold(user);
     }
 
@@ -58,5 +63,4 @@ public class HouseholdController {
         CTMUser user = (CTMUser) userDetails;
         householdService.setHouseholdMemberRewardColor(memberId, color, user);
     }
-
 }

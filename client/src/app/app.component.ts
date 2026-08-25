@@ -15,10 +15,11 @@ import { PluginListenerHandle } from '@capacitor/core';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { routeAnimations } from './animations';
 import { VersionControlService } from './service/version-control.service';
-import { asyncScheduler, delay, observeOn, Subscription } from 'rxjs';
+import { asyncScheduler, delay, filter, observeOn, Subscription, switchMap } from 'rxjs';
 import * as ClientVersion from "../../version.json";
 import { HouseholdService } from './service/household.service';
 import { PushNotificationService } from './service/push.notification.service';
+import { AuthService } from './service/auth.service';
 
 
 @Component({
@@ -41,14 +42,25 @@ export class AppComponent implements OnInit, OnDestroy {
   acknowledgeUpdate: boolean = false;
   showUpdateDialog: boolean = false;
   
-
-  constructor(private translate: TranslateService, private loadingService: LoadingService, private primeng: PrimeNG, private router: Router,  private location: Location, private platform: Platform,
-  private dialogService: DialogService, private zone: NgZone, private versionService: VersionControlService, private pushNotificationService: PushNotificationService, private householdService: HouseholdService) {
-    translate.setDefaultLang('fr');
-    translate.addLangs(['fr', 'en']);
-    translate.use('fr');
-    this.primeng.ripple.set(true);
-  }
+constructor(
+  private translate: TranslateService,
+  private loadingService: LoadingService,
+  private primeng: PrimeNG,
+  private router: Router,
+  private location: Location,
+  private platform: Platform,
+  private dialogService: DialogService,
+  private zone: NgZone,
+  private versionService: VersionControlService,
+  private pushNotificationService: PushNotificationService,
+  private householdService: HouseholdService,
+  private authService: AuthService   // <-- add this
+) {
+  translate.setDefaultLang('fr');
+  translate.addLangs(['fr', 'en']);
+  translate.use('fr');
+  this.primeng.ripple.set(true);
+}
 
   get platformName(){
     return this.platform;
@@ -60,48 +72,52 @@ export class AppComponent implements OnInit, OnDestroy {
     await AppUpdate.openAppStore();
     this.showUpdateDialog = false; // Close dialog on action
   }
+ngOnInit() {
+  this.checkScreenWidth();
+  this.setupBackButtonListener();
 
-  ngOnInit() {
-    this.checkScreenWidth();
-    this.setupBackButtonListener(); // Call helper function
-    this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
-      if(!this.platform.ANDROID) return;
-      const serverVersion = parseFloat(version).toFixed(4);
-      const clientVersion = parseFloat(ClientVersion.version).toFixed(4);
-      if(serverVersion > clientVersion) {
-        this.outdatedVersion = true;
-        this.showUpdateDialog = true; // <--- Trigger the popup here
-      }
-    }));
-
-    if(this.platform.ANDROID) {
-      this.setStatusBarBackgroundColor();
-      this.setStatusBarStyle();
+  this.subscription.add(this.versionService.retrieveVersion().subscribe((version) => {
+    if (!this.platform.ANDROID) return;
+    const serverVersion = parseFloat(version).toFixed(4);
+    const clientVersion = parseFloat(ClientVersion.version).toFixed(4);
+    if (serverVersion > clientVersion) {
+      this.outdatedVersion = true;
+      this.showUpdateDialog = true;
     }
+  }));
 
-    this.subscription.add(this.householdService.retrieveHousehold().subscribe((household) => {
-      this.householdService.setHousehold(household);
-    }));
-
-    this.subscription.add(this.loadingService.loadingSub
-      .pipe(
-        observeOn(asyncScheduler) // <--- Add this pipe with observeOn
-      )
-      .subscribe((state) => {
-        this.isLoading = state; // Assign the state after async scheduling
-      })
-    );
-
-    const language = localStorage.getItem('language');
-    if (language) {
-      this.translate.use(language);
-    } else {
-      localStorage.setItem('language', 'fr');
-      this.translate.use('fr');
-    }
-
-    this.pushNotificationService.initPush()
+  if (this.platform.ANDROID) {
+    this.setStatusBarBackgroundColor();
+    this.setStatusBarStyle();
   }
+
+  // ✅ ONLY load household after user is confirmed authenticated
+  this.subscription.add(
+    this.authService.isLoggedIn$.pipe(
+      filter(isLoggedIn => isLoggedIn),
+      switchMap(() => this.householdService.retrieveHousehold())
+    ).subscribe((household) => {
+      this.householdService.setHousehold(household);
+    })
+  );
+
+  this.subscription.add(this.loadingService.loadingSub
+    .pipe(observeOn(asyncScheduler))
+    .subscribe((state) => {
+      this.isLoading = state;
+    })
+  );
+
+  const language = localStorage.getItem('language');
+  if (language) {
+    this.translate.use(language);
+  } else {
+    localStorage.setItem('language', 'fr');
+    this.translate.use('fr');
+  }
+
+  this.pushNotificationService.initPush();
+}
 
   async setupBackButtonListener(): Promise<void> {
     if (!this.platform.ANDROID) return;

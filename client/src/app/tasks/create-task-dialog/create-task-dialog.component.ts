@@ -73,7 +73,6 @@ export class CreateTaskDialogComponent implements OnInit {
     });
 
     if (this.config.data?.task) {
-      console.log("DATA TASK", this.config.data.task)
         this.task = { ...this.config.data.task }; 
         this.isEditMode = true;
         if(this.task.referenceDate){

@@ -1,13 +1,16 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, filter, Observable, tap } from 'rxjs';
 import { environment } from '../environment';
 import { AppNotification } from '../model/notification';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NotificationService {
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
   private apiUrl = environment.apiUrl.endsWith('/') 
     ? `${environment.apiUrl}notifications` 
     : `${environment.apiUrl}/notifications`;
@@ -15,9 +18,13 @@ export class NotificationService {
   // Reactive state for the badge count
   private unreadCountSubject = new BehaviorSubject<number>(0);
   unreadCount$ = this.unreadCountSubject.asObservable();
-
-  constructor(private http: HttpClient) { 
-    this.refreshUnreadCount();
+constructor() { 
+    // Only fetch unread count once the user is confirmed logged in
+    this.authService.isLoggedIn$.pipe(
+      filter(isLoggedIn => isLoggedIn)
+    ).subscribe(() => {
+      this.refreshUnreadCount();
+    });
   }
 
   getNotifications(): Observable<AppNotification[]> {

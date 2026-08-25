@@ -1,16 +1,40 @@
-.selected-recipe-item {
-    background-color: var(--primary-50) !important; /* Use PrimeNG theme variables */
-    border-left: 3px solid var(--primary-500);
-    padding-left: calc(0.75rem - 3px) !important; /* Adjust padding slightly */
-  }
-  
-  /* Dark mode adjustments for selected item */
-  :host-context(.dark) .selected-recipe-item {
-    background-color: color-mix(in srgb, var(--primary-700) 20%, transparent) !important;
-    border-left-color: var(--primary-400);
-  }
-  
-  /* Ensure last item doesn't have bottom border if needed */
-  .recipe-list-container .recipe-item:last-child {
-    border-bottom: none;
-  }
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 88dvh;
+  overflow: hidden;
+}
+
+.assign-meal-root {
+  height: 100%;
+  max-height: 88dvh;
+}
+
+.dialog-scroll-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--surface-300, #cbd5e1);
+  border-radius: 4px;
+}
+
+:host-context(.dark) .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--surface-700, #334155);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

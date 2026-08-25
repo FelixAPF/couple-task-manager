@@ -21,6 +21,7 @@ import localeFrCA from '@angular/common/locales/fr-CA'; // <-- Import locale dat
 import { LoadingInterceptor } from './interceptor/loading.interceptor';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { AuthService } from './service/auth.service';
+import { firstValueFrom } from 'rxjs';
 
 registerLocaleData(localeFrCA, 'fr-CA'); // <-- Register with the correct ID 'fr-CA'
 
@@ -37,8 +38,9 @@ export class MyHammerConfig extends HammerGestureConfig {
   }
 }
 
+
 export function initializeAuth(authService: AuthService) {
-  return () => authService.attemptSilentLogin();
+  return () => firstValueFrom(authService.attemptSilentLogin());
 }
 
 const scrollConfig: InMemoryScrollingOptions = {

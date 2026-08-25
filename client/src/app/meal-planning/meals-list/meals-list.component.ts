@@ -222,43 +222,50 @@ export class MealsListComponent implements OnInit {
       });
     });
   }
-
-  assignMeal(date: Date, existingMeal?: Meal): void {
-    const dialogRef: DynamicDialogRef | undefined = this.dialogService.open(AssignMealComponent, {
-        width: '90%',
-        modal: true,
-        dismissableMask: true,
-        contentStyle: {"max-height": "80vh", "overflow": "auto"},
-        baseZIndex: 10000,
-        data: {
-          date: date,
-          meal: existingMeal
-        }
-    });
-
-    if (dialogRef) {
-      dialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string, isThawingNeeded: boolean, assignee: any }) => {
-          if (result && result.recipe && result.date && result.location !== undefined) {
-              const mealToSave: Meal = {
-                  id: existingMeal?.id,
-                  recipe: result.recipe,
-                  date: result.date,
-                  location: result.location,
-                  assignedUser: result.assignee,
-                  isThawingNeeded: result.isThawingNeeded
-              };
-              this.saveAssignedMeal(mealToSave);
-          }
-      });
-    } else {
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: "Impossible d'ouvrir la fenêtre d'assignation." });
+assignMeal(date: Date, existingMeal?: Meal): void {
+  const dialogRef: DynamicDialogRef | undefined = this.dialogService.open(AssignMealComponent, {
+    width: '92vw',
+    style: { maxWidth: '580px', maxHeight: '88dvh', margin: 'auto' },
+    modal: true,
+    showHeader: false,
+    dismissableMask: true,
+    contentStyle: { 
+      'max-height': '88dvh', 
+      'height': '88dvh', 
+      'overflow': 'hidden', 
+      'padding': '0', 
+      'border-radius': '1.5rem' 
+    },
+    baseZIndex: 10000,
+    data: {
+      date: date,
+      meal: existingMeal
     }
+  });
+
+  if (dialogRef) {
+    dialogRef.onClose.subscribe((result?: { recipe: Recipe, date: Date, location: string, isThawingNeeded: boolean, assignee: any }) => {
+      if (result && result.recipe && result.date && result.location !== undefined) {
+        const mealToSave: Meal = {
+          id: existingMeal?.id,
+          recipe: result.recipe,
+          date: result.date,
+          location: result.location,
+          assignedUser: result.assignee,
+          isThawingNeeded: result.isThawingNeeded
+        };
+        this.saveAssignedMeal(mealToSave);
+      }
+    });
   }
+}
 
   openAiPlannerDialog(): void {
     const aiRef = this.dialogService.open(AiMealPlannerDialogComponent, {
         header: 'Planificateur IA de la semaine',
         width: '90%',
+        modal: true,
+        dismissableMask: true,
         contentStyle: {"max-height": "80vh", "overflow": "auto"},
         baseZIndex: 10001,
         data: {

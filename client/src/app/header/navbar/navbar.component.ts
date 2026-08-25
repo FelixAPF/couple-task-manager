@@ -8,7 +8,7 @@ import { HouseholdService } from '../../service/household.service';
 import { MessageService } from 'primeng/api';
 import { DialogService } from 'primeng/dynamicdialog';
 import { JoinHouseholdComponent } from '../../household/join-household/join-household.component';
-import { Observable, Subscription } from 'rxjs';
+import { filter, interval, Observable, Subscription, switchMap } from 'rxjs';
 import { Household, HouseholdMember, UserRole } from '../../model/household';
 import { AppNotification } from '../../model/notification';
 import { NotificationService } from '../../service/notification.service';
@@ -50,22 +50,25 @@ export class NavbarComponent implements OnInit {
     public translate: TranslateService, 
     private messageService: MessageService
   ) {}
-
+  
   ngOnInit(): void {
-    setInterval(() => {
-      this.authService.isLoggedIn$.subscribe(isLoggedIn => {
-        if (isLoggedIn) {
-          this.notificationService.refreshUnreadCount();
-        }
-      });
-    }, 60000);
+  // 1. Periodically check notifications when logged in
+  this.subscription.add(
+    interval(60000).pipe(
+      switchMap(() => this.authService.isLoggedIn$),
+      filter(isLoggedIn => isLoggedIn)
+    ).subscribe(() => {
+      this.notificationService.refreshUnreadCount();
+    })
+  );
 
-    this.subscription.add(
-      this.householdService.retrieveHousehold().subscribe((household) => {
-        this.household = household;
-      })
-    );
-  }
+  // 2. Listen to the household reactive subject directly (no premature HTTP call)
+  this.subscription.add(
+    this.householdService.household$.subscribe((household) => {
+      this.household = household;
+    })
+  );
+}
 
   useLanguage(language: string): void {
     this.translate.use(language);

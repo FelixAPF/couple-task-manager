@@ -45,18 +45,30 @@ export class MealCardComponent {
   constructor(@Inject(LOCALE_ID) private locale: string, private dialogService: DialogService, ) {
   }
   
-  openRecipeView(){
-    this.recipeDialogRef = this.dialogService.open(RecipeDialogComponent, {
-        dismissableMask: true,
-        width: '90%',
-        modal: true,
-        contentStyle: {"max-height": "70vh", "overflow": "auto"},
-        baseZIndex: 10000,
-        data: { // Pass the target date
-          recipe: this.meal?.recipe
-        }
-    });
-  }
+  openRecipeView(): void {
+  this.recipeDialogRef = this.dialogService.open(RecipeDialogComponent, {
+    dismissableMask: true,
+    width: '92vw',
+    style: {
+      'max-width': '600px',
+      'max-height': '85dvh',
+      'margin': 'auto'
+    },
+    modal: true,
+    showHeader: false,
+    contentStyle: { 
+      'max-height': '85dvh', 
+      'height': '85dvh',
+      'overflow': 'hidden', 
+      'padding': '0', 
+      'border-radius': '1.5rem' 
+    },
+    baseZIndex: 10000,
+    data: {
+      recipe: this.meal?.recipe
+    }
+  });
+}
 
   // NEW: Handler to emit the delete event
   onRemoveClick(event: Event) {

@@ -1,1 +1,180 @@
-<app-recipe-card [recipe]="recipe" [openIngredients]="true"></app-recipe-card>
+<p-toast></p-toast>
+
+<div class="dialog-wrapper flex flex-col h-full max-h-[85dvh] bg-white dark:bg-surface-900 rounded-3xl overflow-hidden shadow-2xl text-surface-800 dark:text-surface-100">
+  
+  <!-- ========================================================= -->
+  <!-- HERO IMAGE & FLOATING HEADER CONTROLS (Fixed Top)         -->
+  <!-- ========================================================= -->
+  <div class="relative w-full h-44 sm:h-56 bg-surface-200 dark:bg-surface-800 overflow-hidden shrink-0">
+    
+    <img *ngIf="recipe?.imageUrl; else placeholderImage" 
+         [src]="recipe.imageUrl" 
+         [alt]="recipe.name" 
+         class="w-full h-full object-cover">
+    
+    <ng-template #placeholderImage>
+      <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-500/10 to-pink-500/10 text-surface-400">
+        <i class="fa-solid fa-utensils text-4xl mb-1 opacity-50"></i>
+        <span class="text-[10px] font-black uppercase tracking-widest opacity-60">Recette</span>
+      </div>
+    </ng-template>
+
+    <!-- Top Floating Actions Bar -->
+    <div class="absolute top-3 inset-x-3 sm:top-4 sm:inset-x-4 flex justify-between items-center z-20">
+      <span *ngIf="recipe?.category" 
+            class="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider text-white bg-black/50 backdrop-blur-md border border-white/20 shadow-md">
+        {{ recipe.category }}
+      </span>
+      <span *ngIf="!recipe?.category"></span>
+
+      <!-- Circle Action Buttons -->
+      <div class="flex items-center gap-2">
+        <button type="button" 
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-black/40 hover:bg-black/60 active:scale-95 text-white backdrop-blur-md border border-white/25 shadow-md transition-all cursor-pointer"
+                (click)="openEditRecipe()"
+                pTooltip="Modifier" 
+                tooltipPosition="bottom">
+          <i class="pi pi-pencil text-sm"></i>
+        </button>
+        <button type="button" 
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center bg-black/40 hover:bg-black/60 active:scale-95 text-white backdrop-blur-md border border-white/25 shadow-md transition-all cursor-pointer"
+                (click)="close()"
+                aria-label="Fermer">
+          <i class="pi pi-times text-sm"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Soft Dark Bottom Gradient -->
+    <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
+    
+    <!-- Title -->
+    <div class="absolute bottom-3 left-4 right-4 z-10 text-white">
+      <h2 class="text-xl sm:text-2xl font-black m-0 leading-tight drop-shadow-md line-clamp-2">
+        {{ recipe?.name }}
+      </h2>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- SCROLLABLE BODY CONTENT                                   -->
+  <!-- ========================================================= -->
+  <div class="dialog-scroll-body p-4 sm:p-6 flex flex-col gap-6 overflow-y-auto flex-grow custom-scrollbar">
+
+    <!-- Section 1: Servings / Portions Scaler -->
+    <div *ngIf="recipe?.basePortionRatio && recipe.basePortionRatio > 0" 
+         class="bg-surface-50 dark:bg-surface-800/60 p-3 sm:p-4 rounded-2xl border border-surface-200/80 dark:border-surface-700/70 flex items-center justify-between gap-3">
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-surface-500 dark:text-surface-400 m-0">Portions</h3>
+        <p class="text-[11px] text-surface-400 dark:text-surface-500 m-0">Ajuste les quantités</p>
+      </div>
+
+      <!-- Stepper Pill -->
+      <div class="flex items-center gap-2 bg-white dark:bg-surface-900 px-2.5 py-1 rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm">
+        <button (click)="adjustPortions(-1)" 
+                [disabled]="displayPortionRatio <= 1"
+                class="w-7 h-7 rounded-lg flex items-center justify-center text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 disabled:opacity-30 cursor-pointer active:scale-95 transition-all">
+          <i class="pi pi-minus text-[10px]"></i>
+        </button>
+        <span class="font-black text-base text-surface-900 dark:text-white tabular-nums w-6 text-center">
+          {{ displayPortionRatio }}
+        </span>
+        <button (click)="adjustPortions(1)" 
+                class="w-7 h-7 rounded-lg flex items-center justify-center text-surface-600 dark:text-surface-300 hover:bg-surface-100 dark:hover:bg-surface-800 cursor-pointer active:scale-95 transition-all">
+          <i class="pi pi-plus text-[10px]"></i>
+        </button>
+        <span class="text-[10px] font-semibold text-surface-400 dark:text-surface-500 pl-1 border-l border-surface-200 dark:border-surface-700">
+          Base: {{ recipe.basePortionRatio }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Section 2: Ingredients Checklist -->
+    <div>
+      <div class="flex items-center justify-between mb-3 pb-2 border-b border-surface-100 dark:border-surface-800">
+        <div class="flex items-center gap-2">
+          <h3 class="text-base font-bold text-surface-900 dark:text-white m-0">Ingrédients</h3>
+          <span class="text-xs font-extrabold px-2 py-0.5 rounded-full bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
+            {{ scaledIngredients.length }}
+          </span>
+        </div>
+        <button *ngIf="scaledIngredients.length > 0"
+                type="button"
+                (click)="addAllIngredientsToShopList()"
+                class="text-xs font-bold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1.5 cursor-pointer bg-transparent border-0 p-0">
+          <i class="pi pi-shopping-cart text-[11px]"></i>
+          <span>Tout ajouter aux courses</span>
+        </button>
+      </div>
+
+      <div *ngIf="scaledIngredients.length > 0; else noIngredients" class="flex flex-col gap-2">
+        <div *ngFor="let ing of scaledIngredients; let i = index"
+             (click)="toggleIngredientChecked(i)"
+             class="p-2.5 sm:p-3 bg-surface-50 dark:bg-surface-800/40 rounded-xl border border-surface-100 dark:border-surface-700/60 flex items-center justify-between gap-3 cursor-pointer hover:bg-surface-100/70 dark:hover:bg-surface-800 transition-all select-none group"
+             [ngClass]="{'opacity-50 line-through bg-surface-100/50 dark:bg-surface-900/30': checkedIngredients[i]}">
+          
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-5 h-5 rounded-lg border flex items-center justify-center transition-colors shrink-0"
+                 [ngClass]="checkedIngredients[i] 
+                   ? 'bg-emerald-500 border-emerald-500 text-white' 
+                   : 'border-surface-300 dark:border-surface-600 bg-white dark:bg-surface-900'">
+              <i *ngIf="checkedIngredients[i]" class="pi pi-check text-[10px] font-bold"></i>
+            </div>
+            
+            <span class="text-xs sm:text-sm font-semibold text-surface-800 dark:text-surface-200 truncate">
+              {{ formatIngredient(ing) }}
+            </span>
+          </div>
+
+          <button type="button" 
+                  class="w-7 h-7 rounded-lg flex items-center justify-center text-surface-400 hover:text-primary-600 hover:bg-surface-200/60 dark:hover:bg-surface-700 transition-colors shrink-0 cursor-pointer border-0 bg-transparent"
+                  (click)="addSingleIngredientToShopList(ing, $event)"
+                  pTooltip="Ajouter aux courses"
+                  tooltipPosition="left">
+            <i class="pi pi-plus text-xs"></i>
+          </button>
+        </div>
+      </div>
+
+      <ng-template #noIngredients>
+        <p class="text-xs text-surface-400 italic text-center py-3 m-0">Aucun ingrédient listé.</p>
+      </ng-template>
+    </div>
+
+    <!-- Section 3: Preparation Instructions / Description -->
+    <div>
+      <h3 class="text-base font-bold text-surface-900 dark:text-white m-0 mb-2.5 pb-2 border-b border-surface-100 dark:border-surface-800">
+        Préparation & Instructions
+      </h3>
+
+      <div *ngIf="recipe?.description; else noDescription" 
+           class="text-xs sm:text-sm text-surface-700 dark:text-surface-300 leading-relaxed whitespace-pre-wrap font-sans bg-surface-50/50 dark:bg-surface-800/20 p-4 rounded-2xl border border-surface-100 dark:border-surface-700/50">
+        {{ recipe.description }}
+      </div>
+
+      <ng-template #noDescription>
+        <p class="text-xs text-surface-400 italic text-center py-3 m-0">Aucune instruction de préparation fournie.</p>
+      </ng-template>
+    </div>
+
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- PINNED FOOTER (Never cut off)                             -->
+  <!-- ========================================================= -->
+  <div class="px-5 py-3.5 border-t border-surface-100 dark:border-surface-800 bg-surface-50/95 dark:bg-surface-900/95 backdrop-blur-md flex justify-end gap-2.5 shrink-0 z-10">
+    <button pButton pRipple 
+            label="Modifier" 
+            icon="pi pi-pencil" 
+            class="p-button-outlined p-button-secondary p-button-rounded font-bold text-xs !py-2 !px-4"
+            (click)="openEditRecipe()">
+    </button>
+    <button pButton pRipple 
+            label="Fermer" 
+            icon="pi pi-check" 
+            class="p-button-primary p-button-rounded font-bold text-xs !py-2 !px-5"
+            (click)="close()">
+    </button>
+  </div>
+
+</div>

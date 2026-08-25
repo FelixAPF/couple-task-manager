@@ -1,38 +1,33 @@
 :host {
   display: block; 
-  height: 100%; 
+  height: 100%;
 }
 
-.p-card-content i.pi-image {
-  margin: auto;
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-/* Soft UI Highlights instead of harsh solid borders */
-:host(.highlight-monday) ::ng-deep .p-card { 
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.4), 0 8px 30px rgba(0,0,0,0.04) !important; 
+/* Soft Glow & Highlight Borders */
+:host(.today) .meal-card-root {
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.7), 0 10px 30px -5px rgba(245, 158, 11, 0.15) !important;
 }
 
-:host(.highlight-wednesday) ::ng-deep .p-card { 
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4), 0 8px 30px rgba(0,0,0,0.04) !important; 
+:host(.first) .meal-card-root {
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.6), 0 10px 30px -5px rgba(16, 185, 129, 0.15) !important;
 }
 
-:host(.first) ::ng-deep .p-card {
-  box-shadow: 0 0 0 3px rgba(167, 243, 208, 0.6), 0 8px 30px rgba(0,0,0,0.04) !important;
+:host(.last) .meal-card-root {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.6), 0 10px 30px -5px rgba(99, 102, 241, 0.15) !important;
 }
 
-:host(.last) ::ng-deep .p-card {
-  box-shadow: 0 0 0 3px rgba(61, 83, 90, 0.4), 0 8px 30px rgba(0,0,0,0.04) !important;
-}
-
-:host(.today) ::ng-deep .p-card {
-  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.6), 0 8px 30px rgba(0,0,0,0.04) !important;
-}
-
-:host(.selected) ::ng-deep .p-card {
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.6), 0 8px 30px rgba(0,0,0,0.08) !important;
+:host(.selected) .meal-card-root {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.8), 0 12px 35px -5px rgba(59, 130, 246, 0.25) !important;
   background-color: #f0f9ff !important;
 }
 
-:host-context(.dark) :host(.selected) ::ng-deep .p-card {
-  background-color: #1e3a8a !important;
+:host-context(.dark) :host(.selected) .meal-card-root {
+  background-color: rgba(30, 58, 138, 0.35) !important;
 }

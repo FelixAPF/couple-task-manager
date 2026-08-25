@@ -1,30 +1,57 @@
-<!-- Root Div: Change h-full to flex flex-col flex-grow -->
-<div class="p-4 md:p-6 flex flex-col flex-grow">
+<div class="p-4 md:p-6 pb-24 lg:pb-8 flex flex-col flex-grow max-w-7xl mx-auto w-full">
+  
+  <!-- Sleek Top Header & Segmented Tab Switcher -->
+  <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 bg-white dark:bg-surface-800 p-4 sm:p-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+    
+    <!-- Title & Dynamic Subtitle -->
+    <div class="flex items-center gap-3.5 w-full sm:w-auto">
+      <div class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md transition-all duration-300 shrink-0"
+           [ngClass]="activeTab === 'plan' 
+             ? 'bg-orange-500 text-white shadow-orange-500/20' 
+             : 'bg-primary-500 text-white shadow-primary-500/20'">
+        <i class="text-xl" [ngClass]="activeTab === 'plan' ? 'pi pi-calendar' : 'pi pi-book'"></i>
+      </div>
+      <div>
+        <h1 class="text-xl sm:text-2xl font-black text-surface-900 dark:text-white m-0 tracking-tight">
+          {{ activeTab === 'plan' ? 'Planning des Repas' : 'Livre de Recettes' }}
+        </h1>
+        <p class="text-xs sm:text-sm text-surface-500 dark:text-surface-400 font-medium m-0 mt-0.5">
+          {{ activeTab === 'plan' ? 'Menu de la semaine, chefs assignés et décongélations' : 'Découvrez, cuisinez et gérez les recettes du foyer' }}
+        </p>
+      </div>
+    </div>
 
-  <!-- Navigation using PrimeNG SelectButton (Keep as is) -->
-  <div class="flex justify-center mb-4 md:mb-6 flex-shrink-0">
-    <p-selectButton
-      [options]="viewOptions"
-      [ngModel]="selectedView"
-      optionLabel="label"
-      optionValue="value"
-      (onChange)="onViewChange($event)"
-      aria-labelledby="meal-recipe-view-label">
-        <!-- Optional: Template for custom button appearance -->
-        <ng-template let-item pTemplate>
-            <div class="flex align-items-center gap-2 px-2">
-                 <i [class]="item.icon"></i>
-                <span>{{ item.label }}</span>
-            </div>
-        </ng-template>
-    </p-selectButton>
-    <!-- Hidden label for accessibility -->
-    <span id="meal-recipe-view-label" class="sr-only">Select view: Meals Plan or Recipes</span>
+    <!-- Segmented Pill Control -->
+    <div class="flex p-1.5 bg-surface-100 dark:bg-surface-900 rounded-2xl border border-surface-200/80 dark:border-surface-700/80 w-full sm:w-auto shrink-0 shadow-inner">
+      
+      <!-- Planning Tab -->
+      <button (click)="switchTab('plan')"
+              type="button"
+              class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer"
+              [ngClass]="activeTab === 'plan' 
+                ? 'bg-white dark:bg-surface-800 text-orange-600 dark:text-orange-400 shadow-sm scale-100' 
+                : 'text-surface-500 dark:text-surface-400 hover:text-surface-800 dark:hover:text-surface-100'">
+        <i class="pi pi-calendar text-sm"></i>
+        <span>Planning Semaine</span>
+      </button>
+
+      <!-- Recipes Library Tab -->
+      <button (click)="switchTab('recipes')"
+              type="button"
+              class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer"
+              [ngClass]="activeTab === 'recipes' 
+                ? 'bg-white dark:bg-surface-800 text-primary-600 dark:text-primary-400 shadow-sm scale-100' 
+                : 'text-surface-500 dark:text-surface-400 hover:text-surface-800 dark:hover:text-surface-100'">
+        <i class="pi pi-book text-sm"></i>
+        <span>Livre de Recettes</span>
+      </button>
+
+    </div>
+
   </div>
 
-  <!-- Wrapper for the secondary outlet: ADD flex-grow -->
+  <!-- Router Outlet for Child Views -->
   <div class="flex-grow">
-    <!-- The secondary outlet where MealsListComponent or RecipesListComponent will be loaded -->
     <router-outlet name="meals"></router-outlet>
   </div>
 

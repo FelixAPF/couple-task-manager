@@ -1,118 +1,136 @@
 <div class="h-full w-full relative block" *ngIf="isBirthday else regularTemplate">
   <app-balloon-container 
-      class="h-full w-full block"
-      [numberOfBalloons]="30" 
-      [minDuration]="10" 
-      [maxDuration]="20">
-      <ng-container *ngTemplateOutlet="template"></ng-container>
+       class="h-full w-full block"
+       [numberOfBalloons]="30" 
+       [minDuration]="10" 
+       [maxDuration]="20">
+       <ng-container *ngTemplateOutlet="template"></ng-container>
   </app-balloon-container>
 </div>
 
-<ng-template #regularTemplate>
+<ng-template #regularTemplate> 
    <ng-container *ngTemplateOutlet="template"></ng-container>
 </ng-template>
 
 <ng-template #template>
-  <p-card [styleClass]="'day-card h-full flex flex-col bg-white dark:bg-surface-800 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 ease-in-out hover:-translate-y-1 rounded-3xl overflow-hidden cursor-default'"
-      [ngClass]="borderHighlightClass">
+  <div class="meal-card-root h-full flex flex-col bg-white dark:bg-surface-800 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_35px_rgb(0,0,0,0.09)] dark:hover:shadow-[0_12px_35px_rgba(0,0,0,0.4)] transition-all duration-300 ease-out hover:-translate-y-1.5 border border-surface-100 dark:border-surface-700/80 overflow-hidden group/card"
+       [ngClass]="borderHighlightClass">
+      
+    <!-- Day Header -->
+    <div class="px-4 py-3 bg-surface-50/70 dark:bg-surface-900/40 border-b border-surface-100 dark:border-surface-700/50 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-xs uppercase tracking-widest font-black text-surface-500 dark:text-surface-400 m-0">
+          {{ title }}
+        </span>
+      </div>
 
-      <ng-template pTemplate="header">
-        <div class="relative p-4 bg-gradient-to-b from-surface-50 to-white dark:from-surface-800/80 dark:to-surface-800 border-b border-surface-100 dark:border-surface-700/50 flex items-center justify-center">
+      <!-- Delete Button (Shown only when meal is present) -->
+      <button *ngIf="meal" 
+              pButton 
+              pRipple 
+              type="button" 
+              icon="pi pi-trash"
+              class="p-button-rounded p-button-text p-button-sm !w-7 !h-7 !p-0 text-surface-400 hover:!text-red-500 hover:!bg-red-50 dark:hover:!bg-red-900/30 transition-colors opacity-0 group-hover/card:opacity-100"
+              (click)="onRemoveClick($event)" 
+              aria-label="Supprimer le repas"
+              [pTooltip]="'meals.delete' | translate" 
+              tooltipPosition="left">
+      </button>
+    </div>
+
+    <!-- Card Body -->
+    <div class="p-4 flex-grow flex flex-col justify-between items-center text-center">
+      
+      <!-- WHEN MEAL IS PLANNED -->
+      <div *ngIf="meal" class="w-full flex flex-col items-center flex-grow justify-between">
+        
+        <!-- Food Image & Floating Badges Showcase -->
+        <div (click)="openRecipeView()" 
+             class="relative w-full max-w-[170px] aspect-square rounded-2xl cursor-pointer group/img overflow-hidden mb-3.5 bg-surface-100 dark:bg-surface-700 shadow-sm border border-surface-200/60 dark:border-surface-600/50">
           
-          <h3 class="text-xs uppercase tracking-widest font-black text-surface-400 dark:text-surface-500 m-0">
-            {{ title }}
-          </h3>
-
-          <div *ngIf="meal" class="absolute right-3 flex items-center">
-            <button pButton pRipple type="button" icon="pi pi-trash"
-                  class="p-button-rounded p-button-text p-button-sm w-8 h-8 !p-0 text-surface-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
-                  (click)="onRemoveClick($event)" aria-label="Supprimer le repas"
-                  [pTooltip]="'meals.delete' | translate" tooltipPosition="left">
-            </button>
+          <!-- Image Loading Skeleton -->
+          <div *ngIf="meal.recipe.imageUrl && !recipeImageLoaded"
+               class="absolute inset-0 w-full h-full bg-surface-200 dark:bg-surface-700 animate-pulse flex items-center justify-center">
+            <i class="pi pi-image text-3xl text-surface-400 opacity-40"></i>
           </div>
 
-        </div>
-      </ng-template>
-
-      <ng-template pTemplate="content">
-        <div class="p-4 flex-grow flex flex-col justify-center items-center text-center min-h-[140px]">
+          <!-- Recipe Image -->
+          <img *ngIf="meal.recipe.imageUrl"
+               [src]="meal.recipe.imageUrl"
+               [alt]="recipeName"
+               (load)="recipeImageLoaded = true"
+               (error)="recipeImageLoaded = true"
+               class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-110"
+               [class.opacity-0]="!recipeImageLoaded"
+               [class.opacity-100]="recipeImageLoaded">
           
-          <div *ngIf="meal" class="w-full flex flex-col items-center">
-            
-            <div (click)="openRecipeView()" class="relative inline-block mb-4 cursor-pointer group rounded-2xl"> 
-              
-              <div class="overflow-hidden rounded-2xl shadow-sm border border-surface-100 dark:border-surface-700/50 relative w-28 h-28">
-                
-                <!-- Skeleton, shown until the image fires (load) -->
-                <div *ngIf="meal.recipe.imageUrl && !recipeImageLoaded"
-                    class="absolute inset-0 w-28 h-28 bg-surface-100 dark:bg-surface-700 animate-pulse flex items-center justify-center">
-                  <i class="pi pi-image text-3xl text-surface-300 dark:text-surface-500 opacity-50"></i>
-                </div>
-
-                <img *ngIf="meal.recipe.imageUrl"
-                    [src]="meal.recipe.imageUrl"
-                    [alt]="recipeName"
-                    (load)="recipeImageLoaded = true"
-                    (error)="recipeImageLoaded = true"
-                    class="w-28 h-28 object-cover transition-all duration-500 ease-out group-hover:scale-110"
-                    [class.opacity-0]="!recipeImageLoaded"
-                    [class.opacity-100]="recipeImageLoaded">
-
-                <div *ngIf="!meal.recipe.imageUrl" 
-                    class="w-28 h-28 flex items-center justify-center bg-gradient-to-br from-surface-100 to-surface-200 dark:from-surface-700 dark:to-surface-600 text-surface-400 dark:text-surface-500 transition-transform duration-500 group-hover:scale-110">
-                  <i class="pi pi-image text-4xl opacity-40"></i>
-                </div>
-              </div>
-
-              <div class="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none"></div>
-
-               <div *ngIf="meal.isThawingNeeded" 
-                   class="absolute -top-3 -left-3 z-20 flex items-center justify-center w-8 h-8 bg-blue-50 dark:bg-blue-900/80 text-blue-500 dark:text-blue-300 rounded-full shadow-md border-2 border-white dark:border-surface-800 transition-transform duration-300 hover:scale-110"
-                   pTooltip="Décongélation requise" 
-                   tooltipPosition="top">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-[14px] h-[14px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <line x1="2" y1="12" x2="22" y2="12"></line>
-                  <line x1="12" y1="2" x2="12" y2="22"></line>
-                  <line x1="20" y1="16" x2="16" y2="12"></line>
-                  <line x1="20" y1="8" x2="16" y2="12"></line>
-                  <line x1="4" y1="8" x2="8" y2="12"></line>
-                  <line x1="4" y1="16" x2="8" y2="12"></line>
-                  <line x1="16" y1="4" x2="12" y2="8"></line>
-                  <line x1="8" y1="4" x2="12" y2="8"></line>
-                  <line x1="16" y1="20" x2="12" y2="16"></line>
-                  <line x1="8" y1="20" x2="12" y2="16"></line>
-                </svg>
-              </div>
-
-              <div *ngIf="meal?.assignedUser as assignee" class="absolute -bottom-2 -right-2 z-20">
-                 <img
-                  [src]="assignee.imageUrl || 'assets/placeholder.jpg'"
-                  [alt]="'Photo de ' + (assignee.name || 'Membre')"
-                  class="w-10 h-10 rounded-full object-cover border-[3px] border-white dark:border-surface-800 shadow-md"
-                  onError="this.src='assets/placeholder.jpg'"
-                  [pTooltip]="assignee.name" 
-                  tooltipPosition="bottom"
-                />
-              </div>
-
-            </div>
-
-            <p class="text-base font-bold text-surface-800 dark:text-surface-100 mb-2 w-full line-clamp-2 leading-tight min-h-[2.5rem] flex items-center justify-center"
-              [pTooltip]="recipeName" tooltipPosition="top">
-              {{ recipeName }}
-            </p>
-            
-            <div *ngIf="meal.location" class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-50 dark:bg-surface-700/50 rounded-full text-xs font-semibold text-surface-500 dark:text-surface-300 border border-surface-100 dark:border-surface-700">
-              <i class="pi pi-map-marker text-[10px]"></i>
-              <span>{{ meal.location }}</span>
-            </div>
-
-            <ng-container [ngTemplateOutlet]="customTemplate"></ng-container>
-
+          <!-- Fallback Image Placeholder -->
+          <div *ngIf="!meal.recipe.imageUrl" 
+               class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary-50 to-pink-50 dark:from-surface-700 dark:to-surface-800 text-primary-400 dark:text-primary-300">
+            <i class="fa-solid fa-utensils text-3xl mb-1 opacity-60"></i>
+            <span class="text-[10px] font-bold uppercase tracking-wider opacity-70">Recette</span>
           </div>
-          <ng-container *ngIf="!meal && noMealPlanned" [ngTemplateOutlet]="noMealPlanned"></ng-container>
-          
+
+          <!-- Hover Overlay -->
+          <div class="absolute inset-0 bg-black/25 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+            <span class="bg-white/90 dark:bg-surface-900/90 text-surface-900 dark:text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-md flex items-center gap-1 backdrop-blur-sm">
+              <i class="pi pi-eye text-[11px]"></i> Voir
+            </span>
+          </div>
+
+          <!-- Thawing Required Badge (Top-Left) -->
+          <div *ngIf="meal.isThawingNeeded" 
+               class="absolute top-2 left-2 z-20 flex items-center justify-center w-7 h-7 bg-blue-500 text-white rounded-full shadow-md ring-2 ring-white dark:ring-surface-800 transition-transform duration-200 hover:scale-110"
+               pTooltip="Décongélation requise la veille" 
+               tooltipPosition="top">
+            <i class="pi pi-snowflake text-xs"></i>
+          </div>
+
+          <!-- Chef / Assignee Avatar Badge (Bottom-Right) -->
+          <div *ngIf="meal?.assignedUser as assignee" class="absolute bottom-2 right-2 z-20">
+            <img [src]="assignee.imageUrl || 'assets/placeholder.jpg'"
+                 [alt]="assignee.name || 'Chef'"
+                 class="w-8 h-8 rounded-full object-cover shadow-md ring-2 ring-white dark:ring-surface-800"
+                 onError="this.src='assets/placeholder.jpg'"
+                 [pTooltip]="'Chef : ' + assignee.name" 
+                 tooltipPosition="left" />
+          </div>
         </div>
-      </ng-template>
-    </p-card>
+
+        <!-- Recipe Title & Info -->
+        <div class="w-full flex flex-col items-center">
+          
+          <!-- Category Badge if present -->
+          <span *ngIf="meal.recipe.category" 
+                class="text-[10px] font-extrabold uppercase tracking-wider text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2 py-0.5 rounded-md mb-1.5">
+            {{ meal.recipe.category }}
+          </span>
+
+          <!-- Recipe Title -->
+          <h4 class="text-sm sm:text-base font-bold text-surface-900 dark:text-surface-100 m-0 line-clamp-2 leading-tight min-h-[2.4rem] flex items-center justify-center"
+              [pTooltip]="recipeName" 
+              tooltipPosition="top">
+            {{ recipeName }}
+          </h4>
+          
+          <!-- Location Badge -->
+          <div *ngIf="meal.location && meal.location !== 'Maison'" 
+               class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-surface-100 dark:bg-surface-700/50 rounded-full text-[11px] font-semibold text-surface-600 dark:text-surface-300 mt-1.5 border border-surface-200/60 dark:border-surface-700">
+            <i class="pi pi-map-marker text-[9px] text-primary-500"></i>
+            <span>{{ meal.location }}</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons Slot (Move & Modify) -->
+        <div class="w-full mt-3">
+          <ng-container [ngTemplateOutlet]="customTemplate"></ng-container>
+        </div>
+
+      </div>
+
+      <!-- WHEN NO MEAL IS PLANNED (Empty slot) -->
+      <ng-container *ngIf="!meal && noMealPlanned" [ngTemplateOutlet]="noMealPlanned"></ng-container>
+
+    </div>
+  </div>
 </ng-template>

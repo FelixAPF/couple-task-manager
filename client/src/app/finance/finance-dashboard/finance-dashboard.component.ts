@@ -24,10 +24,10 @@ export class FinanceDashboardComponent implements OnInit {
 
   daysUntilPaycheck: number = -1;
   pendingPaycheckDate: Date | null = null;
-  
+
   showPaycheckWizard: boolean = false;
   wizardStep: number = 1;
-  
+
   jointTransferAmount: number = 0;
   groceryTransferAmount: number = 0;
   electricityTransferAmount: number = 0;
@@ -85,22 +85,22 @@ export class FinanceDashboardComponent implements OnInit {
 
   evaluateSetupWizard() {
     const skipped = this.financeService.skippedSetupSteps();
-    
+
     if (this.financeService.bankAccounts().length === 0 && !skipped.includes('banks')) {
       this.promptSetup('banks', 'Let\'s configure your bank accounts?', 'Let\'s do it', '/finance/bank-accounts');
       return;
     }
-    
+
     if (!this.financeService.paycheckConfig() && !skipped.includes('paycheck')) {
       this.promptSetup('paycheck', 'We need to setup your paycheck amount', 'Let\'s do it', '/finance/paycheck-config');
       return;
     }
-    
+
     if (this.financeService.personalExpenses().length === 0 && !skipped.includes('personal')) {
       this.promptSetup('personal', 'Let\'s setup your personal expenses', 'Let\'s do it', '/finance/personal-expenses');
       return;
     }
-    
+
     if (!skipped.includes('household')) {
       const hasHousehold = this.financeService.commonExpenses().length > 0;
       if (hasHousehold) {
@@ -162,12 +162,12 @@ export class FinanceDashboardComponent implements OnInit {
 calculateNextPaycheck() {
     const config = this.financeService.paycheckConfig();
     if (!config || !config.referenceDate) return;
-    
+
     let pastPaycheckDate: Date;
 
     if (typeof config.referenceDate === 'string') {
-      const refDateString = config.referenceDate.includes('T') 
-        ? config.referenceDate 
+      const refDateString = config.referenceDate.includes('T')
+        ? config.referenceDate
         : `${config.referenceDate}T00:00:00`;
       pastPaycheckDate = new Date(refDateString);
     } else {
@@ -178,7 +178,7 @@ calculateNextPaycheck() {
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     let nextPaycheckDate = new Date(pastPaycheckDate);
 
     while (nextPaycheckDate <= today) {
@@ -228,7 +228,7 @@ calculateNextPaycheck() {
 
     let myPercentage = 50;
     const me = members.find(m => m.isCurrentUser === true);
-    
+
     if (me) {
       myPercentage = me.proratedPercentage;
     } else if (members.length > 0) {
@@ -238,7 +238,7 @@ calculateNextPaycheck() {
     const calculatePaycheckAmount = (amount: number, frequency: string): number => {
       let multiplier = 1;
       const freq = (frequency || '').toLowerCase().trim();
-      
+
       if (config.cycle === '14_DAYS' || config.cycle === 'TWICE_MONTHLY') {
         if (freq.includes('hebdo') || (freq.includes('week') && !freq.includes('2') && !freq.includes('bi'))) {
           multiplier = 2; // Weekly
@@ -265,7 +265,7 @@ calculateNextPaycheck() {
     };
 
     this.jointTransferAmount = 0;
-    this.groceryTransferAmount = 0; 
+    this.groceryTransferAmount = 0;
     this.electricityTransferAmount = 0;
     this.householdTransferAmount = 0;
 
@@ -293,10 +293,11 @@ calculateNextPaycheck() {
     });
 
     const transferMap = new Map<string, TransferCompilation>();
-    
+    this.groceryTransferAmount += this.financeService.personalExpenses().filter(p => p.isGrocery).reduce((prev, curr) => prev + curr.amount, 0);
+
     this.financeService.personalExpenses().forEach(exp => {
       const paycheckAmount = calculatePaycheckAmount(exp.amount, exp.frequency);
-      
+
       if (exp.targetBankAccountId === 'JOINT_ACCOUNT') {
         this.jointTransferAmount += paycheckAmount;
         return;
@@ -305,7 +306,7 @@ calculateNextPaycheck() {
       const bank = banks.find(b => b.id === exp.targetBankAccountId);
       const sub = bank?.subAccounts.find(s => s.id === exp.targetSubAccountId);
       const key = `${exp.targetBankAccountId}-${exp.targetSubAccountId}`;
-      
+
       if (transferMap.has(key)) {
         const existing = transferMap.get(key)!;
         existing.amount += paycheckAmount;
@@ -345,7 +346,7 @@ calculateNextPaycheck() {
 
   processFundTransfersAndClose() {
     const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);
-    
+
     if (!currentUser) {
       this.showPaycheckWizard = false;
       return;

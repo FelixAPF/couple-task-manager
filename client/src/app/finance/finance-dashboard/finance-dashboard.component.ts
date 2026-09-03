@@ -9,11 +9,13 @@ import { FinanceService } from '../../service/finance.service';
 import { TransferCompilation } from '../../model/finance.model';
 import { forkJoin } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { CheckboxModule } from 'primeng/checkbox';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-finance-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, ChartModule, ButtonModule, DialogModule, TooltipModule, TranslateModule],
+  imports: [CommonModule, RouterModule, FormsModule, ChartModule, ButtonModule, DialogModule, TooltipModule, TranslateModule, CheckboxModule],
   templateUrl: './finance-dashboard.component.html'
 })
 export class FinanceDashboardComponent implements OnInit {
@@ -35,6 +37,7 @@ export class FinanceDashboardComponent implements OnInit {
   householdTransferAmount: number = 0;
   personalTransfers: TransferCompilation[] = [];
   remainingAmount: number = 0;
+  isGroceryIncluded: boolean = true;
 
   showSetupDialog: boolean = false;
   setupDialogMessage: string = '';
@@ -351,6 +354,10 @@ householdDonutData = computed(() => {
     this.router.navigate([this.setupConfirmRoute]);
   }
 
+  onCheck(value:any){
+    this.updateChart();
+  }
+
   // --- Partner Ratio Chart ---
 updateChart() {
     let userShare = 0;
@@ -362,6 +369,7 @@ updateChart() {
     const [user, partner] = members;
 
     this.financeService.commonExpenses().forEach(exp => {
+      if((exp.isGrocery||exp.targetFund === 'GROCERY') && !this.isGroceryIncluded) return;
       if (exp.splitType === 'EQUAL') {
         userShare += exp.amount / 2;
         partnerShare += exp.amount / 2;
@@ -372,7 +380,7 @@ updateChart() {
     });
 
     this.chartData = {
-      labels: [`${user.name} ${userShare.toFixed(2)}$ (${(userShare/(userShare+partnerShare)*100).toFixed(2)}%) `, `${user.name} ${partnerShare.toFixed(2)}$ (${(partnerShare/(userShare+partnerShare)*100).toFixed(2)}%) `],
+      labels: [`${user.name} ${userShare.toFixed(2)}$ (${(userShare/(userShare+partnerShare)*100).toFixed(2)}%) `, `${partner.name} ${partnerShare.toFixed(2)}$ (${(partnerShare/(userShare+partnerShare)*100).toFixed(2)}%) `],
       datasets: [{
         data: [userShare, partnerShare],
         backgroundColor: ['#42A5F5', '#66BB6A'],

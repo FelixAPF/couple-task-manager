@@ -6,7 +6,7 @@
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Left Column: Paycheck Status, Grocery Summary & Chart -->
     <div class="flex flex-col gap-6">
-      
+
         <!-- Paycheck Status -->
         <div class="bg-surface-0 dark:bg-surface-800 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 p-6 text-center">
             <ng-container *ngIf="financeService.paycheckConfig() as config; else noConfig">
@@ -15,14 +15,14 @@
                     <p class="text-surface-600 dark:text-surface-300 mb-4">La paie du <span class="font-bold">{{ pendingPaycheckDate | date:'dd MMM yyyy' }}</span> n'a pas encore été actionnée.</p>
                     <button pButton pRipple label="Initier les transferts" icon="pi pi-play" class="p-button-success p-button-lg w-full sm:w-auto" (click)="initiatePaycheck()"></button>
                 </div>
-                
+
                 <ng-template #countdownTpl>
-                    
+
                     <h3 class="text-lg font-medium text-surface-500 dark:text-surface-400 mt-0 mb-2">Prochaine paie dans</h3>
-                    
+
                     <h1 class="text-6xl font-bold text-primary-500 m-0" *ngIf="daysUntilPaycheck > 0">{{ daysUntilPaycheck }}</h1>
                     <h1 class="text-4xl font-bold text-primary-500 m-0 py-2" *ngIf="daysUntilPaycheck === 0">Aujourd'hui</h1>
-                    
+
                     <p class="text-surface-600 dark:text-surface-300 mt-2 mb-6" *ngIf="daysUntilPaycheck > 0">Jours</p>
 <!-- Paycheck Details Breakdown Section -->
                     <div class="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700 w-full flex flex-col gap-2">
@@ -60,7 +60,7 @@
                     </div>
                 </ng-template>
             </ng-container>
-            
+
             <ng-template #noConfig>
                 <i class="pi pi-calendar-times text-5xl text-surface-400 dark:text-surface-500 mb-4"></i>
                 <h3 class="text-xl font-semibold text-surface-700 dark:text-surface-200 m-0 mb-2">Paie non configurée</h3>
@@ -75,7 +75,7 @@
                 <h3 class="text-lg font-semibold text-surface-800 dark:text-surface-100 m-0">Fonds d'Épicerie</h3>
                 <button pButton icon="pi pi-external-link" class="p-button-text p-button-rounded p-button-sm p-button-secondary" (click)="navigateTo('/finance/grocery-fund')" pTooltip="Ouvrir le registre"></button>
             </div>
-            
+
             <div class="flex items-center justify-between bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
                 <div class="flex flex-col">
                     <span class="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-1">Solde Disponible</span>
@@ -96,7 +96,7 @@
             <h3 class="text-lg font-semibold text-surface-800 dark:text-surface-100 m-0">Dépenses communes</h3>
             <p class="text-sm text-surface-500 dark:text-surface-400 m-0">Gérez les factures du ménage et les ratios de séparation</p>
         </div>
-        
+
         <div class="bg-surface-0 dark:bg-surface-800 p-6 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 cursor-pointer hover:bg-surface-50 dark:hover:bg-surface-700 transition-colors flex flex-col items-center justify-center text-center gap-3" (click)="navigateTo('/finance/personal-expenses')">
             <i class="pi pi-user text-4xl text-green-500"></i>
             <h3 class="text-lg font-semibold text-surface-800 dark:text-surface-100 m-0">Dépenses personnelles</h3>
@@ -131,16 +131,16 @@
 <!-- Fonds électricité avec intégration dynamique de la voiture -->
 <!-- Fonds électricité avec intégration dynamique de la voiture -->
 <div class="bg-surface-0 dark:bg-surface-800 p-0 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 cursor-pointer hover:border-yellow-400 dark:hover:border-yellow-400 hover:shadow-md transition-all flex flex-col overflow-hidden group" (click)="navigateTo('/finance/electricity-fund')">
-    
+
     <!-- En-tête avec API Image 2D -->
     <div class="h-32 w-full bg-gradient-to-b from-surface-50 to-surface-0 dark:from-surface-700 dark:to-surface-800 flex items-center justify-center relative overflow-hidden border-b border-surface-100 dark:border-surface-700">
         <!-- Icône d'éclair de fond -->
         <i class="fa-solid fa-bolt absolute top-3 right-3 text-yellow-400/80 text-xl drop-shadow-sm z-10"></i>
-        
-        <img [src]="carBrandSlug === 'tesla' 
-                ? 'https://static-assets.tesla.com/v1/compositor/?model=m3&view=STUD_3QTR&size=800&bkba_opt=1&options=$APF2,$APBS,$DV4W,$IPB1,$PBSB,$PRM31,$SC04,$MDL3,$W40B,$MT328,$CPF1,$FM3U,$RSF1,$CW03' 
-                : 'assets/images/generic-car.svg'" 
-            [alt]="userCarBrand" 
+
+        <img [src]="carBrandSlug === 'tesla'
+                ? 'https://static-assets.tesla.com/v1/compositor/?model=m3&view=STUD_3QTR&size=800&bkba_opt=1&options=$APF2,$APBS,$DV4W,$IPB1,$PBSB,$PRM31,$SC04,$MDL3,$W40B,$MT328,$CPF1,$FM3U,$RSF1,$CW03'
+                : 'assets/images/generic-car.svg'"
+            [alt]="userCarBrand"
             class="h-[120%] w-full object-contain transform group-hover:scale-110 transition-transform duration-500 drop-shadow-xl z-0"
             loading="lazy"
             onerror="this.src='assets/images/generic-car.svg'; this.onerror=null;">
@@ -247,11 +247,15 @@
       </div>
 
       <!-- Donut Chart with numbers in legend & tooltip -->
-        <div *ngIf="householdDonutData() as hData; else noHouseholdData" 
+        <div *ngIf="householdDonutData() as hData; else noHouseholdData"
             class="w-full relative flex flex-col md:flex-row items-center justify-center gap-8 py-6">
-        
+
         <div class="flex-shrink-0">
             <p-chart type="doughnut" [data]="chartData" [options]="donutOptions" width="240px" height="240px"></p-chart>
+            <div>
+                <p-checkbox inputId="includeGroceryCheckbox" [binary]="true" [value]="true" [(ngModel)]="isGroceryIncluded"  (onChange)="onCheck($event)"/>
+                <span class="ml-3 text-sm font-medium text-surface-500 dark:text-surface-400">Inclure l'épicerie dans le pourcentage.</span>
+            </div>
         </div>
 
         <div class="flex-shrink-0">
@@ -275,7 +279,7 @@
     <div class="flex flex-col items-center text-center py-4">
         <i class="pi pi-cog text-5xl text-primary-500 mb-4"></i>
         <h3 class="text-xl font-semibold text-surface-800 dark:text-surface-100 m-0 mb-4">{{ setupDialogMessage }}</h3>
-        
+
         <div class="flex flex-col sm:flex-row gap-3 w-full mt-4">
             <button pButton pRipple [label]="setupConfirmLabel" icon="pi pi-check" class="p-button-primary w-full" (click)="onSetupConfirm()"></button>
             <button pButton pRipple label="Maybe Later" class="p-button-outlined p-button-secondary w-full" (click)="onSetupLater()"></button>
@@ -295,7 +299,7 @@
     <div *ngIf="wizardStep === 2" class="flex flex-col py-4">
         <h3 class="text-xl font-semibold text-surface-800 dark:text-surface-100 text-center mt-0 mb-4">Étape 2 : Transferts Personnels</h3>
         <div *ngIf="personalTransfers.length === 0" class="text-center text-surface-500 dark:text-surface-400 my-4">Aucun transfert personnel requis.</div>
-        
+
         <div class="flex flex-col gap-3 mb-6">
             <div *ngFor="let transfer of personalTransfers" class="bg-surface-50 dark:bg-surface-800 p-4 rounded-md border border-surface-200 dark:border-surface-700 flex justify-between items-center">
                 <div class="flex flex-col">
@@ -305,7 +309,7 @@
                 <span class="text-lg font-bold text-green-600 dark:text-green-400">{{ transfer.amount | currency:'CAD':'symbol-narrow':'1.2-2' }}</span>
             </div>
         </div>
-        
+
         <div class="flex justify-center">
             <button pButton pRipple label="Complété - Suivant" icon="pi pi-arrow-right" iconPos="right" class="w-full sm:w-auto" (click)="wizardStep = 3"></button>
         </div>

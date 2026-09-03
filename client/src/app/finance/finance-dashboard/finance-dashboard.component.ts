@@ -372,7 +372,7 @@ updateChart() {
     });
 
     this.chartData = {
-      labels: [user.name, partner.name],
+      labels: [`${user.name} ${userShare.toFixed(2)}$ (${(userShare/(userShare+partnerShare)*100).toFixed(2)}%) `, `${user.name} ${partnerShare.toFixed(2)}$ (${(partnerShare/(userShare+partnerShare)*100).toFixed(2)}%) `],
       datasets: [{
         data: [userShare, partnerShare],
         backgroundColor: ['#42A5F5', '#66BB6A'],

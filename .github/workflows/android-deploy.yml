@@ -133,12 +133,12 @@ jobs:
 
     # --- Upload to Google Play ---
     - name: Upload Android App Bundle to Internal Testing
-      uses: r0adkll/upload-google-play@v1
+      uses: r0adkll/upload-google-play@v2
       with:
         serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-        packageName: com.couple.taskmanager # !!! REPLACE with your actual package name !!!
+        packageName: com.couple.taskmanager
         releaseFiles: client/android/app/build/outputs/bundle/release/*.aab
-        track: internal
+        tracks: internal
         status: completed
 
 # --- Notify Version Endpoint ---

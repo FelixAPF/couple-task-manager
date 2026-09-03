@@ -7,5 +7,6 @@ import java.util.List;
 @Data
 public class ParsedReceiptDto {
     private String storeName;
+    private Double totalReceiptTaxes;
     private List<ReceiptItem> items;
 }

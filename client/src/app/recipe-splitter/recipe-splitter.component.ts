@@ -188,6 +188,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
       this.receiptService.analyzeReceipt(file).subscribe({
         next: (res: any) => {
           this.currentReceipt.storeName = res.storeName || 'Magasin Inconnu';
+          this.receiptTax = res.totalReceiptTaxes || 0.0;
           this.currentReceipt.items = res.items.map((item: any) => ({
             ...item,
             assignmentType: 'grocery'

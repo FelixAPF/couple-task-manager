@@ -1,53 +1,146 @@
-<div class="container p-4 md:p-6 mx-auto pb-20 lg:pb-6">
+<div class="container p-4 md:p-6 mx-auto pb-28 max-w-5xl">
+  <!-- Top Navigation & Title -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
     <div class="flex items-center gap-3">
-        <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" routerLink="/finance/dashboard"></p-button>
-        <h2 class="text-2xl font-semibold text-surface-800 dark:text-surface-100 m-0">Dépenses Personnelles</h2>
+      <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" routerLink="/finance/dashboard"></p-button>
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-black text-surface-900 dark:text-surface-100 m-0">
+          {{ 'finance.personal-expenses' | translate }}
+        </h2>
+        <p class="text-sm text-surface-500 m-0 mt-0.5">{{ 'finance.manage-individual-budgets' | translate }}</p>
+      </div>
     </div>
-    <button pButton icon="pi pi-plus" label="Ajouter" class="p-button-primary w-full sm:w-auto" (click)="addExpense()"></button>
+    <button pButton icon="pi pi-plus" label="{{ 'common.add' | translate }}" class="p-button-primary p-button-rounded font-bold w-full sm:w-auto shadow-md" (click)="addExpense()"></button>
   </div>
-  
-  <div class="flex flex-col gap-4">
-    <div *ngFor="let exp of expenses" class="bg-surface-0 dark:bg-surface-800 p-4 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 flex flex-col md:flex-row gap-4 items-start md:items-center">
-      
-      <div class="flex-1 w-full">
-        <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Nom de la dépense</label>
-        <input pInputText [(ngModel)]="exp.name" (blur)="saveExpense(exp)" class="w-full" />
-      </div>
 
-      <div class="w-full md:w-32">
-        <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Montant ($)</label>
-        <p-inputNumber [(ngModel)]="exp.amount" (onBlur)="saveExpense(exp)" mode="currency" currency="CAD" locale="fr-CA" class="w-full" styleClass="w-full"></p-inputNumber>
+  <!-- Dual-Metric Top Summary Bar -->
+  <div class="bg-surface-0 dark:bg-surface-800 p-5 rounded-3xl shadow-sm border border-surface-200 dark:border-surface-700 mb-6 flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-8">
+      <div>
+        <span class="text-xs font-bold uppercase tracking-wider text-surface-400 block mb-1">{{ 'finance.total-monthly' | translate }}</span>
+        <span class="text-2xl sm:text-3xl font-black text-surface-900 dark:text-white">
+          {{ totalMonthly() | currency:'CAD':'symbol-narrow':'1.2-2' }}
+        </span>
       </div>
-
-      <div class="w-full md:w-40">
-        <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Fréquence</label>
-        <p-dropdown [options]="frequencies" [(ngModel)]="exp.frequency" (onChange)="saveExpense(exp)" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-dropdown>
-      </div>
-
-      <div class="w-full md:w-48">
-        <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Banque cible</label>
-        <p-dropdown [options]="bankOptions" [(ngModel)]="exp.targetBankAccountId" (onChange)="onBankChange(exp)" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" placeholder="Sélectionner"></p-dropdown>
-      </div>
-
-      <div class="w-full md:w-48" *ngIf="exp.targetBankAccountId !== 'JOINT_ACCOUNT'">
-        <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-1">Sous-compte cible</label>
-        <p-dropdown [options]="getSubAccountOptions(exp.targetBankAccountId)" [(ngModel)]="exp.targetSubAccountId" (onChange)="saveExpense(exp)" optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body" placeholder="Sélectionner"></p-dropdown>
-      </div>
-
-      <div class="w-full md:w-28 flex flex-col justify-center">
-        <label class="block text-sm font-medium text-surface-600 dark:text-surface-300 mb-2">Épicerie</label>
-        <p-checkbox [(ngModel)]="exp.isGrocery" [binary]="true" label="Lier" (onChange)="saveExpense(exp)"></p-checkbox>
-      </div>
-
-      <div class="flex justify-end w-full md:w-auto mt-2 md:mt-0 md:pt-6">
-        <button pButton icon="pi pi-trash" class="p-button-danger p-button-text p-button-rounded" (click)="removeExpense(exp.id)" pTooltip="Supprimer"></button>
+      <div class="border-l border-surface-200 dark:border-surface-700 pl-8">
+        <span class="text-xs font-bold uppercase tracking-wider text-surface-400 block mb-1">{{ 'finance.per-paycheck' | translate }}</span>
+        <span class="text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
+          ~{{ totalPerPaycheck() | currency:'CAD':'symbol-narrow':'1.2-2' }}
+        </span>
       </div>
     </div>
-    
-    <div *ngIf="expenses.length === 0" class="text-center p-8 bg-surface-50 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700 text-surface-500">
-      <i class="pi pi-user text-4xl mb-3 text-surface-400"></i>
-      <p class="m-0">Aucune dépense personnelle configurée.</p>
+    <span class="text-xs font-bold px-3 py-1.5 bg-surface-100 dark:bg-surface-700 rounded-full text-surface-600 dark:text-surface-300">
+      {{ filteredExpenses().length }} {{ 'finance.active-items' | translate }}
+    </span>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="flex flex-col sm:flex-row gap-3 mb-6 items-center justify-between">
+    <div class="relative w-full sm:w-80">
+      <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-surface-400 text-sm"></i>
+      <input type="text" pInputText [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="{{ 'common.search' | translate }}..." class="w-full !pl-9 !rounded-2xl !py-2.5 text-sm" />
+    </div>
+    <div class="flex gap-1.5 overflow-x-auto w-full sm:w-auto pb-1">
+      <button *ngFor="let f of ['ALL', 'Mensuel', 'Aux 2 semaines', 'Hebdomadaire', 'Annuel']"
+              type="button"
+              (click)="selectedFrequency.set(f)"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer whitespace-nowrap"
+              [ngClass]="selectedFrequency() === f
+                ? 'bg-surface-900 text-white dark:bg-white dark:text-surface-900 border-transparent shadow-sm'
+                : 'bg-surface-0 dark:bg-surface-800 text-surface-600 dark:text-surface-300 border-surface-200 dark:border-surface-700 hover:bg-surface-100'">
+        {{ f === 'ALL' ? ('common.all' | translate) : f }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Cards List with Drag & Drop and Move Buttons -->
+  <div class="flex flex-col gap-4" cdkDropList (cdkDropListDropped)="onDrop($event)">
+    <div *ngFor="let exp of filteredExpenses(); let i = index; trackBy: trackById"
+         cdkDrag
+         class="bg-surface-0 dark:bg-surface-800 p-4 sm:p-5 rounded-3xl shadow-sm border border-surface-200 dark:border-surface-700 flex flex-col gap-4 transition-all hover:shadow-md relative overflow-hidden"
+         [style.borderLeftColor]="exp.color || '#3b82f6'"
+         style="border-left-width: 6px;">
+
+      <!-- Card Top: Reorder Buttons, Name, Weight Badge, Delete -->
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div class="flex items-center gap-3 w-full sm:w-auto flex-grow">
+          <!-- Reorder Stepper Buttons (Up / Down) -->
+          <div class="flex items-center bg-surface-100 dark:bg-surface-700/60 rounded-xl p-0.5 shrink-0 border border-surface-200 dark:border-surface-600">
+            <button type="button"
+                    (click)="moveUp(i, $event)"
+                    [disabled]="i === 0"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg text-surface-500 hover:text-surface-900 dark:hover:text-white disabled:opacity-20 cursor-pointer">
+              <i class="pi pi-chevron-up text-xs font-bold"></i>
+            </button>
+            <button type="button"
+                    (click)="moveDown(i, $event)"
+                    [disabled]="i === filteredExpenses().length - 1"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg text-surface-500 hover:text-surface-900 dark:hover:text-white disabled:opacity-20 cursor-pointer">
+              <i class="pi pi-chevron-down text-xs font-bold"></i>
+            </button>
+            <div cdkDragHandle class="w-7 h-7 flex items-center justify-center text-surface-400 cursor-grab active:cursor-grabbing border-l border-surface-200 dark:border-surface-600">
+              <i class="pi pi-bars text-xs"></i>
+            </div>
+          </div>
+
+          <div class="flex-grow">
+            <label class="block text-xs font-semibold text-surface-400 mb-1">{{ 'finance.expense-name' | translate }}</label>
+            <input pInputText [(ngModel)]="exp.name" (blur)="saveExpense(exp)" class="w-full font-bold text-base !rounded-xl" />
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-end sm:self-center">
+          <span class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-surface-100 dark:bg-surface-700 text-surface-700 dark:text-surface-200 border border-surface-200 dark:border-surface-600"
+                pTooltip="{{ 'finance.weight-tooltip' | translate }}" tooltipPosition="top">
+            {{ getWeight(exp) }}% {{ 'finance.of-total' | translate }}
+          </span>
+          <button pButton icon="pi pi-trash" class="p-button-danger p-button-text p-button-rounded !w-9 !h-9" (click)="removeExpense(exp.id)" pTooltip="{{ 'common.delete' | translate }}"></button>
+        </div>
+      </div>
+
+      <!-- Card Middle: Amounts & Configuration -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-surface-400 mb-1">{{ 'finance.amount' | translate }}</label>
+          <p-inputNumber [(ngModel)]="exp.amount" (onBlur)="saveExpense(exp)" mode="currency" currency="CAD" locale="fr-CA" class="w-full" styleClass="w-full" inputStyleClass="w-full !rounded-xl font-bold"></p-inputNumber>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-surface-400 mb-1">{{ 'finance.frequency' | translate }}</label>
+          <p-dropdown [options]="frequencies" [(ngModel)]="exp.frequency" (onChange)="saveExpense(exp)" optionLabel="label" optionValue="value" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-surface-400 mb-1">{{ 'finance.target-bank' | translate }}</label>
+          <p-dropdown [options]="bankOptions" [(ngModel)]="exp.targetBankAccountId" (onChange)="onBankChange(exp)" optionLabel="label" optionValue="value" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
+        </div>
+        <div *ngIf="exp.targetBankAccountId !== 'JOINT_ACCOUNT'">
+          <label class="block text-xs font-semibold text-surface-400 mb-1">{{ 'finance.sub-account' | translate }}</label>
+          <p-dropdown [options]="getSubAccountOptions(exp.targetBankAccountId)" [(ngModel)]="exp.targetSubAccountId" (onChange)="saveExpense(exp)" optionLabel="label" optionValue="value" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
+        </div>
+      </div>
+
+      <!-- One-Tap Quick Color Swatch Bar -->
+      <div class="pt-3 border-t border-surface-100 dark:border-surface-700/60 flex items-center justify-between flex-wrap gap-2">
+        <span class="text-xs font-semibold text-surface-400">{{ 'finance.badge-color' | translate }} :</span>
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button *ngFor="let color of quickPalette"
+                  type="button"
+                  (click)="setColor(exp, color)"
+                  [style.backgroundColor]="color"
+                  class="w-6 h-6 rounded-full border transition-transform duration-150 cursor-pointer hover:scale-110 active:scale-95"
+                  [ngClass]="exp.color === color ? 'ring-2 ring-offset-2 ring-primary-500 border-white scale-110' : 'border-transparent opacity-80 hover:opacity-100'">
+          </button>
+          <label class="w-6 h-6 rounded-full border border-surface-300 dark:border-surface-600 flex items-center justify-center cursor-pointer ml-1 text-[10px] text-surface-500 hover:bg-surface-100" pTooltip="{{ 'finance.custom-color' | translate }}">
+            <i class="pi pi-palette text-[10px]"></i>
+            <input type="color" [ngModel]="exp.color || '#3b82f6'" (ngModelChange)="setColor(exp, $event)" class="sr-only" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredExpenses().length === 0" class="text-center py-16 bg-surface-0 dark:bg-surface-800 rounded-3xl border border-dashed border-surface-300 dark:border-surface-700 text-surface-500">
+      <i class="pi pi-inbox text-4xl mb-3 text-surface-400"></i>
+      <p class="m-0 font-medium">{{ 'finance.no-expenses-found' | translate }}</p>
     </div>
   </div>
 </div>

@@ -5,15 +5,16 @@ export interface HouseholdMemberFinance {
   proratedPercentage: number;
   isCurrentUser?: boolean;
 }
-
 export interface CommonExpense {
   id: string;
   householdId?: string;
   name: string;
   amount: number;
   splitType: string;
-  targetFund?: 'GROCERY' | 'HOUSEHOLD' | 'ELECTRICITY' | 'NONE'; 
-  isGrocery?: boolean; // Kept for backwards compatibility if needed
+  targetFund?: 'GROCERY' | 'HOUSEHOLD' | 'ELECTRICITY' | 'NONE';
+  isGrocery?: boolean;
+  color?: string;
+  orderIndex?: number;
 }
 
 export interface SubAccount {
@@ -27,7 +28,6 @@ export interface BankAccount {
   name: string;
   subAccounts: SubAccount[];
 }
-
 export interface PersonalExpense {
   id: string;
   userId?: string;
@@ -37,8 +37,9 @@ export interface PersonalExpense {
   targetBankAccountId: string;
   targetSubAccountId: string;
   isGrocery?: boolean;
+  color?: string;
+  orderIndex?: number;
 }
-
 export interface PaycheckConfig {
   id?: string;
   userId?: string;

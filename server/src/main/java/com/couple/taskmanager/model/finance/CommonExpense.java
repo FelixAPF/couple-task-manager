@@ -4,7 +4,6 @@ import com.couple.taskmanager.model.Household;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Data
 @Entity
@@ -30,4 +29,10 @@ public class CommonExpense {
 
     @Enumerated(EnumType.STRING)
     private TargetFund targetFund;
+
+    @Column(name = "color")
+    private String color = "#10b981";
+
+    @Column(name = "order_index")
+    private Integer orderIndex = 0;
 }

@@ -28,8 +28,15 @@ public class PersonalExpense {
     private String frequency;
 
     private String targetBankAccountId;
+
     private String targetSubAccountId;
 
     @Column(nullable = false, columnDefinition ="BOOLEAN DEFAULT false")
     private Boolean isGrocery = false;
+
+    @Column(name = "color")
+    private String color = "#3b82f6";
+
+    @Column(name = "order_index")
+    private Integer orderIndex = 0;
 }

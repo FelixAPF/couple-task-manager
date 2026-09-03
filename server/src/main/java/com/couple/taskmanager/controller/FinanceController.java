@@ -156,6 +156,18 @@ public class FinanceController {
         return ResponseEntity.ok(financeService.getGroceryTransactions(user.getHousehold()));
     }
 
+    @PutMapping("/personal-expenses/reorder")
+    public ResponseEntity<List<PersonalExpense>> reorderPersonalExpenses(@RequestBody List<String> orderedIds, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.reorderPersonalExpenses(orderedIds, user));
+    }
+
+    @PutMapping("/common-expenses/reorder")
+    public ResponseEntity<List<CommonExpense>> reorderCommonExpenses(@RequestBody List<String> orderedIds, @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = (CTMUser) userDetails;
+        return ResponseEntity.ok(financeService.reorderCommonExpenses(orderedIds, user.getHousehold()));
+    }
+
     @PostMapping("/grocery-transactions")
     public ResponseEntity<Map<String, Object>> addGroceryTransaction(@RequestBody GroceryTransaction transaction, @AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;

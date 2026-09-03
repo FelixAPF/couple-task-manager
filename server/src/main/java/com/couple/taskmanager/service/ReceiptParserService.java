@@ -38,6 +38,7 @@ public class ReceiptParserService {
     private static final String RECEIPT_JSON_SCHEMA = """
     {
       "storeName": "Store Name",
+      "totalReceiptTaxes": 2.29,
       "items": [
         {
           "name": "Item Name",
@@ -63,6 +64,7 @@ public class ReceiptParserService {
         5. Double-check that the price you extract perfectly aligns horizontally with the item name on that specific row.
         6. Determine if each item is taxable based on the receipt indicators (like FP, asterisks, or tax codes next to the price).
         7. Ignore subtotals, taxes, tips, and the final total at the very bottom.
+        8. Include taxes to the json object in the appropriate totalReceiptTaxes box, to calculate it if it isnt hard written, take the final total minus the subtotal, that should give you the total taxes amount.
         """;
 
         String finalPrompt = promptText + "\n\nIMPORTANT: Return ONLY raw valid JSON matching this exact structure:\n" + RECEIPT_JSON_SCHEMA;

@@ -17,22 +17,45 @@
                 </div>
                 
                 <ng-template #countdownTpl>
+                    
                     <h3 class="text-lg font-medium text-surface-500 dark:text-surface-400 mt-0 mb-2">Prochaine paie dans</h3>
                     
                     <h1 class="text-6xl font-bold text-primary-500 m-0" *ngIf="daysUntilPaycheck > 0">{{ daysUntilPaycheck }}</h1>
                     <h1 class="text-4xl font-bold text-primary-500 m-0 py-2" *ngIf="daysUntilPaycheck === 0">Aujourd'hui</h1>
                     
                     <p class="text-surface-600 dark:text-surface-300 mt-2 mb-6" *ngIf="daysUntilPaycheck > 0">Jours</p>
-
-                    <!-- Paycheck Details Section -->
-                    <div class="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700 w-full">
-                        <div class="flex justify-between items-center mb-2 px-2">
-                            <span class="text-sm text-surface-500 dark:text-surface-400">Paie Nette :</span>
-                            <span class="font-semibold text-surface-800 dark:text-surface-100">{{ config.amount | currency:'CAD':'symbol-narrow':'1.2-2' }}</span>
-                        </div>
+<!-- Paycheck Details Breakdown Section -->
+                    <div class="mt-4 pt-4 border-t border-surface-200 dark:border-surface-700 w-full flex flex-col gap-2">
+                        <!-- 1. Paie Nette -->
                         <div class="flex justify-between items-center px-2">
-                            <span class="text-sm text-surface-500 dark:text-surface-400">Solde Restant :</span>
-                            <span class="font-bold text-green-500 dark:text-green-400">{{ remainingAmount | currency:'CAD':'symbol-narrow':'1.2-2' }}</span>
+                            <span class="text-sm font-medium text-surface-500 dark:text-surface-400">Paie Nette :</span>
+                            <span class="font-bold text-surface-800 dark:text-surface-100">
+                                {{ config.amount | number:'1.2-2':'fr-CA' }}
+                            </span>
+                        </div>
+
+                        <!-- 2. Dépenses du foyer (par paie) in Red -->
+                        <div class="flex justify-between items-center px-2">
+                            <span class="text-sm font-medium text-surface-500 dark:text-surface-400">Dépenses du foyer :</span>
+                            <span class="font-bold text-red-500 dark:text-red-400">
+                                -{{ householdYourSharePerPaycheck() | number:'1.2-2':'fr-CA' }}
+                            </span>
+                        </div>
+
+                        <!-- 3. Dépenses personnelles (par paie) in Red -->
+                        <div class="flex justify-between items-center px-2">
+                            <span class="text-sm font-medium text-surface-500 dark:text-surface-400">Dépenses personnelles :</span>
+                            <span class="font-bold text-red-500 dark:text-red-400">
+                                -{{ personalTotalPerPaycheck() | number:'1.2-2':'fr-CA' }}
+                            </span>
+                        </div>
+
+                        <!-- 4. Solde Restant in Green -->
+                        <div class="flex justify-between items-center pt-2.5 mt-1 border-t border-dashed border-surface-200 dark:border-surface-700 px-2">
+                            <span class="text-sm font-bold text-surface-800 dark:text-surface-100">Solde Restant :</span>
+                            <span class="font-black text-lg text-green-600 dark:text-green-400">
+                                {{ remainingPaycheckAmount() | number:'1.2-2':'fr-CA' }}
+                            </span>
                         </div>
                     </div>
                 </ng-template>
@@ -148,6 +171,102 @@
         </div>
     </div>
   </div>
+
+ <!-- Bottom Section: Personal & Household Donut Widgets -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+  <!-- Personal Expenses Widget -->
+  <div class="bg-surface-0 dark:bg-surface-800 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700 flex flex-col justify-between">
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+            <i class="pi pi-user text-lg"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-surface-900 dark:text-surface-100 m-0">{{ 'finance.personal-expenses' | translate }}</h3>
+            <span class="text-xs text-surface-400">{{ financeService.personalExpenses().length }} {{ 'finance.expenses' | translate }}</span>
+          </div>
+        </div>
+        <button pButton icon="pi pi-arrow-right" [rounded]="true" [text]="true" routerLink="/finance/personal-expenses"></button>
+      </div>
+
+      <!-- Numbers Header: 2 decimal places, no $ -->
+      <div class="bg-surface-50 dark:bg-surface-900/50 p-4 rounded-2xl mb-6 flex justify-between items-center border border-surface-100 dark:border-surface-700/60">
+        <div>
+          <span class="text-xs uppercase font-bold text-surface-400 block mb-0.5">{{ 'finance.total-monthly' | translate }}</span>
+          <span class="text-2xl sm:text-3xl font-black text-surface-900 dark:text-white">
+            {{ personalTotalMonthly() | number:'1.2-2':'fr-CA' }}
+          </span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs uppercase font-bold text-surface-400 block mb-0.5">{{ 'finance.per-paycheck' | translate }}</span>
+          <span class="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">
+            ~{{ personalTotalPerPaycheck() | number:'1.2-2':'fr-CA' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Donut Chart with numbers in legend & tooltip -->
+      <div *ngIf="personalDonutData() as pData; else noPersonalData" class="h-64 relative flex items-center justify-center">
+        <p-chart type="doughnut" [data]="pData" [options]="donutOptions" height="240px"></p-chart>
+      </div>
+      <ng-template #noPersonalData>
+        <div class="h-48 flex flex-col items-center justify-center text-surface-400 text-sm">
+          <i class="pi pi-inbox text-3xl mb-2 opacity-50"></i>
+          <span>{{ 'finance.no-personal-expenses' | translate }}</span>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Household Expenses Widget -->
+  <div class="bg-surface-0 dark:bg-surface-800 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700 flex flex-col justify-between">
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <i class="pi pi-home text-lg"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-base text-surface-900 dark:text-surface-100 m-0">{{ 'finance.household-expenses' | translate }}</h3>
+            <span class="text-xs text-surface-400">{{ financeService.commonExpenses().length }} {{ 'finance.expenses' | translate }}</span>
+          </div>
+        </div>
+        <button pButton icon="pi pi-arrow-right" [rounded]="true" [text]="true" routerLink="/finance/household-expenses"></button>
+      </div>
+
+<!-- Numbers Header: 2 decimal places, no $ -->
+      <div class="bg-surface-50 dark:bg-surface-900/50 p-4 rounded-2xl mb-6 flex justify-between items-center border border-surface-100 dark:border-surface-700/60">
+        <div>
+          <span class="text-xs uppercase font-bold text-surface-400 block mb-0.5">{{ 'finance.total-household' | translate }}</span>
+          <span class="text-2xl sm:text-3xl font-black text-surface-900 dark:text-white">
+            {{ householdTotalMonthly() | number:'1.2-2':'fr-CA' }}
+          </span>
+        </div>
+        <div class="text-right">
+          <span class="text-xs uppercase font-bold text-surface-400 block mb-0.5">{{ 'finance.your-share' | translate }}</span>
+          <span class="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400">
+            {{ householdYourShareMonthly() | number:'1.2-2':'fr-CA' }}
+          </span>
+          <span class="text-xs font-semibold text-surface-400 block mt-0.5">
+            (~{{ householdYourSharePerPaycheck() | number:'1.2-2':'fr-CA' }} / paie)
+          </span>
+        </div>
+      </div>
+
+      <!-- Donut Chart with numbers in legend & tooltip -->
+      <div *ngIf="householdDonutData() as hData; else noHouseholdData" class="h-64 relative flex items-center justify-center">
+        <p-chart type="doughnut" [data]="hData" [options]="donutOptions" height="240px"></p-chart>
+      </div>
+      <ng-template #noHouseholdData>
+        <div class="h-48 flex flex-col items-center justify-center text-surface-400 text-sm">
+          <i class="pi pi-inbox text-3xl mb-2 opacity-50"></i>
+          <span>{{ 'finance.no-household-expenses' | translate }}</span>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
 </div>
 
 <!-- Setup Wizard Dialog -->

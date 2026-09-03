@@ -76,7 +76,7 @@ public class FinanceService {
     }
 
     public List<CommonExpense> getCommonExpenses(Household household) {
-        return commonExpenseRepository.findByHouseholdId(household.getId());
+        return commonExpenseRepository.findByHouseholdIdOrderByOrderIndexAsc(household.getId());
     }
 
     public CommonExpense saveCommonExpense(CommonExpense expense, CTMUser user) {
@@ -167,7 +167,35 @@ public class FinanceService {
     }
 
     public List<PersonalExpense> getPersonalExpenses(CTMUser user) {
-        return personalExpenseRepository.findByUserId(user.getId());
+        return personalExpenseRepository.findByUserIdOrderByOrderIndexAsc(user.getId());
+    }
+
+    @Transactional
+    public List<PersonalExpense> reorderPersonalExpenses(List<String> orderedIds, CTMUser user) {
+        for (int i = 0; i < orderedIds.size(); i++) {
+            String id = orderedIds.get(i);
+            Optional<PersonalExpense> expOpt = personalExpenseRepository.findById(id);
+            if (expOpt.isPresent() && expOpt.get().getUser().getId().equals(user.getId())) {
+                PersonalExpense exp = expOpt.get();
+                exp.setOrderIndex(i);
+                personalExpenseRepository.save(exp);
+            }
+        }
+        return getPersonalExpenses(user);
+    }
+
+    @Transactional
+    public List<CommonExpense> reorderCommonExpenses(List<String> orderedIds, Household household) {
+        for (int i = 0; i < orderedIds.size(); i++) {
+            String id = orderedIds.get(i);
+            Optional<CommonExpense> expOpt = commonExpenseRepository.findById(id);
+            if (expOpt.isPresent() && expOpt.get().getHousehold().getId().equals(household.getId())) {
+                CommonExpense exp = expOpt.get();
+                exp.setOrderIndex(i);
+                commonExpenseRepository.save(exp);
+            }
+        }
+        return getCommonExpenses(household);
     }
 
     public PersonalExpense savePersonalExpense(PersonalExpense expense, CTMUser user) {

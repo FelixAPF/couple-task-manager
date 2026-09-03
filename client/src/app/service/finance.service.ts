@@ -188,6 +188,18 @@ export class FinanceService {
     );
   }
 
+  reorderPersonalExpenses(orderedIds: string[]): Observable<PersonalExpense[]> {
+    return this.http.put<PersonalExpense[]>(`${this.apiUrl}/personal-expenses/reorder`, orderedIds).pipe(
+      tap(updated => this.personalExpenses.set(updated))
+    );
+  }
+
+  reorderCommonExpenses(orderedIds: string[]): Observable<CommonExpense[]> {
+    return this.http.put<CommonExpense[]>(`${this.apiUrl}/common-expenses/reorder`, orderedIds).pipe(
+      tap(updated => this.commonExpenses.set(updated))
+    );
+  }
+
   deleteGroceryTransaction(id: string) {
     return this.http.delete<{ fund: GroceryFund }>(`${this.apiUrl}/grocery-transactions/${id}`).pipe(
       tap(res => {

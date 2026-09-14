@@ -77,7 +77,7 @@ public class TravelController {
             @RequestBody CreateTripRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = getUser(userDetails);
-        return ResponseEntity.ok(travelService.createTrip(user.getId(), request.getDestination(), request.getDepartureDate()));
+        return ResponseEntity.ok(travelService.createTrip(user.getId(), request.getDestination(), request.getDepartureDate(), request.getParticipantIds()));
     }
 
     @DeleteMapping("/trips/{tripId}")
@@ -111,5 +111,7 @@ public class TravelController {
 
         @JsonFormat(pattern = "yyyy-MM-dd")
         private LocalDate departureDate;
+
+        private List<Long> participantIds;
     }
 }

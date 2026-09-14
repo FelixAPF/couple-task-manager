@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,9 +66,8 @@ public class TravelService {
     public List<Trip> getTrips(Long userId) {
         return tripRepository.findByUserIdWithItems(userId);
     }
-
     @Transactional
-    public Trip createTrip(Long userId, String destination, LocalDate departureDate) {
+    public Trip createTrip(Long userId, String destination, LocalDate departureDate, List<Long> participantIds) {
         CTMUser ctmUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
         Trip newTrip = new Trip();
@@ -74,7 +75,19 @@ public class TravelService {
         newTrip.setDestination(destination);
         newTrip.setDepartureDate(departureDate);
 
-        // Cloner les articles du modèle vers le nouveau voyage
+        // Association des participants sélectionnés
+        Set<CTMUser> participants = new HashSet<>();
+        if (participantIds != null && !participantIds.isEmpty()) {
+            for (Long pId : participantIds) {
+                userRepository.findById(pId).ifPresent(participants::add);
+            }
+        }
+        if (participants.isEmpty()) {
+            participants.add(ctmUser);
+        }
+        newTrip.setParticipants(participants);
+
+        // Cloner les articles du modèle
         List<TravelTemplateItem> templateItems = templateItemRepository.findByUserId(userId);
         List<TripItem> tripItems = templateItems.stream().map(templateItem -> {
             TripItem tripItem = new TripItem();
@@ -90,7 +103,6 @@ public class TravelService {
         newTrip.setItems(tripItems);
         return tripRepository.save(newTrip);
     }
-
     @Transactional
     public void deleteTrip(Long tripId) {
         if (!tripRepository.existsById(tripId)) {

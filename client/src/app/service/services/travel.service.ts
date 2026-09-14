@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment';
 import { HouseholdService } from '../household.service';
+import { HouseholdMember } from '../../model/household';
 
 export interface TravelTemplateItem {
   id?: number;
@@ -25,8 +26,8 @@ export interface Trip {
   departureDate: string;
   items: TripItem[];
   completed: boolean;
+  participants?: HouseholdMember[];
 }
-
 @Injectable({
   providedIn: 'root'
 })
@@ -51,7 +52,6 @@ export class TravelService {
     return `${this.getBaseUrl()}api/households/${id}/travel`;
   }
 
-  // --- Modèles par défaut ---
   getTemplate(householdId?: number | null): Observable<TravelTemplateItem[]> {
     return this.http.get<TravelTemplateItem[]>(`${this.getApiUrl(householdId)}/template`);
   }
@@ -64,13 +64,12 @@ export class TravelService {
     return this.http.delete<void>(`${this.getApiUrl(householdId)}/template/${itemId}`);
   }
 
-  // --- Voyages & Bagages ---
   getTrips(householdId?: number | null): Observable<Trip[]> {
     return this.http.get<Trip[]>(`${this.getApiUrl(householdId)}/trips`);
   }
 
-  createTrip(householdId: number | null | undefined, destination: string, departureDate: string): Observable<Trip> {
-    return this.http.post<Trip>(`${this.getApiUrl(householdId)}/trips`, { destination, departureDate });
+  createTrip(householdId: number | null | undefined, destination: string, departureDate: string, participantIds?: number[]): Observable<Trip> {
+    return this.http.post<Trip>(`${this.getApiUrl(householdId)}/trips`, { destination, departureDate, participantIds });
   }
 
   deleteTrip(householdId: number | null | undefined, tripId: number): Observable<void> {

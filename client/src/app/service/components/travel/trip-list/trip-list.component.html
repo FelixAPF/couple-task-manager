@@ -11,7 +11,7 @@
             (click)="selectedTrip = null; loadTrips()">
     </button>
     
-    <!-- Vue détaillée du voyage sélectionné -->
+    <!-- Détails du voyage avec householdId transmis -->
     <app-trip-details [trip]="selectedTrip"
                       [householdId]="householdId"
                       (tripUpdated)="loadTrips()">
@@ -19,7 +19,7 @@
   </div>
 } @else {
   <div class="flex flex-col gap-6">
-    <!-- Barre d'action supérieure -->
+    <!-- En-tête de section -->
     <div class="flex justify-between items-center">
       <div>
         <h2 class="text-xl font-bold text-surface-900 dark:text-white m-0">Vos prochains départs</h2>
@@ -73,28 +73,39 @@
           </div>
 
           <!-- Date de départ -->
-          <div class="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-400 mb-4">
+          <div class="flex items-center gap-2 text-xs font-medium text-surface-500 dark:text-surface-400 mb-3">
             <i class="pi pi-calendar text-indigo-500"></i>
             <span>Départ : <strong>{{ trip.departureDate | date:'longDate':'':'fr-CA' }}</strong></span>
           </div>
 
+          <!-- Avatars des participants -->
+          <div class="flex items-center gap-2 mb-4" *ngIf="trip.participants?.length">
+            <div class="flex -space-x-1.5 overflow-hidden">
+              <img *ngFor="let p of trip.participants"
+                   [src]="p.imageUrl || 'assets/placeholder-user.png'"
+                   [pTooltip]="p.name"
+                   tooltipPosition="top"
+                   class="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-surface-800 object-cover" />
+            </div>
+            <span class="text-[11px] font-semibold text-surface-400">
+              {{ trip.participants?.length }} voyageur(s)
+            </span>
+          </div>
+
           <!-- Statut / Compte à rebours dynamique -->
           <div class="mb-5" [ngSwitch]="getTripTiming(trip.departureDate).state">
-            <!-- 1. À venir -->
             <span *ngSwitchCase="'upcoming'"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-700/60">
               <i class="pi pi-clock text-[11px]"></i>
               <span>J - {{ getTripTiming(trip.departureDate).days }} avant le départ</span>
             </span>
 
-            <!-- 2. Aujourd'hui -->
             <span *ngSwitchCase="'today'"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-700/60">
               <i class="fa-solid fa-plane-departure text-[11px]"></i>
               <span>Jour du départ !</span>
             </span>
 
-            <!-- 3. Passé -->
             <span *ngSwitchCase="'past'"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-surface-100 dark:bg-surface-700/50 text-surface-500 dark:text-surface-400 border border-surface-200/70 dark:border-surface-600/60">
               <i class="pi pi-check text-[10px]"></i>
@@ -122,23 +133,44 @@
     </div>
   </div>
 
-  <!-- Dialog Nouveau Voyage -->
+  <!-- Modal Créer un Voyage -->
   <p-dialog [(visible)]="displayCreateTripModal"
             [modal]="true"
             [draggable]="false"
             [resizable]="false"
             appendTo="body"
             header="Planifier un voyage"
-            [style]="{ width: '90vw', maxWidth: '440px' }">
-    <form [formGroup]="tripForm" (ngSubmit)="createTrip()" class="flex flex-col gap-4 pt-3">
+            [style]="{ width: '90vw', maxWidth: '480px' }">
+    <form [formGroup]="tripForm" (ngSubmit)="createTrip()" class="flex flex-col gap-5 pt-2">
+      <!-- Destination -->
       <div class="flex flex-col gap-2">
         <label class="font-bold text-sm text-surface-700 dark:text-surface-300">Destination</label>
         <input pInputText formControlName="destination" placeholder="Ex: Gaspésie, Italie, Camping..." class="w-full !rounded-2xl" />
       </div>
+
+      <!-- Date de départ -->
       <div class="flex flex-col gap-2">
         <label class="font-bold text-sm text-surface-700 dark:text-surface-300">Date de départ</label>
         <p-calendar formControlName="departureDate" appendTo="body" styleClass="w-full" inputStyleClass="w-full !rounded-2xl" [showIcon]="true"></p-calendar>
       </div>
+
+      <!-- Sélection des participants -->
+      <div class="flex flex-col gap-2">
+        <label class="font-bold text-sm text-surface-700 dark:text-surface-300">Qui participe ?</label>
+        <div class="flex gap-2.5 flex-wrap">
+          <div *ngFor="let member of householdMembers"
+               (click)="toggleParticipant(member.id)"
+               class="flex items-center gap-2 px-3 py-2 rounded-2xl border-2 cursor-pointer transition-all select-none"
+               [ngClass]="selectedParticipantIds.includes(member.id)
+                 ? 'border-indigo-500 bg-indigo-50/60 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 shadow-sm'
+                 : 'border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 text-surface-500 opacity-60'">
+            <img [src]="member.imageUrl || 'assets/placeholder-user.png'" class="w-6 h-6 rounded-full object-cover shadow-sm">
+            <span class="text-xs font-bold">{{ member.name }}</span>
+            <i *ngIf="selectedParticipantIds.includes(member.id)" class="pi pi-check text-[10px] text-indigo-500 font-bold ml-0.5"></i>
+          </div>
+        </div>
+      </div>
+
       <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-surface-100 dark:border-surface-700">
         <button pButton type="button" label="Annuler" class="p-button-text p-button-secondary font-bold" (click)="displayCreateTripModal = false"></button>
         <button pButton type="submit" label="Créer le voyage" icon="pi pi-check" class="p-button-primary p-button-rounded font-bold" [disabled]="tripForm.invalid"></button>

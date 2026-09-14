@@ -5,6 +5,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
 import { TravelService, Trip } from '../../../services/travel.service';
 import { HouseholdService } from '../../../household.service';
+import { HouseholdMember } from '../../../../model/household';
 import { TripDetailsComponent } from '../trip-details/trip-details.component';
 import { SharedModule } from '../../../../shared.module';
 
@@ -30,6 +31,8 @@ export class TripListComponent implements OnInit, OnDestroy {
 
   trips: Trip[] = [];
   householdId: number = 1;
+  householdMembers: HouseholdMember[] = [];
+  selectedParticipantIds: number[] = [];
   selectedTrip: Trip | null = null;
   displayCreateTripModal = false;
   isLoading = false;
@@ -45,14 +48,16 @@ export class TripListComponent implements OnInit, OnDestroy {
     const currentHh = this.householdService.getCurrentHousehold();
     if (currentHh?.id) {
       this.householdId = currentHh.id;
+      this.householdMembers = currentHh.members || [];
     }
     this.loadTrips();
 
     this.subscription.add(
       this.householdService.retrieveHousehold().subscribe({
         next: (hh) => {
-          if (hh?.id && hh.id !== this.householdId) {
+          if (hh) {
             this.householdId = hh.id;
+            this.householdMembers = hh.members || [];
             this.loadTrips();
           }
         }
@@ -85,7 +90,20 @@ export class TripListComponent implements OnInit, OnDestroy {
 
   openCreateDialog(): void {
     this.tripForm.reset();
+    // Par défaut, tous les membres du foyer participent
+    this.selectedParticipantIds = this.householdMembers.map(m => m.id);
     this.displayCreateTripModal = true;
+  }
+
+  toggleParticipant(memberId: number): void {
+    const index = this.selectedParticipantIds.indexOf(memberId);
+    if (index > -1) {
+      if (this.selectedParticipantIds.length > 1) {
+        this.selectedParticipantIds.splice(index, 1);
+      }
+    } else {
+      this.selectedParticipantIds.push(memberId);
+    }
   }
 
   createTrip(): void {
@@ -97,7 +115,7 @@ export class TripListComponent implements OnInit, OnDestroy {
     const formVal = this.tripForm.value;
     const formattedDate = this.formatDateToIso(formVal.departureDate);
 
-    this.travelService.createTrip(this.householdId, formVal.destination.trim(), formattedDate).subscribe({
+    this.travelService.createTrip(this.householdId, formVal.destination.trim(), formattedDate, this.selectedParticipantIds).subscribe({
       next: (newTrip) => {
         if (!newTrip.items) newTrip.items = [];
         this.trips.unshift(newTrip);

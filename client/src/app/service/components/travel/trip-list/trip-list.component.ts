@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Subscription } from 'rxjs';
-import { TravelService, Trip } from '../../../services/travel.service';
+import { TravelService, Trip, TripItem } from '../../../services/travel.service';
 import { HouseholdService } from '../../../household.service';
 import { HouseholdMember } from '../../../../model/household';
 import { TripDetailsComponent } from '../trip-details/trip-details.component';
@@ -72,11 +72,11 @@ export class TripListComponent implements OnInit, OnDestroy {
   loadTrips(): void {
     this.isLoading = true;
     this.travelService.getTrips(this.householdId).subscribe({
-      next: (data) => {
+      next: (data: Trip[]) => {
         this.trips = data || [];
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         this.isLoading = false;
         console.error('Erreur chargement voyages:', err);
         this.messageService.add({
@@ -90,7 +90,6 @@ export class TripListComponent implements OnInit, OnDestroy {
 
   openCreateDialog(): void {
     this.tripForm.reset();
-    // Par défaut, tous les membres du foyer participent
     this.selectedParticipantIds = this.householdMembers.map(m => m.id);
     this.displayCreateTripModal = true;
   }
@@ -116,7 +115,7 @@ export class TripListComponent implements OnInit, OnDestroy {
     const formattedDate = this.formatDateToIso(formVal.departureDate);
 
     this.travelService.createTrip(this.householdId, formVal.destination.trim(), formattedDate, this.selectedParticipantIds).subscribe({
-      next: (newTrip) => {
+      next: (newTrip: Trip) => {
         if (!newTrip.items) newTrip.items = [];
         this.trips.unshift(newTrip);
         this.displayCreateTripModal = false;
@@ -126,7 +125,7 @@ export class TripListComponent implements OnInit, OnDestroy {
           detail: `Destination : ${newTrip.destination}`
         });
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erreur création voyage:', err);
         this.messageService.add({
           severity: 'error',
@@ -175,13 +174,26 @@ export class TripListComponent implements OnInit, OnDestroy {
     });
   }
 
+  getCurrentUserId(): number | null {
+    return this.householdService.getCurrentHousehold()?.currentUser?.id || null;
+  }
+
+  getMyItems(trip: Trip): TripItem[] {
+    const myId = this.getCurrentUserId();
+    if (!trip.items) return [];
+    if (!myId) return trip.items;
+    const userItems = trip.items.filter((i: TripItem) => i.userId === myId);
+    return userItems.length > 0 ? userItems : trip.items;
+  }
+
   getPackedCount(trip: Trip): number {
-    return trip.items ? trip.items.filter(i => i.packed).length : 0;
+    return this.getMyItems(trip).filter((i: TripItem) => i.packed).length;
   }
 
   getProgressPercent(trip: Trip): number {
-    if (!trip.items || trip.items.length === 0) return 0;
-    return Math.round((this.getPackedCount(trip) / trip.items.length) * 100);
+    const items = this.getMyItems(trip);
+    if (items.length === 0) return 0;
+    return Math.round((this.getPackedCount(trip) / items.length) * 100);
   }
 
   getTripTiming(dateStr: string): TripTiming {

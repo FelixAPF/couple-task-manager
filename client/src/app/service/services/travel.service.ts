@@ -18,6 +18,7 @@ export interface TripItem {
   quantity: number;
   included: boolean;
   packed: boolean;
+  userId?: number;
 }
 
 export interface Trip {
@@ -28,6 +29,7 @@ export interface Trip {
   completed: boolean;
   participants?: HouseholdMember[];
 }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -52,6 +54,7 @@ export class TravelService {
     return `${this.getBaseUrl()}api/households/${id}/travel`;
   }
 
+  // --- Modèles par défaut ---
   getTemplate(householdId?: number | null): Observable<TravelTemplateItem[]> {
     return this.http.get<TravelTemplateItem[]>(`${this.getApiUrl(householdId)}/template`);
   }
@@ -64,6 +67,7 @@ export class TravelService {
     return this.http.delete<void>(`${this.getApiUrl(householdId)}/template/${itemId}`);
   }
 
+  // --- Voyages & Bagages ---
   getTrips(householdId?: number | null): Observable<Trip[]> {
     return this.http.get<Trip[]>(`${this.getApiUrl(householdId)}/trips`);
   }

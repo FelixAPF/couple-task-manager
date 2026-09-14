@@ -49,18 +49,9 @@ public class Trip {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @JsonIgnoreProperties({
-            "hibernateLazyInitializer",
-            "handler",
-            "password",
-            "taskAssignments",
-            "taskAssigns",
-            "assignedMeal",
-            "taskLists",
-            "waysToCare",
-            "wishList",
-            "trips",
-            "travelTemplateItems",
-            "household"
+            "password", "taskAssignments", "taskAssigns", "assignedMeal",
+            "taskLists", "waysToCare", "wishList", "trips", "travelTemplateItems",
+            "household", "hibernateLazyInitializer", "handler"
     })
     private Set<CTMUser> participants = new HashSet<>();
 }

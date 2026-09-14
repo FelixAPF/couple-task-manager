@@ -3,15 +3,16 @@ package com.couple.taskmanager.service;
 import com.couple.taskmanager.model.*;
 import com.couple.taskmanager.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class TravelService {
@@ -30,16 +31,7 @@ public class TravelService {
     @Autowired
     private TripItemRepository tripItemRepository;
 
-    //== Paramètre Foyer ==//
-    @Transactional
-    public Household enableTravelChecklist(Long householdId, boolean enabled) {
-        Household household = householdRepository.findById(householdId)
-                .orElseThrow(() -> new NoSuchElementException("Household not found with id: " + householdId));
-        household.setEnableTravelChecklist(enabled);
-        return householdRepository.save(household);
-    }
-
-    //== Modèle par Défaut (Template) ==//
+    //== Modèle par Défaut ==//
     public List<TravelTemplateItem> getTemplateItems(Long userId) {
         return templateItemRepository.findByUserId(userId);
     }
@@ -49,7 +41,7 @@ public class TravelService {
         CTMUser ctmUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
         item.setUser(ctmUser);
-        item.setId(null); // Force l'insertion d'une nouvelle entité
+        item.setId(null);
         return templateItemRepository.save(item);
     }
 
@@ -66,16 +58,17 @@ public class TravelService {
     public List<Trip> getTrips(Long userId) {
         return tripRepository.findByUserIdWithItems(userId);
     }
+
     @Transactional
-    public Trip createTrip(Long userId, String destination, LocalDate departureDate, List<Long> participantIds) {
-        CTMUser ctmUser = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+    public Trip createTrip(Long creatorId, String destination, LocalDate departureDate, List<Long> participantIds) {
+        CTMUser creator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + creatorId));
         Trip newTrip = new Trip();
-        newTrip.setUser(ctmUser);
+        newTrip.setUser(creator);
         newTrip.setDestination(destination);
         newTrip.setDepartureDate(departureDate);
 
-        // Association des participants sélectionnés
+        // Participants
         Set<CTMUser> participants = new HashSet<>();
         if (participantIds != null && !participantIds.isEmpty()) {
             for (Long pId : participantIds) {
@@ -83,26 +76,32 @@ public class TravelService {
             }
         }
         if (participants.isEmpty()) {
-            participants.add(ctmUser);
+            participants.add(creator);
         }
         newTrip.setParticipants(participants);
 
-        // Cloner les articles du modèle
-        List<TravelTemplateItem> templateItems = templateItemRepository.findByUserId(userId);
-        List<TripItem> tripItems = templateItems.stream().map(templateItem -> {
-            TripItem tripItem = new TripItem();
-            tripItem.setName(templateItem.getName());
-            tripItem.setCategory(templateItem.getCategory());
-            tripItem.setTrip(newTrip);
-            tripItem.setIncluded(true);
-            tripItem.setPacked(false);
-            tripItem.setQuantity(1);
-            return tripItem;
-        }).collect(Collectors.toList());
+        // Cloner pour CHAQUE participant son propre modèle de voyage
+        List<TripItem> allTripItems = new ArrayList<>();
+        for (CTMUser participant : participants) {
+            // Charge STRICTEMENT le modèle personnel de ce voyageur
+            List<TravelTemplateItem> userTemplate = templateItemRepository.findByUserId(participant.getId());
+            for (TravelTemplateItem tItem : userTemplate) {
+                TripItem item = new TripItem();
+                item.setName(tItem.getName());
+                item.setCategory(tItem.getCategory());
+                item.setTrip(newTrip);
+                item.setUser(participant);
+                item.setIncluded(true);
+                item.setPacked(false);
+                item.setQuantity(1);
+                allTripItems.add(item);
+            }
+        }
 
-        newTrip.setItems(tripItems);
+        newTrip.setItems(allTripItems);
         return tripRepository.save(newTrip);
     }
+
     @Transactional
     public void deleteTrip(Long tripId) {
         if (!tripRepository.existsById(tripId)) {
@@ -112,10 +111,14 @@ public class TravelService {
     }
 
     @Transactional
-    public TripItem addTripItem(Long tripId, TripItem itemData) {
+    public TripItem addTripItem(Long tripId, Long userId, TripItem itemData) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new NoSuchElementException("Trip not found with id: " + tripId));
+        CTMUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+
         itemData.setTrip(trip);
+        itemData.setUser(user); // Lié à l'utilisateur qui l'ajoute
         itemData.setId(null);
         if (itemData.getQuantity() <= 0) {
             itemData.setQuantity(1);
@@ -126,36 +129,34 @@ public class TravelService {
     }
 
     @Transactional
-    public void markTripAsCompleted(Long tripId, boolean completed) {
-        tripRepository.setTripCompletedEquals(completed);
-    }
-
-    @Transactional
-    public TripItem updateTripItem(Long itemId, TripItem itemChanges) {
+    public TripItem updateTripItem(Long itemId, Long currentUserId, TripItem itemChanges) {
         TripItem existingItem = tripItemRepository.findById(itemId)
                 .orElseThrow(() -> new NoSuchElementException("TripItem not found with id: " + itemId));
 
-        // Met à jour la quantité seulement si elle est strictement supérieure à 0
+        // Protection : seul le propriétaire peut modifier son article
+        if (existingItem.getUser() != null && !existingItem.getUser().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("Vous ne pouvez pas modifier les affaires d'un autre voyageur.");
+        }
+
         if (itemChanges.getQuantity() > 0) {
             existingItem.setQuantity(itemChanges.getQuantity());
         }
-
-        // Met à jour l'état emballé
         existingItem.setPacked(itemChanges.isPacked());
-
-        // Met à jour le nom si fourni
         if (itemChanges.getName() != null && !itemChanges.getName().isBlank()) {
             existingItem.setName(itemChanges.getName());
         }
-
         return tripItemRepository.save(existingItem);
     }
 
     @Transactional
-    public void deleteTripItem(Long itemId) {
-        if (!tripItemRepository.existsById(itemId)) {
-            throw new NoSuchElementException("TripItem not found with id: " + itemId);
+    public void deleteTripItem(Long itemId, Long currentUserId) {
+        TripItem existingItem = tripItemRepository.findById(itemId)
+                .orElseThrow(() -> new NoSuchElementException("TripItem not found with id: " + itemId));
+
+        // Protection : seul le propriétaire peut supprimer son article
+        if (existingItem.getUser() != null && !existingItem.getUser().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("Vous ne pouvez pas supprimer les affaires d'un autre voyageur.");
         }
-        tripItemRepository.deleteById(itemId);
+        tripItemRepository.delete(existingItem);
     }
 }

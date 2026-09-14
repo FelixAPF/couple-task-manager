@@ -1,79 +1,52 @@
 package com.couple.taskmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
+@Getter
+@Setter
 public class TripItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     private String category;
-    private int quantity; // Optional, can be 0 or 1 by default
-    private boolean included = true; // To toggle if the item is needed for this trip
-    private boolean packed = false; // To mark as completed
+
+    private int quantity = 1;
+
+    private boolean included = true;
+
+    private boolean packed = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trip_id")
     @JsonBackReference("trip-item")
     private Trip trip;
 
-    // Getters and Setters
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
+    private CTMUser user;
 
-    public Long getId() {
-        return id;
-    }
+    // Lecture directe de la colonne en base (évite les proxies Hibernate)
+    @Column(name = "user_id", insertable = false, updatable = false)
+    private Long userId;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public boolean isIncluded() {
-        return included;
-    }
-
-    public void setIncluded(boolean included) {
-        this.included = included;
-    }
-
-    public boolean isPacked() {
-        return packed;
-    }
-
-    public void setPacked(boolean packed) {
-        this.packed = packed;
-    }
-
-    public Trip getTrip() {
-        return trip;
-    }
-
-    public void setTrip(Trip trip) {
-        this.trip = trip;
+    @JsonProperty("userId")
+    public Long getUserId() {
+        if (this.userId != null) {
+            return this.userId;
+        }
+        return user != null ? user.getId() : null;
     }
 }

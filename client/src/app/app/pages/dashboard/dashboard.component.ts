@@ -56,7 +56,7 @@ export class DashboardComponent {
   todayMeal: Meal | undefined;
   subscription: Subscription = new Subscription();
 
-  // --- Données Voyages pour le compte à rebours ---
+  // --- Voyages & Compte à rebours ---
   private travelService = inject(TravelService);
   nextUpcomingTrip: Trip | null = null;
 
@@ -120,7 +120,7 @@ export class DashboardComponent {
   retrieveNextUpcomingTrip(): void {
     this.subscription.add(
       this.travelService.getTrips().subscribe({
-        next: (trips) => {
+        next: (trips: Trip[]) => {
           if (!trips || trips.length === 0) {
             this.nextUpcomingTrip = null;
             return;
@@ -129,17 +129,17 @@ export class DashboardComponent {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
 
-          // Filtrer les voyages non passés et prendre le plus proche
           const futureTrips = trips
-            .filter(t => {
+            .filter((t: Trip) => {
               if (!t.departureDate) return false;
               const cleanStr = typeof t.departureDate === 'string' ? t.departureDate.split('T')[0] : '';
               const [y, m, d] = cleanStr.split('-').map(Number);
+              if (!y || !m || !d) return false;
               const tripDate = new Date(y, m - 1, d);
               tripDate.setHours(0, 0, 0, 0);
               return tripDate.getTime() >= today.getTime();
             })
-            .sort((a, b) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
+            .sort((a: Trip, b: Trip) => new Date(a.departureDate).getTime() - new Date(b.departureDate).getTime());
 
           this.nextUpcomingTrip = futureTrips.length > 0 ? futureTrips[0] : null;
         }

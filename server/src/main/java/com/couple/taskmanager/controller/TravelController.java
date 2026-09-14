@@ -36,7 +36,6 @@ public class TravelController {
         return userService.getCurrentUser();
     }
 
-    //== Endpoints du Modèle (Template) ==//
     @GetMapping("/template")
     public ResponseEntity<List<TravelTemplateItem>> getTemplate(
             @PathVariable Long householdId,
@@ -62,7 +61,6 @@ public class TravelController {
         return ResponseEntity.ok().build();
     }
 
-    //== Endpoints des Voyages ==//
     @GetMapping("/trips")
     public ResponseEntity<List<Trip>> getTrips(
             @PathVariable Long householdId,
@@ -87,18 +85,34 @@ public class TravelController {
     }
 
     @PostMapping("/trips/{tripId}/items")
-    public ResponseEntity<TripItem> addTripItem(@PathVariable Long householdId, @PathVariable Long tripId, @RequestBody TripItem itemData) {
-        return ResponseEntity.ok(travelService.addTripItem(tripId, itemData));
+    public ResponseEntity<TripItem> addTripItem(
+            @PathVariable Long householdId,
+            @PathVariable Long tripId,
+            @RequestBody TripItem itemData,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = getUser(userDetails);
+        return ResponseEntity.ok(travelService.addTripItem(tripId, user.getId(), itemData));
     }
 
     @PutMapping("/trips/{tripId}/items/{itemId}")
-    public ResponseEntity<TripItem> updateTripItem(@PathVariable Long householdId, @PathVariable Long tripId, @PathVariable Long itemId, @RequestBody TripItem itemChanges) {
-        return ResponseEntity.ok(travelService.updateTripItem(itemId, itemChanges));
+    public ResponseEntity<TripItem> updateTripItem(
+            @PathVariable Long householdId,
+            @PathVariable Long tripId,
+            @PathVariable Long itemId,
+            @RequestBody TripItem itemChanges,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = getUser(userDetails);
+        return ResponseEntity.ok(travelService.updateTripItem(itemId, user.getId(), itemChanges));
     }
 
     @DeleteMapping("/trips/{tripId}/items/{itemId}")
-    public ResponseEntity<Void> deleteTripItem(@PathVariable Long householdId, @PathVariable Long tripId, @PathVariable Long itemId) {
-        travelService.deleteTripItem(itemId);
+    public ResponseEntity<Void> deleteTripItem(
+            @PathVariable Long householdId,
+            @PathVariable Long tripId,
+            @PathVariable Long itemId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        CTMUser user = getUser(userDetails);
+        travelService.deleteTripItem(itemId, user.getId());
         return ResponseEntity.ok().build();
     }
 

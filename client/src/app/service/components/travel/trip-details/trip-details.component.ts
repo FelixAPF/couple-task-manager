@@ -77,10 +77,24 @@ export class TripDetailsComponent implements OnInit {
     return this.activeSuitcaseUserId === this.currentUserId;
   }
 
-  get activeSuitcaseItems(): TripItem[] {
+get activeSuitcaseItems(): TripItem[] {
     if (!this.trip?.items || !this.activeSuitcaseUserId) return [];
-    // Strictement les articles du voyageur sélectionné
-    return this.trip.items.filter((i: TripItem) => i.userId === this.activeSuitcaseUserId);
+    
+    const seenIds = new Set<number>();
+    return this.trip.items.filter((item: TripItem) => {
+      // 1. Filtrer strictly sur le voyageur sélectionné
+      if (item.userId !== this.activeSuitcaseUserId) {
+        return false;
+      }
+      // 2. Éliminer tout doublon d'ID
+      if (item.id && seenIds.has(item.id)) {
+        return false;
+      }
+      if (item.id) {
+        seenIds.add(item.id);
+      }
+      return true;
+    });
   }
 
   get totalItemsCount(): number {

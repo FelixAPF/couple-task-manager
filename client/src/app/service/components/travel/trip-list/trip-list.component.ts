@@ -178,14 +178,21 @@ export class TripListComponent implements OnInit, OnDestroy {
     return this.householdService.getCurrentHousehold()?.currentUser?.id || null;
   }
 
-  getMyItems(trip: Trip): TripItem[] {
+getMyItems(trip: Trip): TripItem[] {
     const myId = this.getCurrentUserId();
     if (!trip.items) return [];
-    if (!myId) return trip.items;
-    const userItems = trip.items.filter((i: TripItem) => i.userId === myId);
-    return userItems.length > 0 ? userItems : trip.items;
-  }
 
+    const seenIds = new Set<number>();
+    return trip.items.filter((i: TripItem) => {
+      const belongsToMe = myId ? i.userId === myId : true;
+      if (!belongsToMe) return false;
+
+      // Éliminer les doublons d'ID pour le calcul de la barre de progression
+      if (i.id && seenIds.has(i.id)) return false;
+      if (i.id) seenIds.add(i.id);
+      return true;
+    });
+  }
   getPackedCount(trip: Trip): number {
     return this.getMyItems(trip).filter((i: TripItem) => i.packed).length;
   }

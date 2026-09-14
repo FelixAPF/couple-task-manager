@@ -53,10 +53,22 @@ public class TravelService {
         templateItemRepository.deleteById(itemId);
     }
 
-    //== Gestion des Voyages ==//
     @Transactional(readOnly = true)
     public List<Trip> getTrips(Long userId) {
-        return tripRepository.findByUserIdWithItems(userId);
+        List<Trip> trips = tripRepository.findByUserIdWithItems(userId);
+        for (Trip trip : trips) {
+            // Initialise les participants proprement sans produit cartésien
+            org.hibernate.Hibernate.initialize(trip.getParticipants());
+
+            // Sécurité supplémentaire : dédoublonnage en mémoire par ID
+            if (trip.getItems() != null) {
+                java.util.Set<Long> seen = new java.util.HashSet<>();
+                trip.setItems(trip.getItems().stream()
+                        .filter(item -> item.getId() == null || seen.add(item.getId()))
+                        .collect(java.util.stream.Collectors.toList()));
+            }
+        }
+        return trips;
     }
 
     @Transactional

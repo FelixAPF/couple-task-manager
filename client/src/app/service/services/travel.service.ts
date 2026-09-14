@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment';
+import { HouseholdService } from '../household.service';
 
-// Define interfaces for your data models
 export interface TravelTemplateItem {
   id?: number;
   name: string;
@@ -22,66 +22,70 @@ export interface TripItem {
 export interface Trip {
   id: number;
   destination: string;
-  departureDate: string; // ISO date string
+  departureDate: string;
   items: TripItem[];
   completed: boolean;
 }
-
 
 @Injectable({
   providedIn: 'root'
 })
 export class TravelService {
-  private getApiUrl(householdId: number) {
-    return `${environment.apiUrl}api/households/${householdId}/travel`;
+  private http = inject(HttpClient);
+  private householdService = inject(HouseholdService);
+
+  private resolveHouseholdId(householdId?: number | null): number {
+    if (householdId && !isNaN(Number(householdId))) {
+      return Number(householdId);
+    }
+    const current = this.householdService.getCurrentHousehold();
+    return current?.id || 1;
   }
 
-  constructor(private http: HttpClient) { }
+  private getBaseUrl(): string {
+    return environment.apiUrl.endsWith('/') ? environment.apiUrl : `${environment.apiUrl}/`;
+  }
 
-  // Template Methods
-  getTemplate(householdId: number): Observable<TravelTemplateItem[]> {
+  private getApiUrl(householdId?: number | null): string {
+    const id = this.resolveHouseholdId(householdId);
+    return `${this.getBaseUrl()}api/households/${id}/travel`;
+  }
+
+  // --- Modèles par défaut ---
+  getTemplate(householdId?: number | null): Observable<TravelTemplateItem[]> {
     return this.http.get<TravelTemplateItem[]>(`${this.getApiUrl(householdId)}/template`);
   }
 
-  addTemplateItem(householdId: number, item: TravelTemplateItem): Observable<TravelTemplateItem> {
+  addTemplateItem(householdId: number | null | undefined, item: TravelTemplateItem): Observable<TravelTemplateItem> {
     return this.http.post<TravelTemplateItem>(`${this.getApiUrl(householdId)}/template`, item);
   }
 
-  // Trip Methods
-  getTrips(householdId: number): Observable<Trip[]> {
+  deleteTemplateItem(householdId: number | null | undefined, itemId: number): Observable<void> {
+    return this.http.delete<void>(`${this.getApiUrl(householdId)}/template/${itemId}`);
+  }
+
+  // --- Voyages & Bagages ---
+  getTrips(householdId?: number | null): Observable<Trip[]> {
     return this.http.get<Trip[]>(`${this.getApiUrl(householdId)}/trips`);
   }
 
-  createTrip(householdId: number, destination: string, departureDate: string): Observable<Trip> {
+  createTrip(householdId: number | null | undefined, destination: string, departureDate: string): Observable<Trip> {
     return this.http.post<Trip>(`${this.getApiUrl(householdId)}/trips`, { destination, departureDate });
   }
 
-    /**
-   * Updates a specific item within a trip.
-   */
-  updateTripItem(householdId: number, tripId: number, itemId: number, itemChanges: Partial<TripItem>): Observable<TripItem> {
-    const url = `${this.getApiUrl(householdId)}/trips/${tripId}/items/${itemId}`;
-    return this.http.put<TripItem>(url, itemChanges);
+  deleteTrip(householdId: number | null | undefined, tripId: number): Observable<void> {
+    return this.http.delete<void>(`${this.getApiUrl(householdId)}/trips/${tripId}`);
   }
 
-  /**
-   * Adds a new item to a specific trip (not the template).
-   */
-  addTripItem(householdId: number, tripId: number, item: { name: string; category: string }): Observable<TripItem> {
-    const url = `${this.getApiUrl(householdId)}/trips/${tripId}/items`;
-    return this.http.post<TripItem>(url, item);
+  addTripItem(householdId: number | null | undefined, tripId: number, item: { name: string; category: string }): Observable<TripItem> {
+    return this.http.post<TripItem>(`${this.getApiUrl(householdId)}/trips/${tripId}/items`, item);
   }
 
-  deleteTrip(householdId: number, tripId: number) {
-    const url = `${this.getApiUrl(householdId)}/trips/${tripId}`;
-    return this.http.delete(url);
+  updateTripItem(householdId: number | null | undefined, tripId: number, itemId: number, itemChanges: Partial<TripItem>): Observable<TripItem> {
+    return this.http.put<TripItem>(`${this.getApiUrl(householdId)}/trips/${tripId}/items/${itemId}`, itemChanges);
   }
 
-  /**
-   * Deletes an item from a specific trip.
-   */
-  deleteTripItem(householdId: number, tripId: number, itemId: number): Observable<any> {
-    const url = `${this.getApiUrl(householdId)}/trips/${tripId}/items/${itemId}`;
-    return this.http.delete(url);
+  deleteTripItem(householdId: number | null | undefined, tripId: number, itemId: number): Observable<void> {
+    return this.http.delete<void>(`${this.getApiUrl(householdId)}/trips/${tripId}/items/${itemId}`);
   }
 }

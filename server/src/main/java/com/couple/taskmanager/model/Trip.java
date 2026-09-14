@@ -1,6 +1,7 @@
 package com.couple.taskmanager.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,12 +20,16 @@ public class Trip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String destination;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate departureDate;
+
     private Boolean completed = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id") // The foreign key column in the 'trip' table
+    @JoinColumn(name = "user_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonBackReference("user-trip")
     private CTMUser user;
@@ -32,5 +37,4 @@ public class Trip {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "trip")
     @JsonManagedReference("trip-item")
     private List<TripItem> items = new ArrayList<>();
-
 }

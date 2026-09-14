@@ -135,7 +135,7 @@
             </div>
             <div>
               <label class="text-xs font-semibold text-surface-400 mb-1 block">{{ 'finance.target-fund' | translate }}</label>
-              <p-dropdown [options]="fundOptions" [(ngModel)]="expense.targetFund" (onChange)="saveExpense(expense)" optionLabel="label" optionValue="value" styleClass="w-full !rounded-xl text-xs"></p-dropdown>
+              <p-dropdown [options]="fundOptions" [(ngModel)]="expense.targetFund" (onChange)="saveExpense(expense)" optionLabel="label" optionValue="value" styleClass="w-full !rounded-xl text-xs" appendTo="body"></p-dropdown>
             </div>
           </div>
 

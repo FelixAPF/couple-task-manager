@@ -1,14 +1,48 @@
-<div class="container mt-4">
-  <div class="card">
-    <div class="card-body">
-      <p-selectButton [options]="viewOptions" [(ngModel)]="currentView" optionLabel="label" optionValue="value"></p-selectButton>
-
-      <div class="mt-4">
-        @switch (currentView) {
-          @case ('trips') { <app-trip-list></app-trip-list> }
-          @case ('template') { <app-travel-template></app-travel-template> }
-        }
+<div class="container mx-auto px-4 py-6 pb-28 max-w-6xl min-h-screen transition-colors duration-200">
+  <!-- Bannière Hero principale -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-surface-100 dark:border-surface-700">
+    <div class="flex items-center gap-4">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-sky-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20 shrink-0">
+        <i class="fa-solid fa-plane-departure text-2xl"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-surface-900 dark:text-white m-0">
+          Listes de voyage
+        </h1>
+        <p class="text-surface-500 dark:text-surface-400 font-medium mt-1 text-sm m-0">
+          Planifiez vos valises et préparez vos départs
+        </p>
       </div>
     </div>
+
+    <!-- Sélecteur de vue (Pills) -->
+    <div class="flex p-1.5 bg-surface-100 dark:bg-surface-900 rounded-2xl border border-surface-200/80 dark:border-surface-700/80 w-full sm:w-auto shrink-0 shadow-inner">
+      <button type="button"
+              (click)="currentView = 'trips'"
+              class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer"
+              [ngClass]="currentView === 'trips'
+                ? 'bg-white dark:bg-surface-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                : 'text-surface-500 dark:text-surface-400 hover:text-surface-800 dark:hover:text-surface-100'">
+        <i class="pi pi-compass text-sm"></i>
+        <span>Mes voyages</span>
+      </button>
+      <button type="button"
+              (click)="currentView = 'template'"
+              class="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 cursor-pointer"
+              [ngClass]="currentView === 'template'
+                ? 'bg-white dark:bg-surface-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                : 'text-surface-500 dark:text-surface-400 hover:text-surface-800 dark:hover:text-surface-100'">
+        <i class="pi pi-sliders-h text-sm"></i>
+        <span>Modèle par défaut</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenu actif -->
+  <div>
+    @switch (currentView) {
+      @case ('trips') { <app-trip-list></app-trip-list> }
+      @case ('template') { <app-travel-template></app-travel-template> }
+    }
   </div>
 </div>

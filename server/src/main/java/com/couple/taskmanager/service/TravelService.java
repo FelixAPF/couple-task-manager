@@ -5,6 +5,7 @@ import com.couple.taskmanager.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -12,63 +13,74 @@ import java.util.stream.Collectors;
 
 @Service
 public class TravelService {
+    @Autowired
+    private HouseholdRepository householdRepository;
 
     @Autowired
-    HouseholdRepository householdRepository;
-    @Autowired
-    TravelTemplateItemRepository templateItemRepository;
-    @Autowired
-    TripRepository tripRepository;
-    @Autowired
-    CTMUserRepository userRepository;
-    @Autowired
-    TripItemRepository tripItemRepository;
+    private TravelTemplateItemRepository templateItemRepository;
 
-    // Constructor injection
+    @Autowired
+    private TripRepository tripRepository;
 
-    //== Household Setting ==//
+    @Autowired
+    private CTMUserRepository userRepository;
+
+    @Autowired
+    private TripItemRepository tripItemRepository;
+
+    //== Paramètre Foyer ==//
     @Transactional
     public Household enableTravelChecklist(Long householdId, boolean enabled) {
         Household household = householdRepository.findById(householdId)
-                .orElseThrow(() -> new RuntimeException("Household not found"));
+                .orElseThrow(() -> new NoSuchElementException("Household not found with id: " + householdId));
         household.setEnableTravelChecklist(enabled);
         return householdRepository.save(household);
     }
 
-    //== Template Methods ==//
+    //== Modèle par Défaut (Template) ==//
     public List<TravelTemplateItem> getTemplateItems(Long userId) {
         return templateItemRepository.findByUserId(userId);
     }
 
     @Transactional
     public TravelTemplateItem addTemplateItem(Long userId, TravelTemplateItem item) {
-        CTMUser ctmUser = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
+        CTMUser ctmUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
         item.setUser(ctmUser);
+        item.setId(null); // Force l'insertion d'une nouvelle entité
         return templateItemRepository.save(item);
     }
 
-    //== Trip Methods ==//
+    @Transactional
+    public void deleteTemplateItem(Long itemId) {
+        if (!templateItemRepository.existsById(itemId)) {
+            throw new NoSuchElementException("Template item not found with id: " + itemId);
+        }
+        templateItemRepository.deleteById(itemId);
+    }
+
+    //== Gestion des Voyages ==//
+    @Transactional(readOnly = true)
     public List<Trip> getTrips(Long userId) {
-        return tripRepository.findByUserIdOrderByDepartureDateDesc(userId);
+        return tripRepository.findByUserIdWithItems(userId);
     }
 
     @Transactional
     public Trip createTrip(Long userId, String destination, LocalDate departureDate) {
-        CTMUser ctmUser = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
-
+        CTMUser ctmUser = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
         Trip newTrip = new Trip();
         newTrip.setUser(ctmUser);
         newTrip.setDestination(destination);
         newTrip.setDepartureDate(departureDate);
 
-        // Load items from the household's template
+        // Cloner les articles du modèle vers le nouveau voyage
         List<TravelTemplateItem> templateItems = templateItemRepository.findByUserId(userId);
         List<TripItem> tripItems = templateItems.stream().map(templateItem -> {
             TripItem tripItem = new TripItem();
             tripItem.setName(templateItem.getName());
             tripItem.setCategory(templateItem.getCategory());
             tripItem.setTrip(newTrip);
-            // Default values
             tripItem.setIncluded(true);
             tripItem.setPacked(false);
             tripItem.setQuantity(1);
@@ -79,44 +91,59 @@ public class TravelService {
         return tripRepository.save(newTrip);
     }
 
+    @Transactional
+    public void deleteTrip(Long tripId) {
+        if (!tripRepository.existsById(tripId)) {
+            throw new NoSuchElementException("Trip not found with id: " + tripId);
+        }
+        tripRepository.deleteById(tripId);
+    }
+
+    @Transactional
     public TripItem addTripItem(Long tripId, TripItem itemData) {
         Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new RuntimeException("Trip not found with id: " + tripId));
-        itemData.setTrip(trip); // Set the relationship
+                .orElseThrow(() -> new NoSuchElementException("Trip not found with id: " + tripId));
+        itemData.setTrip(trip);
+        itemData.setId(null);
+        if (itemData.getQuantity() <= 0) {
+            itemData.setQuantity(1);
+        }
+        itemData.setIncluded(true);
+        itemData.setPacked(false);
         return tripItemRepository.save(itemData);
     }
 
-    public void markTripAsCompleted(Long tripId, boolean completed){
+    @Transactional
+    public void markTripAsCompleted(Long tripId, boolean completed) {
         tripRepository.setTripCompletedEquals(completed);
     }
 
-    /**
-     * Updates an existing item in a trip checklist (e.g., toggles packed status, changes quantity).
-     */
+    @Transactional
     public TripItem updateTripItem(Long itemId, TripItem itemChanges) {
         TripItem existingItem = tripItemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("TripItem not found with id: " + itemId));
+                .orElseThrow(() -> new NoSuchElementException("TripItem not found with id: " + itemId));
 
-        // Update fields from the incoming data
+        // Met à jour la quantité seulement si elle est strictement supérieure à 0
+        if (itemChanges.getQuantity() > 0) {
+            existingItem.setQuantity(itemChanges.getQuantity());
+        }
+
+        // Met à jour l'état emballé
         existingItem.setPacked(itemChanges.isPacked());
-        existingItem.setQuantity(itemChanges.getQuantity());
+
+        // Met à jour le nom si fourni
+        if (itemChanges.getName() != null && !itemChanges.getName().isBlank()) {
+            existingItem.setName(itemChanges.getName());
+        }
 
         return tripItemRepository.save(existingItem);
     }
 
-    /**
-     * Deletes an item from a trip's checklist.
-     */
+    @Transactional
     public void deleteTripItem(Long itemId) {
         if (!tripItemRepository.existsById(itemId)) {
-            throw new RuntimeException("TripItem not found with id: " + itemId);
+            throw new NoSuchElementException("TripItem not found with id: " + itemId);
         }
         tripItemRepository.deleteById(itemId);
     }
-
-    public void deleteTrip(Long tripId) {
-        tripRepository.deleteById(tripId);
-    }
-
-    // Add other methods for updating/deleting trips and trip items as needed
 }

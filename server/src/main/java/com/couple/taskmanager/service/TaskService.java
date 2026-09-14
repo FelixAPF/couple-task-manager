@@ -123,10 +123,8 @@ public class TaskService implements IGenericService<Task, TaskDto> {
 
     public TaskDto createRqst(CreateTaskV1 rqst, CTMUser user) {
         Task task = rqst.getTask();
-        if (rqst.getAssigneeUserId() != null) {
-            CTMUser assignee = userService.get(rqst.getAssigneeUserId(), user);
-            task.setAssignee(assignee);
-        }
+        CTMUser assignee = rqst.getAssigneeUserId() != null ? userService.get(rqst.getAssigneeUserId(), user) : null;
+        task.setAssignee(assignee);
         if(rqst.getProcedureId() != null && rqst.getProcedureId() != 0){
             task.setProcedure(procedureRepository.findById(rqst.getProcedureId()).orElse(null));
         }

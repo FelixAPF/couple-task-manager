@@ -2,19 +2,15 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TripListComponent } from '../trip-list/trip-list.component';
 import { TravelTemplateComponent } from '../travel-template/travel-template.component';
-// PrimeNG Imports
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { FormsModule } from '@angular/forms';
+import { SharedModule } from '../../../../shared.module';
 
 @Component({
   selector: 'app-travel-checklist',
-  imports: [ CommonModule, TripListComponent, TravelTemplateComponent, SelectButtonModule, FormsModule ],
+  standalone: true,
+  imports: [CommonModule, TripListComponent, TravelTemplateComponent, SharedModule],
   templateUrl: './travel-checklist.component.html',
+  styleUrls: ['./travel-checklist.component.css']
 })
 export class TravelChecklistComponent {
-  viewOptions: any[] = [
-    { label: 'Mes voyages', value: 'trips' },
-    { label: 'Gérer template', value: 'template' }
-  ];
   currentView: 'trips' | 'template' = 'trips';
 }

@@ -109,5 +109,15 @@ export const routes: Routes = [
         component: AdminDashboardComponent,
         canActivate: [AdminGuard]
     },
+    {
+        path: 'admin/blind-boxes',
+        loadComponent: () => import('./admin/blind-box-admin/blind-box-admin.component').then(m => m.BlindBoxAdminComponent),
+        canActivate: [AdminGuard]
+    },
+    {
+        path: 'pokedex',
+        loadComponent: () => import('./blindbox/pokedex/pokedex.component').then(m => m.PokedexComponent),
+        canActivate: [authGuard]
+    },
     { path: '**', redirectTo: '/dashboard', pathMatch: 'full' },
 ];

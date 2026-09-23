@@ -68,6 +68,13 @@ public class Task {
     @JoinColumn(name = "procedure_id")
     private Procedure procedure;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "reward_key_id")
+    private com.couple.taskmanager.model.blindbox.BlindBoxKey rewardKey;
+
+    @Column(name = "reward_key_quantity")
+    private Integer rewardKeyQuantity = 1;
+
 
     @Override
     public boolean equals(Object o) {

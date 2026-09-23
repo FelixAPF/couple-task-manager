@@ -1,0 +1,148 @@
+<p-toast></p-toast>
+
+<div class="registry-shell">
+
+  <!-- ================= HERO ================= -->
+  <header class="hero">
+    <div class="hero-glow"></div>
+    <svg class="hero-shuriken" viewBox="0 0 100 100" aria-hidden="true">
+      <path fill="currentColor" d="M50 2 L61 39 L98 50 L61 61 L50 98 L39 61 L2 50 L39 39 Z"/>
+    </svg>
+
+    <div class="hero-text">
+      <p class="hero-eyebrow">Registre du village</p>
+      <h1>Registre des Ombres</h1>
+      <p class="hero-lede">Accomplissez vos corvées, amassez des clés, et brisez les sceaux pour révéler qui rejoint le registre.</p>
+    </div>
+
+    <div class="keyring" *ngIf="userKeys.length > 0">
+      <button type="button" class="key-orb" *ngFor="let inv of userKeys" (click)="openUnboxingModal(inv.key)">
+        <span class="key-orb-ring" [style.boxShadow]="'0 0 22px ' + (inv.key.color || '#ff4b3e') + '99'" [style.backgroundColor]="inv.key.color || '#ff4b3e'">
+          <i [class]="inv.key.icon"></i>
+        </span>
+        <span class="key-count">x{{ inv.quantity }}</span>
+        <span class="key-name">{{ inv.key.name }}</span>
+      </button>
+    </div>
+
+    <div class="keyring-empty" *ngIf="userKeys.length === 0">
+      Aucune clé en poche — terminez une corvée pour en gagner une.
+    </div>
+  </header>
+
+  <!-- ================= CONTROLS ================= -->
+  <div class="controls-row">
+    <nav class="tab-row">
+      <button *ngFor="let col of collections"
+              (click)="selectCollection(col.id)"
+              type="button"
+              class="tab-chip"
+              [class.active]="selectedCollectionId === col.id">
+        <span>{{ col.name }}</span>
+        <em>{{ col.ownedItemsCount }}/{{ col.totalItemsCount }}</em>
+      </button>
+    </nav>
+
+    <div class="partner-toggle" *ngIf="canInspectPartner && householdMembers.length > 1">
+      <span>Registre consulté</span>
+      <p-selectButton [options]="memberSelectOptions" [(ngModel)]="viewingUserId" (onChange)="loadPokedex()" optionLabel="label" optionValue="value" styleClass="registry-select-button"></p-selectButton>
+    </div>
+  </div>
+
+  <!-- ================= CARD GRID ================= -->
+  <div class="card-grid">
+    <div *ngFor="let card of cards"
+         class="s-card"
+         [class.locked]="!card.unlocked"
+         [ngClass]="card.unlocked ? ('effect-' + card.rarity.effectType.toLowerCase()) : ''"
+         [style.borderColor]="card.unlocked ? card.rarity.borderColor : 'transparent'"
+         [style.boxShadow]="card.unlocked ? ('0 0 0 1px ' + card.rarity.borderColor + '40, 0 8px 24px -6px ' + card.rarity.borderColor + '80') : 'none'"
+         (click)="inspectCard(card)">
+
+      <span class="s-card-number">N&deg;{{ card.itemNumber.toString().padStart(3, '0') }}</span>
+      <span *ngIf="card.unlocked && card.count > 1" class="s-card-tally">x{{ card.count }}</span>
+
+      <div class="s-card-art">
+        <img *ngIf="card.unlocked && card.imageUrl" [src]="card.imageUrl" [alt]="card.name">
+        <div *ngIf="!card.unlocked" class="s-card-locked">
+          <span class="locked-pulse"></span>
+          <span class="locked-mark">?</span>
+        </div>
+        <span *ngIf="card.unlocked" class="s-card-badge" [style.backgroundColor]="card.rarity.badgeColor">{{ card.rarity.name }}</span>
+        <div *ngIf="card.unlocked" class="s-card-fade"></div>
+      </div>
+
+      <div class="s-card-name">
+        <h3>{{ card.unlocked ? card.name : '???' }}</h3>
+        <p>{{ card.unlocked ? (card.subtitle || 'Shinobi') : 'Identité inconnue' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= UNBOXING MODAL ================= -->
+<p-dialog [(visible)]="showUnboxingDialog" [modal]="true" [closable]="!isUnboxingRunning" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '440px'}" [showHeader]="false">
+  <div class="unbox-body">
+
+    <div *ngIf="!revealResult" class="unbox-state">
+      <div class="unbox-orb" [class.box-shake]="isUnboxingRunning">
+        <i class="fa-solid fa-scroll"></i>
+      </div>
+
+      <h2>{{ activeKeyToOpen?.blindBox?.name || 'Sceau mystérieux' }}</h2>
+      <p class="unbox-sub">Glissez la clé dans le sceau pour révéler qui rejoint le registre.</p>
+
+      <button pButton pRipple
+              [label]="isUnboxingRunning ? 'Ouverture du sceau\u2026' : 'Briser le sceau'"
+              icon="pi pi-sparkles"
+              class="p-button-primary seal-btn"
+              [disabled]="isUnboxingRunning"
+              (click)="triggerOpen()"></button>
+    </div>
+
+    <div *ngIf="revealResult" class="unbox-state reveal animate-fadein">
+      <span *ngIf="revealResult.isNew || $any(revealResult).new" class="reveal-flag new">Nouveau au registre</span>
+      <span *ngIf="!(revealResult.isNew || $any(revealResult).new)" class="reveal-flag dup">Déjà répertorié &middot; x{{ revealResult.count }}</span>
+
+      <div class="s-card reveal-card"
+           [style.borderColor]="revealResult.item.rarity.borderColor"
+           [style.boxShadow]="'0 0 40px ' + revealResult.item.rarity.borderColor + '90'"
+           [ngClass]="'effect-' + revealResult.item.rarity.effectType.toLowerCase()">
+        <div class="s-card-art">
+          <img [src]="revealResult.item.imageUrl || 'assets/placeholder.jpg'" [alt]="revealResult.item.name">
+          <span class="s-card-badge" [style.backgroundColor]="revealResult.item.rarity.badgeColor">{{ revealResult.item.rarity.name }}</span>
+          <div class="s-card-fade"></div>
+        </div>
+        <div class="s-card-name">
+          <h3>{{ revealResult.item.name }}</h3>
+          <p>{{ revealResult.item.subtitle }}</p>
+        </div>
+      </div>
+
+      <button pButton pRipple label="Refermer le rouleau" class="p-button-secondary close-btn" (click)="closeUnboxing()"></button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- ================= DETAIL MODAL ================= -->
+<p-dialog [(visible)]="showDetailDialog" [modal]="true" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '420px'}" header="Fiche du dossier">
+  <div *ngIf="inspectedCard" class="detail-body">
+    <div class="s-card-art detail-art"
+         [style.borderColor]="inspectedCard.rarity.borderColor"
+         [style.boxShadow]="'0 0 34px ' + inspectedCard.rarity.borderColor + '80'"
+         [ngClass]="'effect-' + inspectedCard.rarity.effectType.toLowerCase()">
+      <img [src]="inspectedCard.imageUrl" [alt]="inspectedCard.name">
+      <span class="s-card-badge" [style.backgroundColor]="inspectedCard.rarity.badgeColor">{{ inspectedCard.rarity.name }} &middot; N&deg;{{ inspectedCard.itemNumber }}</span>
+      <div class="s-card-fade"></div>
+    </div>
+
+    <h2>{{ inspectedCard.name }}</h2>
+    <p class="detail-subtitle">{{ inspectedCard.subtitle }}</p>
+    <p class="detail-notes">{{ inspectedCard.description || 'Aucune note au dossier.' }}</p>
+
+    <div class="detail-footer">
+      <span>Recruté le {{ inspectedCard.firstObtainedDate | date:'mediumDate' }}</span>
+      <span>Possédé : x{{ inspectedCard.count }}</span>
+    </div>
+  </div>
+</p-dialog>

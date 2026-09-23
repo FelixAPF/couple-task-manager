@@ -294,6 +294,12 @@
         </div>
         <span>{{ 'side-menu.wish-list' | translate}}</span>
       </a>
+      <a routerLink="/pokedex" class="menu-item flex items-center gap-3.5 px-3 py-3 rounded-2xl font-bold text-surface-700 dark:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-800 hover:translate-x-0.5 transition-all" (click)="toggleMenu()">
+        <div class="w-9 h-9 rounded-xl bg-orange-50 dark:bg-orange-900/30 text-orange-500 flex items-center justify-center shrink-0">
+          <i class="pi pi-box text-sm"></i>
+        </div>
+        <span>Pokédex & Coffres</span>
+      </a>
       <a *ngIf="household.enableTravelChecklist" routerLink="/household/travel" class="menu-item flex items-center gap-3.5 px-3 py-3 rounded-2xl font-bold text-surface-700 dark:text-surface-200 hover:bg-surface-100 dark:hover:bg-surface-800 hover:translate-x-0.5 transition-all" (click)="toggleMenu()">
         <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 flex items-center justify-center shrink-0">
           <i class="fa-solid fa-plane text-sm"></i>

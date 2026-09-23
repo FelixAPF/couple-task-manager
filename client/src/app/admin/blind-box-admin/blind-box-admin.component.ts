@@ -5,7 +5,6 @@ import { RouterModule } from '@angular/router';
 
 // PrimeNG Modules
 import { SharedModule } from '../../shared.module';
-import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -16,7 +15,6 @@ import { InputSwitchModule } from 'primeng/inputswitch';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { TabViewModule } from 'primeng/tabview';
 
 // Services & Models
 import { BlindBoxService } from '../../service/blind-box.service';
@@ -26,10 +24,12 @@ import {
   BlindBoxRarity,
   BlindBoxItem,
   BlindBoxKey,
-  BlindBox,
+  BlindBoxCollection,
   CardEffectType
 } from '../../model/blind-box.model';
 import { HouseholdMember } from '../../model/household';
+
+export type AdminTab = 'rarities' | 'collections' | 'keys' | 'settings';
 
 @Component({
   selector: 'app-blind-box-admin',
@@ -39,7 +39,6 @@ import { HouseholdMember } from '../../model/household';
     FormsModule,
     RouterModule,
     SharedModule,
-    TableModule,
     DialogModule,
     ButtonModule,
     InputTextModule,
@@ -48,8 +47,7 @@ import { HouseholdMember } from '../../model/household';
     ColorPickerModule,
     InputSwitchModule,
     ToastModule,
-    ConfirmDialogModule,
-    TabViewModule
+    ConfirmDialogModule
   ],
   templateUrl: './blind-box-admin.component.html',
   styleUrls: ['./blind-box-admin.component.css'],
@@ -62,43 +60,49 @@ export class BlindBoxAdminComponent implements OnInit {
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
 
-  // --- State Data ---
+  // Active View Tab
+  activeTab: AdminTab = 'collections';
+
+  // State Data
   rarities: BlindBoxRarity[] = [];
-  collections: any[] = [];
+  collections: BlindBoxCollection[] = [];
   keys: BlindBoxKey[] = [];
   householdMembers: HouseholdMember[] = [];
   partnerInspectionEnabled = false;
 
-  // Selected collection for item management
-  selectedCollectionForItems: any = null;
+  // Collection Drill-down
+  activeCollection: BlindBoxCollection | null = null;
+  itemSearchTerm: string = '';
 
-  // --- Effect Type Options ---
+  // Effect Options
   effectOptions: { label: string; value: CardEffectType }[] = [
-    { label: 'Standard (Aucun effet)', value: 'STANDARD' },
-    { label: 'Foil (Reflet brillant)', value: 'FOIL' },
-    { label: 'Holographique (Reflet arc-en-ciel)', value: 'HOLOGRAPHIC' },
-    { label: 'Rainbow Shimmer (Paillettes animées)', value: 'RAINBOW_SHIMMER' }
+    { label: 'Standard (Neutre)', value: 'STANDARD' },
+    { label: 'Foil (Brillant)', value: 'FOIL' },
+    { label: 'Holographique (Arc-en-ciel)', value: 'HOLOGRAPHIC' },
+    { label: 'Rainbow Shimmer (Paillettes)', value: 'RAINBOW_SHIMMER' }
   ];
 
-  // --- Modal Visibility States ---
+  // Quick Palette for 1-tap color selection
+  colorPalette = ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444', '#ffd166'];
+
+  // Modals
   showRarityDialog = false;
   showCollectionDialog = false;
   showItemDialog = false;
   showKeyDialog = false;
   showGrantKeyDialog = false;
 
-  // --- Form Objects ---
+  // Editing Forms
   editingRarity: BlindBoxRarity = this.getEmptyRarity();
-  editingCollection: any = this.getEmptyCollection();
-  editingItem: any = this.getEmptyItem();
+  editingCollection: BlindBoxCollection = this.getEmptyCollection();
+  editingItem: BlindBoxItem = this.getEmptyItem();
   editingKey: any = this.getEmptyKey();
 
-  // Key granting state
+  // Key Granting
   grantTargetUserId: number | null = null;
   grantTargetKeyId: number | null = null;
   grantQuantity = 1;
 
-  // Image Uploading State
   isUploadingImage = false;
 
   ngOnInit(): void {
@@ -106,8 +110,8 @@ export class BlindBoxAdminComponent implements OnInit {
   }
 
   loadAllData(): void {
-    this.blindBoxService.getRarities().subscribe(data => this.rarities = data);
-    this.blindBoxService.getKeys().subscribe(data => this.keys = data);
+    this.blindBoxService.getRarities().subscribe(data => this.rarities = data || []);
+    this.blindBoxService.getKeys().subscribe(data => this.keys = data || []);
     this.blindBoxService.isInspectionEnabled().subscribe(enabled => this.partnerInspectionEnabled = enabled);
     this.loadCollections();
 
@@ -120,42 +124,35 @@ export class BlindBoxAdminComponent implements OnInit {
 
   loadCollections(): void {
     this.blindBoxService.getAdminCollections().subscribe(data => {
-      this.collections = data;
-      if (this.selectedCollectionForItems) {
-        this.selectedCollectionForItems = this.collections.find(c => c.id === this.selectedCollectionForItems.id) || null;
+      this.collections = data || [];
+      if (this.activeCollection) {
+        this.activeCollection = this.collections.find(c => c.id === this.activeCollection!.id) || null;
       }
     });
   }
 
-  // =========================================================
-  // 1. SYSTEM SETTINGS
-  // =========================================================
-  onToggleInspection(event: any): void {
-    this.blindBoxService.toggleInspection(event.checked).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Paramètre mis à jour',
-          detail: `Inspection des collections ${event.checked ? 'activée' : 'désactivée'}.`
-        });
-      },
-      error: () => {
-        this.partnerInspectionEnabled = !event.checked;
-        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour le paramètre.' });
-      }
-    });
+  // --- FILTERED ITEMS IN ACTIVE COLLECTION ---
+  get filteredActiveItems(): BlindBoxItem[] {
+    if (!this.activeCollection?.items) return [];
+    const term = this.itemSearchTerm.trim().toLowerCase();
+    if (!term) return this.activeCollection.items;
+    return this.activeCollection.items.filter(i =>
+      i.name.toLowerCase().includes(term) ||
+      (i.subtitle && i.subtitle.toLowerCase().includes(term)) ||
+      (i.rarity?.name && i.rarity.name.toLowerCase().includes(term))
+    );
   }
 
   // =========================================================
-  // 2. RARITY TIERS MANAGEMENT
+  // 1. RARITIES MANAGEMENT
   // =========================================================
   getEmptyRarity(): BlindBoxRarity {
     return {
       name: '',
-      borderColor: '#94a3b8',
-      badgeColor: '#64748b',
+      borderColor: '#3b82f6',
+      badgeColor: '#1d4ed8',
       effectType: 'STANDARD',
-      defaultDropRate: 10.0,
+      defaultDropRate: 15.0,
       displayOrder: (this.rarities?.length || 0) + 1
     };
   }
@@ -173,7 +170,6 @@ export class BlindBoxAdminComponent implements OnInit {
   saveRarity(): void {
     if (!this.editingRarity.name.trim()) return;
 
-    // Normalize colors if using p-colorPicker with hex string
     if (!this.editingRarity.borderColor.startsWith('#')) {
       this.editingRarity.borderColor = '#' + this.editingRarity.borderColor;
     }
@@ -192,6 +188,7 @@ export class BlindBoxAdminComponent implements OnInit {
   }
 
   confirmDeleteRarity(event: Event, rarity: BlindBoxRarity): void {
+    event.stopPropagation();
     this.confirmationService.confirm({
       target: event.target as EventTarget,
       message: `Supprimer la rareté "${rarity.name}" ?`,
@@ -204,7 +201,7 @@ export class BlindBoxAdminComponent implements OnInit {
         this.blindBoxService.deleteRarity(rarity.id).subscribe({
           next: () => {
             this.loadAllData();
-            this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Rareté supprimée.' });
+            this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Rareté retirée.' });
           }
         });
       }
@@ -212,9 +209,9 @@ export class BlindBoxAdminComponent implements OnInit {
   }
 
   // =========================================================
-  // 3. COLLECTIONS MANAGEMENT
+  // 2. COLLECTIONS MANAGEMENT
   // =========================================================
-  getEmptyCollection(): any {
+  getEmptyCollection(): BlindBoxCollection {
     return {
       name: '',
       description: '',
@@ -229,7 +226,8 @@ export class BlindBoxAdminComponent implements OnInit {
     this.showCollectionDialog = true;
   }
 
-  openEditCollection(col: any): void {
+  openEditCollection(col: BlindBoxCollection, event?: Event): void {
+    if (event) event.stopPropagation();
     this.editingCollection = { ...col };
     this.showCollectionDialog = true;
   }
@@ -247,19 +245,21 @@ export class BlindBoxAdminComponent implements OnInit {
     });
   }
 
-  confirmDeleteCollection(event: Event, col: any): void {
+  confirmDeleteCollection(event: Event, col: BlindBoxCollection): void {
+    event.stopPropagation();
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `Supprimer la collection "${col.name}" et tous ses personnages ?`,
+      message: `Supprimer la collection "${col.name}" et toutes ses cartes ?`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Supprimer',
       rejectLabel: 'Annuler',
       acceptButtonStyleClass: 'p-button-danger p-button-sm font-bold',
       accept: () => {
+        if (!col.id) return;
         this.blindBoxService.deleteCollection(col.id).subscribe({
           next: () => {
-            if (this.selectedCollectionForItems?.id === col.id) {
-              this.selectedCollectionForItems = null;
+            if (this.activeCollection?.id === col.id) {
+              this.activeCollection = null;
             }
             this.loadCollections();
             this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Collection supprimée.' });
@@ -288,35 +288,41 @@ export class BlindBoxAdminComponent implements OnInit {
   }
 
   // =========================================================
-  // 4. ITEMS / CHARACTERS MANAGEMENT
+  // 3. ITEMS / CARDS MANAGEMENT
   // =========================================================
-  getEmptyItem(): any {
+  getEmptyItem(): BlindBoxItem {
     return {
-      collection: this.selectedCollectionForItems,
-      itemNumber: (this.selectedCollectionForItems?.items?.length || 0) + 1,
+      collectionId: this.activeCollection?.id,
+      itemNumber: (this.activeCollection?.items?.length || 0) + 1,
       name: '',
       subtitle: '',
       description: '',
       imageUrl: '',
-      rarity: this.rarities[0] || null
+      rarity: this.rarities[0] || null!
     };
   }
 
   openCreateItem(): void {
-    if (!this.selectedCollectionForItems) return;
+    if (!this.activeCollection) return;
     this.editingItem = this.getEmptyItem();
     this.showItemDialog = true;
   }
 
-  openEditItem(item: any): void {
-    this.editingItem = { ...item, collection: this.selectedCollectionForItems };
+  openEditItem(item: BlindBoxItem, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.editingItem = { ...item, collectionId: this.activeCollection?.id };
     this.showItemDialog = true;
   }
 
   saveItem(): void {
     if (!this.editingItem.name.trim() || !this.editingItem.rarity) return;
 
-    this.blindBoxService.saveItem(this.editingItem).subscribe({
+    const payload: any = {
+      ...this.editingItem,
+      collection: this.activeCollection
+    };
+
+    this.blindBoxService.saveItem(payload).subscribe({
       next: () => {
         this.showItemDialog = false;
         this.loadCollections();
@@ -326,19 +332,21 @@ export class BlindBoxAdminComponent implements OnInit {
     });
   }
 
-  confirmDeleteItem(event: Event, item: any): void {
+  confirmDeleteItem(event: Event, item: BlindBoxItem): void {
+    event.stopPropagation();
     this.confirmationService.confirm({
       target: event.target as EventTarget,
-      message: `Supprimer le personnage "${item.name}" ?`,
+      message: `Supprimer la carte "${item.name}" ?`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Supprimer',
       rejectLabel: 'Annuler',
       acceptButtonStyleClass: 'p-button-danger p-button-sm font-bold',
       accept: () => {
+        if (!item.id) return;
         this.blindBoxService.deleteItem(item.id).subscribe({
           next: () => {
             this.loadCollections();
-            this.messageService.add({ severity: 'success', summary: 'Supprimé', detail: 'Personnage retiré.' });
+            this.messageService.add({ severity: 'success', summary: 'Supprimée', detail: 'Carte retirée.' });
           }
         });
       }
@@ -364,7 +372,7 @@ export class BlindBoxAdminComponent implements OnInit {
   }
 
   // =========================================================
-  // 5. KEYS & BOXES MANAGEMENT
+  // 4. KEYS & BOXES MANAGEMENT
   // =========================================================
   getEmptyKey(): any {
     return {
@@ -380,12 +388,12 @@ export class BlindBoxAdminComponent implements OnInit {
     };
   }
 
-openCreateKey(): void {
-    if (!this.collections || this.collections.length === 0) {
+  openCreateKey(): void {
+    if (this.collections.length === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Attention',
-        detail: 'Veuillez d\'abord créer au moins une collection avant de créer une clé.'
+        detail: 'Créez d\'abord une collection avant de configurer une clé.'
       });
       return;
     }
@@ -393,14 +401,14 @@ openCreateKey(): void {
     this.showKeyDialog = true;
   }
 
-saveKey(): void {
+  saveKey(): void {
     if (!this.editingKey.name?.trim() || !this.editingKey.blindBox?.name?.trim()) {
-      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Veuillez remplir le nom de la clé et du coffre.' });
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Nom de la clé et du coffre requis.' });
       return;
     }
 
     if (!this.editingKey.blindBox?.collection?.id) {
-      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Veuillez sélectionner une collection cible.' });
+      this.messageService.add({ severity: 'warn', summary: 'Validation', detail: 'Sélectionnez une collection cible.' });
       return;
     }
 
@@ -418,9 +426,9 @@ saveKey(): void {
     });
   }
 
-  openGrantKeyDialog(): void {
+  openGrantKeyDialog(keyId?: number): void {
     this.grantTargetUserId = this.householdMembers[0]?.id || null;
-    this.grantTargetKeyId = this.keys[0]?.id || null;
+    this.grantTargetKeyId = keyId || this.keys[0]?.id || null;
     this.grantQuantity = 1;
     this.showGrantKeyDialog = true;
   }
@@ -438,6 +446,22 @@ saveKey(): void {
         });
       },
       error: () => this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Échec de l\'envoi des clés.' })
+    });
+  }
+
+  onToggleInspection(event: any): void {
+    this.blindBoxService.toggleInspection(event.checked).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Paramètre mis à jour',
+          detail: `Inspection ${event.checked ? 'activée' : 'désactivée'}.`
+        });
+      },
+      error: () => {
+        this.partnerInspectionEnabled = !event.checked;
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour le paramètre.' });
+      }
     });
   }
 }

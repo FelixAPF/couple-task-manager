@@ -1,296 +1,280 @@
 <p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>
 
-<div class="container mx-auto p-4 md:p-6 pb-28 max-w-7xl">
-  <!-- Top Navigation & Header -->
-  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white dark:bg-surface-800 p-6 rounded-3xl shadow-sm border border-surface-200 dark:border-surface-700">
+<div class="admin-shell">
+
+  <!-- ================= TOP HEADER BANNER ================= -->
+  <header class="admin-header">
     <div class="flex items-center gap-3">
-      <p-button icon="pi pi-arrow-left" [text]="true" [rounded]="true" routerLink="/admin/dashboard"></p-button>
+      <button pButton icon="pi pi-arrow-left" [rounded]="true" [text]="true" class="back-nav-btn" routerLink="/admin/dashboard" aria-label="Retour au menu admin"></button>
       <div>
-        <h1 class="text-2xl sm:text-3xl font-black text-surface-900 dark:text-white m-0 tracking-tight">
-          Gestionnaire Blind Box & Pokédex
-        </h1>
-        <p class="text-sm text-surface-500 m-0 mt-0.5">Configuration globale des collections, raretés et récompenses de clés</p>
+        <span class="header-badge">Administration</span>
+        <h1 class="header-title">Blind Box & Collections</h1>
       </div>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="flex gap-2 w-full sm:w-auto">
-      <button pButton pRipple label="Attribuer des Clés" icon="pi pi-gift" class="p-button-warning p-button-rounded font-bold w-full sm:w-auto shadow-sm" (click)="openGrantKeyDialog()"></button>
-    </div>
-  </div>
+    <!-- Quick Grant Test Button -->
+    <button pButton pRipple label="Donner des clés" icon="pi pi-gift" class="grant-quick-btn" (click)="openGrantKeyDialog()"></button>
+  </header>
 
-  <!-- Global Settings Card: Partner Inspection -->
-  <div class="bg-white dark:bg-surface-800 p-6 rounded-3xl shadow-sm border border-surface-200 dark:border-surface-700 mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-    <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl shrink-0">
-        <i class="pi pi-eye"></i>
+  <!-- ================= MOBILE SEGMENTED PILL SWITCHER ================= -->
+  <nav class="pill-nav-container">
+    <button type="button" class="nav-pill" [class.active]="activeTab === 'collections'" (click)="activeTab = 'collections'">
+      <i class="pi pi-images"></i>
+      <span>Collections ({{ collections.length }})</span>
+    </button>
+    <button type="button" class="nav-pill" [class.active]="activeTab === 'rarities'" (click)="activeTab = 'rarities'">
+      <i class="pi pi-star"></i>
+      <span>Raretés ({{ rarities.length }})</span>
+    </button>
+    <button type="button" class="nav-pill" [class.active]="activeTab === 'keys'" (click)="activeTab = 'keys'">
+      <i class="pi pi-key"></i>
+      <span>Clés ({{ keys.length }})</span>
+    </button>
+    <button type="button" class="nav-pill" [class.active]="activeTab === 'settings'" (click)="activeTab = 'settings'">
+      <i class="pi pi-sliders-h"></i>
+      <span>Paramètres</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================= -->
+  <!-- TAB 1: COLLECTIONS & DRILL-DOWN ITEMS                     -->
+  <!-- ========================================================= -->
+  <main *ngIf="activeTab === 'collections'">
+
+    <!-- VIEW A: ALL COLLECTIONS LIST -->
+    <div *ngIf="!activeCollection" class="view-block animate-fadein">
+      <div class="section-title-row">
+        <div>
+          <h2>Collections actives</h2>
+          <p>Choisissez une collection pour gérer son catalogue de cartes.</p>
+        </div>
+        <button pButton pRipple label="Créer" icon="pi pi-plus" class="p-button-primary p-button-rounded font-bold" (click)="openCreateCollection()"></button>
       </div>
-      <div>
-        <h3 class="text-base font-bold text-surface-900 dark:text-white m-0">Inspection mutuelle des collections</h3>
-        <p class="text-xs text-surface-500 m-0 mt-0.5">Permettre aux partenaires du foyer de consulter le Pokédex de l'autre.</p>
+
+      <div class="cards-stack">
+        <div *ngFor="let col of collections" class="touch-card collection-card" (click)="activeCollection = col">
+          <div class="col-thumb">
+            <img [src]="col.bannerUrl || 'assets/placeholder.jpg'" [alt]="col.name">
+            <span class="count-bubble">{{ col.items?.length || 0 }} cartes</span>
+          </div>
+
+          <div class="card-details flex-grow min-w-0">
+            <h3>{{ col.name }}</h3>
+            <p class="truncate">{{ col.description || 'Aucune description' }}</p>
+          </div>
+
+          <div class="card-actions" (click)="$event.stopPropagation()">
+            <button pButton icon="pi pi-pencil" [rounded]="true" [text]="true" class="p-button-secondary" (click)="openEditCollection(col, $event)"></button>
+            <button pButton icon="pi pi-trash" [rounded]="true" [text]="true" class="p-button-danger" (click)="confirmDeleteCollection($event, col)"></button>
+            <i class="pi pi-chevron-right chevron-icon"></i>
+          </div>
+        </div>
+
+        <div *ngIf="collections.length === 0" class="empty-box">
+          <i class="pi pi-inbox text-4xl mb-2 opacity-50"></i>
+          <p>Aucune collection créée pour le moment.</p>
+        </div>
       </div>
     </div>
-    <div class="flex items-center gap-3">
-      <span class="text-xs font-bold" [ngClass]="partnerInspectionEnabled ? 'text-indigo-600 dark:text-indigo-400' : 'text-surface-400'">
-        {{ partnerInspectionEnabled ? 'Activée' : 'Désactivée' }}
-      </span>
+
+    <!-- VIEW B: DRILL-DOWN INTO COLLECTION'S CARDS -->
+    <div *ngIf="activeCollection" class="view-block animate-fadein">
+      
+      <!-- Drill-Down Subheader -->
+      <div class="drilldown-bar">
+        <button type="button" class="back-to-cols-btn" (click)="activeCollection = null">
+          <i class="pi pi-arrow-left"></i>
+          <span>Toutes les collections</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button pButton pRipple label="Ajouter une carte" icon="pi pi-plus" class="p-button-primary p-button-rounded p-button-sm font-bold" (click)="openCreateItem()"></button>
+        </div>
+      </div>
+
+      <div class="collection-hero-mini">
+        <img [src]="activeCollection.bannerUrl || 'assets/placeholder.jpg'" [alt]="activeCollection.name" class="mini-banner">
+        <div class="mini-info">
+          <h2>{{ activeCollection.name }}</h2>
+          <span>{{ activeCollection.items?.length || 0 }} cartes enregistrées</span>
+        </div>
+      </div>
+
+      <!-- Quick Search Bar -->
+      <div class="search-wrap">
+        <i class="pi pi-search search-icon"></i>
+        <input pInputText type="text" [(ngModel)]="itemSearchTerm" placeholder="Rechercher par nom, titre ou rareté..." class="search-input" />
+        <button *ngIf="itemSearchTerm" (click)="itemSearchTerm = ''" class="clear-search-btn"><i class="pi pi-times"></i></button>
+      </div>
+
+      <!-- Character Cards Stack -->
+      <div class="cards-stack">
+        <div *ngFor="let item of filteredActiveItems" class="touch-card item-card">
+          
+          <!-- Card Thumbnail with Rarity Border -->
+          <div class="item-thumb" [style.borderColor]="item.rarity?.borderColor || '#94a3b8'">
+            <img [src]="item.imageUrl || 'assets/placeholder.jpg'" [alt]="item.name">
+            <span class="num-badge">#{{ item.itemNumber.toString().padStart(3, '0') }}</span>
+          </div>
+
+          <div class="card-details flex-grow min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="rarity-pill" [style.backgroundColor]="item.rarity?.badgeColor || '#334155'">
+                {{ item.rarity?.name || 'Inconnu' }}
+              </span>
+            </div>
+            <h3>{{ item.name }}</h3>
+            <p class="truncate">{{ item.subtitle || 'Shinobi' }}</p>
+          </div>
+
+          <div class="card-actions">
+            <button pButton icon="pi pi-pencil" [rounded]="true" [text]="true" class="p-button-secondary" (click)="openEditItem(item, $event)"></button>
+            <button pButton icon="pi pi-trash" [rounded]="true" [text]="true" class="p-button-danger" (click)="confirmDeleteItem($event, item)"></button>
+          </div>
+        </div>
+
+        <div *ngIf="filteredActiveItems.length === 0" class="empty-box">
+          <i class="pi pi-search text-3xl mb-2 opacity-50"></i>
+          <p>Aucun personnage ne correspond à votre recherche.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- TAB 2: RARITIES & VISUAL EFFECTS                          -->
+  <!-- ========================================================= -->
+  <main *ngIf="activeTab === 'rarities'" class="view-block animate-fadein">
+    <div class="section-title-row">
+      <div>
+        <h2>Rangs & Shaders Holographiques</h2>
+        <p>Ajustez les bordures lumineuses et les probabilités d'apparition.</p>
+      </div>
+      <button pButton pRipple label="Créer un rang" icon="pi pi-plus" class="p-button-primary p-button-rounded font-bold" (click)="openCreateRarity()"></button>
+    </div>
+
+    <div class="cards-stack">
+      <div *ngFor="let r of rarities" class="touch-card rarity-card" [style.borderLeftColor]="r.borderColor">
+        
+        <div class="rarity-preview-orb" [style.backgroundColor]="r.badgeColor" [style.boxShadow]="'0 0 16px ' + r.borderColor + '80'">
+          <span class="text-xs font-mono font-black text-white">#{{ r.displayOrder }}</span>
+        </div>
+
+        <div class="card-details flex-grow min-w-0">
+          <div class="flex items-center gap-2">
+            <h3>{{ r.name }}</h3>
+            <span class="effect-tag" [ngClass]="'tag-' + r.effectType.toLowerCase()">{{ r.effectType }}</span>
+          </div>
+          <p>Taux d'apparition standard : <strong>{{ r.defaultDropRate }}%</strong></p>
+        </div>
+
+        <div class="card-actions">
+          <button pButton icon="pi pi-pencil" [rounded]="true" [text]="true" class="p-button-secondary" (click)="openEditRarity(r)"></button>
+          <button pButton icon="pi pi-trash" [rounded]="true" [text]="true" class="p-button-danger" (click)="confirmDeleteRarity($event, r)"></button>
+        </div>
+      </div>
+
+      <div *ngIf="rarities.length === 0" class="empty-box">
+        <p>Aucun rang configuré.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- TAB 3: KEYS & BOXES                                      -->
+  <!-- ========================================================= -->
+  <main *ngIf="activeTab === 'keys'" class="view-block animate-fadein">
+    <div class="section-title-row">
+      <div>
+        <h2>Clés & Coffres</h2>
+        <p>Ces clés peuvent être offertes en récompense pour l'accomplissement des corvées.</p>
+      </div>
+      <button pButton pRipple label="Nouvelle clé" icon="pi pi-plus" class="p-button-primary p-button-rounded font-bold" (click)="openCreateKey()"></button>
+    </div>
+
+    <div class="cards-stack">
+      <div *ngFor="let k of keys" class="touch-card key-card">
+        
+        <div class="key-orb-icon" [style.backgroundColor]="k.color || '#f97316'" [style.boxShadow]="'0 0 14px ' + (k.color || '#f97316') + '80'">
+          <i [class]="k.icon"></i>
+        </div>
+
+        <div class="card-details flex-grow min-w-0">
+          <h3>{{ k.name }}</h3>
+          <p>Ouvre : <strong>{{ k.blindBox?.name }}</strong> &bull; Collection : <em>{{ k.blindBox?.collection?.name || 'Globale' }}</em></p>
+        </div>
+
+        <div class="card-actions">
+          <button pButton label="Donner" icon="pi pi-gift" class="p-button-sm p-button-warning p-button-rounded font-bold" (click)="openGrantKeyDialog(k.id)"></button>
+        </div>
+      </div>
+
+      <div *ngIf="keys.length === 0" class="empty-box">
+        <p>Aucune clé configurée.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- TAB 4: SYSTEM SETTINGS                                    -->
+  <!-- ========================================================= -->
+  <main *ngIf="activeTab === 'settings'" class="view-block animate-fadein">
+    <div class="settings-card">
+      <div class="flex items-center gap-3">
+        <div class="setting-icon-box">
+          <i class="pi pi-eye"></i>
+        </div>
+        <div>
+          <h3>Inspection mutuelle du Pokédex</h3>
+          <p>Permettre aux partenaires du foyer de consulter mutuellement leurs collections.</p>
+        </div>
+      </div>
       <p-inputSwitch [(ngModel)]="partnerInspectionEnabled" (onChange)="onToggleInspection($event)"></p-inputSwitch>
     </div>
-  </div>
-
-  <!-- PrimeNG Tabs for clean modular management -->
-  <p-tabView styleClass="custom-tabs">
-
-    <!-- ========================================================= -->
-    <!-- TAB 1: RARITY TIERS & EFFECTS                            -->
-    <!-- ========================================================= -->
-    <p-tabPanel header="Raretés & Effets Visuels">
-      <div class="flex justify-between items-center mb-4 mt-2">
-        <div>
-          <h3 class="text-lg font-bold m-0 text-surface-900 dark:text-white">Rangs et Taux par Défaut</h3>
-          <p class="text-xs text-surface-500 m-0">Personnalisez les couleurs de bordures, shaders holographiques et probabilités d'apparition.</p>
-        </div>
-        <button pButton pRipple label="Ajouter un Rang" icon="pi pi-plus" class="p-button-primary p-button-rounded font-bold p-button-sm shadow-sm" (click)="openCreateRarity()"></button>
-      </div>
-
-      <div class="bg-white dark:bg-surface-800 rounded-3xl border border-surface-200 dark:border-surface-700 overflow-hidden shadow-sm">
-        <p-table [value]="rarities" responsiveLayout="scroll">
-          <ng-template pTemplate="header">
-            <tr>
-              <th>Ordre</th>
-              <th>Nom du Rang</th>
-              <th>Aperçu Visuel & Bordure</th>
-              <th>Effet Shaders</th>
-              <th>Taux (%)</th>
-              <th class="text-right">Actions</th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-r>
-            <tr>
-              <td class="font-mono text-xs font-bold">{{ r.displayOrder }}</td>
-              <td class="font-bold text-surface-900 dark:text-white">{{ r.name }}</td>
-              <td>
-                <div class="flex items-center gap-2">
-                  <span class="w-6 h-6 rounded-full border-2 shadow-sm" [style.backgroundColor]="r.badgeColor" [style.borderColor]="r.borderColor"></span>
-                  <span class="text-xs font-mono font-bold">{{ r.borderColor }}</span>
-                </div>
-              </td>
-              <td>
-                <span class="px-2.5 py-1 rounded-xl text-xs font-extrabold uppercase tracking-wider"
-                      [ngClass]="{
-                        'bg-slate-100 text-slate-700': r.effectType === 'STANDARD',
-                        'bg-amber-100 text-amber-800': r.effectType === 'FOIL',
-                        'bg-purple-100 text-purple-800': r.effectType === 'HOLOGRAPHIC',
-                        'bg-pink-100 text-pink-800': r.effectType === 'RAINBOW_SHIMMER'
-                      }">
-                  {{ r.effectType }}
-                </span>
-              </td>
-              <td class="font-black text-sm text-surface-800 dark:text-surface-100">{{ r.defaultDropRate }}%</td>
-              <td class="text-right">
-                <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded p-button-secondary" (click)="openEditRarity(r)"></button>
-                <button pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger" (click)="confirmDeleteRarity($event, r)"></button>
-              </td>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="6" class="text-center py-8 text-surface-400">Aucun rang configuré. Cliquez sur "Ajouter un Rang".</td>
-            </tr>
-          </ng-template>
-        </p-table>
-      </div>
-    </p-tabPanel>
-
-    <!-- ========================================================= -->
-    <!-- TAB 2: COLLECTIONS & POKÉDEX CARDS                        -->
-    <!-- ========================================================= -->
-    <p-tabPanel header="Collections & Personnages">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-2">
-
-        <!-- Left: Collections List -->
-        <div class="col-span-1 flex flex-col gap-4">
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-bold m-0 text-surface-900 dark:text-white">Collections</h3>
-            <button pButton pRipple label="Nouvelle" icon="pi pi-plus" class="p-button-rounded p-button-sm p-button-primary font-bold" (click)="openCreateCollection()"></button>
-          </div>
-
-          <div class="flex flex-col gap-3">
-            <div *ngFor="let col of collections"
-                 (click)="selectedCollectionForItems = col"
-                 class="p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between shadow-sm bg-white dark:bg-surface-800"
-                 [ngClass]="selectedCollectionForItems?.id === col.id ? 'border-primary-500 bg-primary-50/40 dark:bg-primary-900/20' : 'border-surface-200 dark:border-surface-700 hover:border-surface-300'">
-              <div class="flex items-center gap-3 min-w-0">
-                <img [src]="col.bannerUrl || 'assets/placeholder.jpg'" class="w-12 h-12 rounded-xl object-cover shadow-sm shrink-0 border border-surface-200 dark:border-surface-700">
-                <div class="min-w-0">
-                  <h4 class="font-bold text-sm m-0 truncate text-surface-900 dark:text-white">{{ col.name }}</h4>
-                  <span class="text-xs text-surface-400">{{ col.items?.length || 0 }} carte(s)</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-1 shrink-0">
-                <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-text p-button-secondary !w-8 !h-8" (click)="$event.stopPropagation(); openEditCollection(col)"></button>
-                <button pButton icon="pi pi-trash" class="p-button-rounded p-button-text p-button-danger !w-8 !h-8" (click)="$event.stopPropagation(); confirmDeleteCollection($event, col)"></button>
-              </div>
-            </div>
-
-            <div *ngIf="collections.length === 0" class="text-center py-10 text-surface-400 border border-dashed border-surface-300 rounded-2xl">
-              Aucune collection. Créez-en une pour commencer !
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Items in Selected Collection -->
-        <div class="col-span-1 lg:col-span-2">
-          <div *ngIf="selectedCollectionForItems; else noColSelected" class="flex flex-col gap-4">
-            <div class="flex justify-between items-center">
-              <div>
-                <h3 class="text-lg font-bold m-0 text-surface-900 dark:text-white">
-                  Cartes de : {{ selectedCollectionForItems.name }}
-                </h3>
-                <p class="text-xs text-surface-500 m-0">Gérez les shinobis / personnages inclus dans cette série.</p>
-              </div>
-              <button pButton pRipple label="Ajouter un Personnage" icon="pi pi-plus" class="p-button-rounded p-button-sm p-button-primary font-bold shadow-sm" (click)="openCreateItem()"></button>
-            </div>
-
-            <!-- Items Table -->
-            <div class="bg-white dark:bg-surface-800 rounded-3xl border border-surface-200 dark:border-surface-700 overflow-hidden shadow-sm">
-              <p-table [value]="selectedCollectionForItems.items || []" responsiveLayout="scroll">
-                <ng-template pTemplate="header">
-                  <tr>
-                    <th>#</th>
-                    <th>Image</th>
-                    <th>Nom & Titre</th>
-                    <th>Rareté</th>
-                    <th class="text-right">Actions</th>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-item>
-                  <tr>
-                    <td class="font-mono text-xs font-bold text-surface-400">#{{ item.itemNumber.toString().padStart(3, '0') }}</td>
-                    <td>
-                      <img [src]="item.imageUrl || 'assets/placeholder.jpg'" class="w-10 h-10 rounded-lg object-cover shadow-sm border border-surface-200 dark:border-surface-700">
-                    </td>
-                    <td>
-                      <div class="flex flex-col">
-                        <span class="font-bold text-sm text-surface-900 dark:text-white">{{ item.name }}</span>
-                        <span class="text-xs text-surface-400">{{ item.subtitle }}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span class="px-2 py-0.5 rounded text-xs font-bold text-white shadow-sm" [style.backgroundColor]="item.rarity?.badgeColor">
-                        {{ item.rarity?.name }}
-                      </span>
-                    </td>
-                    <td class="text-right">
-                      <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded p-button-secondary" (click)="openEditItem(item)"></button>
-                      <button pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger" (click)="confirmDeleteItem($event, item)"></button>
-                    </td>
-                  </tr>
-                </ng-template>
-                <ng-template pTemplate="emptymessage">
-                  <tr>
-                    <td colspan="5" class="text-center py-10 text-surface-400">Cette collection n'a pas encore de personnages enregistrés.</td>
-                  </tr>
-                </ng-template>
-              </p-table>
-            </div>
-          </div>
-
-          <ng-template #noColSelected>
-            <div class="h-full flex flex-col items-center justify-center py-24 text-surface-400 border border-dashed border-surface-200 dark:border-surface-700 rounded-3xl">
-              <i class="pi pi-arrow-left text-3xl mb-2 opacity-50"></i>
-              <span class="font-medium text-sm">Sélectionnez une collection sur la gauche pour gérer ses cartes.</span>
-            </div>
-          </ng-template>
-        </div>
-      </div>
-    </p-tabPanel>
-
-    <!-- ========================================================= -->
-    <!-- TAB 3: BLIND BOXES & KEYS                                -->
-    <!-- ========================================================= -->
-    <p-tabPanel header="Coffres & Clés">
-      <div class="flex justify-between items-center mb-4 mt-2">
-        <div>
-          <h3 class="text-lg font-bold m-0 text-surface-900 dark:text-white">Clés et Coffres Déverrouillables</h3>
-          <p class="text-xs text-surface-500 m-0">Associez chaque clé à son coffre pour l'offrir ensuite en récompense de tâche.</p>
-        </div>
-        <button pButton pRipple label="Créer une Clé & Coffre" icon="pi pi-plus" class="p-button-primary p-button-rounded font-bold p-button-sm shadow-sm" (click)="openCreateKey()"></button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div *ngFor="let k of keys" class="bg-white dark:bg-surface-800 rounded-3xl p-5 border border-surface-200 dark:border-surface-700 shadow-sm flex flex-col justify-between">
-          <div class="flex items-start gap-3.5 mb-4">
-            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl text-white shadow-md" [style.backgroundColor]="k.color || '#f97316'">
-              <i [class]="k.icon"></i>
-            </div>
-            <div>
-              <h4 class="font-bold text-base m-0 text-surface-900 dark:text-white">{{ k.name }}</h4>
-              <p class="text-xs text-surface-400 m-0 mt-0.5">Ouvre : <strong>{{ k.blindBox?.name }}</strong></p>
-            </div>
-          </div>
-          <div class="text-xs text-surface-500 bg-surface-50 dark:bg-surface-900/50 p-3 rounded-2xl border border-surface-100 dark:border-surface-700/60 mb-4">
-            Collection : <span class="font-bold text-surface-800 dark:text-surface-200">{{ k.blindBox?.collection?.name || 'Globale' }}</span>
-          </div>
-          <div class="flex justify-end gap-2 pt-3 border-t border-surface-100 dark:border-surface-700/60">
-            <button pButton label="Attribuer" icon="pi pi-gift" class="p-button-outlined p-button-warning p-button-sm p-button-rounded font-bold" (click)="grantTargetKeyId = k.id!; openGrantKeyDialog()"></button>
-          </div>
-        </div>
-
-        <div *ngIf="keys.length === 0" class="col-span-full py-12 text-center text-surface-400 border border-dashed border-surface-300 rounded-3xl">
-          Aucune clé configurée pour le moment.
-        </div>
-      </div>
-    </p-tabPanel>
-  </p-tabView>
+  </main>
 </div>
 
 <!-- ========================================================= -->
 <!-- MODAL: ADD / EDIT RARITY                                  -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showRarityDialog" [modal]="true" header="Configurer une Rareté" [style]="{width: '90vw', maxWidth: '440px'}">
-  <div class="flex flex-col gap-4 pt-2">
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Nom du rang</label>
-      <input pInputText [(ngModel)]="editingRarity.name" placeholder="Ex: Commun, Légendaire..." class="w-full !rounded-xl font-bold" />
+<p-dialog [(visible)]="showRarityDialog" [modal]="true" header="Rang de Rareté" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+  <div class="dialog-body">
+    <div class="input-group">
+      <label>Nom du rang</label>
+      <input pInputText [(ngModel)]="editingRarity.name" placeholder="Ex: Commun, Épique, Légendaire..." class="w-full !rounded-2xl !py-3" />
+    </div>
+
+    <!-- Quick Palette -->
+    <div class="input-group">
+      <label>Couleur du rang</label>
+      <div class="palette-row">
+        <button *ngFor="let c of colorPalette" type="button" class="swatch-btn" [style.backgroundColor]="c" (click)="editingRarity.borderColor = c; editingRarity.badgeColor = c" [class.selected]="editingRarity.borderColor === c"></button>
+      </div>
+      <div class="flex gap-2 items-center mt-2">
+        <p-colorPicker [(ngModel)]="editingRarity.borderColor" appendTo="body"></p-colorPicker>
+        <input pInputText [(ngModel)]="editingRarity.borderColor" class="w-full font-mono text-xs !rounded-xl" />
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>Effet visuel spécial</label>
+      <p-dropdown [options]="effectOptions" [(ngModel)]="editingRarity.effectType" optionLabel="label" optionValue="value" styleClass="w-full !rounded-2xl" appendTo="body"></p-dropdown>
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Couleur Bordure</label>
-        <div class="flex items-center gap-2">
-          <p-colorPicker [(ngModel)]="editingRarity.borderColor" appendTo="body"></p-colorPicker>
-          <input pInputText [(ngModel)]="editingRarity.borderColor" class="w-full text-xs font-mono !rounded-xl" />
-        </div>
+      <div class="input-group">
+        <label>Taux de drop (%)</label>
+        <p-inputNumber [(ngModel)]="editingRarity.defaultDropRate" [min]="0.1" [max]="100" suffix="%" styleClass="w-full" inputStyleClass="w-full !rounded-2xl font-bold"></p-inputNumber>
       </div>
-      <div>
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Couleur Badge</label>
-        <div class="flex items-center gap-2">
-          <p-colorPicker [(ngModel)]="editingRarity.badgeColor" appendTo="body"></p-colorPicker>
-          <input pInputText [(ngModel)]="editingRarity.badgeColor" class="w-full text-xs font-mono !rounded-xl" />
-        </div>
+      <div class="input-group">
+        <label>Ordre (#)</label>
+        <p-inputNumber [(ngModel)]="editingRarity.displayOrder" [min]="1" styleClass="w-full" inputStyleClass="w-full !rounded-2xl font-bold"></p-inputNumber>
       </div>
     </div>
 
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Effet Visuel Spécial</label>
-      <p-dropdown [options]="effectOptions" [(ngModel)]="editingRarity.effectType" optionLabel="label" optionValue="value" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
-    </div>
-
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Taux par défaut (%)</label>
-        <p-inputNumber [(ngModel)]="editingRarity.defaultDropRate" [min]="0.1" [max]="100" suffix="%" styleClass="w-full" inputStyleClass="w-full !rounded-xl font-bold"></p-inputNumber>
-      </div>
-      <div>
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Ordre d'affichage</label>
-        <p-inputNumber [(ngModel)]="editingRarity.displayOrder" [min]="1" styleClass="w-full" inputStyleClass="w-full !rounded-xl font-bold"></p-inputNumber>
-      </div>
-    </div>
-
-    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
-      <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="showRarityDialog = false"></button>
+    <div class="dialog-footer">
+      <button pButton label="Annuler" class="p-button-text p-button-secondary font-bold" (click)="showRarityDialog = false"></button>
       <button pButton label="Sauvegarder" icon="pi pi-check" class="p-button-primary p-button-rounded font-bold" (click)="saveRarity()"></button>
     </div>
   </div>
@@ -299,125 +283,125 @@
 <!-- ========================================================= -->
 <!-- MODAL: ADD / EDIT COLLECTION                              -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showCollectionDialog" [modal]="true" header="Configurer une Collection" [style]="{width: '90vw', maxWidth: '480px'}">
-  <div class="flex flex-col gap-4 pt-2">
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Nom de la collection</label>
-      <input pInputText [(ngModel)]="editingCollection.name" placeholder="Ex: Naruto & Naruto Shippuden" class="w-full !rounded-xl font-bold" />
+<p-dialog [(visible)]="showCollectionDialog" [modal]="true" header="Nouvelle Collection" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+  <div class="dialog-body">
+    <div class="input-group">
+      <label>Nom de la collection</label>
+      <input pInputText [(ngModel)]="editingCollection.name" placeholder="Ex: Naruto Shippuden, Bleach..." class="w-full !rounded-2xl !py-3" />
     </div>
 
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Description</label>
-      <textarea pInputTextarea [(ngModel)]="editingCollection.description" rows="2" placeholder="Description de l'ensemble de cartes..." class="w-full !rounded-xl"></textarea>
+    <div class="input-group">
+      <label>Description</label>
+      <textarea pInputTextarea [(ngModel)]="editingCollection.description" rows="2" placeholder="Description de l'univers..." class="w-full !rounded-2xl"></textarea>
     </div>
 
-    <!-- Banner File Upload via /files -->
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Bannière Artwork</label>
+    <!-- Banner Upload -->
+    <div class="input-group">
+      <label>Bannière de la collection</label>
       <div class="flex items-center gap-2">
-        <input type="file" #bannerFileInput class="hidden" accept="image/*" (change)="onUploadCollectionBanner($event)">
-        <button pButton icon="pi pi-upload" label="Téléverser une image" class="p-button-outlined p-button-secondary !rounded-xl text-xs" (click)="bannerFileInput.click()" [loading]="isUploadingImage"></button>
-        <input pInputText [(ngModel)]="editingCollection.bannerUrl" placeholder="Ou coller une URL..." class="flex-grow !rounded-xl text-xs" />
+        <input type="file" #bannerInput class="hidden" accept="image/*" (change)="onUploadCollectionBanner($event)">
+        <button pButton icon="pi pi-upload" label="Téléverser" class="p-button-outlined p-button-secondary !rounded-2xl font-bold" (click)="bannerInput.click()" [loading]="isUploadingImage"></button>
+        <input pInputText [(ngModel)]="editingCollection.bannerUrl" placeholder="Ou URL d'image..." class="flex-grow !rounded-2xl text-xs" />
       </div>
-      <img *ngIf="editingCollection.bannerUrl" [src]="editingCollection.bannerUrl" class="mt-2 w-full h-28 object-cover rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm">
+      <img *ngIf="editingCollection.bannerUrl" [src]="editingCollection.bannerUrl" class="image-preview mt-2">
     </div>
 
-    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
-      <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="showCollectionDialog = false"></button>
+    <div class="dialog-footer">
+      <button pButton label="Annuler" class="p-button-text p-button-secondary font-bold" (click)="showCollectionDialog = false"></button>
       <button pButton label="Sauvegarder" icon="pi pi-check" class="p-button-primary p-button-rounded font-bold" (click)="saveCollection()"></button>
     </div>
   </div>
 </p-dialog>
 
 <!-- ========================================================= -->
-<!-- MODAL: ADD / EDIT ITEM (CHARACTER CARD)                   -->
+<!-- MODAL: ADD / EDIT CARD                                    -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showItemDialog" [modal]="true" header="Carte de Personnage" [style]="{width: '90vw', maxWidth: '480px'}">
-  <div class="flex flex-col gap-4 pt-2">
-    <div class="grid grid-cols-3 gap-3">
-      <div class="col-span-1">
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Numéro (#)</label>
-        <p-inputNumber [(ngModel)]="editingItem.itemNumber" [min]="1" styleClass="w-full" inputStyleClass="w-full !rounded-xl font-bold"></p-inputNumber>
+<p-dialog [(visible)]="showItemDialog" [modal]="true" header="Carte de Personnage" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+  <div class="dialog-body">
+    <div class="grid grid-cols-3 gap-2">
+      <div class="col-span-1 input-group">
+        <label>N° (#)</label>
+        <p-inputNumber [(ngModel)]="editingItem.itemNumber" [min]="1" styleClass="w-full" inputStyleClass="w-full !rounded-2xl font-bold text-center"></p-inputNumber>
       </div>
-      <div class="col-span-2">
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Rareté</label>
-        <p-dropdown [options]="rarities" [(ngModel)]="editingItem.rarity" optionLabel="name" placeholder="Sélectionner" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
+      <div class="col-span-2 input-group">
+        <label>Rareté</label>
+        <p-dropdown [options]="rarities" [(ngModel)]="editingItem.rarity" optionLabel="name" placeholder="Sélectionner" styleClass="w-full !rounded-2xl" appendTo="body"></p-dropdown>
       </div>
     </div>
 
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Nom du Shinobi / Personnage</label>
-      <input pInputText [(ngModel)]="editingItem.name" placeholder="Ex: Minato Namikaze" class="w-full !rounded-xl font-bold" />
+    <div class="input-group">
+      <label>Nom du Personnage</label>
+      <input pInputText [(ngModel)]="editingItem.name" placeholder="Ex: Minato Namikaze, Ichigo..." class="w-full !rounded-2xl !py-3 font-bold" />
     </div>
 
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Sous-titre / Titre</label>
-      <input pInputText [(ngModel)]="editingItem.subtitle" placeholder="Ex: Le 4ème Hokage" class="w-full !rounded-xl" />
+    <div class="input-group">
+      <label>Titre / Épithète</label>
+      <input pInputText [(ngModel)]="editingItem.subtitle" placeholder="Ex: L'Éclair Jaune de Konoha" class="w-full !rounded-2xl" />
     </div>
 
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Citation / Lore</label>
-      <textarea pInputTextarea [(ngModel)]="editingItem.description" rows="2" placeholder="Citation ou description épique..." class="w-full !rounded-xl"></textarea>
+    <div class="input-group">
+      <label>Citation / Lore</label>
+      <textarea pInputTextarea [(ngModel)]="editingItem.description" rows="2" placeholder="Citation marquante ou biographie..." class="w-full !rounded-2xl"></textarea>
     </div>
 
-    <!-- Artwork Upload via /files -->
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Illustration de la carte</label>
+    <!-- Artwork Upload -->
+    <div class="input-group">
+      <label>Illustration (Photo)</label>
       <div class="flex items-center gap-2">
-        <input type="file" #cardArtInput class="hidden" accept="image/*" (change)="onUploadItemArtwork($event)">
-        <button pButton icon="pi pi-camera" label="Téléverser" class="p-button-outlined p-button-secondary !rounded-xl text-xs" (click)="cardArtInput.click()" [loading]="isUploadingImage"></button>
-        <input pInputText [(ngModel)]="editingItem.imageUrl" placeholder="Ou URL d'image..." class="flex-grow !rounded-xl text-xs" />
+        <input type="file" #cardInput class="hidden" accept="image/*" (change)="onUploadItemArtwork($event)">
+        <button pButton icon="pi pi-camera" label="Choisir" class="p-button-outlined p-button-secondary !rounded-2xl font-bold" (click)="cardInput.click()" [loading]="isUploadingImage"></button>
+        <input pInputText [(ngModel)]="editingItem.imageUrl" placeholder="Ou URL d'image..." class="flex-grow !rounded-2xl text-xs" />
       </div>
-      <img *ngIf="editingItem.imageUrl" [src]="editingItem.imageUrl" class="mt-2 w-28 h-28 object-cover rounded-xl border border-surface-200 dark:border-surface-700 shadow-sm mx-auto">
+      <img *ngIf="editingItem.imageUrl" [src]="editingItem.imageUrl" class="image-preview item-preview mt-2">
     </div>
 
-    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
-      <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="showItemDialog = false"></button>
+    <div class="dialog-footer">
+      <button pButton label="Annuler" class="p-button-text p-button-secondary font-bold" (click)="showItemDialog = false"></button>
       <button pButton label="Sauvegarder" icon="pi pi-check" class="p-button-primary p-button-rounded font-bold" (click)="saveItem()"></button>
     </div>
   </div>
 </p-dialog>
 
 <!-- ========================================================= -->
-<!-- MODAL: ADD / EDIT KEY & BLIND BOX                         -->
+<!-- MODAL: ADD KEY & BOX                                      -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showKeyDialog" [modal]="true" header="Nouvelle Clé & Coffre" [style]="{width: '90vw', maxWidth: '440px'}">
-  <div class="flex flex-col gap-4 pt-2">
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Nom de la Clé</label>
-      <input pInputText [(ngModel)]="editingKey.name" placeholder="Ex: Clé Naruto Shippuden" class="w-full !rounded-xl font-bold" />
+<p-dialog [(visible)]="showKeyDialog" [modal]="true" header="Configurer une Clé" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+  <div class="dialog-body">
+    <div class="input-group">
+      <label>Nom de la Clé</label>
+      <input pInputText [(ngModel)]="editingKey.name" placeholder="Ex: Clé Naruto Shippuden" class="w-full !rounded-2xl !py-3 font-bold" />
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Icône PrimeNG</label>
-        <input pInputText [(ngModel)]="editingKey.icon" placeholder="pi pi-key" class="w-full text-xs font-mono !rounded-xl" />
+      <div class="input-group">
+        <label>Icône</label>
+        <input pInputText [(ngModel)]="editingKey.icon" placeholder="pi pi-key" class="w-full font-mono text-xs !rounded-2xl" />
       </div>
-      <div>
-        <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Couleur</label>
+      <div class="input-group">
+        <label>Couleur</label>
         <div class="flex items-center gap-2">
           <p-colorPicker [(ngModel)]="editingKey.color" appendTo="body"></p-colorPicker>
-          <input pInputText [(ngModel)]="editingKey.color" class="w-full text-xs font-mono !rounded-xl" />
+          <input pInputText [(ngModel)]="editingKey.color" class="w-full font-mono text-xs !rounded-2xl" />
         </div>
       </div>
     </div>
 
-    <div class="border-t border-surface-200 dark:border-surface-700 pt-3">
-      <label class="block text-xs font-black uppercase text-orange-500 mb-2">Coffre Mystère Associé</label>
+    <div class="box-subcard">
+      <label class="block text-xs font-black uppercase text-orange-500 mb-2">Coffre Mystère Déverrouillé</label>
       <div class="flex flex-col gap-3">
-        <div>
-          <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Nom du Coffre</label>
-          <input pInputText [(ngModel)]="editingKey.blindBox.name" placeholder="Ex: Boîte Shinobi Standard" class="w-full !rounded-xl font-bold" />
+        <div class="input-group">
+          <label>Nom du Coffre</label>
+          <input pInputText [(ngModel)]="editingKey.blindBox.name" placeholder="Ex: Boîte Shinobi Standard" class="w-full !rounded-xl" />
         </div>
-        <div>
-          <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Collection Cible</label>
+        <div class="input-group">
+          <label>Collection Cible</label>
           <p-dropdown [options]="collections" [(ngModel)]="editingKey.blindBox.collection" optionLabel="name" placeholder="Sélectionner" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
         </div>
       </div>
     </div>
 
-    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
-      <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="showKeyDialog = false"></button>
+    <div class="dialog-footer">
+      <button pButton label="Annuler" class="p-button-text p-button-secondary font-bold" (click)="showKeyDialog = false"></button>
       <button pButton label="Sauvegarder" icon="pi pi-check" class="p-button-primary p-button-rounded font-bold" (click)="saveKey()"></button>
     </div>
   </div>
@@ -426,26 +410,26 @@
 <!-- ========================================================= -->
 <!-- MODAL: GRANT KEYS TOOL                                    -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showGrantKeyDialog" [modal]="true" header="Attribuer des Clés" [style]="{width: '90vw', maxWidth: '400px'}">
-  <div class="flex flex-col gap-4 pt-2">
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Membre destinataire</label>
-      <p-dropdown [options]="householdMembers" [(ngModel)]="grantTargetUserId" optionLabel="name" optionValue="id" placeholder="Sélectionner un membre" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
+<p-dialog [(visible)]="showGrantKeyDialog" [modal]="true" header="Donner des clés (Test)" [style]="{width: '92vw', maxWidth: '400px'}" styleClass="mobile-dialog">
+  <div class="dialog-body">
+    <div class="input-group">
+      <label>Destinataire</label>
+      <p-dropdown [options]="householdMembers" [(ngModel)]="grantTargetUserId" optionLabel="name" optionValue="id" placeholder="Sélectionner un membre" styleClass="w-full !rounded-2xl" appendTo="body"></p-dropdown>
     </div>
 
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Type de clé</label>
-      <p-dropdown [options]="keys" [(ngModel)]="grantTargetKeyId" optionLabel="name" optionValue="id" placeholder="Sélectionner la clé" styleClass="w-full !rounded-xl" appendTo="body"></p-dropdown>
+    <div class="input-group">
+      <label>Clé à offrir</label>
+      <p-dropdown [options]="keys" [(ngModel)]="grantTargetKeyId" optionLabel="name" optionValue="id" placeholder="Sélectionner la clé" styleClass="w-full !rounded-2xl" appendTo="body"></p-dropdown>
     </div>
 
-    <div>
-      <label class="block text-xs font-bold uppercase text-surface-500 mb-1">Nombre de clés</label>
-      <p-inputNumber [(ngModel)]="grantQuantity" [min]="1" [showButtons]="true" styleClass="w-full" inputStyleClass="w-full !rounded-xl font-bold"></p-inputNumber>
+    <div class="input-group">
+      <label>Nombre de clés</label>
+      <p-inputNumber [(ngModel)]="grantQuantity" [min]="1" [showButtons]="true" styleClass="w-full" inputStyleClass="w-full !rounded-2xl font-bold text-center"></p-inputNumber>
     </div>
 
-    <div class="flex justify-end gap-2 mt-4 pt-3 border-t border-surface-200 dark:border-surface-700">
-      <button pButton label="Annuler" class="p-button-text p-button-secondary" (click)="showGrantKeyDialog = false"></button>
-      <button pButton label="Envoyer les clés" icon="pi pi-gift" class="p-button-warning p-button-rounded font-bold" (click)="submitGrantKey()"></button>
+    <div class="dialog-footer">
+      <button pButton label="Annuler" class="p-button-text p-button-secondary font-bold" (click)="showGrantKeyDialog = false"></button>
+      <button pButton label="Envoyer" icon="pi pi-gift" class="p-button-warning p-button-rounded font-bold" (click)="submitGrantKey()"></button>
     </div>
   </div>
 </p-dialog>

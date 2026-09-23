@@ -14,6 +14,16 @@ import {
 import { MessageService } from 'primeng/api';
 import confetti from 'canvas-confetti';
 
+export interface HeroThemeConfig {
+  eyebrow: string;
+  title: string;
+  lede: string;
+  gradient: string;
+  glow: string;
+  emblem: 'shuriken' | 'bleach' | 'triforce' | 'pokeball' | 'star';
+  emblemColor: string;
+}
+
 @Component({
   selector: 'app-pokedex',
   standalone: true,
@@ -36,16 +46,87 @@ export class PokedexComponent implements OnInit {
   householdMembers: any[] = [];
   viewingUserId: number | null = null;
   memberSelectOptions: { label: string; value: number }[] = [];
-
-  // Unboxing Modal
+currentUserId: number | null = null;
   showUnboxingDialog = false;
   activeKeyToOpen: BlindBoxKey | null = null;
   isUnboxingRunning = false;
   revealResult: UnboxResult | null = null;
 
-  // Detail Modal
   showDetailDialog = false;
   inspectedCard: PokedexCard | null = null;
+
+  // --- Dynamic Collection & Universe Theme Getter ---
+  get currentCollection(): CollectionProgress | undefined {
+    return this.collections.find(c => c.id === this.selectedCollectionId);
+  }
+
+  switchMemberView(userId: number): void {
+    if (this.viewingUserId === userId) return;
+    this.viewingUserId = userId;
+    this.loadPokedex();
+  }
+
+  isCurrentMember(userId: number): boolean {
+    return this.currentUserId === userId;
+  }
+
+  get heroTheme(): HeroThemeConfig {
+    const col = this.currentCollection;
+    const name = (col?.name || '').toLowerCase();
+
+    if (name.includes('bleach')) {
+      return {
+        eyebrow: 'Soul Society • Sereitei',
+        title: col?.name || 'Registre des Shinigami',
+        lede: 'Purifiez les corvées quotidiennes, libérez le Bankai et consignez les capitaines du Gotei 13.',
+        gradient: 'linear-gradient(135deg, #0d1322 0%, #1c0e35 45%, #090b14 100%)',
+        glow: 'radial-gradient(circle, rgba(63, 217, 255, 0.4), transparent 70%)',
+        emblem: 'bleach',
+        emblemColor: 'rgba(63, 217, 255, 0.12)'
+      };
+    } else if (name.includes('zelda') || name.includes('hyrule')) {
+      return {
+        eyebrow: 'Royaume d’Hyrule',
+        title: col?.name || 'Chroniques d’Hyrule',
+        lede: 'Accomplissez vos quêtes, éveillez les sages et rassemblez les porteurs de la Triforce.',
+        gradient: 'linear-gradient(135deg, #0e2a20 0%, #1d3319 45%, #09150f 100%)',
+        glow: 'radial-gradient(circle, rgba(255, 209, 102, 0.4), transparent 70%)',
+        emblem: 'triforce',
+        emblemColor: 'rgba(255, 209, 102, 0.15)'
+      };
+    } else if (name.includes('poke') || name.includes('poké')) {
+      return {
+        eyebrow: 'Ligue Pokémon',
+        title: col?.name || 'Pokédex National',
+        lede: 'Attrapez-les tous au fil des tâches accomplies pour bâtir l’équipe ultime du foyer.',
+        gradient: 'linear-gradient(135deg, #2b1114 0%, #381318 45%, #15090b 100%)',
+        glow: 'radial-gradient(circle, rgba(239, 68, 68, 0.4), transparent 70%)',
+        emblem: 'pokeball',
+        emblemColor: 'rgba(239, 68, 68, 0.15)'
+      };
+    } else if (name.includes('naruto')) {
+      return {
+        eyebrow: 'Registre du village',
+        title: col?.name || 'Registre des Ombres',
+        lede: 'Accomplissez vos corvées, amassez des clés, et brisez les sceaux pour révéler qui rejoint le registre.',
+        gradient: 'linear-gradient(135deg, #2a1650 0%, #3a1030 45%, #1a0f2e 100%)',
+        glow: 'radial-gradient(circle, rgba(255, 75, 62, 0.35), transparent 70%)',
+        emblem: 'shuriken',
+        emblemColor: 'rgba(255, 255, 255, 0.08)'
+      };
+    } else {
+      // Default / Generic Theme using collection details
+      return {
+        eyebrow: 'Archives du Foyer',
+        title: col?.name || 'Registre des Collections',
+        lede: col?.description || 'Accomplissez vos corvées quotidiennes pour déverrouiller de nouvelles cartes.',
+        gradient: 'linear-gradient(135deg, #181938 0%, #2b1236 45%, #0d0f1c 100%)',
+        glow: 'radial-gradient(circle, rgba(168, 85, 247, 0.35), transparent 70%)',
+        emblem: 'star',
+        emblemColor: 'rgba(255, 255, 255, 0.08)'
+      };
+    }
+  }
 
   ngOnInit(): void {
     this.loadInitialData();
@@ -68,7 +149,7 @@ export class PokedexComponent implements OnInit {
 
     this.blindBoxService.getCollections().subscribe(cols => {
       this.collections = cols;
-      if (cols.length > 0) {
+      if (cols.length > 0 && !this.selectedCollectionId) {
         this.selectCollection(cols[0].id);
       }
     });
@@ -82,7 +163,12 @@ export class PokedexComponent implements OnInit {
   loadPokedex(): void {
     if (!this.selectedCollectionId) return;
     this.blindBoxService.getPokedex(this.selectedCollectionId, this.viewingUserId || undefined)
-      .subscribe(cards => this.cards = cards);
+      .subscribe(cards => {
+        this.cards = cards.map(c => ({
+          ...c,
+          unlocked: c.unlocked ?? (c as any).isUnlocked ?? (c.count > 0)
+        }));
+      });
   }
 
   openUnboxingModal(key: BlindBoxKey): void {
@@ -96,28 +182,25 @@ export class PokedexComponent implements OnInit {
     if (!this.activeKeyToOpen?.blindBox?.id) return;
     this.isUnboxingRunning = true;
 
-    // Suspense delay
     setTimeout(() => {
       this.blindBoxService.openBox(this.activeKeyToOpen!.blindBox.id!).subscribe({
         next: (res) => {
           this.revealResult = res;
           this.isUnboxingRunning = false;
-          this.loadInitialData(); // Refresh keys & cards
-
-          // Trigger celebratory burst
+          this.loadInitialData();
           confetti({
             particleCount: 180,
             spread: 90,
             origin: { y: 0.5 },
-            colors: [res.item.rarity.borderColor, '#f97316', '#eab308']
+            colors: [res.item.rarity.borderColor, '#ff4b3e', '#ffd166']
           });
         },
         error: (err) => {
           this.isUnboxingRunning = false;
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message || "Impossible d'ouvrir le coffre" });
+          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message || "Impossible d'ouvrir le sceau" });
         }
       });
-    }, 1500);
+    }, 1400);
   }
 
   closeUnboxing(): void {

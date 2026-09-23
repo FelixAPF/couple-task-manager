@@ -189,12 +189,69 @@
   box-shadow: 0 4px 16px -2px rgba(255, 75, 62, 0.5);
 }
 
-.partner-toggle {
-  display: flex;
+/* ============== MEMBER / PARTNER INSPECTION CAPSULE ============== */
+.member-capsule {
+  display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.75rem;
+  gap: 0.35rem;
+  background: var(--void-800);
+  border: 1px solid var(--surface-line);
+  padding: 0.3rem;
+  border-radius: 999px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.member-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.85rem 0.3rem 0.4rem;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid transparent;
   color: var(--text-dim);
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.member-pill:hover:not(.active) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.member-pill.active {
+  background: var(--surface);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 16px rgba(108, 76, 224, 0.25);
+}
+
+.member-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.member-pill.active .member-avatar {
+  border-color: var(--vermilion);
+  box-shadow: 0 0 8px rgba(255, 75, 62, 0.6);
+}
+
+.member-name {
+  line-height: 1;
+}
+
+.member-icon {
+  font-size: 0.68rem;
+  color: var(--gold);
+  opacity: 0.8;
 }
 
 /* ============== CARD GRID ============== */

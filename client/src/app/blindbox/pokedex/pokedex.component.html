@@ -3,18 +3,45 @@
 <div class="registry-shell">
 
   <!-- ================= HERO ================= -->
-  <header class="hero">
-    <div class="hero-glow"></div>
-    <svg class="hero-shuriken" viewBox="0 0 100 100" aria-hidden="true">
-      <path fill="currentColor" d="M50 2 L61 39 L98 50 L61 61 L50 98 L39 61 L2 50 L39 39 Z"/>
+<!-- ================= HERO ================= -->
+  <header class="hero" [style.background]="heroTheme.gradient">
+    <div class="hero-glow" [style.background]="heroTheme.glow"></div>
+
+    <!-- DYNAMIC SPINNING EMBLEM -->
+    <svg class="hero-shuriken" viewBox="0 0 100 100" aria-hidden="true" [style.color]="heroTheme.emblemColor">
+      <!-- 1. Naruto Shuriken -->
+      <path *ngIf="heroTheme.emblem === 'shuriken'" fill="currentColor" d="M50 2 L61 39 L98 50 L61 61 L50 98 L39 61 L2 50 L39 39 Z"/>
+      
+      <!-- 2. Bleach Shinigami Skull / Badge -->
+      <g *ngIf="heroTheme.emblem === 'bleach'" fill="currentColor">
+        <path d="M50 8 C30 8 18 24 18 42 C18 56 26 66 32 72 L32 86 C32 90 38 94 50 94 C62 94 68 90 68 86 L68 72 C74 66 82 56 82 42 C82 24 70 8 50 8 Z M34 46 C30 46 28 42 28 38 C28 34 30 30 34 30 C38 30 40 34 40 38 C40 42 38 46 34 46 Z M66 46 C62 46 60 42 60 38 C60 34 62 30 66 30 C70 30 72 34 72 38 C72 42 70 46 66 46 Z M50 66 L44 54 L56 54 Z M42 86 L42 78 L46 78 L46 86 Z M54 86 L54 78 L58 78 L58 86 Z"/>
+      </g>
+
+      <!-- 3. Zelda Triforce -->
+      <g *ngIf="heroTheme.emblem === 'triforce'" fill="currentColor">
+        <polygon points="50,10 25,55 75,55"/>
+        <polygon points="25,55 0,100 50,100"/>
+        <polygon points="75,55 50,100 100,100"/>
+      </g>
+
+      <!-- 4. Pokémon Pokéball -->
+      <g *ngIf="heroTheme.emblem === 'pokeball'" fill="currentColor">
+        <path d="M50,10 A40,40 0 0,0 11,46 L35,46 A16,16 0 0,1 46,35 L46,11 A40,40 0 0,0 50,10 Z M54,11 L54,35 A16,16 0 0,1 65,46 L89,46 A40,40 0 0,0 54,11 Z M11,54 A40,40 0 0,0 46,89 L46,65 A16,16 0 0,1 35,54 Z M54,89 A40,40 0 0,0 89,54 L65,54 A16,16 0 0,1 54,65 Z M50,42 A8,8 0 1,0 50,58 A8,8 0 1,0 50,42 Z"/>
+      </g>
+
+      <!-- 5. Default Celestial Star -->
+      <g *ngIf="heroTheme.emblem === 'star'" fill="currentColor">
+        <polygon points="50,0 63,35 100,50 63,65 50,100 37,65 0,50 37,35"/>
+      </g>
     </svg>
 
     <div class="hero-text">
-      <p class="hero-eyebrow">Registre du village</p>
-      <h1>Registre des Ombres</h1>
-      <p class="hero-lede">Accomplissez vos corvées, amassez des clés, et brisez les sceaux pour révéler qui rejoint le registre.</p>
+      <p class="hero-eyebrow">{{ heroTheme.eyebrow }}</p>
+      <h1>{{ heroTheme.title }}</h1>
+      <p class="hero-lede">{{ heroTheme.lede }}</p>
     </div>
 
+    <!-- Keyring -->
     <div class="keyring" *ngIf="userKeys.length > 0">
       <button type="button" class="key-orb" *ngFor="let inv of userKeys" (click)="openUnboxingModal(inv.key)">
         <span class="key-orb-ring" [style.boxShadow]="'0 0 22px ' + (inv.key.color || '#ff4b3e') + '99'" [style.backgroundColor]="inv.key.color || '#ff4b3e'">
@@ -31,6 +58,7 @@
   </header>
 
   <!-- ================= CONTROLS ================= -->
+<!-- ================= CONTROLS ================= -->
   <div class="controls-row">
     <nav class="tab-row">
       <button *ngFor="let col of collections"
@@ -43,9 +71,17 @@
       </button>
     </nav>
 
-    <div class="partner-toggle" *ngIf="canInspectPartner && householdMembers.length > 1">
-      <span>Registre consulté</span>
-      <p-selectButton [options]="memberSelectOptions" [(ngModel)]="viewingUserId" (onChange)="loadPokedex()" optionLabel="label" optionValue="value" styleClass="registry-select-button"></p-selectButton>
+    <!-- Sleek Custom Avatar Segmented Capsule -->
+    <div class="member-capsule" *ngIf="canInspectPartner && householdMembers.length > 1">
+      <button *ngFor="let member of householdMembers"
+              type="button"
+              class="member-pill"
+              [class.active]="viewingUserId === member.id"
+              (click)="switchMemberView(member.id)">
+        <img [src]="member.imageUrl || 'assets/placeholder.jpg'" [alt]="member.name" class="member-avatar">
+        <span class="member-name">{{ isCurrentMember(member.id) ? 'Mon Registre' : member.name }}</span>
+        <i *ngIf="!isCurrentMember(member.id)" class="pi pi-eye member-icon" title="Mode inspection"></i>
+      </button>
     </div>
   </div>
 

@@ -44,8 +44,8 @@ public class TaskDto {
         this.startDate = task.getStartDate();
         this.dueDate = task.getDueDate();
         this.doNotify = task.isDoNotify();
-        this.rewardKeyId = task.getRewardKey().getId();
-        this.rewardKeyQuantity = task.getRewardKeyQuantity();
+        this.rewardKeyId =  (task.getRewardKey() != null) ? task.getRewardKey().getId() : null;
+        this.rewardKeyQuantity = (task.getRewardKeyQuantity() != null) ? task.getRewardKeyQuantity() : 0;
         if(task.getProcedure() != null){
             this.procedure = new ProcedureDto(task.getProcedure());
         }

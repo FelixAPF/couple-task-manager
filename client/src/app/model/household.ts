@@ -37,6 +37,7 @@ export interface WayToCare {
     location: string;
     assignee: HouseholdMember;
 }
+
 export interface Item {
     id?: number;
     title: string;
@@ -46,6 +47,7 @@ export interface Item {
     bought?: boolean;
     householdMember: HouseholdMember;
 }
+
 export interface ToDoItem {
     id?: number;
     title: string;
@@ -67,15 +69,12 @@ export enum ToDoStatus {
     COMPLETED = "COMPLETED"
 }
 
-
 export enum UserRole {
     ADMIN = "ADMIN",
     USER = "USER"
 }
 
-
-
-// In src/app/model/household.ts (or at top of household.service.ts)
+// --- DTOs for Household Statistics ---
 export interface TopMealDto {
   recipeId?: number;
   recipeName: string;
@@ -103,6 +102,8 @@ export interface MemberChefStatDto {
 
 export interface HouseholdStatsDto {
   year: number;
+  period?: 'WEEK' | 'MONTH' | 'YEAR';
+  periodLabel?: string;
   totalTasksDone: number;
   totalActiveTasks: number;
   totalGrocerySpent: number;

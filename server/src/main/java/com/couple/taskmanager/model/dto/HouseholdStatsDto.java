@@ -13,6 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class HouseholdStatsDto {
     private int year;
+    private String period;
+    private String periodLabel;
     private long totalTasksDone;
     private long totalActiveTasks;
     private double totalGrocerySpent;

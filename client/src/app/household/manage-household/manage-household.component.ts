@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, finalize } from 'rxjs/operators';
@@ -21,49 +21,15 @@ import { ButtonModule } from 'primeng/button';
 import { HouseholdService } from '../../service/household.service';
 import { AuthService } from '../../service/auth.service';
 import { VersionControlService } from '../../service/version-control.service';
-import { Household, HouseholdMember } from '../../model/household';
+import { 
+  Household, 
+  HouseholdMember,
+  HouseholdStatsDto, 
+  TopMealDto, 
+  MemberTaskStatDto, 
+  MemberChefStatDto 
+} from '../../model/household';
 import versionData from '../../../../version.json';
-
-export interface TopMealDto {
-  recipeId?: number;
-  recipeName: string;
-  category?: string;
-  imageUrl?: string;
-  count: number;
-  lastEaten?: Date | string;
-}
-
-export interface MemberTaskStatDto {
-  memberId: number;
-  name: string;
-  imageUrl?: string;
-  count: number;
-  percentage: number;
-}
-
-export interface MemberChefStatDto {
-  memberId: number;
-  name: string;
-  imageUrl?: string;
-  count: number;
-  percentage: number;
-}
-
-export interface HouseholdStatsDto {
-  year: number;
-  totalTasksDone: number;
-  totalActiveTasks: number;
-  totalGrocerySpent: number;
-  totalHouseholdFundSaved: number;
-  householdFundBalance: number;
-  totalHydroCost: number;
-  totalHydroKwh: number;
-  totalMealsCount: number;
-  topMeals: TopMealDto[];
-  memberTaskStats: MemberTaskStatDto[];
-  memberChefStats: MemberChefStatDto[];
-  topChef: MemberChefStatDto | null;
-}
 
 enum HouseholdSettingNames {
   WISH_LIST = "enableWishList",
@@ -75,6 +41,8 @@ enum HouseholdSettingNames {
   TASKS = "enableTasks",
   SHOPPING_LIST = "enableShoppingList"
 }
+
+export type StatPeriod = 'WEEK' | 'MONTH' | 'YEAR';
 
 @Component({
   selector: 'app-manage-household',
@@ -113,17 +81,44 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
   isUpdatingSettings = signal(false);
   private destroy$ = new Subject<void>();
 
-  // --- Statistics Signals ---
+  // --- Time Period Control (Current Year by default) ---
+  selectedPeriod = signal<StatPeriod>('YEAR');
+  
+  periodOptions: { label: string; value: StatPeriod; icon: string }[] = [
+    { label: 'Cette semaine', value: 'WEEK', icon: 'pi pi-calendar-minus' },
+    { label: 'Ce mois-ci', value: 'MONTH', icon: 'pi pi-calendar' },
+    { label: 'Cette année', value: 'YEAR', icon: 'pi pi-calendar-plus' }
+  ];
+
+  periodTitleLabel = computed(() => {
+    switch (this.selectedPeriod()) {
+      case 'WEEK': return 'cette semaine';
+      case 'MONTH': return 'ce mois-ci';
+      case 'YEAR':
+      default: return `en ${this.currentYear}`;
+    }
+  });
+
+  periodBadgeLabel = computed(() => {
+    switch (this.selectedPeriod()) {
+      case 'WEEK': return 'Semaine en cours';
+      case 'MONTH': return 'Mois en cours';
+      case 'YEAR':
+      default: return `Année ${this.currentYear}`;
+    }
+  });
+
+  // --- Statistics State ---
   isLoadingStats = signal<boolean>(true);
-  tasksDoneThisYear = signal<number>(0);
+  tasksDoneThisPeriod = signal<number>(0);
   totalRegisteredTasks = signal<number>(0);
-  grocerySpentThisYear = signal<number>(0);
-  householdFundSavedThisYear = signal<number>(0);
+  grocerySpentThisPeriod = signal<number>(0);
+  householdFundSavedThisPeriod = signal<number>(0);
   householdFundCurrentBalance = signal<number>(0);
   totalHydroCost = signal<number>(0);
   totalHydroKwh = signal<number>(0);
-  totalMealsThisYear = signal<number>(0);
-  topMealsThisYear = signal<TopMealDto[]>([]);
+  totalMealsCount = signal<number>(0);
+  topMealsThisPeriod = signal<TopMealDto[]>([]);
   memberTaskStats = signal<MemberTaskStatDto[]>([]);
   memberChefStats = signal<MemberChefStatDto[]>([]);
   topChef = signal<MemberChefStatDto | null>(null);
@@ -164,24 +159,30 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  onPeriodChange(period: StatPeriod): void {
+    if (this.selectedPeriod() === period) return;
+    this.selectedPeriod.set(period);
+    this.loadHouseholdStats();
+  }
+
   loadHouseholdStats(): void {
     this.isLoadingStats.set(true);
-    this.householdService.getHouseholdStats(this.currentYear)
+    this.householdService.getHouseholdStats(this.selectedPeriod(), this.currentYear)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => this.isLoadingStats.set(false))
       )
       .subscribe({
         next: (stats: HouseholdStatsDto) => {
-          this.tasksDoneThisYear.set(stats.totalTasksDone || 0);
+          this.tasksDoneThisPeriod.set(stats.totalTasksDone || 0);
           this.totalRegisteredTasks.set(stats.totalActiveTasks || 0);
-          this.grocerySpentThisYear.set(stats.totalGrocerySpent || 0);
-          this.householdFundSavedThisYear.set(stats.totalHouseholdFundSaved || 0);
+          this.grocerySpentThisPeriod.set(stats.totalGrocerySpent || 0);
+          this.householdFundSavedThisPeriod.set(stats.totalHouseholdFundSaved || 0);
           this.householdFundCurrentBalance.set(stats.householdFundBalance || 0);
           this.totalHydroCost.set(stats.totalHydroCost || 0);
           this.totalHydroKwh.set(stats.totalHydroKwh || 0);
-          this.totalMealsThisYear.set(stats.totalMealsCount || 0);
-          this.topMealsThisYear.set(stats.topMeals || []);
+          this.totalMealsCount.set(stats.totalMealsCount || 0);
+          this.topMealsThisPeriod.set(stats.topMeals || []);
           this.memberTaskStats.set(stats.memberTaskStats || []);
           this.memberChefStats.set(stats.memberChefStats || []);
           this.topChef.set(stats.topChef || null);
@@ -190,6 +191,38 @@ export class ManageHouseholdComponent implements OnInit, OnDestroy {
           console.error('Error loading household stats:', err);
         }
       });
+  }
+
+  // Ensures both household members always show up with 0 if no meals cooked
+  getResolvedChefStats(members: HouseholdMember[] | undefined): MemberChefStatDto[] {
+    if (!members || members.length === 0) return this.memberChefStats();
+    const currentStats = this.memberChefStats();
+    return members.map(m => {
+      const existing = currentStats.find(s => s.memberId === m.id);
+      return {
+        memberId: m.id,
+        name: m.name,
+        imageUrl: m.imageUrl,
+        count: existing ? existing.count : 0,
+        percentage: existing ? existing.percentage : 0
+      };
+    }).sort((a, b) => b.count - a.count);
+  }
+
+  // Ensures both household members always show up with 0 if no tasks done
+  getResolvedTaskStats(members: HouseholdMember[] | undefined): MemberTaskStatDto[] {
+    if (!members || members.length === 0) return this.memberTaskStats();
+    const currentStats = this.memberTaskStats();
+    return members.map(m => {
+      const existing = currentStats.find(s => s.memberId === m.id);
+      return {
+        memberId: m.id,
+        name: m.name,
+        imageUrl: m.imageUrl,
+        count: existing ? existing.count : 0,
+        percentage: existing ? existing.percentage : 0
+      };
+    }).sort((a, b) => b.count - a.count);
   }
 
   onFileSelect(event: FileSelectEvent, memberId: number): void {

@@ -1,38 +1,31 @@
 package com.couple.taskmanager.service;
 
 import com.couple.taskmanager.controller.HydroBillRepository;
-import com.couple.taskmanager.model.CTMUser;
-import com.couple.taskmanager.model.Household;
-import com.couple.taskmanager.model.dto.HouseholdDto;
-import com.couple.taskmanager.model.dto.HouseholdMemberDto;
-import com.couple.taskmanager.model.dto.UpdateHouseholdSettingsDto;
+import com.couple.taskmanager.model.*;
+import com.couple.taskmanager.model.dto.*;
+import com.couple.taskmanager.model.finance.GroceryTransaction;
+import com.couple.taskmanager.model.finance.HouseholdFund;
+import com.couple.taskmanager.model.finance.HouseholdTransaction;
 import com.couple.taskmanager.model.finance.HydroBill;
 import com.couple.taskmanager.repository.*;
 import com.couple.taskmanager.repository.finance.GroceryTransactionRepository;
+import com.couple.taskmanager.repository.finance.HouseholdFundRepository;
 import com.couple.taskmanager.repository.finance.HouseholdTransactionRepository;
 import jakarta.transaction.SystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.couple.taskmanager.model.*;
-import com.couple.taskmanager.model.dto.*;
-import com.couple.taskmanager.model.finance.GroceryTransaction;
-import com.couple.taskmanager.model.finance.HouseholdFund;
-import com.couple.taskmanager.model.finance.HouseholdTransaction;
-import com.couple.taskmanager.repository.*;
-import com.couple.taskmanager.repository.finance.GroceryTransactionRepository;
-import com.couple.taskmanager.repository.finance.HouseholdFundRepository;
-import com.couple.taskmanager.repository.finance.HouseholdTransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.*;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class HouseholdService {@Autowired
+public class HouseholdService {
+
+    @Autowired
     private HouseholdRepository repository;
 
     @Autowired
@@ -58,28 +51,62 @@ public class HouseholdService {@Autowired
 
     @Autowired
     private HouseholdFundRepository householdFundRepository;
+
     /**
-     * Aggregates stats for the current year in progress for the user's household.
+     * Aggregates stats for the specified period ("WEEK", "MONTH", "YEAR").
+     * Defaults to "YEAR" if omitted.
      */
-    public HouseholdStatsDto getHouseholdStats(CTMUser user, Integer targetYear) {
-        int year = (targetYear != null) ? targetYear : Calendar.getInstance().get(Calendar.YEAR);
+    public HouseholdStatsDto getHouseholdStats(CTMUser user, String period, Integer targetYear) {
+        if (period == null || period.trim().isEmpty()) {
+            period = "YEAR";
+        }
+        period = period.trim().toUpperCase();
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(year, Calendar.JANUARY, 1, 0, 0, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date startOfYear = cal.getTime();
+        ZoneId zoneId = ZoneId.of("America/Montreal");
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+        int year = (targetYear != null) ? targetYear : now.getYear();
 
-        cal.set(year, Calendar.DECEMBER, 31, 23, 59, 59);
-        cal.set(Calendar.MILLISECOND, 999);
-        Date endOfYear = cal.getTime();
+        Date startDate;
+        Date endDate;
+        String periodLabel;
+
+        switch (period) {
+            case "WEEK": {
+                LocalDate monday = now.toLocalDate().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                LocalDate sunday = now.toLocalDate().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+                startDate = Date.from(monday.atStartOfDay(zoneId).toInstant());
+                endDate = Date.from(sunday.atTime(23, 59, 59, 999_000_000).atZone(zoneId).toInstant());
+                periodLabel = "Cette semaine";
+                break;
+            }
+            case "MONTH": {
+                LocalDate firstDay = now.toLocalDate().with(TemporalAdjusters.firstDayOfMonth());
+                LocalDate lastDay = now.toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
+                startDate = Date.from(firstDay.atStartOfDay(zoneId).toInstant());
+                endDate = Date.from(lastDay.atTime(23, 59, 59, 999_000_000).atZone(zoneId).toInstant());
+                periodLabel = "Ce mois-ci";
+                break;
+            }
+            case "YEAR":
+            default: {
+                period = "YEAR";
+                LocalDate firstDay = LocalDate.of(year, 1, 1);
+                LocalDate lastDay = LocalDate.of(year, 12, 31);
+                startDate = Date.from(firstDay.atStartOfDay(zoneId).toInstant());
+                endDate = Date.from(lastDay.atTime(23, 59, 59, 999_000_000).atZone(zoneId).toInstant());
+                periodLabel = "Année " + year;
+                break;
+            }
+        }
 
         Long householdId = user.getHousehold().getId();
+        List<CTMUser> householdMembers = repository.findUsersByHouseholdId(householdId);
 
-        // 1. Meals & Top 3 Recipes
-        List<Meal> mealsThisYear = mealRepository.findByDateBetweenAndHouseholdId(startOfYear, endOfYear, householdId);
-        long totalMealsCount = mealsThisYear.size();
+        // 1. Meals & Top 3 Recipes for this period
+        List<Meal> mealsThisPeriod = mealRepository.findByDateBetweenAndHouseholdId(startDate, endDate, householdId);
+        long totalMealsCount = mealsThisPeriod.size();
 
-        Map<Long, List<Meal>> mealsByRecipe = mealsThisYear.stream()
+        Map<Long, List<Meal>> mealsByRecipe = mealsThisPeriod.stream()
                 .filter(m -> m.getRecipe() != null && m.getRecipe().getId() != null)
                 .collect(Collectors.groupingBy(m -> m.getRecipe().getId()));
 
@@ -106,22 +133,21 @@ public class HouseholdService {@Autowired
                 .limit(3)
                 .collect(Collectors.toList());
 
-        // 2. Who Cooked the Most (Top Chef & Distribution)
-        Map<Long, List<Meal>> mealsByChef = mealsThisYear.stream()
+        // 2. Who Cooked the Most in this period (All household members included)
+        Map<Long, Long> mealsCountByChef = mealsThisPeriod.stream()
                 .filter(m -> m.getAssignedUser() != null && m.getAssignedUser().getId() != null)
-                .collect(Collectors.groupingBy(m -> m.getAssignedUser().getId()));
+                .collect(Collectors.groupingBy(m -> m.getAssignedUser().getId(), Collectors.counting()));
 
-        long totalAssignedMeals = mealsByChef.values().stream().mapToInt(List::size).sum();
+        long totalAssignedMeals = mealsCountByChef.values().stream().mapToLong(Long::longValue).sum();
 
-        List<MemberChefStatDto> memberChefStats = mealsByChef.values().stream()
-                .map(list -> {
-                    CTMUser chef = list.get(0).getAssignedUser();
-                    long count = list.size();
+        List<MemberChefStatDto> memberChefStats = householdMembers.stream()
+                .map(member -> {
+                    long count = mealsCountByChef.getOrDefault(member.getId(), 0L);
                     int pct = totalAssignedMeals > 0 ? (int) Math.round((double) count / totalAssignedMeals * 100) : 0;
                     return MemberChefStatDto.builder()
-                            .memberId(chef.getId())
-                            .name(chef.getName())
-                            .imageUrl(chef.getImageUrl())
+                            .memberId(member.getId())
+                            .name(member.getName())
+                            .imageUrl(member.getImageUrl())
                             .count(count)
                             .percentage(pct)
                             .build();
@@ -129,23 +155,24 @@ public class HouseholdService {@Autowired
                 .sorted((a, b) -> Long.compare(b.getCount(), a.getCount()))
                 .collect(Collectors.toList());
 
-        MemberChefStatDto topChef = memberChefStats.isEmpty() ? null : memberChefStats.get(0);
+        MemberChefStatDto topChef = (totalAssignedMeals > 0 && !memberChefStats.isEmpty())
+                ? memberChefStats.get(0)
+                : null;
 
-        // 3. Tasks Done This Year & Member Breakdown
-        List<TaskHistory> historiesThisYear = taskHistoryRepository.findByHouseholdIdAndCompletedDateBetween(
-                householdId, startOfYear, endOfYear
+        // 3. Tasks Done in this period (All household members included)
+        List<TaskHistory> historiesThisPeriod = taskHistoryRepository.findByHouseholdIdAndCompletedDateBetween(
+                householdId, startDate, endDate
         );
-        long totalTasksDone = historiesThisYear.size();
+        long totalTasksDone = historiesThisPeriod.size();
         long totalActiveTasks = taskRepository.findAllByHouseholdId(householdId).size();
 
-        Map<Long, List<TaskHistory>> byMember = historiesThisYear.stream()
+        Map<Long, Long> taskCountByMember = historiesThisPeriod.stream()
                 .filter(h -> h.getCompletedBy() != null && h.getCompletedBy().getId() != null)
-                .collect(Collectors.groupingBy(h -> h.getCompletedBy().getId()));
+                .collect(Collectors.groupingBy(h -> h.getCompletedBy().getId(), Collectors.counting()));
 
-        List<MemberTaskStatDto> memberTaskStats = byMember.values().stream()
-                .map(list -> {
-                    CTMUser member = list.get(0).getCompletedBy();
-                    long count = list.size();
+        List<MemberTaskStatDto> memberTaskStats = householdMembers.stream()
+                .map(member -> {
+                    long count = taskCountByMember.getOrDefault(member.getId(), 0L);
                     int pct = totalTasksDone > 0 ? (int) Math.round((double) count / totalTasksDone * 100) : 0;
                     return MemberTaskStatDto.builder()
                             .memberId(member.getId())
@@ -158,18 +185,18 @@ public class HouseholdService {@Autowired
                 .sorted((a, b) -> Long.compare(b.getCount(), a.getCount()))
                 .collect(Collectors.toList());
 
-        // 4. Grocery Spending
+        // 4. Grocery Spending in this period
         List<GroceryTransaction> groceryTxs = groceryTransactionRepository.findByHouseholdIdAndDateBetween(
-                householdId, startOfYear, endOfYear
+                householdId, startDate, endDate
         );
         double totalGrocerySpent = groceryTxs.stream()
                 .filter(tx -> "SPEND".equalsIgnoreCase(tx.getTransactionType()))
                 .mapToDouble(tx -> tx.getAmount() != null ? tx.getAmount() : 0.0)
                 .sum();
 
-        // 5. Household Fund Savings & Balance
+        // 5. Household Fund Savings in this period & Current Total Balance
         List<HouseholdTransaction> householdTxs = householdTransactionRepository.findByHouseholdIdAndDateBetween(
-                householdId, startOfYear, endOfYear
+                householdId, startDate, endDate
         );
         double totalHouseholdFundSaved = householdTxs.stream()
                 .filter(tx -> "ADD".equalsIgnoreCase(tx.getTransactionType()))
@@ -180,27 +207,29 @@ public class HouseholdService {@Autowired
                 .map(HouseholdFund::getBalance)
                 .orElse(0.0);
 
-        // 6. Hydro-Québec Electricity Consumption Cost & kWh
-        LocalDateTime startLdt = LocalDateTime.of(year, 1, 1, 0, 0, 0);
-        LocalDateTime endLdt = LocalDateTime.of(year, 12, 31, 23, 59, 59);
+        // 6. Hydro-Québec Electricity Consumption Cost & kWh in this period
+        LocalDateTime startLdt = LocalDateTime.ofInstant(startDate.toInstant(), zoneId);
+        LocalDateTime endLdt = LocalDateTime.ofInstant(endDate.toInstant(), zoneId);
 
         List<HydroBill> allBills = hydroBillRepository.findByHouseholdIdOrderByPeriodEndDesc(String.valueOf(householdId));
-        List<HydroBill> billsThisYear = allBills.stream()
+        List<HydroBill> billsThisPeriod = allBills.stream()
                 .filter(b -> b.getPeriodEnd() != null &&
                         !b.getPeriodEnd().isBefore(startLdt) &&
                         !b.getPeriodEnd().isAfter(endLdt))
                 .toList();
 
-        double totalHydroCost = billsThisYear.stream()
+        double totalHydroCost = billsThisPeriod.stream()
                 .mapToDouble(b -> b.getAmount() != null ? b.getAmount() : 0.0)
                 .sum();
 
-        double totalHydroKwh = billsThisYear.stream()
+        double totalHydroKwh = billsThisPeriod.stream()
                 .mapToDouble(b -> b.getKwhConsumed() != null ? b.getKwhConsumed() : 0.0)
                 .sum();
 
         return HouseholdStatsDto.builder()
                 .year(year)
+                .period(period)
+                .periodLabel(periodLabel)
                 .totalTasksDone(totalTasksDone)
                 .totalActiveTasks(totalActiveTasks)
                 .totalGrocerySpent(totalGrocerySpent)
@@ -233,28 +262,22 @@ public class HouseholdService {@Autowired
         Optional<Household> householdOptional = repository.findByToken(joinKey);
         if(householdOptional.isEmpty()) throw new NoSuchElementException();
         removeUserFromHousehold(user.getId(), user.getHousehold().getId());
-
         Household household = householdOptional.get();
         List<CTMUser> users = household.getUsers();
         users.add(user);
         household.setUsers(users);
-
         user.setHousehold(household);
         userRepository.save(user);
-
         return new HouseholdDto(repository.save(household));
     }
 
     public void removeUserFromHousehold(Long userId, Long householdId) {
         CTMUser user = userRepository.findById(userId).orElseThrow(NoSuchElementException::new);
         Household household = repository.findById(householdId).orElseThrow(NoSuchElementException::new);
-
         List<CTMUser> users = household.getUsers();
         users.remove(user);
-
-        user.setHousehold(null); // 🚨 Important! Disconnect the reference.
-        userRepository.save(user); // Make sure this is saved after removing reference
-
+        user.setHousehold(null);
+        userRepository.save(user);
         if (users.isEmpty()) {
             repository.delete(household);
         } else {
@@ -265,8 +288,8 @@ public class HouseholdService {@Autowired
 
     public void setHouseholdMemberImage(Long userId, String imageUrl){
         CTMUser user = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId)); // Add specific message
-        user.setImageUrl(imageUrl); // Save the full URL
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+        user.setImageUrl(imageUrl);
         userRepository.save(user);
     }
 
@@ -313,22 +336,22 @@ public class HouseholdService {@Autowired
 
     public void increaseRewardPoints(Long memberId, CTMUser user) throws SystemException {
         CTMUser member = userRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + memberId)); // Add specific message
-        member.setRewardPoints(member.getRewardPoints()+1); // Save the full URL
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + memberId));
+        member.setRewardPoints(member.getRewardPoints() + 1);
         userRepository.save(member);
     }
 
     public void setHouseholdMemberRewardColor(Long userId, String color, CTMUser user) {
         CTMUser member = userRepository.findById(userId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId)); // Add specific message
-        member.setRewardColor(color); // Save the full URL
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+        member.setRewardColor(color);
         userRepository.save(member);
     }
 
     public void setRewardPoints(Long memberId, int points, CTMUser user) {
         CTMUser member = userRepository.findById(memberId)
-                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + memberId)); // Add specific message
-        member.setRewardPoints(points); // Save the full URL
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + memberId));
+        member.setRewardPoints(points);
         userRepository.save(member);
     }
 }

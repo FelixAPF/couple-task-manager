@@ -21,10 +21,11 @@ public class HouseholdController {
 
     @GetMapping("/stats")
     public ResponseEntity<HouseholdStatsDto> getHouseholdStats(
+            @RequestParam(value = "period", defaultValue = "YEAR") String period,
             @RequestParam(value = "year", required = false) Integer year,
             @AuthenticationPrincipal UserDetails userDetails) {
         CTMUser user = (CTMUser) userDetails;
-        return ResponseEntity.ok(householdService.getHouseholdStats(user, year));
+        return ResponseEntity.ok(householdService.getHouseholdStats(user, period, year));
     }
 
     @GetMapping

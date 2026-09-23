@@ -66,6 +66,8 @@ export class BlindBoxAdminComponent implements OnInit {
   // State Data
   rarities: BlindBoxRarity[] = [];
   collections: BlindBoxCollection[] = [];
+  draggedItem: BlindBoxItem | null = null;
+  hoveredRarityId: number | null = null;
   keys: BlindBoxKey[] = [];
   householdMembers: HouseholdMember[] = [];
   partnerInspectionEnabled = false;
@@ -104,6 +106,69 @@ export class BlindBoxAdminComponent implements OnInit {
   grantQuantity = 1;
 
   isUploadingImage = false;
+
+  onItemDragStart(event: DragEvent, item: BlindBoxItem): void {
+    this.draggedItem = item;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', String(item.id));
+    }
+  }
+
+  onItemDragEnd(): void {
+    this.draggedItem = null;
+    this.hoveredRarityId = null;
+  }
+
+  onRarityDragOver(event: DragEvent, rarity: BlindBoxRarity): void {
+    event.preventDefault(); // Nécessaire pour autoriser le drop HTML5
+    if (event.dataTransfer) {
+      event.dataTransfer.dropEffect = 'move';
+    }
+    this.hoveredRarityId = rarity.id ?? null;
+  }
+
+  onRarityDragLeave(rarity: BlindBoxRarity): void {
+    if (this.hoveredRarityId === rarity.id) {
+      this.hoveredRarityId = null;
+    }
+  }
+
+  onRarityDrop(event: DragEvent, targetRarity: BlindBoxRarity): void {
+    event.preventDefault();
+    this.hoveredRarityId = null;
+
+    if (!this.draggedItem || !targetRarity.id || this.draggedItem.rarity?.id === targetRarity.id) {
+      return;
+    }
+
+    const item = this.draggedItem;
+    const previousRarity = item.rarity;
+
+    // 1. Mise à jour optimiste (0 latence perçue, la pilule change immédiatement)
+    item.rarity = targetRarity;
+
+    // 2. Appel du endpoint Spring Boot existant
+    this.blindBoxService.updateItemRarity(item.id!, targetRarity.id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Rareté ajustée',
+          detail: `${item.name} déplacé en "${targetRarity.name}"`,
+          life: 1500
+        });
+      },
+      error: (err) => {
+        // Rollback en cas d'erreur
+        item.rarity = previousRarity;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de mettre à jour le rang.'
+        });
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadAllData();

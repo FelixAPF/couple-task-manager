@@ -43,6 +43,10 @@ export class BlindBoxService {
   }
 
   // --- ADMIN API ---
+  updateItemRarity(itemId: number, rarityId: number): Observable<void> {
+    return this.http.patch<void>(`${this.adminApi}/items/${itemId}/rarity?rarityId=${rarityId}`, {});
+  }
+  
   getRarities(): Observable<BlindBoxRarity[]> {
     return this.http.get<BlindBoxRarity[]>(`${this.adminApi}/rarities`);
   }

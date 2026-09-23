@@ -22,6 +22,15 @@ public class BlindBoxAdminController {
     private final BlindBoxRepository boxRepository;
     private final BlindBoxKeyRepository keyRepository;
 
+    // BlindBoxAdminController.java
+    @PatchMapping("/items/{itemId}/rarity")
+    public ResponseEntity<Void> updateItemRarity(
+            @PathVariable Long itemId,
+            @RequestParam Long rarityId) {
+        blindBoxService.updateItemRarity(itemId, rarityId);
+        return ResponseEntity.noContent().build();
+    }
+
     // --- RARITIES ---
     @GetMapping("/rarities")
     public ResponseEntity<List<BlindBoxRarity>> getRarities() {

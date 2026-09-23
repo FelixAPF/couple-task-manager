@@ -4,6 +4,7 @@ import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.blindbox.*;
 import com.couple.taskmanager.model.dto.blindbox.*;
 import com.couple.taskmanager.repository.blindbox.*;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -259,5 +260,15 @@ public class BlindBoxService {
                 });
         inv.setQuantity(inv.getQuantity() + quantity);
         inventoryRepository.save(inv);
+    }
+
+    @Transactional
+    public void updateItemRarity(Long itemId, Long rarityId) {
+        BlindBoxItem item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException("Item non trouvé"));
+        BlindBoxRarity rarity = rarityRepository.findById(rarityId)
+                .orElseThrow(() -> new EntityNotFoundException("Rareté non trouvée"));
+        item.setRarity(rarity);
+        itemRepository.save(item);
     }
 }

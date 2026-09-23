@@ -70,7 +70,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // IMPORTANT: Allowed origin MUST be specific when allowCredentials is true
         configuration.setAllowedOriginPatterns(allowedOrigins);
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type")); // Explicitly list allowed headers
         configuration.setAllowCredentials(true); // Allow credentials (cookies, authorization headers)
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

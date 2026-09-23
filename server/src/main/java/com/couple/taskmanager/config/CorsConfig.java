@@ -20,7 +20,7 @@ public class CorsConfig {
                                 "http://*:4200",          // Allows live reload from any local network IP
                                 "capacitor://localhost",  // Native Capacitor scheme (iOS / modern Android)
                                 "http://localhost"        // Native Capacitor Android scheme
-                        )                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                        )                        .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true)
                         .allowedHeaders("*");
             }

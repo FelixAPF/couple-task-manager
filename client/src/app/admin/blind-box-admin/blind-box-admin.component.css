@@ -482,3 +482,123 @@
   color: #94a3b8;
   font-size: 0.85rem;
 }
+
+/* Layout scindé avec sidebar sticky */
+.tier-editor-layout {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  position: relative;
+}
+
+.admin-shell {
+  max-width: 1200px !important; /* Permet à la vue de s'élargir sur PC */
+}
+
+/* Carte en cours de glissement */
+.item-card {
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.item-card:active {
+  cursor: grabbing;
+}
+
+.item-card.is-dragging {
+  opacity: 0.35;
+  transform: scale(0.98);
+}
+
+.drag-handle {
+  cursor: grab;
+  font-size: 0.85rem;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+  padding: 0 0.2rem;
+}
+
+.item-card:hover .drag-handle {
+  opacity: 1;
+}
+
+/* Sidebar droite fixe */
+.rarity-tier-sidebar {
+  width: 260px;
+  position: sticky;
+  top: 1rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.25rem 1rem;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 820px) {
+  .rarity-tier-sidebar {
+    display: none; /* Masqué sur écran étroit mobile */
+  }
+}
+
+:host-context(.dark) .rarity-tier-sidebar {
+  background: var(--surface-800, #1e293b);
+  border-color: var(--surface-700, #334155);
+}
+
+.sidebar-header .header-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.tier-drop-zones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Zones de drop individuelles pour chaque rang */
+.tier-drop-target {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  transition: all 0.12s ease-in-out;
+}
+
+:host-context(.dark) .tier-drop-target {
+  background: var(--surface-900, #0f172a);
+  border-color: var(--surface-700, #334155);
+}
+
+.tier-orb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tier-name {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+/* Effet au survol pendant le drag */
+.tier-drop-target.is-hovered {
+  border-color: var(--tier-border);
+  border-style: solid;
+  transform: scale(1.04) translateX(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 0 10px var(--tier-color);
+  background: rgba(255, 255, 255, 0.1);
+}

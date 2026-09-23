@@ -108,36 +108,73 @@
         <button *ngIf="itemSearchTerm" (click)="itemSearchTerm = ''" class="clear-search-btn"><i class="pi pi-times"></i></button>
       </div>
 
-      <!-- Character Cards Stack -->
-      <div class="cards-stack">
-        <div *ngFor="let item of filteredActiveItems" class="touch-card item-card">
-          
-          <!-- Card Thumbnail with Rarity Border -->
-          <div class="item-thumb" [style.borderColor]="item.rarity?.borderColor || '#94a3b8'">
-            <img [src]="item.imageUrl || 'assets/placeholder.jpg'" [alt]="item.name">
-            <span class="num-badge">#{{ item.itemNumber.toString().padStart(3, '0') }}</span>
-          </div>
+      <!-- Layout Split : Cartes à gauche + Sidebar Tiers à droite -->
+      <div class="tier-editor-layout">
+        
+        <!-- Colonne Gauche : Cartes déplaçables -->
+        <div class="cards-stack flex-grow">
+          <div *ngFor="let item of filteredActiveItems" 
+               class="touch-card item-card"
+               [draggable]="true"
+               (dragstart)="onItemDragStart($event, item)"
+               (dragend)="onItemDragEnd()"
+               [class.is-dragging]="draggedItem?.id === item.id">
+            
+            <i class="pi pi-bars drag-handle text-surface-400"></i>
 
-          <div class="card-details flex-grow min-w-0">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="rarity-pill" [style.backgroundColor]="item.rarity?.badgeColor || '#334155'">
-                {{ item.rarity?.name || 'Inconnu' }}
-              </span>
+            <!-- Card Thumbnail with Rarity Border -->
+            <div class="item-thumb" [style.borderColor]="item.rarity?.borderColor || '#94a3b8'">
+              <img [src]="item.imageUrl || 'assets/placeholder.jpg'" [alt]="item.name">
+              <span class="num-badge">#{{ item.itemNumber.toString().padStart(3, '0') }}</span>
             </div>
-            <h3>{{ item.name }}</h3>
-            <p class="truncate">{{ item.subtitle || 'Shinobi' }}</p>
+
+            <div class="card-details flex-grow min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="rarity-pill" [style.backgroundColor]="item.rarity?.badgeColor || '#334155'">
+                  {{ item.rarity?.name || 'Inconnu' }}
+                </span>
+              </div>
+              <h3>{{ item.name }}</h3>
+              <p class="truncate">{{ item.subtitle || 'Shinobi' }}</p>
+            </div>
+
+            <div class="card-actions">
+              <button pButton icon="pi pi-pencil" [rounded]="true" [text]="true" class="p-button-secondary" (click)="openEditItem(item, $event)"></button>
+              <button pButton icon="pi pi-trash" [rounded]="true" [text]="true" class="p-button-danger" (click)="confirmDeleteItem($event, item)"></button>
+            </div>
           </div>
 
-          <div class="card-actions">
-            <button pButton icon="pi pi-pencil" [rounded]="true" [text]="true" class="p-button-secondary" (click)="openEditItem(item, $event)"></button>
-            <button pButton icon="pi pi-trash" [rounded]="true" [text]="true" class="p-button-danger" (click)="confirmDeleteItem($event, item)"></button>
+          <div *ngIf="filteredActiveItems.length === 0" class="empty-box">
+            <i class="pi pi-search text-3xl mb-2 opacity-50"></i>
+            <p>Aucun personnage ne correspond à votre recherche.</p>
           </div>
         </div>
 
-        <div *ngIf="filteredActiveItems.length === 0" class="empty-box">
-          <i class="pi pi-search text-3xl mb-2 opacity-50"></i>
-          <p>Aucun personnage ne correspond à votre recherche.</p>
-        </div>
+        <!-- Colonne Droite : Tiers de rareté fixes (Drop Targets) -->
+        <aside class="rarity-tier-sidebar">
+          <div class="sidebar-header">
+            <span class="header-label">Déposer sur un Tier</span>
+          </div>
+
+          <div class="tier-drop-zones">
+            <div *ngFor="let r of rarities"
+                 class="tier-drop-target"
+                 [class.is-hovered]="hoveredRarityId === r.id"
+                 [style.--tier-color]="r.badgeColor"
+                 [style.--tier-border]="r.borderColor"
+                 (dragover)="onRarityDragOver($event, r)"
+                 (dragleave)="onRarityDragLeave(r)"
+                 (drop)="onRarityDrop($event, r)">
+              
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="tier-orb" [style.backgroundColor]="r.badgeColor" [style.boxShadow]="'0 0 10px ' + r.borderColor"></span>
+                <span class="tier-name truncate" [style.color]="r.badgeColor">{{ r.name }}</span>
+              </div>
+              <span class="tier-order text-xs text-surface-400 font-mono font-bold">#{{ r.displayOrder }}</span>
+            </div>
+          </div>
+        </aside>
+
       </div>
     </div>
   </main>

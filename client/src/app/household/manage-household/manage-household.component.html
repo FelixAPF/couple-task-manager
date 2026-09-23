@@ -163,7 +163,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div *ngFor="let stat of getResolvedChefStats(household.members)" class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-center gap-4">
             <p-avatar 
-              [image]="stat.imageUrl || 'assets/placeholder-user.png'" 
+              [image]="stat.imageUrl" 
               size="large" 
               shape="circle"
               styleClass="border-2 border-orange-500 shadow-sm shrink-0">
@@ -199,7 +199,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div *ngFor="let stat of getResolvedTaskStats(household.members)" class="p-4 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex items-center gap-4">
             <p-avatar 
-              [image]="stat.imageUrl || 'assets/placeholder-user.png'" 
+              [image]="stat.imageUrl" 
               size="large" 
               shape="circle"
               styleClass="border-2 border-primary-500 shadow-sm shrink-0">
@@ -401,7 +401,7 @@
                class="p-6 bg-surface-50 dark:bg-surface-900/50 rounded-2xl border border-surface-200/80 dark:border-surface-700 flex flex-col items-center text-center">
             
             <p-avatar 
-              [image]="member.imageUrl || 'assets/placeholder-user.png'" 
+              [image]="member.imageUrl" 
               size="xlarge" 
               shape="circle" 
               class="mb-3 border-4 border-white dark:border-surface-800 shadow-md">

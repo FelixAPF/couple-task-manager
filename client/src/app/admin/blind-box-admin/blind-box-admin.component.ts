@@ -85,7 +85,7 @@ export class BlindBoxAdminComponent implements OnInit {
   ];
 
   // Quick Palette for 1-tap color selection
-  colorPalette = ['#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444', '#ffd166'];
+  colorPalette = ['#000000','#88b6f7', '#e3efff','#aeff00','#ff00a6', '#ff0000','#91c9a7', '#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444', '#ffd166'];
 
   // Modals
   showRarityDialog = false;

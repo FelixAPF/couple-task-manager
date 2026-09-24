@@ -399,37 +399,236 @@
   text-overflow: ellipsis;
 }
 
-/* ============== RARITY EFFECTS ============== */
+/* ========================================================= */
+/* ============== AMBITIOUS SPECIAL EFFECTS =============== */
+/* ========================================================= */
+
+.effect-foil .s-card-art::before,
 .effect-foil .s-card-art::after,
+.effect-holographic .s-card-art::before,
 .effect-holographic .s-card-art::after,
-.effect-rainbow_shimmer .s-card-art::after {
+.effect-rainbow_shimmer .s-card-art::before,
+.effect-rainbow_shimmer .s-card-art::after,
+.effect-lightning .s-card-art::before,
+.effect-lightning .s-card-art::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
 }
 
+/* ================== 1. FOIL (Reflet Métallique / Chrome) ================== */
+.effect-foil .s-card-art::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(200, 225, 255, 0.25) 50%, rgba(255, 255, 255, 0.05) 100%);
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
+
 .effect-foil .s-card-art::after {
-  background: linear-gradient(115deg, transparent 0%, rgba(255, 255, 255, 0.5) 45%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 255, 255, 0.5) 55%, transparent 100%);
+  inset: -60%;
+  background: linear-gradient(108deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 62%
+  );
+  transform: rotate(25deg);
+  animation: foilBeam 3.2s ease-in-out infinite;
+  mix-blend-mode: color-dodge;
+  z-index: 2;
+}
+
+@keyframes foilBeam {
+  0% { transform: translateY(-70%) rotate(25deg); opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { transform: translateY(70%) rotate(25deg); opacity: 0.2; }
+}
+
+/* ================== 2. HOLOGRAPHIC (Prisme Laser Arc-en-ciel TCG) ================== */
+.effect-holographic .s-card-art::before {
+  background: repeating-linear-gradient(125deg,
+    rgba(255, 0, 80, 0.5) 0%,
+    rgba(255, 140, 0, 0.5) 8%,
+    rgba(255, 230, 0, 0.5) 16%,
+    rgba(0, 255, 120, 0.5) 24%,
+    rgba(0, 210, 255, 0.5) 32%,
+    rgba(90, 60, 255, 0.5) 40%,
+    rgba(220, 0, 255, 0.5) 48%,
+    rgba(255, 0, 80, 0.5) 56%
+  );
   background-size: 250% 250%;
   mix-blend-mode: color-dodge;
-  animation: shimmer 3.5s infinite linear;
+  animation: holoRainbow 4s ease infinite;
+  z-index: 1;
 }
 
-.effect-holographic .s-card-art::after,
-.effect-rainbow_shimmer .s-card-art::after {
-  background: linear-gradient(125deg, rgba(255, 0, 90, 0.3) 0%, rgba(255, 154, 0, 0.32) 15%, rgba(208, 222, 33, 0.3) 30%, rgba(79, 220, 74, 0.3) 45%, rgba(63, 218, 216, 0.32) 60%, rgba(108, 76, 224, 0.32) 75%, rgba(255, 0, 90, 0.3) 100%);
+.effect-holographic .s-card-art::after {
+  background: 
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.15) 0px, transparent 1px, transparent 4px),
+    linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.7) 50%, transparent 65%);
+  background-size: 100% 100%, 200% 200%;
+  mix-blend-mode: overlay;
+  animation: holoGlare 5s linear infinite;
+  z-index: 2;
+}
+
+@keyframes holoRainbow {
+  0% { background-position: 0% 0%; filter: hue-rotate(0deg); }
+  50% { background-position: 100% 100%; filter: hue-rotate(180deg); }
+  100% { background-position: 0% 0%; filter: hue-rotate(360deg); }
+}
+
+@keyframes holoGlare {
+  0% { background-position: 0 0, -150% 0; }
+  100% { background-position: 0 0, 150% 0; }
+}
+
+/* ================== 3. RAINBOW SHIMMER (Poussière d'Étoiles & Paillettes) ================== */
+.effect-rainbow_shimmer .s-card-art::before {
+  background: linear-gradient(135deg,
+    rgba(255, 105, 180, 0.4) 0%,
+    rgba(255, 215, 0, 0.4) 25%,
+    rgba(0, 255, 255, 0.4) 50%,
+    rgba(168, 85, 247, 0.4) 75%,
+    rgba(255, 105, 180, 0.4) 100%
+  );
   background-size: 300% 300%;
   mix-blend-mode: color-dodge;
-  animation: holoShift 5s ease infinite;
+  animation: shimmerAurora 4.5s ease-in-out infinite alternate;
+  z-index: 1;
 }
 
-@keyframes shimmer { 0% { background-position: -200% -200%; } 100% { background-position: 200% 200%; } }
-@keyframes holoShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+.effect-rainbow_shimmer .s-card-art::after {
+  background-image: 
+    radial-gradient(circle at 18% 22%, #ffffff 2px, transparent 4px),
+    radial-gradient(circle at 82% 16%, #ffd700 2.5px, transparent 5px),
+    radial-gradient(circle at 45% 48%, #ffffff 2px, transparent 4px),
+    radial-gradient(circle at 25% 78%, #38bdf8 2px, transparent 4.5px),
+    radial-gradient(circle at 78% 75%, #f472b6 2px, transparent 4.5px),
+    radial-gradient(circle at 62% 32%, #ffffff 2px, transparent 4px),
+    radial-gradient(circle at 35% 15%, #c084fc 2px, transparent 4px),
+    radial-gradient(circle at 85% 55%, #fef08a 1.5px, transparent 3.5px);
+  background-size: 100% 100%;
+  mix-blend-mode: screen;
+  animation: shimmerTwinkle 1.8s ease-in-out infinite alternate;
+  z-index: 2;
+}
 
-@media (prefers-reduced-motion: reduce) {
-  .effect-foil .s-card-art::after, .effect-holographic .s-card-art::after,
-  .box-shake, .locked-pulse, .hero-shuriken { animation: none; }
+@keyframes shimmerAurora {
+  0% { background-position: 0% 40%; }
+  100% { background-position: 100% 60%; }
+}
+
+@keyframes shimmerTwinkle {
+  0% { opacity: 0.35; transform: scale(0.97); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0.55; transform: scale(0.98); }
+}
+
+/* ================== 4. LIGHTNING (Éclairs Intérieurs et Autour de la Carte) ================== */
+.effect-lightning {
+  border-color: #38bdf8 !important;
+  animation: electricAura 0.85s infinite alternate;
+}
+
+@keyframes electricAura {
+  0% {
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.85), 0 0 35px rgba(37, 99, 235, 0.65), inset 0 0 10px rgba(56, 189, 248, 0.5) !important;
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(168, 85, 247, 0.95), 0 0 60px rgba(56, 189, 248, 0.8), inset 0 0 18px rgba(168, 85, 247, 0.6) !important;
+  }
+  100% {
+    box-shadow: 0 0 22px rgba(56, 189, 248, 1), 0 0 48px rgba(37, 99, 235, 0.75), inset 0 0 14px rgba(56, 189, 248, 0.7) !important;
+  }
+}
+
+/* Éclairs extérieurs crépitants AUTOUR de la carte */
+.effect-lightning::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 340'%3E%3Cpath d='M-10,40 L35,65 L15,110 L45,140 L25,185 L50,220 L10,310' stroke='%2338bdf8' stroke-width='2.2' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 6px %2338bdf8)'/%3E%3Cpath d='M235,25 L195,80 L220,105 L180,170 L210,200 L175,280 L230,320' stroke='%23a855f7' stroke-width='2' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 7px %23a855f7)'/%3E%3Cpath d='M40,-10 L70,25 L120,5 L160,30 L210,-5' stroke='%2338bdf8' stroke-width='1.8' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 5px %2338bdf8)'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 5;
+  animation: outerLightningStrobe 2s infinite steps(1);
+}
+
+@keyframes outerLightningStrobe {
+  0%, 100% { opacity: 0; }
+  8% { opacity: 1; transform: scale(1.02); }
+  14% { opacity: 0.15; }
+  20% { opacity: 1; transform: scale(0.98) scaleX(-1); }
+  28% { opacity: 0; }
+  58% { opacity: 0.95; transform: scaleX(1); }
+  64% { opacity: 0; }
+  82% { opacity: 1; transform: scale(1.03) scaleY(-1); }
+  88% { opacity: 0; }
+}
+
+/* Éclairs intérieurs jaillissant sur l'illustration */
+.effect-lightning .s-card-art::before {
+  inset: -6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'%3E%3Cpath d='M30,0 L60,85 L35,110 L90,175 L60,195 L125,300' stroke='%2338bdf8' stroke-width='3' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 8px %2338bdf8)'/%3E%3Cpath d='M170,10 L130,95 L155,120 L95,205 L130,225 L75,300' stroke='%23a855f7' stroke-width='2.5' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 8px %23a855f7)'/%3E%3Cpath d='M90,175 L145,195 L115,240' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 4px %23ffffff)'/%3E%3C/svg%3E");
+  background-size: cover;
+  mix-blend-mode: screen;
+  z-index: 2;
+  animation: innerLightningFlash 1.5s infinite steps(1);
+}
+
+.effect-lightning .s-card-art::after {
+  inset: -6px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'%3E%3Cpath d='M100,0 L75,65 L110,90 L65,165 L95,185 L45,290' stroke='%2360a5fa' stroke-width='2.5' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 7px %2360a5fa)'/%3E%3Cpath d='M10,135 L70,165 L45,215 L125,255 L85,300' stroke='%23ffffff' stroke-width='2.5' fill='none' stroke-linecap='round' filter='drop-shadow(0 0 10px %2338bdf8)'/%3E%3C/svg%3E");
+  background-size: cover;
+  mix-blend-mode: color-dodge;
+  z-index: 3;
+  animation: innerLightningAlt 1s infinite steps(1);
+}
+
+@keyframes innerLightningFlash {
+  0%, 100% { opacity: 0; }
+  5% { opacity: 1; transform: scale(1.02); }
+  10% { opacity: 0.2; }
+  16% { opacity: 1; transform: scale(0.99) scaleX(-1); }
+  22% { opacity: 0; }
+  48% { opacity: 0.95; transform: scaleX(1); }
+  54% { opacity: 0; }
+  76% { opacity: 1; transform: scale(1.03) scaleY(-1); }
+  82% { opacity: 0; }
+}
+
+@keyframes innerLightningAlt {
+  0%, 100% { opacity: 0; }
+  18% { opacity: 0; }
+  22% { opacity: 1; transform: scaleY(-1); }
+  26% { opacity: 0; }
+  60% { opacity: 1; transform: scale(1.01) scaleX(-1); }
+  65% { opacity: 0.25; }
+  70% { opacity: 0.95; }
+  75% { opacity: 0; }
+}
+
+/* ============== DETAIL MODAL FIX ============== */
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.detail-card {
+  width: 220px;
+  margin: 0.5rem auto 1rem;
+  cursor: default;
+}
+
+.detail-card .detail-art {
+  width: 100%;
 }
 
 /* ============== MODALS ============== */
@@ -514,53 +713,6 @@
 
 .close-btn { width: 100%; }
 
-/* ============== DETAIL MODAL ============== */
-.detail-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.4rem;
-}
-
-.detail-art {
-  width: 100%;
-  max-width: 240px;
-  border: 2px solid transparent;
-  margin: 0 auto;
-}
-
-.detail-body h2 {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.6rem;
-  letter-spacing: 0.02em;
-  margin: 0.6rem 0 0;
-}
-
-.detail-subtitle {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--gold);
-  margin: 0;
-}
-
-.detail-notes {
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  line-height: 1.5;
-  padding: 0 0.5rem;
-}
-
-.detail-footer {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  border-top: 1px solid var(--surface-line);
-  padding-top: 0.6rem;
-  margin-top: 0.4rem;
-}
 
 /* ============== FILTER BAR & SEARCH ============== */
 .filter-bar {

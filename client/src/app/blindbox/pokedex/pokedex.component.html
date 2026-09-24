@@ -179,7 +179,7 @@
 </div>
 
 <!-- ================= UNBOXING MODAL ================= -->
-<p-dialog [(visible)]="showUnboxingDialog" [modal]="true" [closable]="!isUnboxingRunning" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '440px'}" [showHeader]="false">
+<p-dialog [(visible)]="showUnboxingDialog" [dismissableMask]="!isUnboxingRunning" [modal]="true" [closable]="!isUnboxingRunning" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '440px'}" [showHeader]="false">
   <div class="unbox-body">
     <div *ngIf="!revealResult" class="unbox-state">
       <div class="unbox-orb" [class.box-shake]="isUnboxingRunning">
@@ -215,20 +215,30 @@
     </div>
   </div>
 </p-dialog>
-
 <!-- ================= DETAIL MODAL ================= -->
-<p-dialog [(visible)]="showDetailDialog" [modal]="true" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '420px'}" header="Fiche du dossier">
+<p-dialog [(visible)]="showDetailDialog" [dismissableMask]="true" [modal]="true" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '420px'}" header="Fiche du dossier">
   <div *ngIf="inspectedCard" class="detail-body">
-    <div class="s-card-art detail-art"
+    
+    <!-- CARTE COMPLETE AVEC EFFET ACTIF -->
+    <div class="s-card detail-card"
+         [ngClass]="'effect-' + inspectedCard.rarity.effectType.toLowerCase()"
          [style.borderColor]="inspectedCard.rarity.borderColor"
-         [style.boxShadow]="'0 0 34px ' + inspectedCard.rarity.borderColor + '80'"
-         [ngClass]="'effect-' + inspectedCard.rarity.effectType.toLowerCase()">
-      <img [src]="inspectedCard.imageUrl" [alt]="inspectedCard.name">
-      <span class="s-card-badge" [style.backgroundColor]="inspectedCard.rarity.badgeColor">{{ inspectedCard.rarity.name }} &middot; N&deg;{{ inspectedCard.itemNumber }}</span>
-      <div class="s-card-fade"></div>
+         [style.boxShadow]="'0 0 0 1px ' + inspectedCard.rarity.borderColor + '60, 0 12px 35px -4px ' + inspectedCard.rarity.borderColor + '90'">
+      <span class="s-card-number">N&deg;{{ inspectedCard.itemNumber.toString().padStart(3, '0') }}</span>
+      <div class="s-card-art detail-art">
+        <img [src]="inspectedCard.imageUrl" [alt]="inspectedCard.name">
+        <span class="s-card-badge" [style.backgroundColor]="inspectedCard.rarity.badgeColor">
+          {{ inspectedCard.rarity.name }}
+        </span>
+        <div class="s-card-fade"></div>
+      </div>
+      <div class="s-card-name">
+        <h3>{{ inspectedCard.name }}</h3>
+        <p>{{ inspectedCard.subtitle || 'Shinobi' }}</p>
+      </div>
     </div>
-    <h2>{{ inspectedCard.name }}</h2>
-    <p class="detail-subtitle">{{ inspectedCard.subtitle }}</p>
+
+    <!-- Lore / Description -->
     <p class="detail-notes">{{ inspectedCard.description || 'Aucune note au dossier.' }}</p>
     <div class="detail-footer">
       <span>Recruté le {{ inspectedCard.firstObtainedDate | date:'mediumDate' }}</span>

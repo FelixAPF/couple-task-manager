@@ -602,3 +602,186 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), inset 0 0 10px var(--tier-color);
   background: rgba(255, 255, 255, 0.1);
 }
+
+.tag-lightning { background: #e0f2fe; color: #0284c7; }
+
+/* Vignette cliquable pour aperçu */
+.preview-clickable {
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.preview-clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.thumb-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  border-radius: 10px;
+}
+.preview-clickable:hover .thumb-hover-overlay {
+  opacity: 1;
+}
+
+.item-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.preview-test-tag {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #f97316;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Modale d'aperçu Admin */
+.admin-preview-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0;
+}
+.preview-card {
+  width: 220px;
+  cursor: default;
+}
+.preview-meta-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #334155;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.75rem;
+}
+.meta-label {
+  color: #94a3b8;
+}
+
+/* Duplication des styles de carte pour la modale Admin */
+.s-card {
+  position: relative;
+  background: #1c1a28;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  padding: 0.6rem;
+  color: #f4f2ff;
+}
+.s-card-number {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.75rem;
+  z-index: 2;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+.s-card-art {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #151320;
+}
+.s-card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.s-card-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #fff;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+.s-card-fade {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 55%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+  pointer-events: none;
+}
+.s-card-name {
+  padding: 0.55rem 0.15rem 0.1rem;
+}
+.s-card-name h3 {
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.s-card-name p {
+  font-size: 0.7rem;
+  color: #9d97b8;
+  margin: 0.1rem 0 0;
+}
+
+
+/* ========================================================= */
+/* ============== AMBITIOUS SPECIAL EFFECTS =============== */
+/* ========================================================= */
+
+.effect-foil .s-card-art::before,
+.effect-foil .s-card-art::after,
+.effect-holographic .s-card-art::before,
+.effect-holographic .s-card-art::after,
+.effect-rainbow_shimmer .s-card-art::before,
+.effect-rainbow_shimmer .s-card-art::after,
+.effect-lightning .s-card-art::before,
+.effect-lightning .s-card-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ================== 1. FOIL (Reflet Métallique / Chrome) ================== */
+.effect-foil .s-card-art::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(200, 225, 255, 0.25) 50%, rgba(255, 255, 255, 0.05) 100%);
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
+
+.effect-foil .s-card-art::after {
+  inset: -60%;
+  background: linear-gradient(108deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 62%
+  );
+  transform: rotate(25deg);
+  animation: foilBeam 3.2s ease-in-out infinite;
+  mix-blend-mode: color-dodge;
+  z-index: 2;
+}
+
+@keyframes foilBeam {
+  0% { transform: translateY(-70%) rotate(25deg); opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { transform: translateY(70%) rotate(25deg); opacity: 0.2; }
+}

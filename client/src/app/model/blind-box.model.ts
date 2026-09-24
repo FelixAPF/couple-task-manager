@@ -1,4 +1,4 @@
-export type CardEffectType = 'STANDARD' | 'FOIL' | 'HOLOGRAPHIC' | 'RAINBOW_SHIMMER';
+export type CardEffectType = 'STANDARD' | 'FOIL' | 'HOLOGRAPHIC' | 'RAINBOW_SHIMMER' | 'LIGHTNING';
 
 export interface BlindBoxRarity {
   id?: number;

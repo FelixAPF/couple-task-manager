@@ -122,10 +122,17 @@
             
             <i class="pi pi-bars drag-handle text-surface-400"></i>
 
-            <!-- Card Thumbnail with Rarity Border -->
-            <div class="item-thumb" [style.borderColor]="item.rarity?.borderColor || '#94a3b8'">
+            <!-- Card Thumbnail with Rarity Border (Cliquable pour aperçu) -->
+            <div class="item-thumb preview-clickable" 
+                 [style.borderColor]="item.rarity?.borderColor || '#94a3b8'"
+                 (click)="openPreview(item, $event)"
+                 pTooltip="Cliquer pour voir l'aperçu utilisateur"
+                 tooltipPosition="top">
               <img [src]="item.imageUrl || 'assets/placeholder.jpg'" [alt]="item.name">
               <span class="num-badge">#{{ item.itemNumber.toString().padStart(3, '0') }}</span>
+              <div class="thumb-hover-overlay">
+                <i class="pi pi-eye"></i>
+              </div>
             </div>
 
             <div class="card-details flex-grow min-w-0">
@@ -275,7 +282,7 @@
 <!-- ========================================================= -->
 <!-- MODAL: ADD / EDIT RARITY                                  -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showRarityDialog" [modal]="true" header="Rang de Rareté" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+<p-dialog [(visible)]="showRarityDialog" [dismissableMask]="true" [modal]="true" header="Rang de Rareté" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
   <div class="dialog-body">
     <div class="input-group">
       <label>Nom du rang</label>
@@ -320,7 +327,7 @@
 <!-- ========================================================= -->
 <!-- MODAL: ADD / EDIT COLLECTION                              -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showCollectionDialog" [modal]="true" header="Nouvelle Collection" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+<p-dialog [(visible)]="showCollectionDialog" [dismissableMask]="true" [modal]="true" header="Nouvelle Collection" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
   <div class="dialog-body">
     <div class="input-group">
       <label>Nom de la collection</label>
@@ -353,7 +360,7 @@
 <!-- ========================================================= -->
 <!-- MODAL: ADD / EDIT CARD                                    -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showItemDialog" [modal]="true" header="Carte de Personnage" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+<p-dialog [(visible)]="showItemDialog" [dismissableMask]="true" [modal]="true" header="Carte de Personnage" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
   <div class="dialog-body">
     <div class="grid grid-cols-3 gap-2">
       <div class="col-span-1 input-group">
@@ -381,7 +388,7 @@
       <textarea pInputTextarea [(ngModel)]="editingItem.description" rows="2" placeholder="Citation marquante ou biographie..." class="w-full !rounded-2xl"></textarea>
     </div>
 
-    <!-- Artwork Upload -->
+<!-- Artwork Upload -->
     <div class="input-group">
       <label>Illustration (Photo)</label>
       <div class="flex items-center gap-2">
@@ -389,7 +396,17 @@
         <button pButton icon="pi pi-camera" label="Choisir" class="p-button-outlined p-button-secondary !rounded-2xl font-bold" (click)="cardInput.click()" [loading]="isUploadingImage"></button>
         <input pInputText [(ngModel)]="editingItem.imageUrl" placeholder="Ou URL d'image..." class="flex-grow !rounded-2xl text-xs" />
       </div>
-      <img *ngIf="editingItem.imageUrl" [src]="editingItem.imageUrl" class="image-preview item-preview mt-2">
+      <!-- Clic sur l'image de la modale d'édition pour tester l'effet -->
+      <div *ngIf="editingItem.imageUrl" 
+           class="item-preview-container cursor-pointer"
+           (click)="openPreview(editingItem)"
+           pTooltip="Cliquer pour voir le rendu avec effets"
+           tooltipPosition="bottom">
+        <img [src]="editingItem.imageUrl" class="image-preview item-preview mt-2">
+        <div class="preview-test-tag">
+          <i class="pi pi-sparkles"></i> Tester le rendu de la carte
+        </div>
+      </div>
     </div>
 
     <div class="dialog-footer">
@@ -402,7 +419,7 @@
 <!-- ========================================================= -->
 <!-- MODAL: ADD KEY & BOX                                      -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showKeyDialog" [modal]="true" header="Configurer une Clé" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
+<p-dialog [(visible)]="showKeyDialog" [dismissableMask]="true" [modal]="true" header="Configurer une Clé" [style]="{width: '92vw', maxWidth: '440px'}" styleClass="mobile-dialog">
   <div class="dialog-body">
     <div class="input-group">
       <label>Nom de la Clé</label>
@@ -447,7 +464,7 @@
 <!-- ========================================================= -->
 <!-- MODAL: GRANT KEYS TOOL                                    -->
 <!-- ========================================================= -->
-<p-dialog [(visible)]="showGrantKeyDialog" [modal]="true" header="Donner des clés (Test)" [style]="{width: '92vw', maxWidth: '400px'}" styleClass="mobile-dialog">
+<p-dialog [(visible)]="showGrantKeyDialog" [dismissableMask]="true" [modal]="true" header="Donner des clés (Test)" [style]="{width: '92vw', maxWidth: '400px'}" styleClass="mobile-dialog">
   <div class="dialog-body">
     <div class="input-group">
       <label>Destinataire</label>
@@ -468,5 +485,40 @@
       <button pButton label="Annuler" class="p-button-text p-button-secondary font-bold" (click)="showGrantKeyDialog = false"></button>
       <button pButton label="Envoyer" icon="pi pi-gift" class="p-button-warning p-button-rounded font-bold" (click)="submitGrantKey()"></button>
     </div>
+  </div>
+</p-dialog>
+
+<!-- ========================================================= -->
+<!-- MODAL: ADMIN CARD USER PREVIEW                            -->
+<!-- ========================================================= -->
+<p-dialog [(visible)]="showPreviewDialog" [dismissableMask]="true" [modal]="true" header="Aperçu Joueur" [style]="{width: '92vw', maxWidth: '420px'}" styleClass="dark-modal">
+  <div *ngIf="previewItem" class="admin-preview-body">
+    <div class="s-card preview-card"
+         [ngClass]="'effect-' + (previewItem.rarity?.effectType?.toLowerCase() || 'standard')"
+         [style.borderColor]="previewItem.rarity?.borderColor || '#6c4ce0'"
+         [style.boxShadow]="'0 0 0 1px ' + (previewItem.rarity?.borderColor || '#6c4ce0') + '60, 0 12px 35px -4px ' + (previewItem.rarity?.borderColor || '#6c4ce0') + '90'">
+      <span class="s-card-number">N&deg;{{ (previewItem.itemNumber || 1).toString().padStart(3, '0') }}</span>
+      <div class="s-card-art">
+        <img [src]="previewItem.imageUrl || 'assets/placeholder.jpg'" [alt]="previewItem.name">
+        <span class="s-card-badge" [style.backgroundColor]="previewItem.rarity?.badgeColor || '#6c4ce0'">
+          {{ previewItem.rarity?.name || 'Rareté' }}
+        </span>
+        <div class="s-card-fade"></div>
+      </div>
+      <div class="s-card-name">
+        <h3>{{ previewItem.name || 'Nom du personnage' }}</h3>
+        <p>{{ previewItem.subtitle || 'Titre / Épithète' }}</p>
+      </div>
+    </div>
+
+    <!-- Informations sur l'effet testé -->
+    <div class="preview-meta-pill" [style.borderColor]="previewItem.rarity?.borderColor">
+      <span class="meta-label">Effet :</span>
+      <strong [style.color]="previewItem.rarity?.badgeColor">
+        {{ previewItem.rarity?.name }} &bull; {{ previewItem.rarity?.effectType }}
+      </strong>
+    </div>
+
+    <button pButton label="Fermer l'aperçu" class="p-button-secondary p-button-rounded font-bold w-full mt-3" (click)="showPreviewDialog = false"></button>
   </div>
 </p-dialog>

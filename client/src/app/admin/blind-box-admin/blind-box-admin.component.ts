@@ -71,7 +71,8 @@ export class BlindBoxAdminComponent implements OnInit {
   keys: BlindBoxKey[] = [];
   householdMembers: HouseholdMember[] = [];
   partnerInspectionEnabled = false;
-
+  showPreviewDialog = false;
+  previewItem: BlindBoxItem | null = null;
   // Collection Drill-down
   activeCollection: BlindBoxCollection | null = null;
   itemSearchTerm: string = '';
@@ -79,9 +80,10 @@ export class BlindBoxAdminComponent implements OnInit {
   // Effect Options
   effectOptions: { label: string; value: CardEffectType }[] = [
     { label: 'Standard (Neutre)', value: 'STANDARD' },
-    { label: 'Foil (Brillant)', value: 'FOIL' },
-    { label: 'Holographique (Arc-en-ciel)', value: 'HOLOGRAPHIC' },
-    { label: 'Rainbow Shimmer (Paillettes)', value: 'RAINBOW_SHIMMER' }
+    { label: 'Foil (Brillant métallique)', value: 'FOIL' },
+    { label: 'Holographique (Prismatique Arc-en-ciel)', value: 'HOLOGRAPHIC' },
+    { label: 'Rainbow Shimmer (Paillettes & Étoiles)', value: 'RAINBOW_SHIMMER' },
+    { label: 'Lightning (Éclairs électriques & Aura)', value: 'LIGHTNING' }
   ];
 
   // Quick Palette for 1-tap color selection
@@ -113,6 +115,14 @@ export class BlindBoxAdminComponent implements OnInit {
       event.dataTransfer.effectAllowed = 'move';
       event.dataTransfer.setData('text/plain', String(item.id));
     }
+  }
+
+  openPreview(item: BlindBoxItem, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.previewItem = item;
+    this.showPreviewDialog = true;
   }
 
   onItemDragEnd(): void {

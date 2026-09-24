@@ -27,13 +27,22 @@ public class PokedexCardDto {
     public PokedexCardDto(BlindBoxItem item, UserCollectionItem userEntry) {
         this.id = item.getId();
         this.itemNumber = item.getItemNumber();
-        this.name = item.getName();
-        this.subtitle = item.getSubtitle();
-        this.description = item.getDescription();
-        this.imageUrl = item.getImageUrl();
         this.rarity = item.getRarity();
         this.isUnlocked = (userEntry != null && userEntry.getCount() > 0);
         this.count = userEntry != null ? userEntry.getCount() : 0;
         this.firstObtainedDate = userEntry != null ? userEntry.getFirstObtainedDate() : null;
+
+        // Anti-spoiler : Le nom, sous-titre et visuel ne sont envoyés que si la carte est débloquée
+        if (this.isUnlocked) {
+            this.name = item.getName();
+            this.subtitle = item.getSubtitle();
+            this.description = item.getDescription();
+            this.imageUrl = item.getImageUrl();
+        } else {
+            this.name = null;
+            this.subtitle = null;
+            this.description = null;
+            this.imageUrl = null;
+        }
     }
 }

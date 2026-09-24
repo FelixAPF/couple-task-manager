@@ -221,7 +221,7 @@ export class PokedexComponent implements OnInit {
     this.applyFilters();
   }
 
-  applyFilters(): void {
+applyFilters(): void {
     const term = this.searchQuery.trim().toLowerCase();
 
     this.filteredCards = this.cards.filter(card => {
@@ -230,15 +230,29 @@ export class PokedexComponent implements OnInit {
         return false;
       }
 
-      // 2. Filtre de recherche textuelle (nom, titre, n°)
+      // 2. Filtre de recherche textuelle
       if (term) {
-        const matchesName = card.name && card.name.toLowerCase().includes(term);
-        const matchesSubtitle = card.subtitle && card.subtitle.toLowerCase().includes(term);
-        const numStr = String(card.itemNumber);
-        const matchesNum = numStr.includes(term) || numStr.padStart(3, '0').includes(term);
-        const matchesRarity = card.rarity?.name && card.rarity.name.toLowerCase().includes(term);
+        if (card.unlocked) {
+          // Pour les cartes DÉBLOQUÉES : recherche autorisée par nom, sous-titre, rareté ou numéro
+          const matchesName = card.name && card.name.toLowerCase().includes(term);
+          const matchesSubtitle = card.subtitle && card.subtitle.toLowerCase().includes(term);
+          const numStr = String(card.itemNumber);
+          const matchesNum = numStr.includes(term) || numStr.padStart(3, '0').includes(term);
+          const matchesRarity = card.rarity?.name && card.rarity.name.toLowerCase().includes(term);
 
-        return matchesName || matchesSubtitle || matchesNum || matchesRarity;
+          return matchesName || matchesSubtitle || matchesNum || matchesRarity;
+        } else {
+          // Pour les cartes VERROUILLÉES : 
+          // Interdiction absolue de chercher par nom/texte pour ne pas révéler son numéro !
+          // Seule une recherche par numéro explicite (ex: "5", "005", "N°5") peut afficher le slot masqué.
+          const cleanTerm = term.replace(/^n[°o\s#]*/i, '').trim();
+          const isNumeric = /^\d+$/.test(cleanTerm);
+          if (!isNumeric) {
+            return false;
+          }
+          const numStr = String(card.itemNumber);
+          return numStr === cleanTerm || numStr.padStart(3, '0') === cleanTerm;
+        }
       }
 
       return true;

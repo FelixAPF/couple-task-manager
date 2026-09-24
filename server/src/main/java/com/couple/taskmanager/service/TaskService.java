@@ -168,11 +168,7 @@ public class TaskService implements IGenericService<Task, TaskDto> {
         Date dueDate = task.isFixedDay() ? calculateNextDueDate(new Date(), task.getReferenceDate(), task.getFrequency()) :  calculateNextDueDate(new Date(), task.getFrequency());
         task.setDueDate(dueDate);
 
-        if (task.getRewardKey() != null) {
-            int qty = (task.getRewardKeyQuantity() != null && task.getRewardKeyQuantity() > 0)
-                    ? task.getRewardKeyQuantity() : 1;
-            blindBoxService.grantKeyToUser(user.getId(), task.getRewardKey().getId(), qty);
-        }
+        blindBoxService.grantKeyToUser(user.getId(), task.getRewardKey().getId(), 1);
 
         return new TaskDto(taskRepository.save(task));
     }

@@ -7,6 +7,8 @@ import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.ProcedureRepository;
 import com.couple.taskmanager.repository.TaskHistoryRepository;
 import com.couple.taskmanager.repository.TaskRepository;
+import com.couple.taskmanager.repository.blindbox.BlindBoxKeyRepository;
+import com.couple.taskmanager.utils.StreamUtils;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -41,6 +43,9 @@ public class TaskService implements IGenericService<Task, TaskDto> {
 
     @Autowired
     private CTMUserService userService;
+
+    @Autowired
+    private BlindBoxKeyRepository keyRepository;
 
     // --- IGenericService Implementation ---
 
@@ -168,7 +173,7 @@ public class TaskService implements IGenericService<Task, TaskDto> {
         Date dueDate = task.isFixedDay() ? calculateNextDueDate(new Date(), task.getReferenceDate(), task.getFrequency()) :  calculateNextDueDate(new Date(), task.getFrequency());
         task.setDueDate(dueDate);
 
-        blindBoxService.grantKeyToUser(user.getId(), task.getRewardKey().getId(), 1);
+        StreamUtils.ofNullable(keyRepository.findAll()).forEach(key -> blindBoxService.grantKeyToUser(user.getId(), key.getId(), 1));
 
         return new TaskDto(taskRepository.save(task));
     }

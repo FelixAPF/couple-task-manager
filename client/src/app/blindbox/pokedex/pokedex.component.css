@@ -312,16 +312,25 @@
 
 .s-card-art {
   position: relative;
-  aspect-ratio: 3 / 4;
+  width: 100%;
+  /* padding-top plutôt que aspect-ratio : certaines WebViews mobiles n'appliquent pas
+     aspect-ratio de façon fiable (ou le font trop tard, après le calcul de layout de
+     l'image), ce qui fait retomber la boîte sur sa hauteur intrinsèque — d'où des
+     cartes dont l'image ne remplit pas le cadre 3:4 attendu. Le padding-top, lui,
+     ne dépend que de la largeur du parent et est calculé immédiatement. */
+  padding-top: 133.333%; /* ratio 3:4 */
   border-radius: 10px;
   overflow: hidden;
   background: var(--void-800);
 }
 
 .s-card-art img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .s-card-fade {
@@ -631,7 +640,7 @@
   width: 100%;
 }
 
-/* ============== MODALS ============== */
+/* ============== MODALS (base, applies to forge & detail dialogs) ============== */
 ::ng-deep .dark-modal .p-dialog-content,
 ::ng-deep .dark-modal .p-dialog-header {
   background: var(--surface);
@@ -643,13 +652,117 @@
   font-weight: 700;
 }
 
-.unbox-body {
-  padding: 1.5rem 1rem;
-  text-align: center;
-  min-height: 340px;
+::ng-deep .dark-modal.p-dialog {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ========================================================= */
+/* ====== UNBOXING MODAL SHELL : AURA + NEBULA (VIBRANT) ==== */
+/* ========================================================= */
+
+/* Le panneau : fond transparent pour laisser voir l'anneau lumineux qui l'entoure */
+::ng-deep .unbox-modal.p-dialog {
+  position: relative;
+  background: transparent;
+  border: none;
+  border-radius: 28px;
+  overflow: visible;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65);
+}
+
+/* Anneau lumineux tournant lentement autour du panneau, dégradé sur toute la palette de l'app */
+::ng-deep .unbox-modal.p-dialog::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: 0;
+  border-radius: 30px;
+  background: conic-gradient(from 0deg, var(--gold), var(--vermilion), var(--indigo), var(--cyan), var(--gold));
+  filter: blur(7px);
+  opacity: 0.65;
+  animation: modalAuraSpin 7s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes modalAuraSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Le contenu : nébuleuse animée qui dérive lentement derrière le paquet/la carte */
+::ng-deep .unbox-modal .p-dialog-content {
+  position: relative;
+  z-index: 1;
+  border-radius: 26px;
+  overflow: hidden;
+  background:
+    radial-gradient(650px circle at 15% 18%, rgba(108, 76, 224, 0.4), transparent 60%),
+    radial-gradient(600px circle at 88% 12%, rgba(255, 75, 62, 0.3), transparent 55%),
+    radial-gradient(700px circle at 50% 105%, rgba(255, 209, 102, 0.22), transparent 60%),
+    linear-gradient(160deg, #1e1533 0%, #170f28 55%, #0d0916 100%);
+  background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+  animation: modalNebulaDrift 16s ease-in-out infinite alternate;
+}
+
+@keyframes modalNebulaDrift {
+  0%   { background-position: 0% 0%,  100% 0%,  50% 100%, 0 0; }
+  100% { background-position: 18% 15%, 82% 22%, 38% 88%,  0 0; }
+}
+
+/* Bouton de fermeture en verre, seul affordance de fermeture puisqu'il n'y a pas d'en-tête */
+.modal-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 6;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-dim);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.25s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* Boutons de fin d'ouverture, restylés pour matcher la palette vibrante du modal */
+::ng-deep .unbox-modal .p-button.p-button-primary {
+  background: linear-gradient(120deg, var(--gold), var(--vermilion)) !important;
+  border: none !important;
+  color: #241a00 !important;
+  box-shadow: 0 10px 26px rgba(255, 75, 62, 0.35);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+::ng-deep .unbox-modal .p-button.p-button-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+
+::ng-deep .unbox-modal .p-button.p-button-secondary {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: var(--text) !important;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+::ng-deep .unbox-modal .p-button.p-button-secondary:hover {
+  background: rgba(255, 255, 255, 0.13) !important;
+  transform: translateY(-1px);
 }
 
 .unbox-state {
@@ -659,41 +772,12 @@
   width: 100%;
 }
 
-.unbox-orb {
-  width: 110px;
-  height: 110px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 75, 62, 0.25), transparent 70%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  color: var(--gold);
-  margin-bottom: 1.25rem;
-}
-
 .unbox-state h2 {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 1.7rem;
   letter-spacing: 0.02em;
   margin: 0;
 }
-
-.unbox-sub {
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  max-width: 32ch;
-  margin: 0.5rem auto 1.5rem;
-}
-
-@keyframes boxRattle {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  20% { transform: rotate(-6deg) scale(1.05); }
-  40% { transform: rotate(6deg) scale(1.08); }
-  60% { transform: rotate(-5deg) scale(1.1); }
-  80% { transform: rotate(5deg) scale(1.12); }
-}
-.box-shake { animation: boxRattle 1s infinite ease-in-out; }
 
 .reveal-flag {
   font-size: 0.7rem;
@@ -940,4 +1024,599 @@
   border-color: var(--indigo);
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(108, 76, 224, 0.4);
+}
+
+/* ============== 4.A: 100% COMPLETION TROPHY & MASTER BANNER ============== */
+.master-completed {
+  border: 2px solid var(--gold) !important;
+  box-shadow: 0 0 35px rgba(255, 209, 102, 0.35), inset 0 0 20px rgba(255, 209, 102, 0.15) !important;
+}
+
+.master-trophy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 209, 102, 0.15);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 0 15px rgba(255, 209, 102, 0.4);
+}
+
+.tab-completed {
+  border-color: var(--gold) !important;
+}
+
+/* Hero Top Actions (Mute & Forge) */
+.hero-top-actions {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  z-index: 10;
+}
+
+.hero-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.hero-forge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  border: none;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.78rem;
+  padding: 0.45rem 0.95rem;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.hero-forge-btn:hover {
+  transform: translateY(-2px);
+}
+
+/* ============== 1.C: SEGMENTED 3-WAY STATUS FILTER ============== */
+.filter-top-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+@media (min-width: 640px) {
+  .filter-top-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.status-segmented-control {
+  display: inline-flex;
+  background: var(--void-800);
+  border: 1px solid var(--surface-line);
+  padding: 0.25rem;
+  border-radius: 999px;
+  gap: 0.25rem;
+}
+
+.status-seg-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-seg-btn.active {
+  background: var(--surface);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.seg-count {
+  font-size: 0.65rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+}
+
+.status-seg-btn.active .seg-count {
+  background: var(--indigo);
+  color: #fff;
+}
+
+/* ============== 3.B: SKELETON LOADERS ============== */
+.skeleton-card {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 14px;
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--void-800) 25%, var(--surface-line) 50%, var(--void-800) 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.6s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-thumb {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+}
+
+.skeleton-title {
+  width: 70%;
+  height: 14px;
+}
+
+.skeleton-sub {
+  width: 45%;
+  height: 10px;
+}
+
+/* ============== 1.B: 3D CARD FLIP SCENE ============== */
+.flip-card-scene {
+  perspective: 1000px;
+  width: 220px;
+  height: 310px;
+  margin: 0.5rem auto 1rem;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.flip-card-scene.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 14px;
+}
+
+.card-back {
+  background: #14111f;
+  border: 2px solid var(--surface-line);
+  box-shadow: 0 0 35px var(--glow-color, rgba(108, 76, 224, 0.5));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-back-pattern {
+  width: 85%;
+  height: 85%;
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--glow-color, var(--gold));
+  animation: pulseBack 2s infinite alternate;
+}
+
+@keyframes pulseBack {
+  from { opacity: 0.6; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1.04); }
+}
+
+.card-front {
+  transform: rotateY(180deg);
+}
+
+/* ============== 1.D: FORGE DIALOG STYLES ============== */
+.forge-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.forge-intro {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.forge-key-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.forge-duplicates-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.forge-dup-item {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid var(--surface-line);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.forge-dup-item:hover {
+  transform: scale(1.04);
+}
+
+.forge-dup-item.selected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+}
+
+.forge-dup-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dup-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 0.1rem 0.35rem;
+  border-radius: 999px;
+}
+
+.dup-name {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.75);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.2rem;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.select-check {
+  position: absolute;
+  inset: 0;
+  background: rgba(245, 158, 11, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.forge-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--surface-line);
+}
+
+/* ========================================================= */
+/* ========== UNBOXING : PACK STAGE (TAP-TO-OPEN) =========== */
+/* ========================================================= */
+
+.unbox-body {
+  padding: 2rem 1.25rem 1.75rem;
+  text-align: center;
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scène qui contient le paquet + tous les effets qui gravitent autour de lui */
+.pack-stage {
+  position: relative;
+  width: 230px;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.1rem;
+}
+
+/* --- Poussière ambiante qui flotte autour du paquet en attente --- */
+.ambient-sparkle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px 2px rgba(255, 209, 102, 0.8);
+  opacity: 0;
+  animation: sparkleFloat 3.2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+.spark-1 { top: 12%; left: 8%;  animation-delay: 0s; }
+.spark-2 { top: 68%; left: 4%;  animation-delay: 0.7s; background: var(--cyan); box-shadow: 0 0 8px 2px rgba(63, 217, 255, 0.8); }
+.spark-3 { top: 6%;  right: 10%; animation-delay: 1.4s; }
+.spark-4 { top: 78%; right: 6%;  animation-delay: 2.1s; background: var(--vermilion); box-shadow: 0 0 8px 2px rgba(255, 75, 62, 0.8); }
+.spark-5 { top: 42%; right: -2%; animation-delay: 2.8s; }
+
+@keyframes sparkleFloat {
+  0% { opacity: 0; transform: translateY(10px) scale(0.6); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-38px) scale(1.1); }
+}
+
+.pack-stage.is-shaking .ambient-sparkle,
+.pack-stage.is-bursting .ambient-sparkle {
+  animation-play-state: paused;
+  opacity: 0;
+}
+
+/* --- Le paquet lui-même : cadre orné, façon carte à collectionner premium --- */
+.tcg-pack {
+  all: unset;
+  position: relative;
+  z-index: 2;
+  width: 200px;
+  height: 280px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.75rem 1.25rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 30%),
+    linear-gradient(135deg, #241340 0%, #34123f 45%, #100a1e 100%);
+  border-radius: 18px;
+  border: 2px solid rgba(255, 209, 102, 0.55);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 30px rgba(255, 209, 102, 0.28);
+  cursor: pointer;
+  animation: packIdleFloat 3.6s ease-in-out infinite, packGlowPulse 2.4s ease-in-out infinite;
+}
+
+.tcg-pack:disabled {
+  cursor: default;
+}
+
+.tcg-pack:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+@keyframes packIdleFloat {
+  0%, 100% { transform: translateY(0) rotate(-0.6deg); }
+  50% { transform: translateY(-7px) rotate(0.6deg); }
+}
+
+@keyframes packGlowPulse {
+  0%, 100% { box-shadow: 0 16px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 24px rgba(255,209,102,0.25); }
+  50%      { box-shadow: 0 16px 40px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 42px rgba(255,209,102,0.5); }
+}
+
+/* Coins ornés façon cadre de carte de collection */
+.pack-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--gold);
+  opacity: 0.85;
+  pointer-events: none;
+}
+.pack-corner.tl { top: 10px; left: 10px; border-right: none; border-bottom: none; border-radius: 4px 0 0 0; }
+.pack-corner.tr { top: 10px; right: 10px; border-left: none; border-bottom: none; border-radius: 0 4px 0 0; }
+.pack-corner.bl { bottom: 10px; left: 10px; border-right: none; border-top: none; border-radius: 0 0 0 4px; }
+.pack-corner.br { bottom: 10px; right: 10px; border-left: none; border-top: none; border-radius: 0 0 4px 0; }
+
+.pack-seal-emblem {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 75, 62, 0.3) 0%, rgba(20, 10, 35, 0.95) 75%);
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.9rem;
+}
+
+.pack-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  margin: 0;
+  color: var(--text);
+  max-width: 15ch;
+  line-height: 1.05;
+}
+
+.pack-subtitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  opacity: 0.85;
+}
+
+.pack-rarity-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+/* --- Tremblement d'anticipation, monte en intensité --- */
+.pack-stage.is-shaking .tcg-pack {
+  animation: packShake 0.65s ease-in-out forwards;
+}
+
+@keyframes packShake {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+  10%  { transform: translate(-2px, 1px) rotate(-1deg) scale(1.005); }
+  22%  { transform: translate(2px, -1px) rotate(1deg) scale(1.01); }
+  36%  { transform: translate(-4px, 2px) rotate(-2deg) scale(1.02); }
+  50%  { transform: translate(4px, -3px) rotate(2.5deg) scale(1.03); }
+  64%  { transform: translate(-6px, 3px) rotate(-3.5deg) scale(1.045); }
+  78%  { transform: translate(7px, -4px) rotate(4.5deg) scale(1.06); }
+  90%  { transform: translate(-8px, 5px) rotate(-5.5deg) scale(1.08); }
+  100% { transform: scale(1.12); opacity: 1; }
+}
+
+/* --- Explosion : rayons de lumière + flash central, le paquet se consume --- */
+.ray-burst {
+  position: absolute;
+  inset: -60px;
+  z-index: 3;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 244, 214, 0.9) 0deg 3deg,
+    transparent 3deg 16deg
+  );
+  mix-blend-mode: screen;
+}
+
+.flash-core {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle, #ffffff 0%, rgba(255, 244, 214, 0.9) 35%, rgba(255, 209, 102, 0.4) 60%, transparent 78%);
+}
+
+.pack-stage.is-bursting .ray-burst {
+  animation: rayBurstAnim 0.65s ease-out forwards;
+}
+
+@keyframes rayBurstAnim {
+  0%   { opacity: 0; transform: scale(0.2) rotate(0deg); }
+  25%  { opacity: 1; }
+  100% { opacity: 0; transform: scale(2.4) rotate(30deg); }
+}
+
+.pack-stage.is-bursting .flash-core {
+  animation: flashCoreAnim 0.55s ease-out forwards;
+}
+
+@keyframes flashCoreAnim {
+  0%   { opacity: 0; transform: scale(0.3); }
+  30%  { opacity: 1; transform: scale(1.6); }
+  100% { opacity: 0; transform: scale(3); }
+}
+
+.pack-stage.is-bursting .tcg-pack {
+  animation: packVanish 0.5s forwards ease-in;
+}
+
+@keyframes packVanish {
+  0%   { transform: scale(1.12); opacity: 1; filter: brightness(1); }
+  30%  { transform: scale(1.32); opacity: 1; filter: brightness(2.4); }
+  100% { transform: scale(0.6); opacity: 0; filter: brightness(3.2); }
+}
+
+/* --- Texte d'instruction --- */
+.tap-instruction {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.tap-instruction.charging {
+  color: var(--gold);
+  animation: chargingPulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes chargingPulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+
+/* ============== REVEAL & 3D CARD SCENE ============== */
+.reveal-top-banner {
+  margin-bottom: 0.85rem;
+}
+
+.back-tap-hint {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ffffff;
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.reveal-actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 0.75rem;
 }

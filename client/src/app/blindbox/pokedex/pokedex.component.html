@@ -2,41 +2,36 @@
 <div class="registry-shell">
 
   <!-- ================= HERO ================= -->
-  <header class="hero" [style.background]="heroTheme.gradient">
-    <div class="hero-glow" [style.background]="heroTheme.glow"></div>
+  <header class="hero" [class.master-completed]="isCollectionCompleted">
+    <div class="hero-glow"></div>
 
-    <!-- DYNAMIC SPINNING EMBLEM -->
-    <svg class="hero-shuriken" viewBox="0 0 100 100" aria-hidden="true" [style.color]="heroTheme.emblemColor">
-      <!-- 1. Naruto Shuriken -->
-      <path *ngIf="heroTheme.emblem === 'shuriken'" fill="currentColor" d="M50 2 L61 39 L98 50 L61 61 L50 98 L39 61 L2 50 L39 39 Z"/>
-      
-      <!-- 2. Bleach Shinigami Skull / Badge -->
-      <g *ngIf="heroTheme.emblem === 'bleach'" fill="currentColor">
-        <path d="M50 8 C30 8 18 24 18 42 C18 56 26 66 32 72 L32 86 C32 90 38 94 50 94 C62 94 68 90 68 86 L68 72 C74 66 82 56 82 42 C82 24 70 8 50 8 Z M34 46 C30 46 28 42 28 38 C28 34 30 30 34 30 C38 30 40 34 40 38 C40 42 38 46 34 46 Z M66 46 C62 46 60 42 60 38 C60 34 62 30 66 30 C70 30 72 34 72 38 C72 42 70 46 66 46 Z M50 66 L44 54 L56 54 Z M42 86 L42 78 L46 78 L46 86 Z M54 86 L54 78 L58 78 L58 86 Z"/>
-      </g>
+    <!-- 4.A: Trophée Maître de Collection 100% -->
+    <div *ngIf="isCollectionCompleted" class="master-trophy-badge animate-fadein">
+      <i class="pi pi-trophy text-amber-400"></i>
+      <span>Maître du Registre (100% Complété)</span>
+    </div>
 
-      <!-- 3. Zelda Triforce -->
-      <g *ngIf="heroTheme.emblem === 'triforce'" fill="currentColor">
-        <polygon points="50,10 25,55 75,55"/>
-        <polygon points="25,55 0,100 50,100"/>
-        <polygon points="75,55 50,100 100,100"/>
-      </g>
+    <!-- Contrôles audio & forge -->
+    <div class="hero-top-actions">
+      <!-- Toggle Son -->
+      <button type="button" class="hero-icon-btn" (click)="soundService.toggleMute()" [pTooltip]="soundService.isMuted ? 'Activer le son' : 'Couper le son'">
+        <i class="pi" [ngClass]="soundService.isMuted ? 'pi-volume-off' : 'pi-volume-up'"></i>
+      </button>
 
-      <!-- 4. Pokémon Pokéball -->
-      <g *ngIf="heroTheme.emblem === 'pokeball'" fill="currentColor">
-        <path d="M50,10 A40,40 0 0,0 11,46 L35,46 A16,16 0 0,1 46,35 L46,11 A40,40 0 0,0 50,10 Z M54,11 L54,35 A16,16 0 0,1 65,46 L89,46 A40,40 0 0,0 54,11 Z M11,54 A40,40 0 0,0 46,89 L46,65 A16,16 0 0,1 35,54 Z M54,89 A40,40 0 0,0 89,54 L65,54 A16,16 0 0,1 54,65 Z M50,42 A8,8 0 1,0 50,58 A8,8 0 1,0 50,42 Z"/>
-      </g>
-
-      <!-- 5. Default Celestial Star -->
-      <g *ngIf="heroTheme.emblem === 'star'" fill="currentColor">
-        <polygon points="50,0 63,35 100,50 63,65 50,100 37,65 0,50 37,35"/>
-      </g>
-    </svg>
+      <!-- 1.D: Bouton Forge de doublons -->
+      <button *ngIf="viewingUserId === currentUserId && totalDuplicatesCount >= 3" 
+              type="button" 
+              class="hero-forge-btn"
+              (click)="openForge()">
+        <i class="fa-solid fa-fire-burner"></i>
+        <span>Forge ({{ totalDuplicatesCount }} doubles)</span>
+      </button>
+    </div>
 
     <div class="hero-text">
-      <p class="hero-eyebrow">{{ heroTheme.eyebrow }}</p>
-      <h1>{{ heroTheme.title }}</h1>
-      <p class="hero-lede">{{ heroTheme.lede }}</p>
+      <p class="hero-eyebrow">Registre des Collections</p>
+      <h1>{{ currentCollection?.name || 'Registre des Ombres' }}</h1>
+      <p class="hero-lede">{{ currentCollection?.description || 'Accomplissez vos tâches pour débloquer de nouveaux sceaux.' }}</p>
     </div>
 
     <!-- Keyring -->
@@ -61,13 +56,15 @@
               (click)="selectCollection(col.id)"
               type="button"
               class="tab-chip"
-              [class.active]="selectedCollectionId === col.id">
+              [class.active]="selectedCollectionId === col.id"
+              [class.tab-completed]="col.ownedItemsCount >= col.totalItemsCount && col.totalItemsCount > 0">
+        <i *ngIf="col.ownedItemsCount >= col.totalItemsCount && col.totalItemsCount > 0" class="pi pi-crown text-amber-400 mr-1"></i>
         <span>{{ col.name }}</span>
         <em>{{ col.ownedItemsCount }}/{{ col.totalItemsCount }}</em>
       </button>
     </nav>
 
-    <!-- Sleek Custom Avatar Segmented Capsule -->
+    <!-- Inspection Partner Capsule -->
     <div class="member-capsule" *ngIf="canInspectPartner && householdMembers.length > 1">
       <button *ngFor="let member of householdMembers"
               type="button"
@@ -76,43 +73,51 @@
               (click)="switchMemberView(member.id)">
         <img [src]="member.imageUrl || 'assets/placeholder.jpg'" [alt]="member.name" class="member-avatar">
         <span class="member-name">{{ isCurrentMember(member.id) ? 'Mon Registre' : member.name }}</span>
-        <i *ngIf="!isCurrentMember(member.id)" class="pi pi-eye member-icon" title="Mode inspection"></i>
+        <i *ngIf="!isCurrentMember(member.id)" class="pi pi-eye member-icon"></i>
       </button>
     </div>
   </div>
 
-  <!-- ================= SEARCH & RARITY FILTERS ================= -->
+  <!-- ================= SEARCH & STATUS FILTERS ================= -->
   <section class="filter-bar">
-    <!-- Search Input by Name or Keyword -->
-    <div class="search-field-wrap">
-      <i class="pi pi-search search-icon"></i>
-      <input type="text"
-             pInputText
-             [(ngModel)]="searchQuery"
-             (ngModelChange)="applyFilters()"
-             placeholder="Rechercher par nom de personnage, titre, N°..."
-             class="pokedex-search-input" />
-      <button *ngIf="searchQuery"
-              type="button"
-              class="clear-search-icon-btn"
-              (click)="clearSearch()"
-              aria-label="Effacer la recherche">
-        <i class="pi pi-times"></i>
-      </button>
+    <div class="filter-top-row">
+      <!-- Search Input -->
+      <div class="search-field-wrap">
+        <i class="pi pi-search search-icon"></i>
+        <input type="text"
+               pInputText
+               [(ngModel)]="searchQuery"
+               (ngModelChange)="applyFilters()"
+               placeholder="Rechercher par nom de personnage, N°..."
+               class="pokedex-search-input" />
+        <button *ngIf="searchQuery" type="button" class="clear-search-icon-btn" (click)="clearSearch()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- 1.C: Filtre d'état 3 crans (Toutes / Débloquées / Manquantes) -->
+      <div class="status-segmented-control">
+        <button type="button" class="status-seg-btn" [class.active]="statusFilter === 'ALL'" (click)="setStatusFilter('ALL')">
+          <span>Toutes</span>
+          <span class="seg-count">{{ cards.length }}</span>
+        </button>
+        <button type="button" class="status-seg-btn" [class.active]="statusFilter === 'UNLOCKED'" (click)="setStatusFilter('UNLOCKED')">
+          <span>Débloquées</span>
+          <span class="seg-count">{{ unlockedCardsCount }}</span>
+        </button>
+        <button type="button" class="status-seg-btn" [class.active]="statusFilter === 'LOCKED'" (click)="setStatusFilter('LOCKED')">
+          <span>Manquantes</span>
+          <span class="seg-count">{{ missingCardsCount }}</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Rarity Selector Chips Carousel -->
+    <!-- Raretés -->
     <div class="rarity-filter-row" *ngIf="availableRarities.length > 0">
-      <!-- ALL / TOUTES -->
-      <button type="button"
-              class="rarity-chip"
-              [class.active]="selectedRarityId === null"
-              (click)="selectRarity(null)">
+      <button type="button" class="rarity-chip" [class.active]="selectedRarityId === null" (click)="selectRarity(null)">
         <span>Toutes</span>
         <span class="rarity-badge-count">{{ cards.length }}</span>
       </button>
-
-      <!-- Each Distinct Rarity with badge styling -->
       <button *ngFor="let r of availableRarities"
               type="button"
               class="rarity-chip"
@@ -127,19 +132,25 @@
       </button>
     </div>
 
-    <!-- Active Filter Status & Reset link -->
-    <div class="filter-info-row" *ngIf="searchQuery || selectedRarityId !== null">
-      <span>
-        Affichage : <strong>{{ filteredCards.length }}</strong> / {{ cards.length }} cartes
-      </span>
+    <div class="filter-info-row" *ngIf="searchQuery || selectedRarityId !== null || statusFilter !== 'ALL'">
+      <span>Affichage : <strong>{{ filteredCards.length }}</strong> / {{ cards.length }} cartes</span>
       <button type="button" class="filter-reset-link" (click)="clearFilters()">
         <i class="pi pi-undo text-[10px] mr-1"></i>Réinitialiser les filtres
       </button>
     </div>
   </section>
 
+  <!-- ================= 3.B: SKELETON LOADERS ================= -->
+  <div *ngIf="isLoadingCards" class="card-grid">
+    <div *ngFor="let i of [1,2,3,4,5,6,7,8,9,10]" class="skeleton-card">
+      <div class="skeleton-shimmer skeleton-thumb"></div>
+      <div class="skeleton-shimmer skeleton-title"></div>
+      <div class="skeleton-shimmer skeleton-sub"></div>
+    </div>
+  </div>
+
   <!-- ================= CARD GRID ================= -->
-  <div class="card-grid">
+  <div *ngIf="!isLoadingCards" class="card-grid">
     <div *ngFor="let card of filteredCards"
          class="s-card"
          [class.locked]="!card.unlocked"
@@ -166,11 +177,9 @@
 
     <!-- Empty Search State -->
     <div *ngIf="filteredCards.length === 0" class="empty-search-state">
-      <div class="empty-search-icon">
-        <i class="pi pi-search"></i>
-      </div>
+      <div class="empty-search-icon"><i class="pi pi-search"></i></div>
       <h3>Aucun personnage trouvé</h3>
-      <p>Aucune carte ne correspond à vos critères de recherche dans cette collection.</p>
+      <p>Aucune carte ne correspond à vos critères de recherche.</p>
       <button type="button" class="reset-filter-btn" (click)="clearFilters()">
         <i class="pi pi-undo"></i> Réinitialiser les filtres
       </button>
@@ -178,48 +187,192 @@
   </div>
 </div>
 
-<!-- ================= UNBOXING MODAL ================= -->
-<p-dialog [(visible)]="showUnboxingDialog" [dismissableMask]="!isUnboxingRunning" [modal]="true" [closable]="!isUnboxingRunning" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '440px'}" [showHeader]="false">
+<!-- ================= UNBOXING : TAP-TO-OPEN À LA HEARTHSTONE ================= -->
+<p-dialog [(visible)]="showUnboxingDialog" 
+          [modal]="true" 
+          [dismissableMask]="!isUnboxingRunning"
+          [closable]="!isUnboxingRunning" 
+          styleClass="dark-modal unbox-modal" 
+          [style]="{width: '94vw', maxWidth: '440px'}" 
+          [showHeader]="false">
+
+  <!-- Chrome custom : pas d'en-tête PrimeNG ici, donc on fournit notre propre bouton de fermeture -->
+  <button type="button"
+          class="modal-close-btn"
+          *ngIf="!isUnboxingRunning"
+          (click)="closeUnboxing()"
+          aria-label="Fermer">
+    <i class="pi pi-times"></i>
+  </button>
+
   <div class="unbox-body">
+
+    <!-- ================= ETAPE 1 : LE PAQUET, EN ATTENTE PUIS OUVERT D'UN TAP ================= -->
     <div *ngIf="!revealResult" class="unbox-state">
-      <div class="unbox-orb" [class.box-shake]="isUnboxingRunning">
-        <i class="fa-solid fa-scroll"></i>
+
+      <div class="pack-stage" [class.is-shaking]="isShaking" [class.is-bursting]="isBursting">
+
+        <!-- Poussière ambiante qui flotte autour du paquet en attente -->
+        <div class="ambient-sparkle spark-1"></div>
+        <div class="ambient-sparkle spark-2"></div>
+        <div class="ambient-sparkle spark-3"></div>
+        <div class="ambient-sparkle spark-4"></div>
+        <div class="ambient-sparkle spark-5"></div>
+
+        <!-- Rayons de lumière et flash central, invisibles jusqu'à l'ouverture -->
+        <div class="ray-burst"></div>
+        <div class="flash-core"></div>
+
+        <!-- Le paquet lui-même : un seul tap suffit -->
+        <button type="button"
+                class="tcg-pack"
+                (click)="openPack()"
+                [disabled]="isUnboxingRunning"
+                [attr.aria-label]="'Ouvrir ' + (activeKeyToOpen?.blindBox?.name || 'le paquet')">
+          <div class="pack-corner tl"></div>
+          <div class="pack-corner tr"></div>
+          <div class="pack-corner bl"></div>
+          <div class="pack-corner br"></div>
+
+          <div class="pack-seal-emblem" 
+               [style.borderColor]="activeKeyToOpen?.color || '#ff4b3e'"
+               [style.boxShadow]="'0 0 25px ' + (activeKeyToOpen?.color || '#ff4b3e') + '80'">
+            <i [class]="activeKeyToOpen?.icon || 'fa-solid fa-scroll'" [style.color]="activeKeyToOpen?.color || '#ffd166'"></i>
+          </div>
+
+          <h3 class="pack-title">{{ activeKeyToOpen?.blindBox?.name || 'Sceau Mystérieux' }}</h3>
+          <span class="pack-subtitle">{{ activeKeyToOpen?.blindBox?.collection?.name || 'Registre des Ombres' }}</span>
+        </button>
       </div>
-      <h2>{{ activeKeyToOpen?.blindBox?.name || 'Sceau mystérieux' }}</h2>
-      <p class="unbox-sub">Glissez la clé dans le sceau pour révéler qui rejoint le registre.</p>
-      <button pButton pRipple
-              [label]="isUnboxingRunning ? 'Ouverture du sceau\u2026' : 'Briser le sceau'"
-              icon="pi pi-sparkles"
-              class="p-button-primary seal-btn"
-              [disabled]="isUnboxingRunning"
-              (click)="triggerOpen()"></button>
+
+      <p class="tap-instruction" *ngIf="!isShaking && !isBursting && !isUnboxingRunning">Touchez le paquet pour l'ouvrir</p>
+      <p class="tap-instruction charging" *ngIf="isShaking">Le sceau se fissure...</p>
     </div>
+
+    <!-- ================= ETAPE 2 : SUSPENSE DOS DE CARTE + REVEAL 3D ================= -->
     <div *ngIf="revealResult" class="unbox-state reveal animate-fadein">
-      <span *ngIf="revealResult.isNew || $any(revealResult).new" class="reveal-flag new">Nouveau au registre</span>
-      <span *ngIf="!(revealResult.isNew || $any(revealResult).new)" class="reveal-flag dup">Déjà répertorié &middot; x{{ revealResult.count }}</span>
-      <div class="s-card reveal-card"
-           [style.borderColor]="revealResult.item.rarity.borderColor"
-           [style.boxShadow]="'0 0 40px ' + revealResult.item.rarity.borderColor + '90'"
-           [ngClass]="'effect-' + revealResult.item.rarity.effectType.toLowerCase()">
-        <div class="s-card-art">
-          <img [src]="revealResult.item.imageUrl || 'assets/placeholder.jpg'" [alt]="revealResult.item.name">
-          <span class="s-card-badge" [style.backgroundColor]="revealResult.item.rarity.badgeColor">{{ revealResult.item.rarity.name }}</span>
-          <div class="s-card-fade"></div>
-        </div>
-        <div class="s-card-name">
-          <h3>{{ revealResult.item.name }}</h3>
-          <p>{{ revealResult.item.subtitle }}</p>
+      <div class="reveal-top-banner">
+        <span *ngIf="revealResult.isNew || $any(revealResult).new" class="reveal-flag new">Nouveau au registre !</span>
+        <span *ngIf="!(revealResult.isNew || $any(revealResult).new)" class="reveal-flag dup">Déjà répertorié &middot; x{{ revealResult.count }}</span>
+      </div>
+
+      <!-- Scène de carte 3D interactive -->
+      <div class="flip-card-scene" [class.flipped]="isCardFlipped" (click)="flipRevealedCard()">
+        <div class="flip-card-inner">
+          
+          <!-- DOS DE CARTE (Lueur basée sur la VRAIE rareté pour le suspense) -->
+          <div class="card-face card-back" 
+               [style.--glow-color]="revealResult.item.rarity.borderColor"
+               [style.boxShadow]="'0 0 45px ' + revealResult.item.rarity.borderColor + '90, 0 0 15px ' + revealResult.item.rarity.borderColor">
+            <div class="card-back-pattern">
+              <i class="pi pi-sparkles text-4xl animate-pulse"></i>
+              <span class="back-tap-hint">Touchez pour révéler</span>
+            </div>
+          </div>
+
+          <!-- FACE AVANT (Carte dévoilée avec son Effet Spécial) -->
+          <div class="card-face card-front s-card reveal-card"
+               [style.borderColor]="revealResult.item.rarity.borderColor"
+               [style.boxShadow]="'0 0 40px ' + revealResult.item.rarity.borderColor + '90'"
+               [ngClass]="'effect-' + revealResult.item.rarity.effectType.toLowerCase()">
+            <span class="s-card-number">N&deg;{{ (revealResult.item.itemNumber || 1).toString().padStart(3, '0') }}</span>
+            <div class="s-card-art">
+              <img [src]="revealResult.item.imageUrl || 'assets/placeholder.jpg'" [alt]="revealResult.item.name">
+              <span class="s-card-badge" [style.backgroundColor]="revealResult.item.rarity.badgeColor">{{ revealResult.item.rarity.name }}</span>
+              <div class="s-card-fade"></div>
+            </div>
+            <div class="s-card-name">
+              <h3>{{ revealResult.item.name }}</h3>
+              <p>{{ revealResult.item.subtitle || 'Shinobi' }}</p>
+            </div>
+          </div>
         </div>
       </div>
-      <button pButton pRipple label="Refermer le rouleau" class="p-button-secondary close-btn" (click)="closeUnboxing()"></button>
+
+      <!-- Actions de fin d'ouverture -->
+      <div class="reveal-actions-row">
+        <button *ngIf="revealResult.remainingKeys > 0" 
+                pButton pRipple 
+                label="Ouvrir un autre ({{ revealResult.remainingKeys }} restantes)" 
+                icon="pi pi-sparkles" 
+                class="p-button-primary p-button-rounded font-bold w-full" 
+                (click)="openAnother()">
+        </button>
+        <button pButton pRipple 
+                label="Consigner au registre" 
+                icon="pi pi-check" 
+                class="p-button-secondary p-button-rounded font-bold w-full" 
+                (click)="closeUnboxing()">
+        </button>
+      </div>
+    </div>
+
+  </div>
+</p-dialog>
+
+<!-- ================= 1.D: MODALE FORGE / RECYCLAGE DES DOUBLONS ================= -->
+<p-dialog [(visible)]="showForgeDialog" 
+          [modal]="true" 
+          [dismissableMask]="!isForging"
+          header="Forge des Ombres (Recyclage)" 
+          styleClass="dark-modal" 
+          [style]="{width: '94vw', maxWidth: '520px'}">
+  <div class="forge-body">
+    <p class="forge-intro">
+      Sacrifiez <strong>3 cartes en double</strong> pour forger immédiatement <strong>1 clé de coffre</strong>.
+    </p>
+
+    <!-- Choix de la clé cible -->
+    <div class="forge-key-select">
+      <label class="text-xs font-bold text-surface-400 uppercase">Clé à forger :</label>
+      <p-dropdown [options]="userKeys" 
+                  [(ngModel)]="forgeTargetKeyId" 
+                  optionLabel="key.name" 
+                  optionValue="key.id" 
+                  styleClass="w-full !rounded-2xl" 
+                  appendTo="body">
+      </p-dropdown>
+    </div>
+
+    <!-- Grille des doublons sélectionnables -->
+    <div class="forge-duplicates-grid">
+      <div *ngFor="let d of duplicateCards" 
+           class="forge-dup-item"
+           [class.selected]="selectedDuplicateIds.includes(d.id)"
+           (click)="toggleSelectDuplicate(d)">
+        <img [src]="d.imageUrl || 'assets/placeholder.jpg'" [alt]="d.name">
+        <span class="dup-badge">x{{ d.count }}</span>
+        <span class="dup-name">{{ d.name }}</span>
+        <div class="select-check" *ngIf="selectedDuplicateIds.includes(d.id)">
+          <i class="pi pi-check"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="forge-footer">
+      <span class="text-xs font-bold text-surface-400">
+        Sélectionnés : <strong>{{ selectedDuplicateIds.length }} / 3</strong>
+      </span>
+      <button pButton pRipple 
+              label="Forger la Clé" 
+              icon="fa-solid fa-fire" 
+              class="p-button-warning p-button-rounded font-bold" 
+              [loading]="isForging"
+              [disabled]="selectedDuplicateIds.length !== 3 || isForging"
+              (click)="confirmRecycle()">
+      </button>
     </div>
   </div>
 </p-dialog>
+
 <!-- ================= DETAIL MODAL ================= -->
-<p-dialog [(visible)]="showDetailDialog" [dismissableMask]="true" [modal]="true" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '420px'}" header="Fiche du dossier">
+<p-dialog [(visible)]="showDetailDialog" 
+          [modal]="true" 
+          [dismissableMask]="true"
+          styleClass="dark-modal" 
+          [style]="{width: '90vw', maxWidth: '420px'}" 
+          header="Fiche du dossier">
   <div *ngIf="inspectedCard" class="detail-body">
-    
-    <!-- CARTE COMPLETE AVEC EFFET ACTIF -->
     <div class="s-card detail-card"
          [ngClass]="'effect-' + inspectedCard.rarity.effectType.toLowerCase()"
          [style.borderColor]="inspectedCard.rarity.borderColor"
@@ -237,8 +390,6 @@
         <p>{{ inspectedCard.subtitle || 'Shinobi' }}</p>
       </div>
     </div>
-
-    <!-- Lore / Description -->
     <p class="detail-notes">{{ inspectedCard.description || 'Aucune note au dossier.' }}</p>
     <div class="detail-footer">
       <span>Recruté le {{ inspectedCard.firstObtainedDate | date:'mediumDate' }}</span>

@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/blind-boxes")
@@ -43,5 +44,17 @@ public class BlindBoxController {
     @GetMapping("/inspection-enabled")
     public ResponseEntity<Boolean> isInspectionEnabled() {
         return ResponseEntity.ok(blindBoxService.isPartnerInspectionAllowed());
+    }
+
+    @PostMapping("/recycle")
+    public ResponseEntity<Void> recycleDuplicates(
+            @RequestBody Map<String, Object> payload,
+            @AuthenticationPrincipal CTMUser user) {
+        List<Integer> itemIdsRaw = (List<Integer>) payload.get("itemIds");
+        Long targetKeyId = Long.valueOf(payload.get("targetKeyId").toString());
+        List<Long> itemIds = itemIdsRaw.stream().map(Integer::longValue).toList();
+
+        blindBoxService.recycleDuplicates(itemIds, targetKeyId, user);
+        return ResponseEntity.ok().build();
     }
 }

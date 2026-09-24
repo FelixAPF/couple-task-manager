@@ -1,8 +1,10 @@
 package com.couple.taskmanager.service;
 
+import com.couple.taskmanager.enums.CardEffectType;
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.blindbox.*;
 import com.couple.taskmanager.model.dto.blindbox.*;
+import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.blindbox.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +26,98 @@ public class BlindBoxService {
     private final UserKeyInventoryRepository inventoryRepository;
     private final UserCollectionItemRepository userCollectionRepository;
     private final SystemConfigRepository systemConfigRepository;
+    private final HouseholdRepository householdRepository;
+    private final FirebaseMessagingService firebaseMessagingService;
 
+    // === RECYCLAGE / FORGE DE DOUBLONS ===
+    @Transactional
+    public void recycleDuplicates(List<Long> itemIdsToBurn, Long targetKeyId, CTMUser user) {
+        if (itemIdsToBurn == null || itemIdsToBurn.size() < 3) {
+            throw new IllegalArgumentException("Il faut au minimum 3 doublons pour forger une clé.");
+        }
+
+        // Vérifier que l'utilisateur possède bien chaque doublon (count > 1)
+        for (Long itemId : itemIdsToBurn) {
+            UserCollectionItem entry = userCollectionRepository.findByUserIdAndItemId(user.getId(), itemId)
+                    .orElseThrow(() -> new IllegalArgumentException("Carte introuvable dans votre collection."));
+            if (entry.getCount() <= 1) {
+                throw new IllegalStateException("Impossible de recycler un exemplaire unique !");
+            }
+            entry.setCount(entry.getCount() - 1);
+            userCollectionRepository.save(entry);
+        }
+
+        // Octroyer la clé demandée
+        grantKeyToUser(user.getId(), targetKeyId, 1);
+    }
+
+    // === OUVERTURE DE COFFRE AVEC NOTIFICATION AU PARTENAIRE ===
+    @Transactional
+    public UnboxResultDto openBox(Long boxId, CTMUser user) {
+        BlindBox box = boxRepository.findById(boxId)
+                .orElseThrow(() -> new NoSuchElementException("Boîte introuvable"));
+
+        BlindBoxKey key = keyRepository.findByBlindBoxId(boxId)
+                .orElseThrow(() -> new NoSuchElementException("Aucune clé associée à cette boîte"));
+
+        UserKeyInventory inventory = inventoryRepository.findByUserIdAndKeyId(user.getId(), key.getId())
+                .orElseThrow(() -> new IllegalStateException("Vous n'avez pas de clé pour cette boîte !"));
+
+        if (inventory.getQuantity() <= 0) {
+            throw new IllegalStateException("Vous n'avez pas de clé pour cette boîte !");
+        }
+
+        // Déduire 1 clé
+        inventory.setQuantity(inventory.getQuantity() - 1);
+        inventoryRepository.save(inventory);
+
+        // Tirage aléatoire
+        BlindBoxCollection collection = box.getCollection();
+        BlindBoxItem droppedItem = rollItem(collection);
+
+        // Sauvegarde de l'item dans la collection utilisateur
+        Optional<UserCollectionItem> existingOpt = userCollectionRepository.findByUserIdAndItemId(user.getId(), droppedItem.getId());
+        UserCollectionItem userItem;
+        boolean isNew = false;
+        if (existingOpt.isPresent()) {
+            userItem = existingOpt.get();
+            userItem.setCount(userItem.getCount() + 1);
+            userItem.setLastObtainedDate(new Date());
+        } else {
+            userItem = new UserCollectionItem();
+            userItem.setUser(user);
+            userItem.setItem(droppedItem);
+            userItem.setCount(1);
+            userItem.setFirstObtainedDate(new Date());
+            userItem.setLastObtainedDate(new Date());
+            isNew = true;
+        }
+        userCollectionRepository.save(userItem);
+
+        // 2.A: Si le drop est  dropRate <= 3%, notifier le partenaire !
+        boolean isHighTier = droppedItem.getRarity().getDefaultDropRate() <= 3.0;
+
+        if (isHighTier) {
+            notifyPartnerHighTierDrop(user, droppedItem, collection);
+        }
+
+        return new UnboxResultDto(droppedItem, isNew, userItem.getCount(), inventory.getQuantity());
+    }
+
+    private void notifyPartnerHighTierDrop(CTMUser user, BlindBoxItem item, BlindBoxCollection collection) {
+        if (user.getHousehold() == null) return;
+        List<CTMUser> members = householdRepository.findUsersByHouseholdId(user.getHousehold().getId());
+        CTMUser partner = members.stream()
+                .filter(m -> !m.getId().equals(user.getId()))
+                .findFirst()
+                .orElse(null);
+
+        if (partner != null) {
+            String title = "⚡ Tirage Exceptionnel au Foyer !";
+            String body = user.getName() + " vient d'obtenir " + item.getName() + " (" + item.getRarity().getName() + ") !";
+            firebaseMessagingService.sendNotificationWithNavigation(partner, title, body, "POKEDEX", collection.getId());
+        }
+    }
     // === SYSTEM SETTINGS ===
     public boolean isPartnerInspectionAllowed() {
         return systemConfigRepository.findByConfigKey("ALLOW_HOUSEHOLD_INSPECTION")
@@ -97,51 +190,7 @@ public class BlindBoxService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public UnboxResultDto openBox(Long boxId, CTMUser user) {
-        BlindBox box = boxRepository.findById(boxId)
-                .orElseThrow(() -> new NoSuchElementException("Boîte introuvable"));
 
-        // Find key required for this box
-        BlindBoxKey key = keyRepository.findByBlindBoxId(boxId)
-                .orElseThrow(() -> new NoSuchElementException("Aucune clé associée à cette boîte"));
-
-        UserKeyInventory inventory = inventoryRepository.findByUserIdAndKeyId(user.getId(), key.getId())
-                .orElseThrow(() -> new IllegalStateException("Vous n'avez pas de clé pour cette boîte !"));
-
-        if (inventory.getQuantity() <= 0) {
-            throw new IllegalStateException("Vous n'avez pas de clé pour cette boîte !");
-        }
-
-        // Deduct 1 key
-        inventory.setQuantity(inventory.getQuantity() - 1);
-        inventoryRepository.save(inventory);
-
-        // Determine drop
-        BlindBoxCollection collection = box.getCollection();
-        BlindBoxItem droppedItem = rollItem(collection);
-
-        // Record to User Collection
-        Optional<UserCollectionItem> existingOpt = userCollectionRepository.findByUserIdAndItemId(user.getId(), droppedItem.getId());
-        UserCollectionItem userItem;
-        boolean isNew = false;
-        if (existingOpt.isPresent()) {
-            userItem = existingOpt.get();
-            userItem.setCount(userItem.getCount() + 1);
-            userItem.setLastObtainedDate(new Date());
-        } else {
-            userItem = new UserCollectionItem();
-            userItem.setUser(user);
-            userItem.setItem(droppedItem);
-            userItem.setCount(1);
-            userItem.setFirstObtainedDate(new Date());
-            userItem.setLastObtainedDate(new Date());
-            isNew = true;
-        }
-        userCollectionRepository.save(userItem);
-
-        return new UnboxResultDto(droppedItem, isNew, userItem.getCount(), inventory.getQuantity());
-    }
     @Transactional
     public BlindBoxKey saveKey(BlindBoxKey key) {
         BlindBox box = key.getBlindBox();

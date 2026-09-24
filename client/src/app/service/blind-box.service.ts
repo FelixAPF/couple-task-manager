@@ -24,8 +24,12 @@ export class BlindBoxService {
     return this.http.get<UserKeyInventory[]>(`${this.userApi}/my-keys`);
   }
 
-  getCollections(): Observable<CollectionProgress[]> {
-    return this.http.get<CollectionProgress[]>(`${this.userApi}/collections`);
+getCollections(targetUserId?: number): Observable<CollectionProgress[]> {
+    let url = `${this.userApi}/collections`;
+    if (targetUserId) {
+      url += `?userId=${targetUserId}`;
+    }
+    return this.http.get<CollectionProgress[]>(url);
   }
 
   getPokedex(collectionId: number, targetUserId?: number): Observable<PokedexCard[]> {
@@ -46,7 +50,11 @@ export class BlindBoxService {
   updateItemRarity(itemId: number, rarityId: number): Observable<void> {
     return this.http.patch<void>(`${this.adminApi}/items/${itemId}/rarity?rarityId=${rarityId}`, {});
   }
-  
+
+  recycleDuplicates(itemIds: number[], targetKeyId: number): Observable<void> {
+    return this.http.post<void>(`${this.userApi}/recycle`, { itemIds, targetKeyId });
+  }
+
   getRarities(): Observable<BlindBoxRarity[]> {
     return this.http.get<BlindBoxRarity[]>(`${this.adminApi}/rarities`);
   }

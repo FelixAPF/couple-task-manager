@@ -1,9 +1,7 @@
 <p-toast></p-toast>
-
 <div class="registry-shell">
 
   <!-- ================= HERO ================= -->
-<!-- ================= HERO ================= -->
   <header class="hero" [style.background]="heroTheme.gradient">
     <div class="hero-glow" [style.background]="heroTheme.glow"></div>
 
@@ -51,14 +49,12 @@
         <span class="key-name">{{ inv.key.name }}</span>
       </button>
     </div>
-
     <div class="keyring-empty" *ngIf="userKeys.length === 0">
-      Aucune clé en poche — terminez une corvée pour en gagner une.
+      Aucune clé en poche – terminez une corvée pour en gagner une.
     </div>
   </header>
 
   <!-- ================= CONTROLS ================= -->
-<!-- ================= CONTROLS ================= -->
   <div class="controls-row">
     <nav class="tab-row">
       <button *ngFor="let col of collections"
@@ -85,19 +81,74 @@
     </div>
   </div>
 
+  <!-- ================= SEARCH & RARITY FILTERS ================= -->
+  <section class="filter-bar">
+    <!-- Search Input by Name or Keyword -->
+    <div class="search-field-wrap">
+      <i class="pi pi-search search-icon"></i>
+      <input type="text"
+             pInputText
+             [(ngModel)]="searchQuery"
+             (ngModelChange)="applyFilters()"
+             placeholder="Rechercher par nom de personnage, titre, N°..."
+             class="pokedex-search-input" />
+      <button *ngIf="searchQuery"
+              type="button"
+              class="clear-search-icon-btn"
+              (click)="clearSearch()"
+              aria-label="Effacer la recherche">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Rarity Selector Chips Carousel -->
+    <div class="rarity-filter-row" *ngIf="availableRarities.length > 0">
+      <!-- ALL / TOUTES -->
+      <button type="button"
+              class="rarity-chip"
+              [class.active]="selectedRarityId === null"
+              (click)="selectRarity(null)">
+        <span>Toutes</span>
+        <span class="rarity-badge-count">{{ cards.length }}</span>
+      </button>
+
+      <!-- Each Distinct Rarity with badge styling -->
+      <button *ngFor="let r of availableRarities"
+              type="button"
+              class="rarity-chip"
+              [class.active]="selectedRarityId === r.id"
+              [style.--chip-border-color]="r.borderColor"
+              [style.--chip-glow]="r.borderColor + '60'"
+              [style.--chip-active-bg]="r.badgeColor + '30'"
+              (click)="selectRarity(r.id)">
+        <span class="rarity-dot" [style.backgroundColor]="r.badgeColor" [style.boxShadow]="'0 0 8px ' + r.borderColor"></span>
+        <span>{{ r.name }}</span>
+        <span class="rarity-badge-count">{{ r.count }}</span>
+      </button>
+    </div>
+
+    <!-- Active Filter Status & Reset link -->
+    <div class="filter-info-row" *ngIf="searchQuery || selectedRarityId !== null">
+      <span>
+        Affichage : <strong>{{ filteredCards.length }}</strong> / {{ cards.length }} cartes
+      </span>
+      <button type="button" class="filter-reset-link" (click)="clearFilters()">
+        <i class="pi pi-undo text-[10px] mr-1"></i>Réinitialiser les filtres
+      </button>
+    </div>
+  </section>
+
   <!-- ================= CARD GRID ================= -->
   <div class="card-grid">
-    <div *ngFor="let card of cards"
+    <div *ngFor="let card of filteredCards"
          class="s-card"
          [class.locked]="!card.unlocked"
          [ngClass]="card.unlocked ? ('effect-' + card.rarity.effectType.toLowerCase()) : ''"
          [style.borderColor]="card.unlocked ? card.rarity.borderColor : 'transparent'"
          [style.boxShadow]="card.unlocked ? ('0 0 0 1px ' + card.rarity.borderColor + '40, 0 8px 24px -6px ' + card.rarity.borderColor + '80') : 'none'"
          (click)="inspectCard(card)">
-
       <span class="s-card-number">N&deg;{{ card.itemNumber.toString().padStart(3, '0') }}</span>
       <span *ngIf="card.unlocked && card.count > 1" class="s-card-tally">x{{ card.count }}</span>
-
       <div class="s-card-art">
         <img *ngIf="card.unlocked && card.imageUrl" [src]="card.imageUrl" [alt]="card.name">
         <div *ngIf="!card.unlocked" class="s-card-locked">
@@ -107,11 +158,22 @@
         <span *ngIf="card.unlocked" class="s-card-badge" [style.backgroundColor]="card.rarity.badgeColor">{{ card.rarity.name }}</span>
         <div *ngIf="card.unlocked" class="s-card-fade"></div>
       </div>
-
       <div class="s-card-name">
         <h3>{{ card.unlocked ? card.name : '???' }}</h3>
         <p>{{ card.unlocked ? (card.subtitle || 'Shinobi') : 'Identité inconnue' }}</p>
       </div>
+    </div>
+
+    <!-- Empty Search State -->
+    <div *ngIf="filteredCards.length === 0" class="empty-search-state">
+      <div class="empty-search-icon">
+        <i class="pi pi-search"></i>
+      </div>
+      <h3>Aucun personnage trouvé</h3>
+      <p>Aucune carte ne correspond à vos critères de recherche dans cette collection.</p>
+      <button type="button" class="reset-filter-btn" (click)="clearFilters()">
+        <i class="pi pi-undo"></i> Réinitialiser les filtres
+      </button>
     </div>
   </div>
 </div>
@@ -119,15 +181,12 @@
 <!-- ================= UNBOXING MODAL ================= -->
 <p-dialog [(visible)]="showUnboxingDialog" [modal]="true" [closable]="!isUnboxingRunning" styleClass="dark-modal" [style]="{width: '90vw', maxWidth: '440px'}" [showHeader]="false">
   <div class="unbox-body">
-
     <div *ngIf="!revealResult" class="unbox-state">
       <div class="unbox-orb" [class.box-shake]="isUnboxingRunning">
         <i class="fa-solid fa-scroll"></i>
       </div>
-
       <h2>{{ activeKeyToOpen?.blindBox?.name || 'Sceau mystérieux' }}</h2>
       <p class="unbox-sub">Glissez la clé dans le sceau pour révéler qui rejoint le registre.</p>
-
       <button pButton pRipple
               [label]="isUnboxingRunning ? 'Ouverture du sceau\u2026' : 'Briser le sceau'"
               icon="pi pi-sparkles"
@@ -135,11 +194,9 @@
               [disabled]="isUnboxingRunning"
               (click)="triggerOpen()"></button>
     </div>
-
     <div *ngIf="revealResult" class="unbox-state reveal animate-fadein">
       <span *ngIf="revealResult.isNew || $any(revealResult).new" class="reveal-flag new">Nouveau au registre</span>
       <span *ngIf="!(revealResult.isNew || $any(revealResult).new)" class="reveal-flag dup">Déjà répertorié &middot; x{{ revealResult.count }}</span>
-
       <div class="s-card reveal-card"
            [style.borderColor]="revealResult.item.rarity.borderColor"
            [style.boxShadow]="'0 0 40px ' + revealResult.item.rarity.borderColor + '90'"
@@ -154,7 +211,6 @@
           <p>{{ revealResult.item.subtitle }}</p>
         </div>
       </div>
-
       <button pButton pRipple label="Refermer le rouleau" class="p-button-secondary close-btn" (click)="closeUnboxing()"></button>
     </div>
   </div>
@@ -171,11 +227,9 @@
       <span class="s-card-badge" [style.backgroundColor]="inspectedCard.rarity.badgeColor">{{ inspectedCard.rarity.name }} &middot; N&deg;{{ inspectedCard.itemNumber }}</span>
       <div class="s-card-fade"></div>
     </div>
-
     <h2>{{ inspectedCard.name }}</h2>
     <p class="detail-subtitle">{{ inspectedCard.subtitle }}</p>
     <p class="detail-notes">{{ inspectedCard.description || 'Aucune note au dossier.' }}</p>
-
     <div class="detail-footer">
       <span>Recruté le {{ inspectedCard.firstObtainedDate | date:'mediumDate' }}</span>
       <span>Possédé : x{{ inspectedCard.count }}</span>

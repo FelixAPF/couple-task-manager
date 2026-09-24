@@ -4,12 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../../shared.module';
 import { BlindBoxService } from '../../service/blind-box.service';
 import { HouseholdService } from '../../service/household.service';
-import { 
-  CollectionProgress, 
-  PokedexCard, 
-  UserKeyInventory, 
-  BlindBoxKey, 
-  UnboxResult 
+import {
+  CollectionProgress,
+  PokedexCard,
+  UserKeyInventory,
+  BlindBoxKey,
+  UnboxResult
 } from '../../model/blind-box.model';
 import { MessageService } from 'primeng/api';
 import confetti from 'canvas-confetti';
@@ -22,6 +22,14 @@ export interface HeroThemeConfig {
   glow: string;
   emblem: 'shuriken' | 'bleach' | 'triforce' | 'pokeball' | 'star';
   emblemColor: string;
+}
+
+export interface RarityFilterOption {
+  id: number | null;
+  name: string;
+  borderColor: string;
+  badgeColor: string;
+  count: number;
 }
 
 @Component({
@@ -40,13 +48,19 @@ export class PokedexComponent implements OnInit {
   collections: CollectionProgress[] = [];
   selectedCollectionId: number | null = null;
   cards: PokedexCard[] = [];
+  filteredCards: PokedexCard[] = [];
   userKeys: UserKeyInventory[] = [];
-  
   canInspectPartner = false;
   householdMembers: any[] = [];
   viewingUserId: number | null = null;
   memberSelectOptions: { label: string; value: number }[] = [];
-currentUserId: number | null = null;
+  currentUserId: number | null = null;
+
+  // --- Search & Rarity Filters ---
+  searchQuery: string = '';
+  selectedRarityId: number | null = null;
+  availableRarities: RarityFilterOption[] = [];
+
   showUnboxingDialog = false;
   activeKeyToOpen: BlindBoxKey | null = null;
   isUnboxingRunning = false;
@@ -76,7 +90,7 @@ currentUserId: number | null = null;
 
     if (name.includes('bleach')) {
       return {
-        eyebrow: 'Soul Society • Sereitei',
+        eyebrow: 'Soul Society • Seireitei',
         title: col?.name || 'Registre des Shinigami',
         lede: 'Purifiez les corvées quotidiennes, libérez le Bankai et consignez les capitaines du Gotei 13.',
         gradient: 'linear-gradient(135deg, #0d1322 0%, #1c0e35 45%, #090b14 100%)',
@@ -115,7 +129,6 @@ currentUserId: number | null = null;
         emblemColor: 'rgba(255, 255, 255, 0.08)'
       };
     } else {
-      // Default / Generic Theme using collection details
       return {
         eyebrow: 'Archives du Foyer',
         title: col?.name || 'Registre des Collections',
@@ -139,7 +152,10 @@ currentUserId: number | null = null;
     this.householdService.retrieveHousehold().subscribe(hh => {
       if (hh?.members) {
         this.householdMembers = hh.members;
-        this.viewingUserId = hh.currentUser?.id || null;
+        this.currentUserId = hh.currentUser?.id || null;
+        if (!this.viewingUserId) {
+          this.viewingUserId = this.currentUserId;
+        }
         this.memberSelectOptions = hh.members.map(m => ({
           label: m.id === hh.currentUser?.id ? 'Ma collection' : m.name,
           value: m.id
@@ -157,6 +173,7 @@ currentUserId: number | null = null;
 
   selectCollection(id: number): void {
     this.selectedCollectionId = id;
+    this.selectedRarityId = null; // Réinitialise le filtre de rareté lors du changement de collection
     this.loadPokedex();
   }
 
@@ -168,7 +185,75 @@ currentUserId: number | null = null;
           ...c,
           unlocked: c.unlocked ?? (c as any).isUnlocked ?? (c.count > 0)
         }));
+        this.updateAvailableRarities();
+        this.applyFilters();
       });
+  }
+
+  updateAvailableRarities(): void {
+    const rarityMap = new Map<number, { option: RarityFilterOption; order: number }>();
+
+    for (const card of this.cards) {
+      if (card.rarity && card.rarity.id != null) {
+        if (!rarityMap.has(card.rarity.id)) {
+          rarityMap.set(card.rarity.id, {
+            option: {
+              id: card.rarity.id,
+              name: card.rarity.name,
+              borderColor: card.rarity.borderColor,
+              badgeColor: card.rarity.badgeColor,
+              count: 0
+            },
+            order: card.rarity.displayOrder ?? 0
+          });
+        }
+        rarityMap.get(card.rarity.id)!.option.count++;
+      }
+    }
+
+    this.availableRarities = Array.from(rarityMap.values())
+      .sort((a, b) => a.order - b.order)
+      .map(entry => entry.option);
+  }
+
+  selectRarity(rarityId: number | null): void {
+    this.selectedRarityId = rarityId;
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    const term = this.searchQuery.trim().toLowerCase();
+
+    this.filteredCards = this.cards.filter(card => {
+      // 1. Filtre par type de rareté
+      if (this.selectedRarityId !== null && card.rarity?.id !== this.selectedRarityId) {
+        return false;
+      }
+
+      // 2. Filtre de recherche textuelle (nom, titre, n°)
+      if (term) {
+        const matchesName = card.name && card.name.toLowerCase().includes(term);
+        const matchesSubtitle = card.subtitle && card.subtitle.toLowerCase().includes(term);
+        const numStr = String(card.itemNumber);
+        const matchesNum = numStr.includes(term) || numStr.padStart(3, '0').includes(term);
+        const matchesRarity = card.rarity?.name && card.rarity.name.toLowerCase().includes(term);
+
+        return matchesName || matchesSubtitle || matchesNum || matchesRarity;
+      }
+
+      return true;
+    });
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.applyFilters();
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.selectedRarityId = null;
+    this.applyFilters();
   }
 
   openUnboxingModal(key: BlindBoxKey): void {
@@ -181,13 +266,13 @@ currentUserId: number | null = null;
   triggerOpen(): void {
     if (!this.activeKeyToOpen?.blindBox?.id) return;
     this.isUnboxingRunning = true;
-
     setTimeout(() => {
       this.blindBoxService.openBox(this.activeKeyToOpen!.blindBox.id!).subscribe({
         next: (res) => {
           this.revealResult = res;
           this.isUnboxingRunning = false;
           this.loadInitialData();
+          this.loadPokedex();
           confetti({
             particleCount: 180,
             spread: 90,
@@ -197,7 +282,11 @@ currentUserId: number | null = null;
         },
         error: (err) => {
           this.isUnboxingRunning = false;
-          this.messageService.add({ severity: 'error', summary: 'Erreur', detail: err?.error?.message || "Impossible d'ouvrir le sceau" });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: err?.error?.message || "Impossible d'ouvrir le sceau"
+          });
         }
       });
     }, 1400);

@@ -561,3 +561,231 @@
   padding-top: 0.6rem;
   margin-top: 0.4rem;
 }
+
+/* ============== FILTER BAR & SEARCH ============== */
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: 20px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.search-field-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.search-field-wrap .search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.pokedex-search-input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 2.6rem !important;
+  border-radius: 14px !important;
+  background: var(--void-800) !important;
+  border: 1px solid var(--surface-line) !important;
+  color: var(--text) !important;
+  font-size: 0.88rem !important;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.pokedex-search-input:focus {
+  border-color: var(--indigo) !important;
+  box-shadow: 0 0 0 2px rgba(108, 76, 224, 0.35) !important;
+  outline: none;
+}
+
+.pokedex-search-input::placeholder {
+  color: #6c6686;
+}
+
+.clear-search-icon-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.clear-search-icon-btn:hover {
+  color: var(--text);
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Rarity Chips Carousel */
+.rarity-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.rarity-filter-row::-webkit-scrollbar {
+  display: none;
+}
+
+.rarity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: var(--void-800);
+  border: 1.5px solid var(--surface-line);
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+}
+
+.rarity-chip:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.rarity-chip.active {
+  background: var(--chip-active-bg, var(--surface));
+  color: #ffffff;
+  border-color: var(--chip-border-color, var(--indigo));
+  box-shadow: 0 0 16px var(--chip-glow, rgba(108, 76, 224, 0.35));
+  transform: translateY(-1px);
+}
+
+.rarity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.rarity-badge-count {
+  font-size: 0.65rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  font-family: monospace;
+}
+
+.rarity-chip.active .rarity-badge-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+/* Filter Summary Text */
+.filter-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+  padding: 0 0.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.5rem;
+}
+
+.filter-reset-link {
+  background: none;
+  border: none;
+  color: var(--gold);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.76rem;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+
+.filter-reset-link:hover {
+  text-decoration: underline;
+}
+
+/* Empty Search Results State */
+.empty-search-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  background: var(--void-800);
+  border: 2px dashed var(--surface-line);
+  border-radius: 20px;
+  text-align: center;
+}
+
+.empty-search-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-search-state h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin: 0 0 0.35rem;
+}
+
+.empty-search-state p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0 0 1.25rem;
+  max-width: 36ch;
+}
+
+.reset-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reset-filter-btn:hover {
+  background: var(--indigo);
+  border-color: var(--indigo);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(108, 76, 224, 0.4);
+}

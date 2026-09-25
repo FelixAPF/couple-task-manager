@@ -325,12 +325,11 @@ public class BlindBoxService {
 
     public void notifyUserOfAddedKey(Long userId, Long keyId, int quantity, CTMUser user) {
         CTMUser targetUser = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("No Such User"));
-        CTMUser sendingUser = userRepository.findById(user.getId()).orElseThrow(() -> new NoSuchElementException("No Such Sending User"));
         BlindBoxKey key = keyRepository.findById(keyId).orElseThrow(() -> new NoSuchElementException("No Such Key"));
 
         if (targetUser != null) {
             String title = "⚡ Nouvelle clé !";
-            String body = sendingUser.getName() + " vient de vous accorder " + quantity + " " + key.getName() ;
+            String body = " " + key.getName()  + " Vient de vous être accordé " ;
             firebaseMessagingService.sendNotificationWithNavigation(targetUser, title, body, "POKEDEX", keyId);
         }
     }

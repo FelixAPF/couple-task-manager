@@ -21,7 +21,7 @@ export interface Splitter {
 }
 
 @Component({
-  selector: 'app-receipt-splitter',
+  selector: 'app-recipe-splitter',
   standalone: true,
   imports: [CommonModule, FormsModule, ButtonModule, ToastModule, TooltipModule, DialogModule, InputTextModule],
   templateUrl: './recipe-splitter.component.html',
@@ -31,7 +31,6 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   step: number = 1;
   members: HouseholdMember[] = [];
   activeSplitters: Splitter[] = [];
- 
   currentReceipt: Receipt = this.getEmptyReceipt();
   splitPercentages: Record<number, number> = {};
   groceryTotal: number = 0;
@@ -39,7 +38,6 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   loading: boolean = false;
   pastReceipts: Receipt[] = [];
   receiptTax: number = 0;
-
   showAddPersonDialog: boolean = false;
   newPersonName: string = '';
 
@@ -71,7 +69,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Crucial: Clear the browser trap if the user uses the navigation bar to leave the page
+    // Clear the browser trap if the user uses the navigation bar to leave the page
     if (this.trapActive) {
       this.isSkippingPop = true;
       history.back();
@@ -79,8 +77,6 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   }
 
   // --- BROWSER HISTORY TRAP LOGIC --- //
-
-  // Pushes a dummy state to browser history to catch swipes/back buttons
   private trapBrowserBackButton(): void {
     if (!this.trapActive) {
       history.pushState({ wizardTrap: true }, '', location.href);
@@ -88,7 +84,6 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Silently removes the dummy state when we are done saving
   private releaseTrap(): void {
     if (this.trapActive) {
       this.isSkippingPop = true;
@@ -97,38 +92,33 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Listens to Swipes, Chrome Back Arrow, and Android Hardware Back
   @HostListener('window:popstate', ['$event'])
   onPopState(event: Event): void {
     if (this.isSkippingPop) {
-      this.isSkippingPop = false; // Ignore our own manual silent pop
+      this.isSkippingPop = false;
       return;
     }
 
     if (this.trapActive) {
-      this.trapActive = false; // Browser popped it for us
+      this.trapActive = false;
       
       this.zone.run(() => {
         if (this.isViewingPastReceipt) {
-           // If they were just looking at an old receipt, exit straight to step 1
-           this.step = 1;
-           this.isViewingPastReceipt = false;
+          this.step = 1;
+          this.isViewingPastReceipt = false;
         } else if (this.step > 1) {
-           // If in wizard, go back 1 step
-           this.step--;
-           if (this.step > 1) {
-              this.trapBrowserBackButton(); // Re-arm the trap for the next back swipe
-           }
+          this.step--;
+          if (this.step > 1) {
+            this.trapBrowserBackButton();
+          }
         }
       });
     }
   }
 
   // --- UI NAVIGATION METHODS --- //
-
   goBack(): void {
     if (this.trapActive) {
-      // Trigger the native back event which executes onPopState flawlessly
       history.back();
     } else {
       this.location.back();
@@ -137,11 +127,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
 
   goBackToEditing(): void {
     this.step = 2;
-    // Notice we do NOT release the trap here. The user is still in the wizard,
-    // so if they swipe back from step 2, they correctly go to step 1!
   }
-
-  // --- EXISTING LOGIC --- //
 
   getEmptyReceipt(): Receipt {
     return {
@@ -166,8 +152,8 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   recalculateEvenSplits(): void {
     const defaultSplit: number = 100 / this.activeSplitters.length;
     this.activeSplitters.forEach(s => {
-        this.splitPercentages[s.id] = defaultSplit;
-        this.memberTotals[s.id] = 0;
+      this.splitPercentages[s.id] = defaultSplit;
+      this.memberTotals[s.id] = 0;
     });
   }
 
@@ -195,15 +181,15 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
           }));
           this.step = 2;
           this.isViewingPastReceipt = false;
-          this.trapBrowserBackButton(); // Arm trap
+          this.trapBrowserBackButton();
           this.loading = false;
         },
         error: (err) => {
           this.loading = false;
           if (err.status === 429) {
-            this.messageService.add({severity:'warn', summary:'Limite atteinte', detail:'L\'IA doit faire une pause. Réessayez dans une minute.'});
+            this.messageService.add({ severity: 'warn', summary: 'Limite atteinte', detail: "L'IA doit faire une pause. Réessayez dans une minute." });
           } else {
-            this.messageService.add({severity:'error', summary:'Erreur', detail:'Impossible d\'analyser le reçu.'});
+            this.messageService.add({ severity: 'error', summary: 'Erreur', detail: "Impossible d'analyser le reçu." });
           }
         }
       });
@@ -263,7 +249,7 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
   calculateTotals(): void {
     this.groceryTotal = 0;
     this.activeSplitters.forEach(s => {
-        this.memberTotals[s.id] = 0;
+      this.memberTotals[s.id] = 0;
     });
 
     const totalTaxableAmount = this.currentReceipt.items
@@ -272,7 +258,6 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
 
     this.currentReceipt.items.forEach((item: ReceiptItem) => {
       let finalPrice = item.price;
-
       if (item.taxable && totalTaxableAmount > 0) {
         finalPrice += (item.price / totalTaxableAmount) * (this.receiptTax || 0);
       }
@@ -281,23 +266,22 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
         this.groceryTotal += finalPrice;
       } else if (item.assignmentType === 'individual' && item.assigneeId !== undefined) {
         if (this.memberTotals[item.assigneeId] !== undefined) {
-            this.memberTotals[item.assigneeId] += finalPrice;
+          this.memberTotals[item.assigneeId] += finalPrice;
         }
       } else if (item.assignmentType === 'split') {
         this.activeSplitters.forEach(s => {
-            const splitAmount: number = finalPrice * ((this.splitPercentages[s.id] || 0) / 100);
-            this.memberTotals[s.id] += splitAmount;
+          const splitAmount: number = finalPrice * ((this.splitPercentages[s.id] || 0) / 100);
+          this.memberTotals[s.id] += splitAmount;
         });
       }
     });
 
     this.currentReceipt.totals = { grocery: this.groceryTotal };
-
     this.activeSplitters.forEach(s => {
       if (s.isExtra) {
-         this.currentReceipt.totals[`EXTRA_${s.id}_${s.name}`] = this.memberTotals[s.id];
+        this.currentReceipt.totals[`EXTRA_${s.id}_${s.name}`] = this.memberTotals[s.id];
       } else {
-         this.currentReceipt.totals[s.id.toString()] = this.memberTotals[s.id];
+        this.currentReceipt.totals[s.id.toString()] = this.memberTotals[s.id];
       }
       this.currentReceipt.totals[`SPLIT_PCT_${s.id}`] = this.splitPercentages[s.id];
     });
@@ -312,29 +296,28 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     return total;
   }
 
-  reconstructExtrasFromReceipt(receipt: Receipt): void {
+reconstructExtrasFromReceipt(receipt: Receipt): void {
     this.resetToHouseholdSplitters();
     if (receipt.totals) {
       Object.keys(receipt.totals).forEach(key => {
         if (key.startsWith('EXTRA_')) {
-          const parts = key.split('_');
-          const id = parseInt(parts[1], 10);
-          const name = parts.slice(2).join('_');
+          const [prefix, idStr, ...nameParts] = key.split('_');
+          const id = parseInt(idStr, 10);
+          const name = nameParts.join('_');
+          
           if (!this.activeSplitters.find(s => s.id === id)) {
             this.activeSplitters.push({ id, name, isExtra: true });
           }
         }
       });
-
       let hasSavedPcts = false;
       this.activeSplitters.forEach(s => {
         const savedPct = receipt.totals[`SPLIT_PCT_${s.id}`];
         if (savedPct !== undefined) {
-           this.splitPercentages[s.id] = savedPct;
-           hasSavedPcts = true;
+          this.splitPercentages[s.id] = savedPct;
+          hasSavedPcts = true;
         }
       });
-
       if (!hasSavedPcts) {
         this.recalculateEvenSplits();
       }
@@ -361,7 +344,6 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
         this.memberTotals[s.id] = this.currentReceipt.totals[s.id.toString()] || 0;
       }
     });
-
     this.step = 4;
     this.isViewingPastReceipt = true;
     this.trapBrowserBackButton();
@@ -372,34 +354,106 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
     this.processSaveRequest('Brouillon sauvegardé avec succès.');
   }
 
+  // =========================================================
+  // --- LOGIQUE FONDS D'ÉPICERIE : 0$ & DÉCOUVERT (OVERDRAFT)
+  // =========================================================
+
+  // 1. Solde du fonds d'épicerie à la date de la facture
+  get fundBalanceAtTime(): number {
+    return this.getHistoricalGroceryBalance();
+  }
+
+  // 2. Montant déduit pour atteindre 0$ (part prélevée sur le fonds disponible)
+  get amountToReachZero(): number {
+    if (this.currentReceipt.totals && this.currentReceipt.totals['amountToReachZero'] !== undefined) {
+      return this.currentReceipt.totals['amountToReachZero'];
+    }
+    const balance = this.fundBalanceAtTime;
+    if (balance <= 0) return 0;
+    return Math.min(this.groceryTotal, balance);
+  }
+
+  // 3. Montant à découvert (l'excédent non couvert par le fonds)
+  get overdraftAmount(): number {
+    if (this.currentReceipt.totals && this.currentReceipt.totals['overdraftAmount'] !== undefined) {
+      return this.currentReceipt.totals['overdraftAmount'];
+    }
+    const balance = this.fundBalanceAtTime;
+    if (balance <= 0) return this.groceryTotal;
+    return Math.max(0, Math.round((this.groceryTotal - balance) * 100) / 100);
+  }
+
+  // 4. Solde restant dans le fonds après la facture
+  get fundBalanceAfter(): number {
+    if (this.currentReceipt.totals && this.currentReceipt.totals['groceryFundBalanceAfter'] !== undefined) {
+      return this.currentReceipt.totals['groceryFundBalanceAfter'];
+    }
+    return Math.round((this.fundBalanceAtTime - this.groceryTotal) * 100) / 100;
+  }
+
+  // Reconstitution historique à rebours (si pas d'instantané présent dans la facture)
+  getHistoricalGroceryBalance(): number {
+    if (this.currentReceipt.totals && this.currentReceipt.totals['groceryFundBalanceAtTime'] !== undefined) {
+      return this.currentReceipt.totals['groceryFundBalanceAtTime'];
+    }
+
+    const currentBalance = this.financeService.groceryFund()?.balance || 0;
+    if (!this.currentReceipt.date) return currentBalance;
+
+    const receiptTimestamp = new Date(this.currentReceipt.date).getTime();
+    if (isNaN(receiptTimestamp)) return currentBalance;
+
+    let reconstructed = currentBalance;
+    const allTxs = this.financeService.groceryTransactions();
+
+    allTxs.forEach(tx => {
+      const txTime = new Date(tx.date).getTime();
+      if (txTime > receiptTimestamp) {
+        if (tx.transactionType === 'SPEND') {
+          reconstructed += tx.amount;
+        } else if (tx.transactionType === 'ADD') {
+          reconstructed -= tx.amount;
+        }
+      }
+    });
+
+    return Math.round(reconstructed * 100) / 100;
+  }
+
   saveReceipt(): void {
     this.currentReceipt.status = 'COMPLETED';
-    this.processSaveRequest('Facture finalisée et assignée!');
+
+    // Fige définitivement les données d'époque dans totals
+    this.currentReceipt.totals['groceryFundBalanceAtTime'] = this.fundBalanceAtTime;
+    this.currentReceipt.totals['amountToReachZero'] = this.amountToReachZero;
+    this.currentReceipt.totals['overdraftAmount'] = this.overdraftAmount;
+    this.currentReceipt.totals['groceryFundBalanceAfter'] = this.fundBalanceAfter;
+
+    this.processSaveRequest('Facture finalisée et assignée !');
   }
 
   private processSaveRequest(successMessage: string): void {
     this.loading = true;
-
     const request = this.currentReceipt.id
       ? this.receiptService.updateReceipt(this.currentReceipt.id, this.currentReceipt)
       : this.receiptService.saveReceipt(this.currentReceipt);
 
     request.subscribe({
       next: () => {
-        if (this.currentReceipt.status === 'COMPLETED' && this.groceryTotal > 0) {
+        // Enregistre la transaction de dépense uniquement pour les nouvelles factures finalisées
+        if (this.currentReceipt.status === 'COMPLETED' && this.groceryTotal > 0 && !this.isViewingPastReceipt) {
           const currentUser = this.financeService.householdMembers().find(m => m.isCurrentUser);
           if (currentUser) {
             this.financeService.addGroceryTransaction({
               userId: currentUser.userId,
               storeName: this.currentReceipt.storeName || 'Épicerie',
-              description: 'Facture scannée',
+              description: `Facture ${this.currentReceipt.storeName || 'Épicerie'}`,
               amount: this.groceryTotal,
               transactionType: 'SPEND',
-              date: new Date().toISOString()
+              date: this.currentReceipt.date || new Date().toISOString()
             }).subscribe();
           }
         }
-
         this.releaseTrap(); 
         this.step = 1;
         this.isViewingPastReceipt = false;
@@ -407,13 +461,23 @@ export class ReceiptSplitterComponent implements OnInit, OnDestroy {
         this.currentReceipt = this.getEmptyReceipt();
         this.resetToHouseholdSplitters();
         this.loadSavedReceipts();
-        this.messageService.add({severity:'success', summary:'Succès', detail: successMessage});
+        this.messageService.add({ severity: 'success', summary: 'Succès', detail: successMessage });
         this.loading = false;
       },
       error: () => {
-         this.messageService.add({severity:'error', summary:'Erreur', detail:'Impossible de sauvegarder.'});
-         this.loading = false;
+        this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de sauvegarder.' });
+        this.loading = false;
       }
     });
+  }
+
+  getItemAssignmentLabel(item: ReceiptItem): string {
+    if (item.assignmentType === 'grocery') return 'Compte Conjoint (Épicerie)';
+    if (item.assignmentType === 'split') return 'Partagé (Prorata)';
+    if (item.assignmentType === 'individual' && item.assigneeId !== undefined) {
+      const splitter = this.activeSplitters.find(s => s.id === item.assigneeId);
+      return splitter ? `Individuel : ${splitter.name}` : 'Individuel';
+    }
+    return 'Non assigné';
   }
 }

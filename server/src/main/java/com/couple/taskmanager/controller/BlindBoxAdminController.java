@@ -1,11 +1,13 @@
 package com.couple.taskmanager.controller;
 
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.blindbox.*;
 import com.couple.taskmanager.repository.blindbox.*;
 import com.couple.taskmanager.service.BlindBoxService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -90,8 +92,9 @@ public class BlindBoxAdminController {
 
 
     @PostMapping("/grant-key")
-    public ResponseEntity<Void> grantKey(@RequestParam Long userId, @RequestParam Long keyId, @RequestParam int quantity) {
+    public ResponseEntity<Void> grantKey(@RequestParam Long userId, @RequestParam Long keyId, @RequestParam int quantity, @AuthenticationPrincipal AuthenticationPrincipal principal) {
         blindBoxService.grantKeyToUser(userId, keyId, quantity);
+        blindBoxService.notifyUserOfAddedKey(userId, keyId, quantity, (CTMUser) principal);
         return ResponseEntity.ok().build();
     }
 

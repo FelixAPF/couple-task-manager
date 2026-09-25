@@ -70,12 +70,21 @@ export class PokedexComponent implements OnInit {
 
   isCardFlipped = false;
   revealResult: UnboxResult | null = null;
+  forgeKeyOptions: { label: string; value: number }[] = [];
+  allAvailableKeys: BlindBoxKey[] = [];
 
   // --- 1.D: FORGE / RECYCLAGE DES DOUBLONS ---
   showForgeDialog = false;
   selectedDuplicateIds: number[] = [];
   forgeTargetKeyId: number | null = null;
   isForging = false;
+  cardTiltX = 0;
+  cardTiltY = 0;
+
+packStage: 'IDLE' | 'TEARING' | 'EXTRACTING' | 'SUSPENSE' | 'REVEALED' = 'IDLE';
+  tearProgress = 0; // 0% à 100%
+  isTearing = false;
+  tearStartX = 0;
 
   // --- DETAIL MODAL ---
   showDetailDialog = false;
@@ -113,10 +122,24 @@ export class PokedexComponent implements OnInit {
     this.loadInitialData();
   }
 
-  loadInitialData(): void {
-    this.blindBoxService.getMyKeys().subscribe(keys => this.userKeys = keys);
-    this.blindBoxService.isInspectionEnabled().subscribe(enabled => this.canInspectPartner = enabled);
+loadInitialData(): void {
+    // 1. Clés en inventaire
+    this.blindBoxService.getMyKeys().subscribe(keys => {
+      this.userKeys = keys;
+      this.buildForgeKeyOptions();
+    });
 
+    // 2. Toutes les clés existantes (pour toujours avoir du choix même avec 0 clé en poche)
+    this.blindBoxService.getKeys().subscribe({
+      next: (allKeys) => {
+        this.allAvailableKeys = allKeys || [];
+        this.buildForgeKeyOptions();
+      },
+      error: () => this.buildForgeKeyOptions()
+    });
+
+    this.blindBoxService.isInspectionEnabled().subscribe(enabled => this.canInspectPartner = enabled);
+    
     this.householdService.retrieveHousehold().subscribe(hh => {
       if (hh?.members) {
         this.householdMembers = hh.members;
@@ -136,6 +159,34 @@ export class PokedexComponent implements OnInit {
         this.selectCollection(cols[0].id);
       }
     });
+  }
+
+  buildForgeKeyOptions(): void {
+    const keyMap = new Map<number, string>();
+
+    // Clés globales configurées
+    if (this.allAvailableKeys && this.allAvailableKeys.length > 0) {
+      this.allAvailableKeys.forEach(k => {
+        if (k.id) keyMap.set(k.id, k.name);
+      });
+    }
+
+    // Clés de l'inventaire du joueur
+    if (this.userKeys && this.userKeys.length > 0) {
+      this.userKeys.forEach(inv => {
+        if (inv.key?.id) keyMap.set(inv.key.id, inv.key.name);
+      });
+    }
+
+    this.forgeKeyOptions = Array.from(keyMap.entries()).map(([id, name]) => ({
+      label: name,
+      value: id
+    }));
+
+    // Sélectionne la 1ère clé par défaut
+    if (!this.forgeTargetKeyId && this.forgeKeyOptions.length > 0) {
+      this.forgeTargetKeyId = this.forgeKeyOptions[0].value;
+    }
   }
 
   selectCollection(id: number): void {
@@ -317,47 +368,70 @@ export class PokedexComponent implements OnInit {
     }, 650);
   }
 
-  flipRevealedCard(): void {
-    if (this.isCardFlipped || !this.revealResult) return;
+  // Parallaxe 3D sur la carte flottante au mouvement de la souris
+onCardMouseMove(event: MouseEvent, cardEl: HTMLElement): void {
+    if (this.packStage !== 'SUSPENSE') return;
+    const rect = cardEl.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    this.cardTiltX = ((y - centerY) / centerY) * -18;
+    this.cardTiltY = ((x - centerX) / centerX) * 18;
+  }
+
+onCardMouseLeave(): void {
+    this.cardTiltX = 0;
+    this.cardTiltY = 0;
+  }
+
+  // Retournement de la carte (Flip)
+flipRevealedCard(): void {
+    if (this.packStage !== 'SUSPENSE' || !this.revealResult) return;
+    this.packStage = 'REVEALED';
     this.isCardFlipped = true;
-    this.soundService.playCardFlip();
+
     this.hapticService.medium();
 
-    if (this.revealResult.item.rarity.defaultDropRate <= 10.0 || this.revealResult.item.rarity.effectType === 'LIGHTNING') {
-      this.soundService.playRareChime();
-    }
+    this.soundService.playRevealSound(this.revealResult.item.rarity.effectType);
 
     confetti({
-      particleCount: 180,
+      particleCount: 160,
       spread: 90,
-      origin: { y: 0.5 },
-      colors: [this.revealResult.item.rarity.borderColor, '#ff4b3e', '#ffd166', '#38bdf8']
+      origin: { y: 0.55 },
+      colors: [this.revealResult.item.rarity.borderColor, '#ffd166', '#ff4b3e', '#ffffff']
     });
   }
 
-  openAnother(): void {
+openAnother(): void {
     this.revealResult = null;
+    this.packStage = 'IDLE';
+    this.tearProgress = 0;
     this.isCardFlipped = false;
-    this.isShaking = false;
-    this.isBursting = false;
+    this.cardTiltX = 0;
+    this.cardTiltY = 0;
   }
 
   // --- 1.B: OUVERTURE DE LA MODALE D'UNBOXING ---
-  openUnboxingModal(key: BlindBoxKey): void {
+   openUnboxingModal(key: BlindBoxKey): void {
     this.soundService.playKeyClick();
     this.hapticService.light();
     this.activeKeyToOpen = key;
     this.revealResult = null;
-    this.isUnboxingRunning = false;
-    this.isShaking = false;
-    this.isBursting = false;
+    this.packStage = 'IDLE';
+    this.tearProgress = 0;
+    this.isTearing = false;
     this.isCardFlipped = false;
+    this.cardTiltX = 0;
+    this.cardTiltY = 0;
     this.showUnboxingDialog = true;
   }
-
-  closeUnboxing(): void {
+closeUnboxing(): void {
     this.showUnboxingDialog = false;
     this.revealResult = null;
+    this.packStage = 'IDLE';
+    this.tearProgress = 0;
     this.isCardFlipped = false;
   }
 
@@ -369,13 +443,109 @@ export class PokedexComponent implements OnInit {
     this.showDetailDialog = true;
   }
 
+  startTear(event: MouseEvent | TouchEvent, packEl: HTMLElement): void {
+    if (this.packStage !== 'IDLE') return;
+    this.isTearing = true;
+    this.packStage = 'TEARING';
+    this.tearStartX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    this.soundService.playSealBreak();
+    this.hapticService.light();
+  }
+
   // --- 1.D: GESTION DE LA FORGE / RECYCLAGE ---
-  openForge(): void {
+openForge(): void {
     this.soundService.playKeyClick();
     this.hapticService.light();
     this.selectedDuplicateIds = [];
-    this.forgeTargetKeyId = this.userKeys.length > 0 ? this.userKeys[0].key.id! : null;
+    this.buildForgeKeyOptions();
+    if (!this.forgeTargetKeyId && this.forgeKeyOptions.length > 0) {
+      this.forgeTargetKeyId = this.forgeKeyOptions[0].value;
+    }
     this.showForgeDialog = true;
+  }
+
+  moveTear(event: MouseEvent | TouchEvent, packEl: HTMLElement): void {
+    if (!this.isTearing || this.packStage !== 'TEARING') return;
+    const currentX = 'touches' in event ? event.touches[0].clientX : event.clientX;
+    const rect = packEl.getBoundingClientRect();
+    
+    // Calcule la distance parcourue sur la largeur réelle du paquet
+    const distanceTorn = currentX - this.tearStartX;
+    const tearWidth = rect.width * 0.85; // 85% de la largeur du paquet pour déchirer
+    const progress = Math.min(100, Math.max(0, (distanceTorn / tearWidth) * 100));
+    
+    this.tearProgress = progress;
+
+    if (this.tearProgress >= 95) {
+      this.isTearing = false;
+      this.tearProgress = 100;
+      this.finalizeRipping();
+    }
+  }
+
+  endTear(): void {
+    if (!this.isTearing) return;
+    this.isTearing = false;
+    if (this.tearProgress >= 70) {
+      this.tearProgress = 100;
+      this.finalizeRipping();
+    } else {
+      // Si l'utilisateur relâche trop tôt, le foil revient à sa place
+      this.tearProgress = 0;
+      this.packStage = 'IDLE';
+    }
+  }
+
+  quickRip(): void {
+    if (this.packStage !== 'IDLE' && this.packStage !== 'TEARING') return;
+    this.isTearing = false;
+    this.tearProgress = 100;
+    this.finalizeRipping();
+  }
+
+  // Séquence d'arrachage du haut et sortie de la carte
+  private finalizeRipping(): void {
+    if (!this.activeKeyToOpen?.blindBox?.id) return;
+    this.packStage = 'EXTRACTING';
+
+    this.soundService.playSealBreak();
+    this.soundService.playChargingRumble();
+    this.hapticService.heavy();
+
+    // Appel API backend
+    this.blindBoxService.openBox(this.activeKeyToOpen.blindBox.id).subscribe({
+      next: (res) => {
+        this.revealResult = res;
+
+        // Détonation légère à l'extraction de la carte
+        setTimeout(() => {
+          this.soundService.playBurstExplosion();
+          this.hapticService.medium();
+          
+          confetti({
+            particleCount: 50,
+            spread: 100,
+            origin: { y: 0.45 },
+            colors: ['#ffd166', '#ffffff', '#ff4b3e']
+          });
+
+          // La carte flotte désormais au centre
+          this.packStage = 'SUSPENSE';
+          this.loadInitialData();
+          this.loadCollections();
+          this.loadPokedex();
+        }, 600);
+      },
+      error: (err) => {
+        this.packStage = 'IDLE';
+        this.tearProgress = 0;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: err?.error?.message || "Impossible d'ouvrir le coffre"
+        });
+      }
+    });
   }
 
   toggleSelectDuplicate(card: PokedexCard): void {
@@ -403,7 +573,7 @@ export class PokedexComponent implements OnInit {
         this.loadInitialData();
         this.loadCollections();
         this.loadPokedex();
-        this.soundService.playRareChime();
+        this.soundService.playKeyAdded();
         this.messageService.add({
           severity: 'success',
           summary: 'Transmutation réussie !',

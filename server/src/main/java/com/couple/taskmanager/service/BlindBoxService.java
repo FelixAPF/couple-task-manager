@@ -4,6 +4,7 @@ import com.couple.taskmanager.enums.CardEffectType;
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.blindbox.*;
 import com.couple.taskmanager.model.dto.blindbox.*;
+import com.couple.taskmanager.repository.CTMUserRepository;
 import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.blindbox.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +26,7 @@ public class BlindBoxService {
     private final BlindBoxKeyRepository keyRepository;
     private final UserKeyInventoryRepository inventoryRepository;
     private final UserCollectionItemRepository userCollectionRepository;
+    private final CTMUserRepository userRepository;
     private final SystemConfigRepository systemConfigRepository;
     private final HouseholdRepository householdRepository;
     private final FirebaseMessagingService firebaseMessagingService;
@@ -319,5 +321,17 @@ public class BlindBoxService {
                 .orElseThrow(() -> new EntityNotFoundException("Rareté non trouvée"));
         item.setRarity(rarity);
         itemRepository.save(item);
+    }
+
+    public void notifyUserOfAddedKey(Long userId, Long keyId, int quantity, CTMUser user) {
+        CTMUser targetUser = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("No Such User"));
+        CTMUser sendingUser = userRepository.findById(user.getId()).orElseThrow(() -> new NoSuchElementException("No Such Sending User"));
+        BlindBoxKey key = keyRepository.findById(keyId).orElseThrow(() -> new NoSuchElementException("No Such Key"));
+
+        if (targetUser != null) {
+            String title = "⚡ Nouvelle clé !";
+            String body = sendingUser.getName() + " vient de vous accorder " + quantity + " " + key.getName() ;
+            firebaseMessagingService.sendNotificationWithNavigation(targetUser, title, body, "POKEDEX", keyId);
+        }
     }
 }

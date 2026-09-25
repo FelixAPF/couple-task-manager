@@ -28,6 +28,7 @@ import {
   CardEffectType
 } from '../../model/blind-box.model';
 import { HouseholdMember } from '../../model/household';
+import { SoundService } from '../../service/sound.service';
 
 export type AdminTab = 'rarities' | 'collections' | 'keys' | 'settings';
 
@@ -57,6 +58,7 @@ export class BlindBoxAdminComponent implements OnInit {
   private blindBoxService = inject(BlindBoxService);
   private fileService = inject(FileService);
   private householdService = inject(HouseholdService);
+  private soundService = inject(SoundService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
 
@@ -514,6 +516,7 @@ export class BlindBoxAdminComponent implements OnInit {
     this.blindBoxService.grantKey(this.grantTargetUserId, this.grantTargetKeyId, this.grantQuantity).subscribe({
       next: () => {
         this.showGrantKeyDialog = false;
+        this.soundService.playKeyAdded();
         this.messageService.add({
           severity: 'success',
           summary: 'Clés envoyées',

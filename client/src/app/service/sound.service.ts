@@ -1,9 +1,21 @@
 import { Injectable } from '@angular/core';
+import { CardEffectType } from '../model/blind-box.model';
 
 @Injectable({ providedIn: 'root' })
 export class SoundService {
   private audioCtx: AudioContext | null = null;
+  private keyAddedAudio: HTMLAudioElement = new Audio('assets/sounds/key_added.wav');
+  private revealCardAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_standard.mp3');
+  private revealHolographicAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_holographic.mp3');
+  private revealRainbowAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_card.mp3');
+  private revealFoilAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_foil.mp3');
+  private revealLightningAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_lightning.mp3');
   public isMuted: boolean = localStorage.getItem('pokedex_sound_muted') === 'true';
+
+  constructor(){
+    this.keyAddedAudio.volume = 0.5; // Adjust default volume (0.0 to 1.0)
+    this.keyAddedAudio.load();
+  }
 
   private getContext(): AudioContext {
     if (!this.audioCtx) {
@@ -22,7 +34,6 @@ export class SoundService {
     return this.isMuted;
   }
 
-  // Clic de clé / bouton
   playKeyClick(): void {
     if (this.isMuted) return;
     try {
@@ -41,13 +52,12 @@ export class SoundService {
     } catch {}
   }
 
-  // Son de déchirure / rupture de sceau
+  // Son de déchirure du paquet
   playSealBreak(): void {
     if (this.isMuted) return;
     try {
       const ctx = this.getContext();
-      // Bruit blanc filtré pour simuler la déchirure
-      const bufferSize = ctx.sampleRate * 0.25;
+      const bufferSize = ctx.sampleRate * 0.3;
       const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
       const data = buffer.getChannelData(0);
       for (let i = 0; i < bufferSize; i++) {
@@ -57,11 +67,11 @@ export class SoundService {
       noise.buffer = buffer;
       const filter = ctx.createBiquadFilter();
       filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(1200, ctx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.25);
+      filter.frequency.setValueAtTime(1600, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(350, ctx.currentTime + 0.3);
       const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.3, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.35, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
       noise.connect(filter);
       filter.connect(gain);
       gain.connect(ctx.destination);
@@ -69,7 +79,62 @@ export class SoundService {
     } catch {}
   }
 
-  // Retournement de carte
+  playKeyAdded(): void {
+    if (this.isMuted) return;
+    try {
+      // Reset playhead so rapid triggers replay immediately
+      this.keyAddedAudio.currentTime = 0;
+      this.keyAddedAudio.play().catch(() => {});
+    } catch {}
+  }
+
+  // Grondement d'énergie qui monte en intensité (Hearthstone tension)
+  playChargingRumble(): void {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(45, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.65);
+      gain.gain.setValueAtTime(0.02, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 0.55);
+      gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.7);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.7);
+    } catch {}
+  }
+
+  // Détonation explosion du paquet
+  playBurstExplosion(): void {
+    if (this.isMuted) return;
+    try {
+      const ctx = this.getContext();
+      const bufferSize = ctx.sampleRate * 0.45;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(900, ctx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.45);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.45, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.45);
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start();
+    } catch {}
+  }
+
   playCardFlip(): void {
     if (this.isMuted) return;
     try {
@@ -79,7 +144,7 @@ export class SoundService {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(300, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(750, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.setValueAtTime(0.25, ctx.currentTime);
       gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.15);
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -88,24 +153,32 @@ export class SoundService {
     } catch {}
   }
 
-  // Carillon triomphal pour carte rare / légendaire
-  playRareChime(): void {
+  playRevealSound(revealEffect: CardEffectType): void {
     if (this.isMuted) return;
     try {
-      const ctx = this.getContext();
-      const chord = [523.25, 659.25, 783.99, 1046.50]; // Do, Mi, Sol, Do majeur
-      chord.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.06);
-        gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.06);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8 + idx * 0.06);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + idx * 0.06);
-        osc.stop(ctx.currentTime + 0.9 + idx * 0.06);
-      });
+        let htmlAudioElement: HTMLAudioElement;
+        switch(revealEffect){
+            case 'STANDARD':
+                htmlAudioElement = this.revealCardAudio;
+                break;
+            case 'HOLOGRAPHIC':
+                htmlAudioElement = this.revealHolographicAudio;
+                break;
+            case 'FOIL':
+                htmlAudioElement = this.revealFoilAudio;
+                break;
+            case 'RAINBOW_SHIMMER':
+                htmlAudioElement = this.revealRainbowAudio;
+                break;
+            case 'LIGHTNING':
+            default:
+                htmlAudioElement = this.revealLightningAudio;
+                break;
+
+        }
+      // Reset playhead so rapid triggers replay immediately
+        htmlAudioElement.currentTime = 0;
+        htmlAudioElement.play().catch(() => {});
     } catch {}
   }
 }

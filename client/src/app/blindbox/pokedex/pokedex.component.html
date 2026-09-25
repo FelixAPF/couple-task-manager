@@ -187,129 +187,188 @@
   </div>
 </div>
 
-<!-- ================= UNBOXING : TAP-TO-OPEN À LA HEARTHSTONE ================= -->
-<p-dialog [(visible)]="showUnboxingDialog" 
-          [modal]="true" 
-          [dismissableMask]="!isUnboxingRunning"
-          [closable]="!isUnboxingRunning" 
-          styleClass="dark-modal unbox-modal" 
-          [style]="{width: '94vw', maxWidth: '440px'}" 
-          [showHeader]="false">
 
-  <!-- Chrome custom : pas d'en-tête PrimeNG ici, donc on fournit notre propre bouton de fermeture -->
-  <button type="button"
-          class="modal-close-btn"
-          *ngIf="!isUnboxingRunning"
+<!-- ================= VRAIE DÉCHIRURE DE BOOSTER TCG ================= -->
+<p-dialog [(visible)]="showUnboxingDialog" 
+           [modal]="true" 
+           [dismissableMask]="packStage === 'IDLE' || packStage === 'REVEALED'"
+           [closable]="packStage === 'IDLE' || packStage === 'REVEALED'" 
+           styleClass="dark-modal unbox-modal" 
+           [style]="{width: '95vw', maxWidth: '440px'}" 
+           [showHeader]="false">
+
+  <!-- Bouton de fermeture -->
+  <button type="button" 
+          class="modal-close-btn" 
+          *ngIf="packStage === 'IDLE' || packStage === 'REVEALED'"
           (click)="closeUnboxing()"
           aria-label="Fermer">
     <i class="pi pi-times"></i>
   </button>
 
-  <div class="unbox-body">
+  <div class="tcg-rip-arena">
+    <!-- Nébuleuse Cosmique arrière-plan -->
+    <div class="arena-nebula"></div>
 
-    <!-- ================= ETAPE 1 : LE PAQUET, EN ATTENTE PUIS OUVERT D'UN TAP ================= -->
-    <div *ngIf="!revealResult" class="unbox-state">
+    <!-- ================= SCÈNE 1 : LE PACK EN COURS DE DÉCHIRURE ================= -->
+    <div *ngIf="packStage === 'IDLE' || packStage === 'TEARING' || packStage === 'EXTRACTING'" 
+         class="rip-stage">
+      
+      <div #packElement 
+           class="foil-booster-pack" 
+           [class.extracting]="packStage === 'EXTRACTING'">
 
-      <div class="pack-stage" [class.is-shaking]="isShaking" [class.is-bursting]="isBursting">
+        <!-- 1. LA CARTE CACHÉE À L'INTÉRIEUR (Glisse vers le haut à l'ouverture) -->
+        <div class="inner-peek-card" 
+             [style.transform]="packStage === 'EXTRACTING' ? 'translateY(-160px) scale(1.05)' : 'translateY(0)'">
+          <div class="card-back-pattern-mini">
+            <i class="pi pi-sparkles text-amber-300 animate-pulse text-2xl"></i>
+          </div>
+        </div>
 
-        <!-- Poussière ambiante qui flotte autour du paquet en attente -->
-        <div class="ambient-sparkle spark-1"></div>
-        <div class="ambient-sparkle spark-2"></div>
-        <div class="ambient-sparkle spark-3"></div>
-        <div class="ambient-sparkle spark-4"></div>
-        <div class="ambient-sparkle spark-5"></div>
+        <!-- 2. LE HAUT DU PAQUET (qui s'arrache et s'envole) -->
+        <div class="foil-top-cap" 
+             [class.torn-off]="packStage === 'EXTRACTING'"
+             [style.transform]="packStage !== 'EXTRACTING' && tearProgress > 0 
+                ? ('rotateZ(-' + (tearProgress * 0.22) + 'deg) translateY(-' + (tearProgress * 0.25) + 'px) rotateX(' + (tearProgress * 0.3) + 'deg)') 
+                : ''">
+          <div class="metallic-crimp top"></div>
+          <!-- Bords argentés déchiquetés sous la coupure -->
+          <div class="jagged-foil-edge top-edge" *ngIf="tearProgress > 0"></div>
+        </div>
 
-        <!-- Rayons de lumière et flash central, invisibles jusqu'à l'ouverture -->
-        <div class="ray-burst"></div>
-        <div class="flash-core"></div>
-
-        <!-- Le paquet lui-même : un seul tap suffit -->
-        <button type="button"
-                class="tcg-pack"
-                (click)="openPack()"
-                [disabled]="isUnboxingRunning"
-                [attr.aria-label]="'Ouvrir ' + (activeKeyToOpen?.blindBox?.name || 'le paquet')">
-          <div class="pack-corner tl"></div>
-          <div class="pack-corner tr"></div>
-          <div class="pack-corner bl"></div>
-          <div class="pack-corner br"></div>
-
-          <div class="pack-seal-emblem" 
-               [style.borderColor]="activeKeyToOpen?.color || '#ff4b3e'"
-               [style.boxShadow]="'0 0 25px ' + (activeKeyToOpen?.color || '#ff4b3e') + '80'">
-            <i [class]="activeKeyToOpen?.icon || 'fa-solid fa-scroll'" [style.color]="activeKeyToOpen?.color || '#ffd166'"></i>
+        <!-- 3. ZONE ACTIVE DE DÉCHIRURE TACTILE SUR TOUT LE HAUT DU PAQUET -->
+        <div class="pack-tear-zone"
+             (mousedown)="startTear($event, packElement)"
+             (mousemove)="moveTear($event, packElement)"
+             (mouseup)="endTear()"
+             (touchstart)="startTear($event, packElement)"
+             (touchmove)="moveTear($event, packElement)"
+             (touchend)="endTear()"
+             (dblclick)="quickRip()">
+          
+          <!-- Ligne de découpe en pointillés incitatrice -->
+          <div class="tear-guideline" *ngIf="tearProgress === 0">
+            <i class="fa-solid fa-scissors guideline-icon animate-pulse"></i>
+            <span>Glissez pour déchirer</span>
           </div>
 
-          <h3 class="pack-title">{{ activeKeyToOpen?.blindBox?.name || 'Sceau Mystérieux' }}</h3>
-          <span class="pack-subtitle">{{ activeKeyToOpen?.blindBox?.collection?.name || 'Registre des Ombres' }}</span>
-        </button>
+          <!-- Ligne laser de déchirure vive qui suit le curseur -->
+          <div class="active-tear-slit" [style.width.%]="tearProgress" *ngIf="tearProgress > 0">
+            <span class="tear-spark-emitter"></span>
+          </div>
+        </div>
+
+        <!-- 4. LE CORPS DU PAQUET (qui reste en bas) -->
+        <div class="foil-bottom-body" [style.borderColor]="activeKeyToOpen?.color || '#ffd166'">
+          <!-- Bord supérieur déchiqueté montrant l'aluminium argenté déchiré -->
+          <div class="jagged-foil-edge bottom-edge" *ngIf="tearProgress > 0"></div>
+
+          <div class="booster-artwork">
+            <div class="booster-emblem" 
+                 [style.borderColor]="activeKeyToOpen?.color || '#ff4b3e'"
+                 [style.boxShadow]="'0 0 25px ' + (activeKeyToOpen?.color || '#ff4b3e') + '90'">
+              <i [class]="activeKeyToOpen?.icon || 'fa-solid fa-scroll'" [style.color]="activeKeyToOpen?.color || '#ffd166'"></i>
+            </div>
+            <h3 class="booster-name">{{ activeKeyToOpen?.blindBox?.name || 'Sceau Mystérieux' }}</h3>
+            <span class="booster-collection">{{ activeKeyToOpen?.blindBox?.collection?.name || 'Registre des Ombres' }}</span>
+          </div>
+          <div class="metallic-crimp bottom"></div>
+        </div>
+
       </div>
 
-      <p class="tap-instruction" *ngIf="!isShaking && !isBursting && !isUnboxingRunning">Touchez le paquet pour l'ouvrir</p>
-      <p class="tap-instruction charging" *ngIf="isShaking">Le sceau se fissure...</p>
+      <!-- Indication d'interaction -->
+      <div class="rip-hint">
+        <p *ngIf="packStage === 'IDLE'"><i class="fa-solid fa-arrow-right-long mr-1"></i> Balayez le haut du paquet pour le fendre</p>
+        <p *ngIf="packStage === 'TEARING'" class="tearing-text">Déchirure en cours : <strong>{{ tearProgress | number:'1.0-0' }}%</strong></p>
+        <p *ngIf="packStage === 'EXTRACTING'" class="burst-text"><i class="pi pi-spin pi-spinner mr-1"></i> Révélation...</p>
+      </div>
     </div>
 
-    <!-- ================= ETAPE 2 : SUSPENSE DOS DE CARTE + REVEAL 3D ================= -->
-    <div *ngIf="revealResult" class="unbox-state reveal animate-fadein">
-      <div class="reveal-top-banner">
-        <span *ngIf="revealResult.isNew || $any(revealResult).new" class="reveal-flag new">Nouveau au registre !</span>
-        <span *ngIf="!(revealResult.isNew || $any(revealResult).new)" class="reveal-flag dup">Déjà répertorié &middot; x{{ revealResult.count }}</span>
+    <!-- ================= SCÈNE 2 : LA CARTE SORTIE DU PAQUET (SUSPENSE 3D) ================= -->
+    <div *ngIf="packStage === 'SUSPENSE' || packStage === 'REVEALED'" class="reveal-stage animate-fadein">
+      
+      <!-- Étiquette Nouveau / Doublon -->
+      <div class="reveal-banner" *ngIf="revealResult">
+        <span *ngIf="revealResult.isNew || $any(revealResult).new" class="reveal-flag new">
+          <i class="pi pi-sparkles mr-1"></i> Nouveau au registre !
+        </span>
+        <span *ngIf="!(revealResult.isNew || $any(revealResult).new)" class="reveal-flag dup">
+          Déjà répertorié &bull; x{{ revealResult.count }}
+        </span>
       </div>
 
-      <!-- Scène de carte 3D interactive -->
-      <div class="flip-card-scene" [class.flipped]="isCardFlipped" (click)="flipRevealedCard()">
-        <div class="flip-card-inner">
+      <!-- Scène 3D avec Parallaxe au pointeur -->
+      <div #cardContainer
+           class="floating-card-scene"
+           [class.flipped]="isCardFlipped"
+           (mousemove)="onCardMouseMove($event, cardContainer)"
+           (mouseleave)="onCardMouseLeave()"
+           (click)="flipRevealedCard()">
+
+        <div class="card-inner-3d" 
+             [style.transform]="isCardFlipped 
+                ? 'rotateY(180deg)' 
+                : 'perspective(900px) rotateX(' + cardTiltX + 'deg) rotateY(' + cardTiltY + 'deg)'">
           
-          <!-- DOS DE CARTE (Lueur basée sur la VRAIE rareté pour le suspense) -->
-          <div class="card-face card-back" 
-               [style.--glow-color]="revealResult.item.rarity.borderColor"
-               [style.boxShadow]="'0 0 45px ' + revealResult.item.rarity.borderColor + '90, 0 0 15px ' + revealResult.item.rarity.borderColor">
-            <div class="card-back-pattern">
-              <i class="pi pi-sparkles text-4xl animate-pulse"></i>
-              <span class="back-tap-hint">Touchez pour révéler</span>
+          <!-- DOS DE CARTE (Lueur de rareté en teaser) -->
+          <div class="card-face card-back"
+               [style.--rarity-glow]="revealResult?.item?.rarity?.borderColor || '#ffd166'">
+            <div class="card-back-frame">
+              <div class="mystery-seal-core">
+                <i class="pi pi-sparkles seal-glyph"></i>
+              </div>
+              <span class="tap-reveal-prompt">Touchez pour retourner</span>
             </div>
           </div>
 
-          <!-- FACE AVANT (Carte dévoilée avec son Effet Spécial) -->
-          <div class="card-face card-front s-card reveal-card"
+          <!-- CARTE DÉVOILÉE -->
+          <div *ngIf="revealResult" 
+               class="card-face card-front s-card"
                [style.borderColor]="revealResult.item.rarity.borderColor"
-               [style.boxShadow]="'0 0 40px ' + revealResult.item.rarity.borderColor + '90'"
+               [style.boxShadow]="'0 0 35px ' + revealResult.item.rarity.borderColor + '90'"
                [ngClass]="'effect-' + revealResult.item.rarity.effectType.toLowerCase()">
+            
             <span class="s-card-number">N&deg;{{ (revealResult.item.itemNumber || 1).toString().padStart(3, '0') }}</span>
+            
             <div class="s-card-art">
               <img [src]="revealResult.item.imageUrl || 'assets/placeholder.jpg'" [alt]="revealResult.item.name">
-              <span class="s-card-badge" [style.backgroundColor]="revealResult.item.rarity.badgeColor">{{ revealResult.item.rarity.name }}</span>
+              <span class="s-card-badge" [style.backgroundColor]="revealResult.item.rarity.badgeColor">
+                {{ revealResult.item.rarity.name }}
+              </span>
               <div class="s-card-fade"></div>
             </div>
+
             <div class="s-card-name">
               <h3>{{ revealResult.item.name }}</h3>
               <p>{{ revealResult.item.subtitle || 'Shinobi' }}</p>
             </div>
           </div>
+
         </div>
       </div>
 
       <!-- Actions de fin d'ouverture -->
-      <div class="reveal-actions-row">
-        <button *ngIf="revealResult.remainingKeys > 0" 
-                pButton pRipple 
-                label="Ouvrir un autre ({{ revealResult.remainingKeys }} restantes)" 
-                icon="pi pi-sparkles" 
-                class="p-button-primary p-button-rounded font-bold w-full" 
+      <div class="reveal-actions" *ngIf="isCardFlipped">
+        <button *ngIf="revealResult && revealResult.remainingKeys > 0"
+                pButton pRipple
+                label="Ouvrir un autre ({{ revealResult.remainingKeys }} restantes)"
+                icon="pi pi-sparkles"
+                class="p-button-primary p-button-rounded font-bold w-full"
                 (click)="openAnother()">
         </button>
-        <button pButton pRipple 
-                label="Consigner au registre" 
-                icon="pi pi-check" 
-                class="p-button-secondary p-button-rounded font-bold w-full" 
+        <button pButton pRipple
+                label="Consigner au registre"
+                icon="pi pi-check"
+                class="p-button-secondary p-button-rounded font-bold w-full"
                 (click)="closeUnboxing()">
         </button>
       </div>
-    </div>
 
+    </div>
   </div>
 </p-dialog>
-
 <!-- ================= 1.D: MODALE FORGE / RECYCLAGE DES DOUBLONS ================= -->
 <p-dialog [(visible)]="showForgeDialog" 
           [modal]="true" 
@@ -323,14 +382,16 @@
     </p>
 
     <!-- Choix de la clé cible -->
+<!-- Choix de la clé cible -->
     <div class="forge-key-select">
       <label class="text-xs font-bold text-surface-400 uppercase">Clé à forger :</label>
-      <p-dropdown [options]="userKeys" 
-                  [(ngModel)]="forgeTargetKeyId" 
-                  optionLabel="key.name" 
-                  optionValue="key.id" 
-                  styleClass="w-full !rounded-2xl" 
-                  appendTo="body">
+      <p-dropdown [options]="forgeKeyOptions" 
+                   [(ngModel)]="forgeTargetKeyId" 
+                   optionLabel="label" 
+                   optionValue="value" 
+                   placeholder="Sélectionnez une clé à forger..."
+                   styleClass="w-full !rounded-2xl" 
+                   appendTo="body">
       </p-dropdown>
     </div>
 

@@ -10,6 +10,7 @@ export class SoundService {
   private revealRainbowAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_card.mp3');
   private revealFoilAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_foil.mp3');
   private tearEffectAudio: HTMLAudioElement = new Audio('assets/sounds/tear_effect.mp3');
+  private forgeAudio: HTMLAudioElement = new Audio('assets/sounds/forge.mp3');
   private revealLightningAudio: HTMLAudioElement = new Audio('assets/sounds/reveal_lightning.mp3');
   public isMuted: boolean = localStorage.getItem('pokedex_sound_muted') === 'true';
 
@@ -51,6 +52,15 @@ export class SoundService {
       osc.start();
       osc.stop(ctx.currentTime + 0.08);
     } catch {}
+  }
+
+  playForgeAudio(): void {
+    if (this.isMuted) return;
+    try {
+        this.forgeAudio.currentTime = 0;
+        this.forgeAudio.play().catch(() => {});
+    } catch {}
+
   }
 
   // Son de déchirure du paquet

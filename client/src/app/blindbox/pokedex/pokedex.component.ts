@@ -509,7 +509,6 @@ openForge(): void {
     this.packStage = 'EXTRACTING';
 
     this.soundService.playSealBreak();
-    this.soundService.playChargingRumble();
     this.hapticService.heavy();
 
     // Appel API backend
@@ -563,7 +562,7 @@ openForge(): void {
   confirmRecycle(): void {
     if (this.selectedDuplicateIds.length !== 3 || !this.forgeTargetKeyId) return;
     this.isForging = true;
-    this.soundService.playSealBreak();
+    this.soundService.playForgeAudio();
     this.hapticService.heavy();
 
     this.blindBoxService.recycleDuplicates(this.selectedDuplicateIds, this.forgeTargetKeyId).subscribe({

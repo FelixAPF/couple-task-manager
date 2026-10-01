@@ -18,6 +18,52 @@ import confetti from 'canvas-confetti';
 
 export type CardStatusFilter = 'ALL' | 'UNLOCKED' | 'LOCKED';
 
+export interface CollectionBannerTheme {
+  slug: string;
+  accentColor: string;
+  gradient: string;
+  motifType: 'sharingan' | 'menos_grande' | 'straw_hat' | 'triforce' | 'default';
+  rotationDuration: string;
+}
+
+export const COLLECTION_THEMES: Record<string, CollectionBannerTheme> = {
+  naruto: {
+    slug: 'naruto',
+    accentColor: '#ff2a2a',
+    gradient: 'radial-gradient(ellipse at 85% 50%, rgba(239, 68, 68, 0.35), rgba(185, 28, 28, 0.12) 45%, transparent 70%)',
+    motifType: 'sharingan',
+    rotationDuration: '28s'
+  },
+  bleach: {
+    slug: 'bleach',
+    accentColor: '#c084fc',
+    gradient: 'radial-gradient(ellipse at 85% 50%, rgba(147, 51, 234, 0.38), rgba(255, 0, 85, 0.15) 45%, transparent 70%)',
+    motifType: 'menos_grande',
+    rotationDuration: '36s'
+  },
+  one_piece: {
+    slug: 'one_piece',
+    accentColor: '#f59e0b',
+    gradient: 'radial-gradient(ellipse at 85% 50%, rgba(245, 158, 11, 0.32), rgba(220, 38, 38, 0.12) 45%, transparent 70%)',
+    motifType: 'straw_hat',
+    rotationDuration: '32s'
+  },
+  zelda: {
+    slug: 'zelda',
+    accentColor: '#eab308',
+    gradient: 'radial-gradient(ellipse at 85% 50%, rgba(234, 179, 8, 0.30), rgba(161, 98, 7, 0.10) 45%, transparent 70%)',
+    motifType: 'triforce',
+    rotationDuration: '26s'
+  },
+  default: {
+    slug: 'default',
+    accentColor: '#ffd166',
+    gradient: 'radial-gradient(ellipse at 85% 50%, rgba(255, 209, 102, 0.20), rgba(255, 209, 102, 0.05) 45%, transparent 70%)',
+    motifType: 'default',
+    rotationDuration: '32s'
+  }
+};
+
 export interface RarityFilterOption {
   id: number | null;
   name: string;
@@ -59,9 +105,7 @@ export class PokedexComponent implements OnInit {
   statusFilter: CardStatusFilter = 'ALL';
   availableRarities: RarityFilterOption[] = [];
 
-  // --- 1.B: UNBOXING — TAP-TO-OPEN (à la Hearthstone) ---
-  // Un seul geste : on touche le paquet. Il tremble (anticipation), explose de lumière,
-  // puis disparaît pour laisser place au dos de carte suspense + flip 3D.
+  // --- 1.B: UNBOXING ---
   showUnboxingDialog = false;
   activeKeyToOpen: BlindBoxKey | null = null;
   isUnboxingRunning = false;
@@ -81,8 +125,8 @@ export class PokedexComponent implements OnInit {
   cardTiltX = 0;
   cardTiltY = 0;
 
-packStage: 'IDLE' | 'TEARING' | 'EXTRACTING' | 'SUSPENSE' | 'REVEALED' = 'IDLE';
-  tearProgress = 0; // 0% à 100%
+  packStage: 'IDLE' | 'TEARING' | 'EXTRACTING' | 'SUSPENSE' | 'REVEALED' = 'IDLE';
+  tearProgress = 0;
   isTearing = false;
   tearStartX = 0;
 
@@ -94,13 +138,20 @@ packStage: 'IDLE' | 'TEARING' | 'EXTRACTING' | 'SUSPENSE' | 'REVEALED' = 'IDLE';
     return this.collections.find(c => c.id === this.selectedCollectionId);
   }
 
-  // 4.A: Vérifie si la collection est terminée à 100%
+  get activeTheme(): CollectionBannerTheme {
+    const rawName = (this.currentCollection?.name || '').toLowerCase();
+    if (rawName.includes('naruto')) return COLLECTION_THEMES['naruto'];
+    if (rawName.includes('bleach')) return COLLECTION_THEMES['bleach'];
+    if (rawName.includes('piece')) return COLLECTION_THEMES['one_piece'];
+    if (rawName.includes('zelda')) return COLLECTION_THEMES['zelda'];
+    return COLLECTION_THEMES['default'];
+  }
+
   get isCollectionCompleted(): boolean {
     const col = this.currentCollection;
     return !!col && col.totalItemsCount > 0 && col.ownedItemsCount >= col.totalItemsCount;
   }
 
-  // 1.C: Compteurs pour le filtre d'état
   get unlockedCardsCount(): number {
     return this.cards.filter(c => c.unlocked).length;
   }
@@ -109,7 +160,6 @@ packStage: 'IDLE' | 'TEARING' | 'EXTRACTING' | 'SUSPENSE' | 'REVEALED' = 'IDLE';
     return this.cards.filter(c => !c.unlocked).length;
   }
 
-  // 1.D: Liste des cartes en doublon
   get duplicateCards(): PokedexCard[] {
     return this.cards.filter(c => c.unlocked && c.count > 1);
   }
@@ -122,14 +172,12 @@ packStage: 'IDLE' | 'TEARING' | 'EXTRACTING' | 'SUSPENSE' | 'REVEALED' = 'IDLE';
     this.loadInitialData();
   }
 
-loadInitialData(): void {
-    // 1. Clés en inventaire
+  loadInitialData(): void {
     this.blindBoxService.getMyKeys().subscribe(keys => {
       this.userKeys = keys;
       this.buildForgeKeyOptions();
     });
 
-    // 2. Toutes les clés existantes (pour toujours avoir du choix même avec 0 clé en poche)
     this.blindBoxService.getKeys().subscribe({
       next: (allKeys) => {
         this.allAvailableKeys = allKeys || [];
@@ -164,14 +212,12 @@ loadInitialData(): void {
   buildForgeKeyOptions(): void {
     const keyMap = new Map<number, string>();
 
-    // Clés globales configurées
     if (this.allAvailableKeys && this.allAvailableKeys.length > 0) {
       this.allAvailableKeys.forEach(k => {
         if (k.id) keyMap.set(k.id, k.name);
       });
     }
 
-    // Clés de l'inventaire du joueur
     if (this.userKeys && this.userKeys.length > 0) {
       this.userKeys.forEach(inv => {
         if (inv.key?.id) keyMap.set(inv.key.id, inv.key.name);
@@ -183,7 +229,6 @@ loadInitialData(): void {
       value: id
     }));
 
-    // Sélectionne la 1ère clé par défaut
     if (!this.forgeTargetKeyId && this.forgeKeyOptions.length > 0) {
       this.forgeTargetKeyId = this.forgeKeyOptions[0].value;
     }
@@ -250,7 +295,6 @@ loadInitialData(): void {
       .map(entry => entry.option);
   }
 
-  // --- FILTRAGE AVANCÉ ---
   setStatusFilter(status: CardStatusFilter): void {
     this.hapticService.light();
     this.statusFilter = status;
@@ -267,16 +311,13 @@ loadInitialData(): void {
     const term = this.searchQuery.trim().toLowerCase();
 
     this.filteredCards = this.cards.filter(card => {
-      // 1. Filtre d'état Débloquées / Manquantes
       if (this.statusFilter === 'UNLOCKED' && !card.unlocked) return false;
       if (this.statusFilter === 'LOCKED' && card.unlocked) return false;
 
-      // 2. Filtre par type de rareté
       if (this.selectedRarityId !== null && card.rarity?.id !== this.selectedRarityId) {
         return false;
       }
 
-      // 3. Filtre de recherche textuelle anti-spoiler
       if (term) {
         if (card.unlocked) {
           const matchesName = card.name && card.name.toLowerCase().includes(term);
@@ -310,10 +351,6 @@ loadInitialData(): void {
     this.applyFilters();
   }
 
-  // --- OUVERTURE DU PAQUET : TAP UNIQUE, SÉQUENCE SCRIPTÉE ---
-  // 1) tremblement d'anticipation qui monte en intensité
-  // 2) explosion de lumière + particules
-  // 3) le paquet disparaît, place au dos de carte suspense (déjà géré par flipRevealedCard)
   openPack(): void {
     if (!this.activeKeyToOpen?.blindBox?.id || this.isUnboxingRunning) return;
     this.isUnboxingRunning = true;
@@ -321,7 +358,6 @@ loadInitialData(): void {
     this.soundService.playKeyClick();
     this.hapticService.light();
 
-    // Secousses haptiques croissantes pendant l'anticipation, comme un paquet qu'on serre de plus en plus fort
     setTimeout(() => this.hapticService.light(), 200);
     setTimeout(() => this.hapticService.medium(), 420);
 
@@ -331,7 +367,6 @@ loadInitialData(): void {
       this.soundService.playSealBreak();
       this.hapticService.heavy();
 
-      // Flash blanc/or immédiat à l'ouverture, avant même de savoir ce qu'on a obtenu
       confetti({
         particleCount: 55,
         spread: 100,
@@ -350,7 +385,6 @@ loadInitialData(): void {
           this.loadCollections();
           this.loadPokedex();
 
-          // Laisse le temps au flash de retomber avant de montrer le dos de carte, puis déclenche le flip 3D
           setTimeout(() => {
             this.flipRevealedCard();
           }, 550);
@@ -368,8 +402,7 @@ loadInitialData(): void {
     }, 650);
   }
 
-  // Parallaxe 3D sur la carte flottante au mouvement de la souris
-onCardMouseMove(event: MouseEvent, cardEl: HTMLElement): void {
+  onCardMouseMove(event: MouseEvent, cardEl: HTMLElement): void {
     if (this.packStage !== 'SUSPENSE') return;
     const rect = cardEl.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -381,19 +414,17 @@ onCardMouseMove(event: MouseEvent, cardEl: HTMLElement): void {
     this.cardTiltY = ((x - centerX) / centerX) * 18;
   }
 
-onCardMouseLeave(): void {
+  onCardMouseLeave(): void {
     this.cardTiltX = 0;
     this.cardTiltY = 0;
   }
 
-  // Retournement de la carte (Flip)
-flipRevealedCard(): void {
+  flipRevealedCard(): void {
     if (this.packStage !== 'SUSPENSE' || !this.revealResult) return;
     this.packStage = 'REVEALED';
     this.isCardFlipped = true;
 
     this.hapticService.medium();
-
     this.soundService.playRevealSound(this.revealResult.item.rarity.effectType);
 
     confetti({
@@ -404,7 +435,7 @@ flipRevealedCard(): void {
     });
   }
 
-openAnother(): void {
+  openAnother(): void {
     this.revealResult = null;
     this.packStage = 'IDLE';
     this.tearProgress = 0;
@@ -413,8 +444,7 @@ openAnother(): void {
     this.cardTiltY = 0;
   }
 
-  // --- 1.B: OUVERTURE DE LA MODALE D'UNBOXING ---
-   openUnboxingModal(key: BlindBoxKey): void {
+  openUnboxingModal(key: BlindBoxKey): void {
     this.soundService.playKeyClick();
     this.hapticService.light();
     this.activeKeyToOpen = key;
@@ -427,7 +457,8 @@ openAnother(): void {
     this.cardTiltY = 0;
     this.showUnboxingDialog = true;
   }
-closeUnboxing(): void {
+
+  closeUnboxing(): void {
     this.showUnboxingDialog = false;
     this.revealResult = null;
     this.packStage = 'IDLE';
@@ -452,8 +483,7 @@ closeUnboxing(): void {
     this.hapticService.light();
   }
 
-  // --- 1.D: GESTION DE LA FORGE / RECYCLAGE ---
-openForge(): void {
+  openForge(): void {
     this.soundService.playKeyClick();
     this.hapticService.light();
     this.selectedDuplicateIds = [];
@@ -469,9 +499,8 @@ openForge(): void {
     const currentX = 'touches' in event ? event.touches[0].clientX : event.clientX;
     const rect = packEl.getBoundingClientRect();
     
-    // Calcule la distance parcourue sur la largeur réelle du paquet
     const distanceTorn = currentX - this.tearStartX;
-    const tearWidth = rect.width * 0.85; // 85% de la largeur du paquet pour déchirer
+    const tearWidth = rect.width * 0.85;
     const progress = Math.min(100, Math.max(0, (distanceTorn / tearWidth) * 100));
     
     this.tearProgress = progress;
@@ -490,7 +519,6 @@ openForge(): void {
       this.tearProgress = 100;
       this.finalizeRipping();
     } else {
-      // Si l'utilisateur relâche trop tôt, le foil revient à sa place
       this.tearProgress = 0;
       this.packStage = 'IDLE';
     }
@@ -503,7 +531,6 @@ openForge(): void {
     this.finalizeRipping();
   }
 
-  // Séquence d'arrachage du haut et sortie de la carte
   private finalizeRipping(): void {
     if (!this.activeKeyToOpen?.blindBox?.id) return;
     this.packStage = 'EXTRACTING';
@@ -511,12 +538,10 @@ openForge(): void {
     this.soundService.playSealBreak();
     this.hapticService.heavy();
 
-    // Appel API backend
     this.blindBoxService.openBox(this.activeKeyToOpen.blindBox.id).subscribe({
       next: (res) => {
         this.revealResult = res;
 
-        // Détonation légère à l'extraction de la carte
         setTimeout(() => {
           this.soundService.playBurstExplosion();
           this.hapticService.medium();
@@ -528,7 +553,6 @@ openForge(): void {
             colors: ['#ffd166', '#ffffff', '#ff4b3e']
           });
 
-          // La carte flotte désormais au centre
           this.packStage = 'SUSPENSE';
           this.loadInitialData();
           this.loadCollections();

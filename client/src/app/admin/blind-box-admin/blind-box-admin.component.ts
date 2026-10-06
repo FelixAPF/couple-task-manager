@@ -88,6 +88,44 @@ export class BlindBoxAdminComponent implements OnInit {
     { label: 'Lightning (Éclairs électriques & Aura)', value: 'LIGHTNING' }
   ];
 
+  // Liste exhaustive des 20 effets avec libellés et émojis
+  allEffectsList: { label: string; value: CardEffectType; icon: string; category: string }[] = [
+    { label: 'Standard (Neutre)', value: 'STANDARD', icon: 'pi pi-circle', category: 'Classique' },
+    { label: 'Foil (Brillant métallique)', value: 'FOIL', icon: 'pi pi-sparkles', category: 'Classique' },
+    { label: 'Holographique (Prisme Arc-en-ciel)', value: 'HOLOGRAPHIC', icon: 'pi pi-sun', category: 'Classique' },
+    { label: 'Rainbow Shimmer (Poussière d\'étoiles)', value: 'RAINBOW_SHIMMER', icon: 'pi pi-star', category: 'Cosmique' },
+    { label: 'Lightning (Éclairs électriques)', value: 'LIGHTNING', icon: 'pi pi-bolt', category: 'Élémentaire' },
+    { label: 'Flames (Flammes ardentes & Chaleur)', value: 'FLAMES', icon: 'fa-solid fa-fire', category: 'Élémentaire' },
+    { label: 'Frost Ice (Givre cristallin)', value: 'FROST_ICE', icon: 'fa-solid fa-snowflake', category: 'Élémentaire' },
+    { label: 'Cosmic Void (Nébuleuse & Trou Noir)', value: 'COSMIC_VOID', icon: 'fa-solid fa-meteor', category: 'Cosmique' },
+    { label: 'Cherry Blossom (Pétales de Sakura)', value: 'CHERRY_BLOSSOM', icon: 'fa-solid fa-leaf', category: 'Nature' },
+    { label: 'Golden Luxury (Or Pur 24k)', value: 'GOLDEN_LUXURY', icon: 'fa-solid fa-coins', category: 'Légende' },
+    { label: 'Shadow Smoke (Fumée Noire Maudite)', value: 'SHADOW_SMOKE', icon: 'fa-solid fa-smog', category: 'Sombre' },
+    { label: 'Blood Moon (Lune de Sang)', value: 'BLOOD_MOON', icon: 'fa-solid fa-moon', category: 'Sombre' },
+    { label: 'Neon Cyberpunk (Grille Synthwave)', value: 'NEON_CYBERPUNK', icon: 'fa-solid fa-vr-cardboard', category: 'Cyber' },
+    { label: 'Poison Toxic (Vert Acide)', value: 'POISON_TOXIC', icon: 'fa-solid fa-skull-crossbones', category: 'Élémentaire' },
+    { label: 'Divine Aura (Lumière Sainte)', value: 'DIVINE_AURA', icon: 'fa-solid fa-dove', category: 'Légende' },
+    { label: 'Earthquake (Failles de Lave)', value: 'EARTH_QUAKE', icon: 'fa-solid fa-volcano', category: 'Élémentaire' },
+    { label: 'Wind Vortex (Lames de Vent)', value: 'WIND_VORTEX', icon: 'fa-solid fa-wind', category: 'Élémentaire' },
+    { label: 'Bubble Ocean (Bulles Marines)', value: 'BUBBLE_OCEAN', icon: 'fa-solid fa-water', category: 'Nature' },
+    { label: 'Amethyst Crystal (Prismes Violets)', value: 'AMETHYST_CRYSTAL', icon: 'fa-solid fa-gem', category: 'Magie' },
+    { label: 'Matrix Glitch (Pluie Numérique)', value: 'MATRIX_GLITCH', icon: 'fa-solid fa-code', category: 'Cyber' }
+  ];
+
+  // Options pour le dropdown de surcharge de la carte (avec option d'héritage)
+  cardOverrideOptions = [
+    { label: '🛡️ Hériter de la Rareté (Par défaut)', value: null },
+    ...this.allEffectsList.map(e => ({ label: `${e.label}`, value: e.value }))
+  ];
+
+  // Modal Showcase / Galerie des Effets
+  showEffectsShowcaseDialog = false;
+  showcaseEffect: CardEffectType = 'FLAMES';
+
+  openEffectsShowcase(): void {
+    this.showEffectsShowcaseDialog = true;
+  }
+
   // Quick Palette for 1-tap color selection
   colorPalette = ['#000000','#88b6f7', '#e3efff','#aeff00','#ff00a6', '#ff0000','#91c9a7', '#94a3b8', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#ef4444', '#ffd166'];
 
@@ -541,5 +579,31 @@ export class BlindBoxAdminComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour le paramètre.' });
       }
     });
+  }
+
+  // Résout la liste des classes CSS d'effets à appliquer sur la carte
+getCardEffectClasses(card?: BlindBoxItem | { rarity?: BlindBoxRarity; overrideEffectType?: CardEffectType | null; combineEffects?: boolean } | null): string {
+    if (!card) return '';
+    const rarityEffect = card.rarity?.effectType || 'STANDARD';
+    const override = card.overrideEffectType;
+    const combine = card.combineEffects ?? false;
+
+    // Cas B : Pas de surcharge -> Effet de la rareté
+    if (!override || override === 'STANDARD') {
+      return rarityEffect !== 'STANDARD' ? `effect-${rarityEffect.toLowerCase()}` : '';
+    }
+
+    // Cas Combiné : Rareté + Surcharge personnalisée
+    if (combine) {
+      const classes = new Set<string>();
+      if (rarityEffect !== 'STANDARD') {
+        classes.add(`effect-${rarityEffect.toLowerCase()}`);
+      }
+      classes.add(`effect-${override.toLowerCase()}`);
+      return Array.from(classes).join(' ');
+    }
+
+    // Cas A : La carte surcharge complètement la rareté
+    return `effect-${override.toLowerCase()}`;
   }
 }

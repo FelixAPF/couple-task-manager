@@ -11,7 +11,9 @@ import {
   PokedexCard,
   UserKeyInventory,
   BlindBoxKey,
-  UnboxResult
+  UnboxResult,
+  BlindBoxRarity,
+  CardEffectType
 } from '../../model/blind-box.model';
 import { MessageService } from 'primeng/api';
 import confetti from 'canvas-confetti';
@@ -170,6 +172,70 @@ export class PokedexComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInitialData();
+  }
+
+  // --- 1. LISTE DES 20 EFFETS POUR LA GALERIE SHOWCASE ---
+  allEffectsList: { label: string; value: CardEffectType; icon: string; category: string }[] = [
+    { label: 'Standard (Neutre)', value: 'STANDARD', icon: 'pi pi-circle', category: 'Classique' },
+    { label: 'Foil (Brillant métallique)', value: 'FOIL', icon: 'pi pi-sparkles', category: 'Classique' },
+    { label: 'Holographique (Prisme Arc-en-ciel)', value: 'HOLOGRAPHIC', icon: 'pi pi-sun', category: 'Classique' },
+    { label: 'Rainbow Shimmer (Poussière d\'étoiles)', value: 'RAINBOW_SHIMMER', icon: 'pi pi-star', category: 'Cosmique' },
+    { label: 'Lightning (Éclairs électriques)', value: 'LIGHTNING', icon: 'pi pi-bolt', category: 'Élémentaire' },
+    { label: 'Flames (Flammes ardentes & Chaleur)', value: 'FLAMES', icon: 'fa-solid fa-fire', category: 'Élémentaire' },
+    { label: 'Frost Ice (Givre cristallin)', value: 'FROST_ICE', icon: 'fa-solid fa-snowflake', category: 'Élémentaire' },
+    { label: 'Cosmic Void (Nébuleuse & Trou Noir)', value: 'COSMIC_VOID', icon: 'fa-solid fa-meteor', category: 'Cosmique' },
+    { label: 'Cherry Blossom (Pétales de Sakura)', value: 'CHERRY_BLOSSOM', icon: 'fa-solid fa-leaf', category: 'Nature' },
+    { label: 'Golden Luxury (Or Pur 24k)', value: 'GOLDEN_LUXURY', icon: 'fa-solid fa-coins', category: 'Légende' },
+    { label: 'Shadow Smoke (Fumée Noire Maudite)', value: 'SHADOW_SMOKE', icon: 'fa-solid fa-smog', category: 'Sombre' },
+    { label: 'Blood Moon (Lune de Sang)', value: 'BLOOD_MOON', icon: 'fa-solid fa-moon', category: 'Sombre' },
+    { label: 'Neon Cyberpunk (Grille Synthwave)', value: 'NEON_CYBERPUNK', icon: 'fa-solid fa-vr-cardboard', category: 'Cyber' },
+    { label: 'Poison Toxic (Vert Acide)', value: 'POISON_TOXIC', icon: 'fa-solid fa-skull-crossbones', category: 'Élémentaire' },
+    { label: 'Divine Aura (Lumière Sainte)', value: 'DIVINE_AURA', icon: 'fa-solid fa-dove', category: 'Légende' },
+    { label: 'Earthquake (Failles de Lave)', value: 'EARTH_QUAKE', icon: 'fa-solid fa-volcano', category: 'Élémentaire' },
+    { label: 'Wind Vortex (Lames de Vent)', value: 'WIND_VORTEX', icon: 'fa-solid fa-wind', category: 'Élémentaire' },
+    { label: 'Bubble Ocean (Bulles Marines)', value: 'BUBBLE_OCEAN', icon: 'fa-solid fa-water', category: 'Nature' },
+    { label: 'Amethyst Crystal (Prismes Violets)', value: 'AMETHYST_CRYSTAL', icon: 'fa-solid fa-gem', category: 'Magie' },
+    { label: 'Matrix Glitch (Pluie Numérique)', value: 'MATRIX_GLITCH', icon: 'fa-solid fa-code', category: 'Cyber' }
+  ];
+
+  // --- 2. OPTIONS DU DROPDOWN DE SURCHARGE DE CARTE ---
+  cardOverrideOptions = [
+    { label: '🛡️ Hériter de la Rareté (Par défaut)', value: null },
+    ...this.allEffectsList.map(e => ({ label: `${e.label}`, value: e.value }))
+  ];
+
+  // --- 3. VARIABLES ET MÉTHODE DE LA GALERIE SHOWCASE ---
+  showEffectsShowcaseDialog: boolean = false;
+  showcaseEffect: CardEffectType = 'FLAMES';
+
+  openEffectsShowcase(): void {
+    this.showEffectsShowcaseDialog = true;
+  }
+
+  // --- 4. RÉSOLUTION UNIVERSELLE DES EFFETS (SURCHARGE A, RARETÉ B OU COMBINÉ) ---
+  getCardEffectClasses(card: { rarity?: BlindBoxRarity; overrideEffectType?: CardEffectType | null; combineEffects?: boolean } | null | undefined): string {
+    if (!card) return '';
+    const rarityEffect = card.rarity?.effectType || 'STANDARD';
+    const override = card.overrideEffectType;
+    const combine = card.combineEffects ?? false;
+
+    // Cas B : Pas de surcharge -> Effet de la rareté
+    if (!override || override === 'STANDARD') {
+      return rarityEffect !== 'STANDARD' ? `effect-${rarityEffect.toLowerCase()}` : '';
+    }
+
+    // Cas Combiné : Rareté + Surcharge personnalisée
+    if (combine) {
+      const classes = new Set<string>();
+      if (rarityEffect !== 'STANDARD') {
+        classes.add(`effect-${rarityEffect.toLowerCase()}`);
+      }
+      classes.add(`effect-${override.toLowerCase()}`);
+      return Array.from(classes).join(' ');
+    }
+
+    // Cas A : La carte surcharge complètement la rareté
+    return `effect-${override.toLowerCase()}`;
   }
 
   loadInitialData(): void {
@@ -425,13 +491,16 @@ export class PokedexComponent implements OnInit {
     this.isCardFlipped = true;
 
     this.hapticService.medium();
-    this.soundService.playRevealSound(this.revealResult.item.rarity.effectType);
+    const revealSound = this.revealResult?.item?.rarity?.effectType;
+    if(revealSound){
+      this.soundService.playRevealSound(revealSound);
+    }
 
     confetti({
       particleCount: 160,
       spread: 90,
       origin: { y: 0.55 },
-      colors: [this.revealResult.item.rarity.borderColor, '#ffd166', '#ff4b3e', '#ffffff']
+      colors: [this.revealResult?.item?.rarity?.borderColor || '', '#ffd166', '#ff4b3e', '#ffffff']
     });
   }
 
@@ -613,4 +682,5 @@ export class PokedexComponent implements OnInit {
       }
     });
   }
+
 }

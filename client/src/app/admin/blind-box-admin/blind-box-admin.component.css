@@ -1,5 +1,5 @@
 .admin-shell {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 1rem 1rem 5rem;
 }
@@ -1736,3 +1736,549 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(108, 76, 224, 0.4);
 }
+
+/* ========================================================= */
+/* ============= STYLES DU SHOWCASE DES 20 EFFETS ========== */
+/* ========================================================= */
+.effects-showcase-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+}
+
+@media (min-width: 640px) {
+  .effects-showcase-container {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.effects-selector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .effects-selector-list {
+    width: 320px;
+    flex-shrink: 0;
+  }
+}
+
+.effect-select-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  background: var(--surface-900, #0f172a);
+  border: 1px solid var(--surface-700, #334155);
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.effect-select-pill:hover {
+  background: var(--surface-700, #334155);
+  color: #fff;
+}
+
+.effect-select-pill.active {
+  background: #f97316;
+  border-color: #f97316;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
+}
+
+.category-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-style: normal;
+}
+
+.showcase-card-preview {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  border: 1px dashed var(--surface-700, #334155);
+}
+
+/* Badges Surcharge & Combiné dans la liste */
+.override-pill {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: #38bdf8;
+  color: #082f49;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+}
+
+.combine-pill {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: linear-gradient(120deg, #ec4899, #f59e0b);
+  color: #fff;
+  padding: 0.1rem 0.45rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(236, 72, 153, 0.35);
+}
+
+/* ========================================================= */
+/* ============= STYLES DU SHOWCASE DES 20 EFFETS ========== */
+/* ========================================================= */
+.effects-showcase-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+}
+@media (min-width: 640px) {
+  .effects-showcase-container { flex-direction: row; align-items: flex-start; }
+}
+
+.effects-selector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  width: 100%;
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+@media (min-width: 640px) {
+  .effects-selector-list { width: 320px; flex-shrink: 0; }
+}
+
+.effect-select-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+.effect-select-pill:hover { background: #334155; color: #fff; }
+.effect-select-pill.active {
+  background: #f97316;
+  border-color: #f97316;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
+}
+
+.category-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+  font-style: normal;
+}
+
+.showcase-card-preview {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  border: 1px dashed #334155;
+}
+
+/* ===================================================================== */
+/* ==================== BIBLIOTHÈQUE DES 20 EFFETS AAA ================== */
+/* ===================================================================== */
+
+.s-card-art::before,
+.s-card-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* 1. FOIL (Chrome Métallique Biseauté) */
+.effect-foil {
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 0 20px rgba(226, 232, 240, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.4) !important;
+}
+.effect-foil .s-card-art::before {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(200, 225, 255, 0.3) 50%, rgba(255, 255, 255, 0.05) 100%);
+  mix-blend-mode: overlay;
+  z-index: 1;
+}
+.effect-foil .s-card-art::after {
+  inset: -60%;
+  background: linear-gradient(108deg, transparent 35%, rgba(255, 255, 255, 0.2) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 255, 255, 0.2) 55%, transparent 65%);
+  transform: rotate(25deg);
+  animation: foilBeam 3.2s ease-in-out infinite;
+  mix-blend-mode: color-dodge;
+  z-index: 2;
+}
+@keyframes foilBeam {
+  0% { transform: translateY(-70%) rotate(25deg); opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { transform: translateY(70%) rotate(25deg); opacity: 0.2; }
+}
+
+/* 2. HOLOGRAPHIC (Prisme Laser Arc-en-ciel 12 Stops) */
+.effect-holographic {
+  border-color: #ec4899 !important;
+  animation: holoBorder 3s infinite alternate;
+}
+@keyframes holoBorder {
+  0% { box-shadow: 0 0 20px #ec4899, 0 0 35px #8b5cf6 !important; }
+  100% { box-shadow: 0 0 25px #06b6d4, 0 0 45px #ec4899 !important; }
+}
+.effect-holographic .s-card-art::before {
+  background: repeating-linear-gradient(115deg,
+    rgba(255, 0, 0, 0.45) 0%, rgba(255, 120, 0, 0.45) 8%, rgba(255, 230, 0, 0.45) 16%,
+    rgba(0, 255, 100, 0.45) 24%, rgba(0, 210, 255, 0.45) 32%, rgba(70, 70, 255, 0.45) 40%,
+    rgba(190, 0, 255, 0.45) 48%, rgba(255, 0, 150, 0.45) 56%, rgba(255, 0, 0, 0.45) 64%);
+  background-size: 250% 250%;
+  mix-blend-mode: color-dodge;
+  animation: holoShift 4s ease infinite;
+  z-index: 1;
+}
+.effect-holographic .s-card-art::after {
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0px, transparent 1.5px, transparent 4px),
+              linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.8) 50%, transparent 65%);
+  background-size: 100% 100%, 200% 200%;
+  mix-blend-mode: overlay;
+  animation: holoScan 5s linear infinite;
+  z-index: 2;
+}
+@keyframes holoShift {
+  0% { background-position: 0% 0%; filter: hue-rotate(0deg); }
+  50% { background-position: 100% 100%; filter: hue-rotate(180deg); }
+  100% { background-position: 0% 0%; filter: hue-rotate(360deg); }
+}
+@keyframes holoScan { 0% { background-position: 0 0, -150% 0; } 100% { background-position: 0 0, 150% 0; } }
+
+/* 3. RAINBOW SHIMMER (Poussière d'Étoiles & Paillettes Diamant) */
+.effect-rainbow_shimmer {
+  border-color: #f472b6 !important;
+  box-shadow: 0 0 25px rgba(244, 114, 182, 0.75), 0 0 45px rgba(192, 132, 252, 0.5) !important;
+}
+.effect-rainbow_shimmer .s-card-art::before {
+  background: linear-gradient(135deg, rgba(255, 105, 180, 0.4) 0%, rgba(255, 215, 0, 0.4) 25%, rgba(0, 255, 255, 0.4) 50%, rgba(168, 85, 247, 0.4) 75%, rgba(255, 105, 180, 0.4) 100%);
+  background-size: 300% 300%;
+  mix-blend-mode: color-dodge;
+  animation: shimmerAurora 4.5s ease-in-out infinite alternate;
+  z-index: 1;
+}
+.effect-rainbow_shimmer .s-card-art::after {
+  background-image: 
+    radial-gradient(circle at 18% 22%, #ffffff 2px, transparent 4px),
+    radial-gradient(circle at 82% 16%, #ffd700 2.5px, transparent 5px),
+    radial-gradient(circle at 45% 48%, #ffffff 2px, transparent 4px),
+    radial-gradient(circle at 25% 78%, #38bdf8 2px, transparent 4.5px),
+    radial-gradient(circle at 78% 75%, #f472b6 2px, transparent 4.5px);
+  mix-blend-mode: screen;
+  animation: shimmerTwinkle 1.8s ease-in-out infinite alternate;
+  z-index: 2;
+}
+@keyframes shimmerAurora { 0% { background-position: 0% 40%; } 100% { background-position: 100% 60%; } }
+@keyframes shimmerTwinkle { 0% { opacity: 0.35; } 50% { opacity: 1; } 100% { opacity: 0.55; } }
+
+/* 4. LIGHTNING (Éclairs Haute-Tension Crépitants) */
+.effect-lightning {
+  border-color: #38bdf8 !important;
+  animation: electricAura 0.85s infinite alternate;
+}
+@keyframes electricAura {
+  0% { box-shadow: 0 0 18px rgba(56, 189, 248, 0.9), 0 0 40px rgba(37, 99, 235, 0.7) !important; }
+  100% { box-shadow: 0 0 28px rgba(168, 85, 247, 1), 0 0 55px rgba(56, 189, 248, 0.85) !important; }
+}
+.effect-lightning .s-card-art::before {
+  background: radial-gradient(circle at center, rgba(56, 189, 248, 0.35) 0%, transparent 70%);
+  mix-blend-mode: screen;
+  z-index: 1;
+}
+.effect-lightning .s-card-art::after {
+  background: repeating-linear-gradient(135deg, transparent 0px, rgba(56, 189, 248, 0.35) 15px, transparent 30px);
+  animation: lightningStrobe 0.6s steps(1) infinite;
+  z-index: 2;
+}
+@keyframes lightningStrobe { 0%, 100% { opacity: 0; } 15% { opacity: 1; } 50% { opacity: 0; } 75% { opacity: 0.85; } }
+
+/* 5. FLAMES (Flammes Ardentes Vives & Ondulation Thermique AAA) */
+.effect-flames {
+  border-color: #f97316 !important;
+  animation: flameBorderPulse 1s infinite alternate ease-in-out;
+}
+@keyframes flameBorderPulse {
+  0% {
+    box-shadow: 0 0 18px rgba(249, 115, 22, 0.9), 0 0 38px rgba(239, 68, 68, 0.7), 0 -8px 25px rgba(251, 191, 36, 0.6), inset 0 0 12px rgba(249, 115, 22, 0.5) !important;
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(239, 68, 68, 1), 0 0 60px rgba(245, 158, 11, 0.9), 0 -15px 45px rgba(254, 240, 138, 0.8), inset 0 0 18px rgba(239, 68, 68, 0.7) !important;
+  }
+}
+/* Langues de feu montantes autour du cadre */
+.effect-flames::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 20px;
+  background: 
+    radial-gradient(ellipse at 50% 100%, rgba(254, 240, 138, 0.7) 0%, rgba(249, 115, 22, 0.45) 40%, transparent 70%),
+    radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.75) 0%, transparent 45%),
+    radial-gradient(circle at 80% 75%, rgba(245, 158, 11, 0.75) 0%, transparent 45%),
+    radial-gradient(circle at 35% 20%, rgba(239, 68, 68, 0.55) 0%, transparent 35%),
+    radial-gradient(circle at 65% 15%, rgba(245, 158, 11, 0.55) 0%, transparent 35%);
+  filter: drop-shadow(0 -5px 14px #f97316);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 5;
+  animation: flameTonguesDance 1.6s infinite alternate ease-in-out;
+}
+@keyframes flameTonguesDance {
+  0% { transform: scale(1) translateY(0); filter: brightness(1); }
+  50% { transform: scale(1.02) translateY(-4px) skewX(1deg); filter: brightness(1.3); }
+  100% { transform: scale(1.01) translateY(-2px) skewX(-1deg); filter: brightness(1.15); }
+}
+/* Ondulation thermique de chaleur (Heat Shimmer) */
+.effect-flames .s-card-art::before {
+  background: linear-gradient(0deg, rgba(239, 68, 68, 0.55) 0%, rgba(249, 115, 22, 0.35) 40%, rgba(254, 240, 138, 0.2) 75%, transparent 100%);
+  mix-blend-mode: screen;
+  animation: heatShimmerHaze 2.2s infinite alternate ease-in-out;
+  z-index: 2;
+}
+@keyframes heatShimmerHaze {
+  0% { opacity: 0.65; transform: scaleY(1) translateY(0); }
+  50% { opacity: 0.95; transform: scaleY(1.04) translateY(-3px) skewX(1.5deg); }
+  100% { opacity: 0.75; transform: scaleY(1.02) translateY(-1px) skewX(-1.5deg); }
+}
+/* Braises incandescentes montantes */
+.effect-flames .s-card-art::after {
+  background-image: 
+    radial-gradient(circle at 25% 90%, #fef08a 2.5px, transparent 5px),
+    radial-gradient(circle at 75% 85%, #f97316 3px, transparent 6px),
+    radial-gradient(circle at 45% 65%, #ffffff 2px, transparent 4px),
+    radial-gradient(circle at 15% 45%, #ef4444 2.5px, transparent 5px),
+    radial-gradient(circle at 85% 35%, #fef08a 2px, transparent 4px);
+  background-size: 100% 100%;
+  mix-blend-mode: color-dodge;
+  animation: risingEmbers 2s linear infinite;
+  z-index: 3;
+}
+@keyframes risingEmbers {
+  0% { transform: translateY(0); opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-40px); opacity: 0; }
+}
+
+/* ========================================================================== */
+/* 6. FROST ICE (Shader Optique Glacial, Verre Givré & Poussière de Diamant)  */
+/* ========================================================================== */
+
+.effect-frost_ice {
+  border-color: #bae6fd !important;
+  animation: glacialBorderAura 2.6s infinite alternate ease-in-out;
+}
+
+@keyframes glacialBorderAura {
+  0% {
+    box-shadow: 
+      0 0 15px rgba(56, 189, 248, 0.85),
+      0 0 35px rgba(2, 132, 199, 0.55),
+      0 0 60px rgba(186, 230, 253, 0.3),
+      inset 0 0 12px rgba(224, 242, 254, 0.75) !important;
+  }
+  100% {
+    box-shadow: 
+      0 0 25px rgba(125, 211, 252, 1),
+      0 0 55px rgba(14, 165, 233, 0.85),
+      0 0 85px rgba(56, 189, 248, 0.5),
+      inset 0 0 18px rgba(255, 255, 255, 0.95) !important;
+  }
+}
+
+/* 1. Vapeur polaire volumétrique qui s'échappe doucement autour de la carte */
+.effect-frost_ice::before {
+  content: "";
+  position: absolute;
+  inset: -14px;
+  border-radius: 22px;
+  background: 
+    radial-gradient(ellipse at 50% 0%, rgba(224, 242, 254, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse at 50% 100%, rgba(56, 189, 248, 0.35) 0%, transparent 70%),
+    radial-gradient(ellipse at 0% 50%, rgba(186, 230, 253, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 100% 50%, rgba(56, 189, 248, 0.3) 0%, transparent 60%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 5;
+  animation: glacialVaporBreath 4s ease-in-out infinite alternate;
+}
+
+@keyframes glacialVaporBreath {
+  0% { opacity: 0.5; transform: scale(0.98); }
+  50% { opacity: 0.9; transform: scale(1.02); }
+  100% { opacity: 0.65; transform: scale(1); }
+}
+
+/* 2. Écran de verre givré & givre naturel sur le pourtour (visage 100% net) */
+.effect-frost_ice .s-card-art::before {
+  background: 
+    /* Givre translucide encadrant les 4 coins */
+    radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.6) 0%, rgba(186, 230, 253, 0.3) 30%, transparent 60%),
+    radial-gradient(circle at 100% 0%, rgba(255, 255, 255, 0.6) 0%, rgba(186, 230, 253, 0.3) 30%, transparent 60%),
+    radial-gradient(circle at 0% 100%, rgba(186, 230, 253, 0.5) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(186, 230, 253, 0.5) 0%, transparent 50%),
+    /* Étalonnage colorimétrique froid sub-zéro */
+    linear-gradient(175deg, rgba(224, 242, 254, 0.2) 0%, transparent 30%, transparent 70%, rgba(2, 132, 199, 0.3) 100%);
+  mix-blend-mode: overlay;
+  z-index: 2;
+  animation: frostGlassPulse 3.2s ease-in-out infinite alternate;
+}
+
+@keyframes frostGlassPulse {
+  0% { opacity: 0.75; }
+  100% { opacity: 1; }
+}
+
+/* 3. Balayage spéculaire de banquise & micro-poussières de diamant */
+.effect-frost_ice .s-card-art::after {
+  background-image: 
+    /* Micro-poussières de diamant polaire douces (1.5px à 2px, pas d'étoiles grossières) */
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.9) 1.5px, transparent 3px),
+    radial-gradient(circle at 75% 25%, rgba(186, 230, 253, 0.85) 2px, transparent 4px),
+    radial-gradient(circle at 45% 65%, rgba(255, 255, 255, 0.95) 1.8px, transparent 3.5px),
+    radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.8) 2px, transparent 4px),
+    radial-gradient(circle at 30% 85%, rgba(255, 255, 255, 0.85) 1.5px, transparent 3px),
+    radial-gradient(circle at 65% 45%, rgba(224, 242, 254, 0.75) 2px, transparent 4px),
+    /* Faisceau spéculaire tranchant façon bloc de glace taillé */
+    linear-gradient(110deg, transparent 32%, rgba(56, 189, 248, 0.18) 42%, rgba(224, 242, 254, 0.75) 48%, rgba(255, 255, 255, 0.95) 50%, rgba(224, 242, 254, 0.75) 52%, rgba(56, 189, 248, 0.18) 58%, transparent 68%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 250% 250%;
+  mix-blend-mode: color-dodge;
+  animation: glacialSpecularSweep 3.2s ease-in-out infinite;
+  z-index: 3;
+}
+
+@keyframes glacialSpecularSweep {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, -180% 0;
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 180% 0;
+    opacity: 0.4;
+  }
+}
+
+/* 7. COSMIC_VOID (Nébuleuse & Trou Noir) */
+.effect-cosmic_void { border-color: #a855f7 !important; box-shadow: 0 0 28px rgba(168, 85, 247, 0.85) !important; }
+.effect-cosmic_void .s-card-art::before {
+  background: radial-gradient(circle at center, transparent 30%, rgba(15, 7, 30, 0.9) 100%), linear-gradient(135deg, #7c3aed, #db2777);
+  mix-blend-mode: color-dodge;
+  animation: cosmicPulse 4s infinite alternate;
+  z-index: 1;
+}
+@keyframes cosmicPulse { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(120deg); } }
+
+/* 8. CHERRY_BLOSSOM (Pétales de Sakura) */
+.effect-cherry_blossom { border-color: #f472b6 !important; box-shadow: 0 0 22px rgba(244, 114, 182, 0.8) !important; }
+.effect-cherry_blossom .s-card-art::before { background: linear-gradient(to top, rgba(244, 114, 182, 0.4) 0%, transparent 70%); z-index: 1; }
+.effect-cherry_blossom .s-card-art::after {
+  background-image: radial-gradient(ellipse at 30% 20%, #fbcfe8 3.5px, transparent 7px), radial-gradient(ellipse at 75% 60%, #f472b6 3.5px, transparent 7px);
+  animation: sakuraDrift 3s infinite linear;
+  z-index: 2;
+}
+@keyframes sakuraDrift { from { transform: translateY(-20px) rotate(0deg); } to { transform: translateY(20px) rotate(45deg); } }
+
+/* 9. GOLDEN_LUXURY (Or Pur 24k) */
+.effect-golden_luxury { border-color: #ffd166 !important; box-shadow: 0 0 32px rgba(255, 209, 102, 0.95), inset 0 0 15px rgba(255, 255, 255, 0.5) !important; }
+.effect-golden_luxury .s-card-art::before {
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 215, 0, 0.45) 45%, rgba(255, 255, 255, 0.95) 50%, rgba(255, 215, 0, 0.45) 55%, transparent 70%);
+  background-size: 200% 200%;
+  mix-blend-mode: color-dodge;
+  animation: goldSweep 3s infinite ease-in-out;
+  z-index: 2;
+}
+@keyframes goldSweep { 0% { background-position: -150% 0; } 100% { background-position: 150% 0; } }
+
+/* 10. SHADOW_SMOKE (Miasme Obscur & Fumée Noire) */
+.effect-shadow_smoke { border-color: #475569 !important; box-shadow: 0 0 30px #000000, 0 0 55px rgba(88, 28, 135, 0.8), inset 0 0 18px #000 !important; }
+.effect-shadow_smoke .s-card-art::before { background: radial-gradient(circle at center, transparent 40%, #000000 95%); mix-blend-mode: multiply; z-index: 2; }
+
+/* 11. BLOOD_MOON (Lune de Sang & Brume Carmin) */
+.effect-blood_moon { border-color: #dc2626 !important; box-shadow: 0 0 28px rgba(220, 38, 38, 0.9) !important; }
+.effect-blood_moon .s-card-art::before { background: linear-gradient(180deg, rgba(220, 38, 38, 0.5) 0%, transparent 80%); mix-blend-mode: color-dodge; z-index: 1; }
+
+/* 12. NEON_CYBERPUNK (Grille Synthwave & Scanlines) */
+.effect-neon_cyberpunk { border-color: #06b6d4 !important; box-shadow: 0 0 22px #06b6d4, 0 0 40px #d946ef !important; }
+.effect-neon_cyberpunk .s-card-art::after { background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0px, transparent 2px, transparent 4px); z-index: 2; }
+
+/* 13. POISON_TOXIC (Bouillonnement Vert Acide) */
+.effect-poison_toxic { border-color: #84cc16 !important; box-shadow: 0 0 25px rgba(132, 204, 22, 0.9) !important; }
+.effect-poison_toxic .s-card-art::before { background: linear-gradient(to top, rgba(132, 204, 22, 0.45) 0%, transparent 70%); mix-blend-mode: screen; z-index: 1; }
+
+/* 14. DIVINE_AURA (Lumière Sainte & Halos) */
+.effect-divine_aura { border-color: #ffffff !important; box-shadow: 0 0 32px #ffffff, 0 0 55px rgba(254, 240, 138, 0.9) !important; }
+.effect-divine_aura .s-card-art::before { background: radial-gradient(circle at center, rgba(255, 255, 255, 0.55) 0%, transparent 75%); mix-blend-mode: screen; z-index: 2; }
+
+/* 15. EARTH_QUAKE (Failles de Lave Tellurique) */
+.effect-earth_quake { border-color: #ea580c !important; box-shadow: 0 0 25px rgba(234, 88, 12, 0.9) !important; }
+.effect-earth_quake .s-card-art::before { background: linear-gradient(45deg, rgba(234, 88, 12, 0.45) 0%, transparent 60%); mix-blend-mode: color-dodge; z-index: 1; }
+
+/* 16. WIND_VORTEX (Lames de Vent) */
+.effect-wind_vortex { border-color: #a7f3d0 !important; box-shadow: 0 0 22px rgba(167, 243, 208, 0.8) !important; }
+.effect-wind_vortex .s-card-art::after {
+  background: repeating-linear-gradient(65deg, transparent 0px, rgba(255, 255, 255, 0.28) 20px, transparent 40px);
+  animation: windSlash 1.2s infinite linear;
+  z-index: 2;
+}
+@keyframes windSlash { from { background-position: 0 0; } to { background-position: 100px 50px; } }
+
+/* 17. BUBBLE_OCEAN (Bulles Marines & Caustiques) */
+.effect-bubble_ocean { border-color: #0284c7 !important; box-shadow: 0 0 25px rgba(2, 132, 199, 0.85) !important; }
+.effect-bubble_ocean .s-card-art::after {
+  background-image: radial-gradient(circle at 40% 70%, rgba(255, 255, 255, 0.75) 3.5px, transparent 7px), radial-gradient(circle at 70% 30%, rgba(56, 189, 248, 0.75) 4.5px, transparent 9px);
+  animation: bubbleRise 2.5s infinite linear;
+  z-index: 2;
+}
+@keyframes bubbleRise { from { transform: translateY(20px); } to { transform: translateY(-20px); } }
+
+/* 18. AMETHYST_CRYSTAL (Prismes de Cristal Violet) */
+.effect-amethyst_crystal { border-color: #c084fc !important; box-shadow: 0 0 25px rgba(192, 132, 252, 0.9) !important; }
+.effect-amethyst_crystal .s-card-art::before { background: linear-gradient(135deg, rgba(192, 132, 252, 0.4) 0%, transparent 50%, rgba(147, 51, 234, 0.4) 100%); mix-blend-mode: overlay; z-index: 1; }
+
+/* 19. MATRIX_GLITCH (Pluie de Code Numérique) */
+.effect-matrix_glitch { border-color: #22c55e !important; box-shadow: 0 0 25px rgba(34, 197, 94, 0.9) !important; }
+.effect-matrix_glitch .s-card-art::after {
+  background: repeating-linear-gradient(180deg, rgba(34, 197, 94, 0.3) 0px, transparent 3px, transparent 6px);
+  animation: matrixScan 1s infinite linear;
+  z-index: 2;
+}
+@keyframes matrixScan { from { background-position: 0 0; } to { background-position: 0 50px; } }

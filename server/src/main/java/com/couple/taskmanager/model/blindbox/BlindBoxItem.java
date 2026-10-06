@@ -1,5 +1,6 @@
 package com.couple.taskmanager.model.blindbox;
 
+import com.couple.taskmanager.enums.CardEffectType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -34,4 +35,11 @@ public class BlindBoxItem {
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "override_effect_type")
+    private CardEffectType overrideEffectType;
+
+    @Column(name = "combine_effects")
+    private Boolean combineEffects = false;
 }

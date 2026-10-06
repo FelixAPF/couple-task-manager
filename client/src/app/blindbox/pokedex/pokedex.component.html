@@ -363,13 +363,12 @@
 
   <!-- ================= CARD GRID ================= -->
   <div *ngIf="!isLoadingCards" class="card-grid">
-    <div *ngFor="let card of filteredCards"
-         class="s-card"
-         [class.locked]="!card.unlocked"
-         [ngClass]="card.unlocked ? ('effect-' + card.rarity.effectType.toLowerCase()) : ''"
-         [style.borderColor]="card.unlocked ? card.rarity.borderColor : 'transparent'"
-         [style.boxShadow]="card.unlocked ? ('0 0 0 1px ' + card.rarity.borderColor + '40, 0 8px 24px -6px ' + card.rarity.borderColor + '80') : 'none'"
-         (click)="inspectCard(card)">
+  <div *ngFor="let card of filteredCards"
+          class="s-card"
+          [class.locked]="!card.unlocked"
+          [ngClass]="card.unlocked ? getCardEffectClasses(card) : ''"
+          [style.borderColor]="card.unlocked ? card.rarity.borderColor : 'transparent'"
+          (click)="inspectCard(card)">
       <span class="s-card-number">N&deg;{{ card.itemNumber.toString().padStart(3, '0') }}</span>
       <span *ngIf="card.unlocked && card.count > 1" class="s-card-tally">x{{ card.count }}</span>
       <div class="s-card-art">
@@ -523,17 +522,16 @@
           </div>
 
           <div *ngIf="revealResult" 
-               class="card-face card-front s-card"
-               [style.borderColor]="revealResult.item.rarity.borderColor"
-               [style.boxShadow]="'0 0 35px ' + revealResult.item.rarity.borderColor + '90'"
-               [ngClass]="'effect-' + revealResult.item.rarity.effectType.toLowerCase()">
+               class="card-face card-front s-card reveal-card"
+              [style.borderColor]="revealResult?.item?.rarity?.borderColor"
+              [ngClass]="getCardEffectClasses(revealResult.item)">
             
             <span class="s-card-number">N&deg;{{ (revealResult.item.itemNumber || 1).toString().padStart(3, '0') }}</span>
             
             <div class="s-card-art">
               <img [src]="revealResult.item.imageUrl || 'assets/placeholder.jpg'" [alt]="revealResult.item.name">
-              <span class="s-card-badge" [style.backgroundColor]="revealResult.item.rarity.badgeColor">
-                {{ revealResult.item.rarity.name }}
+              <span class="s-card-badge" [style.backgroundColor]="revealResult?.item?.rarity?.badgeColor">
+                {{ revealResult?.item?.rarity?.name }}
               </span>
               <div class="s-card-fade"></div>
             </div>
@@ -629,10 +627,9 @@
           [style]="{width: '90vw', maxWidth: '420px'}" 
           header="Fiche du dossier">
   <div *ngIf="inspectedCard" class="detail-body">
-    <div class="s-card detail-card"
-         [ngClass]="'effect-' + inspectedCard.rarity.effectType.toLowerCase()"
-         [style.borderColor]="inspectedCard.rarity.borderColor"
-         [style.boxShadow]="'0 0 0 1px ' + inspectedCard.rarity.borderColor + '60, 0 12px 35px -4px ' + inspectedCard.rarity.borderColor + '90'">
+<div class="s-card detail-card"
+         [ngClass]="getCardEffectClasses(inspectedCard)"
+         [style.borderColor]="inspectedCard.rarity.borderColor">
       <span class="s-card-number">N&deg;{{ inspectedCard.itemNumber.toString().padStart(3, '0') }}</span>
       <div class="s-card-art detail-art">
         <img [src]="inspectedCard.imageUrl" [alt]="inspectedCard.name">

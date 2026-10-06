@@ -1,4 +1,24 @@
-export type CardEffectType = 'STANDARD' | 'FOIL' | 'HOLOGRAPHIC' | 'RAINBOW_SHIMMER' | 'LIGHTNING';
+export type CardEffectType =
+  | 'STANDARD'
+  | 'FOIL'
+  | 'HOLOGRAPHIC'
+  | 'RAINBOW_SHIMMER'
+  | 'LIGHTNING'
+  | 'FLAMES'
+  | 'FROST_ICE'
+  | 'COSMIC_VOID'
+  | 'CHERRY_BLOSSOM'
+  | 'GOLDEN_LUXURY'
+  | 'SHADOW_SMOKE'
+  | 'BLOOD_MOON'
+  | 'NEON_CYBERPUNK'
+  | 'POISON_TOXIC'
+  | 'DIVINE_AURA'
+  | 'EARTH_QUAKE'
+  | 'WIND_VORTEX'
+  | 'BUBBLE_OCEAN'
+  | 'AMETHYST_CRYSTAL'
+  | 'MATRIX_GLITCH';
 
 export interface BlindBoxRarity {
   id?: number;
@@ -24,12 +44,16 @@ export interface BlindBoxCollection {
 export interface BlindBoxItem {
   id?: number;
   collectionId?: number;
-  rarity: BlindBoxRarity;
+  collection?: BlindBoxCollection;
+  rarityId?: number;
+  rarity?: BlindBoxRarity;
   itemNumber: number;
   name: string;
   subtitle?: string;
   description?: string;
   imageUrl?: string;
+  overrideEffectType?: CardEffectType | null;
+  combineEffects?: boolean;
 }
 
 export interface BlindBox {
@@ -59,10 +83,12 @@ export interface PokedexCard {
   id: number;
   itemNumber: number;
   name: string;
-  subtitle?: string;
-  description?: string;
-  imageUrl?: string;
+  subtitle: string;
+  description: string;
+  imageUrl: string;
   rarity: BlindBoxRarity;
+  overrideEffectType?: CardEffectType | null;
+  combineEffects?: boolean;
   unlocked: boolean;
   count: number;
   firstObtainedDate?: string;

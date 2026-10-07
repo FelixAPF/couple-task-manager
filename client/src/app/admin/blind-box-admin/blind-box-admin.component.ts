@@ -122,7 +122,7 @@ export class BlindBoxAdminComponent implements OnInit {
   showEffectsShowcaseDialog = false;
   showcaseEffect: CardEffectType = 'FLAMES';
 
-  openEffectsShowcase(): void {
+openEffectsShowcase(): void {
     this.showEffectsShowcaseDialog = true;
   }
 
@@ -579,6 +579,18 @@ export class BlindBoxAdminComponent implements OnInit {
         this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour le paramètre.' });
       }
     });
+  }
+
+  selectShowcaseEffect(eff: CardEffectType): void {
+    this.showcaseEffect = eff;
+  }
+
+  getDemoImageUrl(): string {
+    if (this.activeCollection?.items && this.activeCollection.items.length > 0) {
+      const itemWithImg = this.activeCollection.items.find(i => i.imageUrl);
+      if (itemWithImg?.imageUrl) return itemWithImg.imageUrl;
+    }
+    return 'assets/placeholder.jpg';
   }
 
   // Résout la liste des classes CSS d'effets à appliquer sur la carte

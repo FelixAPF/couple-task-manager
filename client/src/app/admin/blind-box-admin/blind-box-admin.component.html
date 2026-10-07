@@ -577,33 +577,40 @@
               type="button"
               class="effect-select-pill"
               [class.active]="showcaseEffect === eff.value"
-              (click)="showcaseEffect = eff.value">
-        <i [class]="eff.icon"></i>
-        <span>{{ eff.label }}</span>
+              (click)="selectShowcaseEffect(eff.value)">
+        <div class="flex items-center gap-2.5">
+          <i [class]="eff.icon" class="text-sm"></i>
+          <span class="font-bold text-xs">{{ eff.label }}</span>
+        </div>
         <em class="category-tag">{{ eff.category }}</em>
       </button>
     </div>
 
-    <!-- Colonne Droite : Carte Interactive en Direct -->
+    <!-- Colonne Droite : Carte Démo Interactive -->
     <div class="showcase-card-preview">
       <div class="s-card preview-card"
-          [ngClass]="getCardEffectClasses(previewItem)"
-           style="border-color: #ffd166; width: 220px;">
+           [ngClass]="'effect-' + (showcaseEffect || 'STANDARD').toLowerCase()"
+           style="width: 220px;">
         <span class="s-card-number">N&deg;001</span>
         <div class="s-card-art">
-          <img src="assets/placeholder.jpg" alt="Aperçu">
-          <span class="s-card-badge" style="background-color: #f97316;">Test FX</span>
+          <!-- Affiche l'image d'un personnage de votre collection ou le placeholder -->
+          <img [src]="getDemoImageUrl()" alt="Aperçu">
+          <span class="s-card-badge" style="background-color: #f97316;">
+            {{ showcaseEffect || 'STANDARD' }}
+          </span>
           <div class="s-card-fade"></div>
         </div>
         <div class="s-card-name">
           <h3>Carte Démo FX</h3>
-          <p>{{ showcaseEffect }}</p>
+          <p>{{ showcaseEffect || 'STANDARD' }}</p>
         </div>
       </div>
 
-      <div class="text-center mt-3">
-        <span class="text-xs text-surface-400 font-bold block">Effet actuellement affiché :</span>
-        <strong class="text-sm text-gold">{{ showcaseEffect }}</strong>
+      <div class="showcase-meta-footer mt-4 text-center">
+        <span class="text-xs text-surface-400 font-bold block mb-1">Shader en temps réel :</span>
+        <span class="active-effect-pill">
+          <i class="pi pi-sparkles text-xs mr-1"></i> {{ showcaseEffect || 'STANDARD' }}
+        </span>
       </div>
     </div>
 

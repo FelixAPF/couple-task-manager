@@ -1,6 +1,5 @@
 package com.couple.taskmanager.service;
 
-import com.couple.taskmanager.enums.CardEffectType;
 import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.blindbox.*;
 import com.couple.taskmanager.model.dto.blindbox.*;
@@ -9,6 +8,7 @@ import com.couple.taskmanager.repository.HouseholdRepository;
 import com.couple.taskmanager.repository.blindbox.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +53,16 @@ public class BlindBoxService {
         grantKeyToUser(user.getId(), targetKeyId, 1);
     }
 
+
+    @Scheduled(cron = "0 0 6 * * *", zone = "America/Toronto")
+    @Transactional
+    public void grantDailyKeysToUsers() {
+        List<BlindBoxKey> keys = keyRepository.findAll();
+
+        userCollectionRepository.findUsersWithAtLeastOneBox()
+                .forEach(user -> keys.forEach(key -> grantKeyToUser(user.getId(), key.getId(), 1)));
+    }
+
     // === OUVERTURE DE COFFRE AVEC NOTIFICATION AU PARTENAIRE ===
     @Transactional
     public UnboxResultDto openBox(Long boxId, CTMUser user) {
@@ -69,9 +79,6 @@ public class BlindBoxService {
             throw new IllegalStateException("Vous n'avez pas de clé pour cette boîte !");
         }
 
-        // Déduire 1 clé
-        inventory.setQuantity(inventory.getQuantity() - 1);
-        inventoryRepository.save(inventory);
 
         // Tirage aléatoire
         BlindBoxCollection collection = box.getCollection();
@@ -94,6 +101,9 @@ public class BlindBoxService {
             userItem.setLastObtainedDate(new Date());
             isNew = true;
         }
+
+        inventory.setQuantity(inventory.getQuantity() - 1);
+        inventoryRepository.save(inventory);
         userCollectionRepository.save(userItem);
 
         // 2.A: Si le drop est  dropRate <= 3%, notifier le partenaire !

@@ -1,5 +1,6 @@
 package com.couple.taskmanager.repository.blindbox;
 
+import com.couple.taskmanager.model.CTMUser;
 import com.couple.taskmanager.model.blindbox.UserCollectionItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,6 @@ public interface UserCollectionItemRepository extends JpaRepository<UserCollecti
     List<UserCollectionItem> findByUserIdAndItemCollectionId(@Param("userId") Long userId, @Param("collectionId") Long collectionId);
 
     Optional<UserCollectionItem> findByUserIdAndItemId(Long userId, Long itemId);
-}
+
+    @Query("SELECT DISTINCT uci.user FROM UserCollectionItem uci")
+    List<CTMUser> findUsersWithAtLeastOneBox();}

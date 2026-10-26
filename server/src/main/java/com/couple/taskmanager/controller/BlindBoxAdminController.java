@@ -84,6 +84,12 @@ public class BlindBoxAdminController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/keys/{id}/activate")
+    public ResponseEntity<Void> changeActivateStatus(@PathVariable Long id, Boolean activateValue){
+        blindBoxService.changeActivationKeyStatus(id);
+        return ResponseEntity.ok().build();
+    }
+
     // --- BOXES & KEYS ---
     @GetMapping("/keys")
     public ResponseEntity<List<BlindBoxKey>> getKeys() {

@@ -95,6 +95,10 @@ getCollections(targetUserId?: number): Observable<CollectionProgress[]> {
     return this.http.post<BlindBoxKey>(`${this.adminApi}/keys`, key);
   }
 
+  changeActivationKeyStatus(id: string): Observable<BlindBoxKey> {
+    return this.http.post<BlindBoxKey>(`${this.adminApi}/keys/${id}/activate`, {});
+  }
+
   grantKey(userId: number, keyId: number, quantity: number): Observable<void> {
     return this.http.post<void>(`${this.adminApi}/grant-key?userId=${userId}&keyId=${keyId}&quantity=${quantity}`, {});
   }

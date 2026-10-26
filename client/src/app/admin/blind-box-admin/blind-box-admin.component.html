@@ -256,6 +256,9 @@
         </div>
 
         <div class="card-actions">
+          <div class="key-orb-icon" [style.backgroundColor]="k.color || '#f97316'" (click)="changeActivationStatus(k.id)" >
+            <i [class]="k.activated ? 'pi pi-pause-circle' : 'pi pi-play-circle'"></i>
+          </div>
           <button pButton label="Donner" icon="pi pi-gift" class="p-button-sm p-button-warning p-button-rounded font-bold" (click)="openGrantKeyDialog(k.id)"></button>
         </div>
       </div>
@@ -462,6 +465,10 @@
     <div class="input-group">
       <label>Nom de la Clé</label>
       <input pInputText [(ngModel)]="editingKey.name" placeholder="Ex: Clé Naruto Shippuden" class="w-full !rounded-2xl !py-3 font-bold" />
+    </div>
+    <div>
+      <p-checkbox inputId="activated-checkbox" [binary]="true" [(ngModel)]="editingKey.activated" class="w-full !rounded-2xl !py-3 font-bold" />
+      <label pLabel for="activated-checkbox">  Activée</label>
     </div>
 
     <div class="grid grid-cols-2 gap-3">

@@ -17,6 +17,9 @@ public class BlindBoxKey {
 
     private String description;
 
+    @Column(columnDefinition="BOOLEAN DEFAULT true")
+    private Boolean activated;
+
     private String icon = "pi pi-key";
 
     private String color = "#f97316";

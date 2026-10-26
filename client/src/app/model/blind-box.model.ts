@@ -69,6 +69,7 @@ export interface BlindBoxKey {
   id?: number;
   name: string;
   description?: string;
+  activated?: boolean;
   icon?: string;
   color?: string;
   blindBox: BlindBox;

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -29,6 +29,7 @@ import {
 } from '../../model/blind-box.model';
 import { HouseholdMember } from '../../model/household';
 import { SoundService } from '../../service/sound.service';
+import { Subscription } from 'rxjs';
 
 export type AdminTab = 'rarities' | 'collections' | 'keys' | 'settings';
 
@@ -54,7 +55,7 @@ export type AdminTab = 'rarities' | 'collections' | 'keys' | 'settings';
   styleUrls: ['./blind-box-admin.component.css'],
   providers: [MessageService, ConfirmationService]
 })
-export class BlindBoxAdminComponent implements OnInit {
+export class BlindBoxAdminComponent implements OnInit, OnDestroy {
   private blindBoxService = inject(BlindBoxService);
   private fileService = inject(FileService);
   private householdService = inject(HouseholdService);
@@ -132,6 +133,7 @@ openEffectsShowcase(): void {
   // Modals
   showRarityDialog = false;
   showCollectionDialog = false;
+  subscription: Subscription = new Subscription();
   showItemDialog = false;
   showKeyDialog = false;
   showGrantKeyDialog = false;
@@ -163,6 +165,10 @@ openEffectsShowcase(): void {
     }
     this.previewItem = item;
     this.showPreviewDialog = true;
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   onItemDragEnd(): void {
@@ -494,6 +500,7 @@ openEffectsShowcase(): void {
       name: '',
       description: '',
       icon: 'pi pi-key',
+      activated: true,
       color: '#f97316',
       blindBox: {
         name: '',
@@ -591,6 +598,11 @@ openEffectsShowcase(): void {
       if (itemWithImg?.imageUrl) return itemWithImg.imageUrl;
     }
     return 'assets/placeholder.jpg';
+  }
+
+  changeActivationStatus(id: any){
+    if(!id) return;
+    this.subscription.add(this.blindBoxService.changeActivationKeyStatus(id).subscribe());
   }
 
   // Résout la liste des classes CSS d'effets à appliquer sur la carte

@@ -54,10 +54,10 @@ public class BlindBoxService {
     }
 
 
-    @Scheduled(cron = "0 0 6 * * *", zone = "America/Toronto")
+    @Scheduled(cron = "0 9 11 * * *", zone = "America/Toronto")
     @Transactional
     public void grantDailyKeysToUsers() {
-        List<BlindBoxKey> keys = keyRepository.findAll();
+        List<BlindBoxKey> keys = keyRepository.findAllActivatedTrue();
 
         userCollectionRepository.findUsersWithAtLeastOneBox()
                 .forEach(user -> keys.forEach(key -> grantKeyToUser(user.getId(), key.getId(), 1)));
@@ -342,5 +342,13 @@ public class BlindBoxService {
             String body = " " + key.getName()  + " Vient de vous être accordé " ;
             firebaseMessagingService.sendNotificationWithNavigation(targetUser, title, body, "POKEDEX", keyId);
         }
+    }
+
+    public void changeActivationKeyStatus(Long id) {
+        Optional<BlindBoxKey> byId = keyRepository.findById(id);
+        if(byId.isEmpty()) return;
+        BlindBoxKey blindBoxKey = byId.get();
+        blindBoxKey.setActivated(!blindBoxKey.getActivated());
+        keyRepository.save(blindBoxKey);
     }
 }

@@ -173,7 +173,8 @@ public class TaskService implements IGenericService<Task, TaskDto> {
         Date dueDate = task.isFixedDay() ? calculateNextDueDate(new Date(), task.getReferenceDate(), task.getFrequency()) :  calculateNextDueDate(new Date(), task.getFrequency());
         task.setDueDate(dueDate);
 
-        StreamUtils.ofNullable(keyRepository.findAll()).forEach(key -> blindBoxService.grantKeyToUser(user.getId(), key.getId(), 1));
+        StreamUtils.ofNullable(keyRepository.findAllActivatedTrue())
+                .forEach(key -> blindBoxService.grantKeyToUser(user.getId(), key.getId(), 1));
 
         return new TaskDto(taskRepository.save(task));
     }
